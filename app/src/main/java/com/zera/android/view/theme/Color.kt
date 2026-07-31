@@ -1,4 +1,4 @@
-package com.zera.android.ui.theme
+package com.zera.android.view.theme
 
 import androidx.compose.ui.graphics.Color
 
