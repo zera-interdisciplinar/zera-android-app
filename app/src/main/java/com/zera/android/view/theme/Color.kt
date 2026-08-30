@@ -2,10 +2,27 @@ package com.zera.android.view.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
+val White100 = Color(0xFFFFFFFF)
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+// Shades of Red
+val PastelRed85 = Color(0xFFFFB2B2)
+val DarkRed40 = Color(0xFFB43119)
+val Red50 = Color(0xFFEC401D)
+
+// Sahdes of Yellow
+val DarkYellow35 = Color(0xFFA36809)
+val Orange50 = Color(0xFFF59E0B)
+val PastelYellow95 = Color(0xFFFFF2DA)
+val PastelYellow90 = Color(0xFFF2EAD9)
+
+// Sahdes of Green
+val LightGreen90 = Color(0xFFDDF7EE)
+val Green50 = Color(0xFF10B981)
+val DarkGreen30 = Color(0xFF168763)
+
+// Shades of blue
+val DarkBlue15 = Color(0xFF122038)
+val LightPastelBlue90 = Color(0xFFD8E0EE)
+val Gray45 = Color(0xFF5C6980)
+val White95 = Color(0xFFE9EEF9)
+val DarkBlue25 = Color(0xFF162F71)
