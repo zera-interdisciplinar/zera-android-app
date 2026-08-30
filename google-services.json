@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "749616688022",
+    "project_id": "zera-d36b2",
+    "storage_bucket": "zera-d36b2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:749616688022:android:4130ed0f74de7f7de90bb7",
+        "android_client_info": {
+          "package_name": "com.zera.android"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAzELGuCa5rv5cPYK7DP5JHSzK5TgtFDGk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
