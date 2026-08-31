@@ -1,8 +1,11 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
 
     id("com.google.gms.google-services")
+
+
 }
 
 android {
@@ -57,4 +60,6 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
     implementation(platform("com.google.firebase:firebase-bom:34.18.0"))
+    implementation(libs.navigation.compose)
+    implementation(libs.kotlinx.serialization.json)
 }
