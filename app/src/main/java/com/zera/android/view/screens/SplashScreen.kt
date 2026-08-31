@@ -14,6 +14,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zera.android.view.components.Logo
+import com.zera.android.view.components.ProgressBar
 import com.zera.android.view.components.SplashBackground
 import com.zera.android.view.theme.ZeraTheme
 
@@ -23,16 +24,18 @@ fun SplashScreen() {
         modifier = Modifier
             .fillMaxSize()
             .background(color = MaterialTheme.colorScheme.surface),
-        contentAlignment = Alignment.Center,
+        contentAlignment = Alignment.Center
     ) {
         SplashBackground(modifier = Modifier.fillMaxSize())
-        Column() {
-
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             Logo(modifier = Modifier.width(250.dp))
             Text(
-                text = "Carregando aplicativo!",
+                text = "Transformando descarte em solução",
                 textAlign = TextAlign.Center
             )
+            ProgressBar()
         }
     }
 }
