@@ -1,15 +1,46 @@
 package com.zera.android.view.screens
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.zera.android.view.components.Logo
+import com.zera.android.view.components.SplashBackground
+import com.zera.android.view.theme.ZeraTheme
 
 @Composable
-fun SplashScreen(){
-    Text(
-        text = "Hello World"
-    )
+fun SplashScreen() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = MaterialTheme.colorScheme.surface),
+        contentAlignment = Alignment.Center,
+    ) {
+        SplashBackground(modifier = Modifier.fillMaxSize())
+        Column() {
+
+            Logo(modifier = Modifier.width(250.dp))
+            Text(
+                text = "Carregando aplicativo!",
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun SplashScreenPreview() {
+    ZeraTheme {
+        SplashScreen()
+    }
 }
