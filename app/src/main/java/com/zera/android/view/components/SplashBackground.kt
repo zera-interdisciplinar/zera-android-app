@@ -8,21 +8,30 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.tooling.preview.Preview
-import com.zera.android.view.theme.DarkBlue15
 import com.zera.android.view.theme.TransparentBlue17
 import com.zera.android.view.theme.TransparentBlue40
 import com.zera.android.view.theme.TransparentYellow27
 import com.zera.android.view.theme.ZeraTheme
 
+/**
+ * Arte decorativa de fundo da splash: faixas azuis no canto superior direito
+ * e faixas amarelas no canto inferior esquerdo.
+ */
 @Composable
 fun SplashBackground(
     modifier: Modifier = Modifier,
     backgroundColor: Color = MaterialTheme.colorScheme.surface,
-    stripeColor: Color = MaterialTheme.colorScheme.primary,
-    accentColor: Color = DarkBlue15,
+    topStripeColor: Color = TransparentBlue40,
+    topStripeColorSecondary: Color = TransparentBlue17,
+    bottomStripeColor: Color = TransparentYellow27,
 ) {
-    Canvas(modifier = modifier.background(backgroundColor)) {
+    Canvas(
+        modifier = modifier
+            .background(backgroundColor)
+            .clearAndSetSemantics {},
+    ) {
         val w = size.width
         val h = size.height
 
@@ -34,7 +43,7 @@ fun SplashBackground(
             lineTo(w * 0.42f, h * 0.07f)
             close()
         }
-        drawPath(topPath, color = TransparentBlue40)
+        drawPath(topPath, color = topStripeColor)
 
         val topPath2 = Path().apply {
             moveTo(w * 0.68f, h * 0.10f)
@@ -43,7 +52,7 @@ fun SplashBackground(
             lineTo(w * 0.55f, h * 0.14f)
             close()
         }
-        drawPath(topPath2, color = TransparentBlue17)
+        drawPath(topPath2, color = topStripeColorSecondary)
 
         // faixas inferiores esquerdas
         val bottomPath = Path().apply {
@@ -52,7 +61,7 @@ fun SplashBackground(
             lineTo(w * 0f, h * 1f)
             close()
         }
-        drawPath(bottomPath, color = TransparentYellow27)
+        drawPath(bottomPath, color = bottomStripeColor)
 
         val bottomPath2 = Path().apply {
             moveTo(w * 0.0f, h * 0.7f)
@@ -61,8 +70,7 @@ fun SplashBackground(
             lineTo(w * 0.7f, h * 1f)
             close()
         }
-
-        drawPath(bottomPath2, color = TransparentYellow27)
+        drawPath(bottomPath2, color = bottomStripeColor)
     }
 }
 
