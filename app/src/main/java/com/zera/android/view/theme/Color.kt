@@ -9,13 +9,14 @@ val PastelRed85 = Color(0xFFFFB2B2)
 val DarkRed40 = Color(0xFFB43119)
 val Red50 = Color(0xFFEC401D)
 
-// Sahdes of Yellow
+// Shades of Yellow
 val DarkYellow35 = Color(0xFFA36809)
 val Orange50 = Color(0xFFF59E0B)
 val PastelYellow95 = Color(0xFFFFF2DA)
+val TransparentYellow27 = Color(0x45DEC591)
 val PastelYellow90 = Color(0xFFF2EAD9)
 
-// Sahdes of Green
+// Shades of Green
 val LightGreen90 = Color(0xFFDDF7EE)
 val Green50 = Color(0xFF10B981)
 val DarkGreen30 = Color(0xFF168763)
@@ -26,3 +27,6 @@ val LightPastelBlue90 = Color(0xFFD8E0EE)
 val Gray45 = Color(0xFF5C6980)
 val White95 = Color(0xFFE9EEF9)
 val DarkBlue25 = Color(0xFF162F71)
+
+val TransparentBlue40 = Color(0x662A58CE)
+val TransparentBlue17 = Color(0x2B2A58CE)
