@@ -19,6 +19,9 @@ import androidx.compose.ui.unit.dp
 import com.zera.android.view.components.logo.Logo
 import com.zera.android.view.components.progressbars.ProgressBar
 import com.zera.android.view.components.outros.SplashBackground
+import com.zera.android.view.components.texts.BodyText
+import com.zera.android.view.components.texts.SubtitleText
+import com.zera.android.view.components.texts.TitleText
 import com.zera.android.view.theme.Typography
 import com.zera.android.view.theme.ZeraTheme
 
@@ -34,21 +37,14 @@ fun SplashScreen() {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Logo(modifier = Modifier.width(250.dp).padding(16.dp))
-            Text(
+            Logo(modifier = Modifier.width(250.dp))
+            Spacer(Modifier.height(16.dp))
+            SubtitleText(
                 text = "TRANSFORMANDO DESCARTE EM SOLUÇÃO",
-                style = Typography.bodyMedium,
-                textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.onSurface
+                bold = true
             )
             Spacer(Modifier.height(32.dp))
             ProgressBar()
-            Spacer(Modifier.height(16.dp))
-            Text(
-                text = "Carregando informações...",
-                textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.onSurface
-            )
         }
     }
 }
