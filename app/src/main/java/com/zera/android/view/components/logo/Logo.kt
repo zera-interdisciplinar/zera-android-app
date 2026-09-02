@@ -1,4 +1,4 @@
-package com.zera.android.view.components
+    package com.zera.android.view.components.logo
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.aspectRatio

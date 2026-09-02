@@ -1,4 +1,4 @@
-package com.zera.android.view.components
+package com.zera.android.view.components.outros
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background

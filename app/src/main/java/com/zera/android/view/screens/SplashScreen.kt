@@ -16,9 +16,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.zera.android.view.components.Logo
-import com.zera.android.view.components.ProgressBar
-import com.zera.android.view.components.SplashBackground
+import com.zera.android.view.components.logo.Logo
+import com.zera.android.view.components.progressbars.ProgressBar
+import com.zera.android.view.components.outros.SplashBackground
 import com.zera.android.view.theme.Typography
 import com.zera.android.view.theme.ZeraTheme
 
