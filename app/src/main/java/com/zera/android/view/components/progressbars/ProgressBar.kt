@@ -1,4 +1,4 @@
-package com.zera.android.view.components
+package com.zera.android.view.components.progressbars
 
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.LinearProgressIndicator
