@@ -16,9 +16,9 @@ import com.zera.android.view.theme.ZeraTheme
 
 @Composable
 fun ZeraTextInput(
+    modifier: Modifier = Modifier,
     value: String = "",
     onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier,
     label: String = "",
     placeholder: String = ""
 ){

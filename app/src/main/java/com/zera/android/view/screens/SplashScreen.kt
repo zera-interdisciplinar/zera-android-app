@@ -19,7 +19,6 @@ import com.zera.android.view.components.texts.SubtitleText
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.view.theme.ZeraTheme
-import kotlinx.coroutines.Delay
 import kotlinx.coroutines.delay
 
 @Composable

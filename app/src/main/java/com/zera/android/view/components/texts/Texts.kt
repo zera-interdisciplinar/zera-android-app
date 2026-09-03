@@ -20,30 +20,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zera.android.view.theme.ZeraTheme
 
-/**
- * Padronização de texto do app.
- *
- * Cada componente abaixo fixa um estilo do [MaterialTheme.typography] (e, quando faz
- * sentido, uma cor semântica). Use-os no lugar do `Text` cru para manter a hierarquia
- * tipográfica consistente entre telas.
- *
- * Parâmetros comuns:
- * - [modifier]: modificador externo.
- * - [color]: cor do texto. Cada componente já tem um padrão semântico (ver docs abaixo);
- *   textos de base (Headline/Title/Body) usam `primary`, textos auxiliares (Label/Subtitle/
- *   Caption/Overline) usam `onSurfaceVariant`, mais claro e com menos destaque.
- * - [alpha]: transparência aplicada sobre [color] (`1f` = opaco, `0f` = invisível). Útil para
- *   variações rápidas de ênfase sem precisar passar uma [Color] customizada.
- * - [textAlign]: alinhamento horizontal.
- * - [maxLines] / [overflow]: controle de truncamento.
- * - [bold]: quando `true`, força `FontWeight.Bold`; quando `false`, mantém o peso do estilo.
- * - [italic]: quando `true`, aplica itálico.
- * - [underline]: quando `true`, sublinha o texto (`TextDecoration.Underline`).
- * - [onClick]: quando informado, o texto vira clicável (`Modifier.clickable`). Padrão `null`
- *   = texto estático, sem área de toque nem efeito de ripple.
- */
-
-/** Título grande de tela (ex.: "Bem-vindo"). Mapeia para `headlineLarge`. */
 @Composable
 fun HeadlineText(
     text: String,
