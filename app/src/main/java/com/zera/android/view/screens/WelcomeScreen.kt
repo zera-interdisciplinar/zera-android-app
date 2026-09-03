@@ -18,6 +18,7 @@ import com.zera.android.view.components.logo.Logo
 import com.zera.android.view.components.outros.SplashBackground
 import com.zera.android.view.components.texts.LabelText
 import com.zera.android.view.components.texts.TitleText
+import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
 
 @Composable
@@ -30,9 +31,9 @@ fun WelcomeScreen(){
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Logo(Modifier.width(250.dp).padding(bottom = 32.dp))
+            Logo(Modifier.width(250.dp).padding(bottom = Spacing.xLarge))
             TitleText(text = "Bem vindo!", bold = true)
-            Spacer(Modifier.height(64.dp))
+            Spacer(Modifier.height(Spacing.huge))
             ZeraButton(
                 text = "Login",
                 style = ZeraButtonStyle.Yellow,
@@ -40,7 +41,7 @@ fun WelcomeScreen(){
 
                 }
             )
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(Spacing.medium))
             LabelText(
                 text = "Primeiro Acesso",
                 underline = true,

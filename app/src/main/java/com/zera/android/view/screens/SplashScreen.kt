@@ -18,6 +18,7 @@ import com.zera.android.view.components.outros.SplashBackground
 import com.zera.android.view.components.texts.SubtitleText
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
+import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
 import kotlinx.coroutines.delay
 
@@ -36,12 +37,12 @@ fun SplashScreen() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Logo(modifier = Modifier.width(250.dp))
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(Spacing.medium))
             SubtitleText(
                 text = "TRANSFORMANDO DESCARTE EM SOLUÇÃO",
                 bold = true
             )
-            Spacer(Modifier.height(32.dp))
+            Spacer(Modifier.height(Spacing.xLarge))
             ProgressBar()
         }
     }
