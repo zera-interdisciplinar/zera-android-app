@@ -9,9 +9,9 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.zera.android.view.components.texts.BodyText
 import com.zera.android.view.components.texts.LabelText
+import com.zera.android.view.theme.Radius
 import com.zera.android.view.theme.ZeraTheme
 
 @Composable
@@ -31,7 +31,7 @@ fun ZeraTextInput(
                 BodyText(placeholder, alpha = 0.5f)
             },
             singleLine = true,
-            shape = RoundedCornerShape(16.dp),
+            shape = RoundedCornerShape(Radius.large),
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
                 unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
