@@ -6,8 +6,8 @@ import androidx.compose.material3.Button
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.zera.android.view.components.texts.BodyText
+import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
 
 /**
@@ -37,7 +37,7 @@ fun ZeraButton(
         enabled = enabled,
         colors = buttonColors(style, type),
     ) {
-        BodyText(text = text, bold = true, modifier = Modifier.padding(horizontal = 16.dp))
+        BodyText(text = text, bold = true, modifier = Modifier.padding(horizontal = Spacing.medium))
     }
 }
 
@@ -48,7 +48,7 @@ private fun ZeraButtonPreview() {
         ZeraButton(
             text = "Continuar",
             onClick = {},
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(Spacing.medium),
             style = ZeraButtonStyle.Yellow,
         )
     }
@@ -64,7 +64,7 @@ private fun ZeraButtonSecondaryPreview() {
             fillMaxWidth = true,
             style = ZeraButtonStyle.Yellow,
             type = ZeraButtonType.Secondary,
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(Spacing.medium),
         )
     }
 }

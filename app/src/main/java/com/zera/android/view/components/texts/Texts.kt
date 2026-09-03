@@ -16,8 +16,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
 
 @Composable
@@ -260,8 +260,8 @@ private fun BaseText(
 private fun TextsPreview() {
     ZeraTheme {
         Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.padding(Spacing.medium),
+            verticalArrangement = Arrangement.spacedBy(Spacing.small),
         ) {
             OverlineText("Overline")
             HeadlineText("Headline")
