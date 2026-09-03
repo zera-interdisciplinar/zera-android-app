@@ -4,6 +4,9 @@ sealed interface NavCommand{
     data class Navigate(
         val route : Route
     ) : NavCommand
+    data class PushAndPop(
+        val route : Route
+    ) : NavCommand
 
     data object GoBack : NavCommand
 }
