@@ -2,11 +2,13 @@ package com.zera.android.view.components.buttons
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.zera.android.view.components.texts.BodyText
+import com.zera.android.view.theme.Radius
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
 
@@ -36,6 +38,7 @@ fun ZeraButton(
         modifier = modifier.then(if (fillMaxWidth) Modifier.fillMaxWidth() else Modifier),
         enabled = enabled,
         colors = buttonColors(style, type),
+        shape = RoundedCornerShape(Radius.large)
     ) {
         BodyText(text = text, bold = true, modifier = Modifier.padding(horizontal = Spacing.medium))
     }
