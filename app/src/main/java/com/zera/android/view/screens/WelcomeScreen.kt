@@ -14,6 +14,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zera.android.view.components.buttons.ZeraButton
 import com.zera.android.view.components.buttons.ZeraButtonStyle
+import com.zera.android.view.components.buttons.ZeraButtonType
 import com.zera.android.view.components.logo.Logo
 import com.zera.android.view.components.outros.SplashBackground
 import com.zera.android.view.components.texts.LabelText
@@ -31,27 +32,34 @@ fun WelcomeScreen(){
         contentAlignment = Alignment.Center
     ){
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(horizontal = Spacing.xLarge)
         ) {
             Logo(Modifier.width(250.dp).padding(bottom = Spacing.small))
             TitleText(text = "Bem vindo!", bold = true)
             Spacer(Modifier.height(Spacing.huge))
-            ZeraButton(
-                text = "Login",
-                style = ZeraButtonStyle.Yellow,
-                onClick = {
-                    ZeraNavigator.push(Route.Login)
-                }
-            )
-            Spacer(Modifier.height(Spacing.medium))
-            LabelText(
-                text = "Primeiro Acesso",
-                underline = true,
-                bold = true,
-                onClick = {
+            Column() {
+                ZeraButton(
+                    text = "Login",
+                    style = ZeraButtonStyle.Blue,
+                    fillMaxWidth = true,
+                    maxWidth = 200,
+                    onClick = {
+                        ZeraNavigator.push(Route.Login)
+                    }
+                )
+                Spacer(Modifier.height(Spacing.small))
+                ZeraButton(
+                    text = "Primeiro Acesso",
+                    style = ZeraButtonStyle.Yellow,
+                    type = ZeraButtonType.Secondary,
+                    fillMaxWidth = true,
+                    onClick = {
 
-                }
-            )
+                    }
+                )
+            }
+            Spacer(Modifier.height(Spacing.medium))
         }
     }
 
