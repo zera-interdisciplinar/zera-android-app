@@ -33,6 +33,7 @@ fun ZeraButton(
     type: ZeraButtonType = ZeraButtonType.Primary,
     enabled: Boolean = true,
 ) {
+    val (_, content) = buttonColorPair(style, type)
     Button(
         onClick = onClick,
         modifier = modifier.then(if (fillMaxWidth) Modifier.fillMaxWidth() else Modifier),
@@ -40,7 +41,12 @@ fun ZeraButton(
         colors = buttonColors(style, type),
         shape = RoundedCornerShape(Radius.large)
     ) {
-        BodyText(text = text, bold = true, modifier = Modifier.padding(horizontal = Spacing.medium))
+        BodyText(
+            text = text,
+            bold = true,
+            color = content,
+            modifier = Modifier.padding(horizontal = Spacing.medium),
+        )
     }
 }
 
@@ -52,7 +58,7 @@ private fun ZeraButtonPreview() {
             text = "Continuar",
             onClick = {},
             modifier = Modifier.padding(Spacing.medium),
-            style = ZeraButtonStyle.Yellow,
+            style = ZeraButtonStyle.Green,
         )
     }
 }
@@ -65,7 +71,7 @@ private fun ZeraButtonSecondaryPreview() {
             text = "Secundário",
             onClick = {},
             fillMaxWidth = true,
-            style = ZeraButtonStyle.Yellow,
+            style = ZeraButtonStyle.Green,
             type = ZeraButtonType.Secondary,
             modifier = Modifier.padding(Spacing.medium),
         )
