@@ -1,5 +1,6 @@
 package com.zera.android.view.components.texts
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -12,6 +13,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -36,6 +38,9 @@ import com.zera.android.view.theme.ZeraTheme
  * - [maxLines] / [overflow]: controle de truncamento.
  * - [bold]: quando `true`, força `FontWeight.Bold`; quando `false`, mantém o peso do estilo.
  * - [italic]: quando `true`, aplica itálico.
+ * - [underline]: quando `true`, sublinha o texto (`TextDecoration.Underline`).
+ * - [onClick]: quando informado, o texto vira clicável (`Modifier.clickable`). Padrão `null`
+ *   = texto estático, sem área de toque nem efeito de ripple.
  */
 
 /** Título grande de tela (ex.: "Bem-vindo"). Mapeia para `headlineLarge`. */
@@ -50,20 +55,23 @@ fun HeadlineText(
     overflow: TextOverflow = TextOverflow.Clip,
     bold: Boolean = false,
     italic: Boolean = false,
-) {
-    BaseText(
-        text = text,
-        style = MaterialTheme.typography.headlineLarge,
-        modifier = modifier,
-        color = color,
-        alpha = alpha,
-        textAlign = textAlign,
-        maxLines = maxLines,
-        overflow = overflow,
-        bold = bold,
-        italic = italic,
-    )
-}
+    underline: Boolean = false,
+    onClick: (() -> Unit)? = null,
+) = BaseText(
+    text = text,
+    style = MaterialTheme.typography.headlineLarge,
+    modifier = modifier,
+    color = color,
+    alpha = alpha,
+    textAlign = textAlign,
+    maxLines = maxLines,
+    overflow = overflow,
+    bold = bold,
+    italic = italic,
+    underline = underline,
+    onClick = onClick,
+)
+
 /** Título de seção ou card. Mapeia para `titleLarge`. */
 @Composable
 fun TitleText(
@@ -76,6 +84,8 @@ fun TitleText(
     overflow: TextOverflow = TextOverflow.Clip,
     bold: Boolean = false,
     italic: Boolean = false,
+    underline: Boolean = false,
+    onClick: (() -> Unit)? = null,
 ) = BaseText(
     text = text,
     style = MaterialTheme.typography.titleLarge,
@@ -87,6 +97,8 @@ fun TitleText(
     overflow = overflow,
     bold = bold,
     italic = italic,
+    underline = underline,
+    onClick = onClick,
 )
 
 /** Subtítulo que complementa um [TitleText]. Mapeia para `titleMedium` + `onSurfaceVariant`. */
@@ -101,6 +113,8 @@ fun SubtitleText(
     overflow: TextOverflow = TextOverflow.Clip,
     bold: Boolean = false,
     italic: Boolean = false,
+    underline: Boolean = false,
+    onClick: (() -> Unit)? = null,
 ) = BaseText(
     text = text,
     style = MaterialTheme.typography.titleMedium,
@@ -112,6 +126,8 @@ fun SubtitleText(
     overflow = overflow,
     bold = bold,
     italic = italic,
+    underline = underline,
+    onClick = onClick,
 )
 
 /** Texto corrido / parágrafos. Mapeia para `bodyLarge`. */
@@ -126,6 +142,8 @@ fun BodyText(
     overflow: TextOverflow = TextOverflow.Clip,
     bold: Boolean = false,
     italic: Boolean = false,
+    underline: Boolean = false,
+    onClick: (() -> Unit)? = null,
 ) = BaseText(
     text = text,
     style = MaterialTheme.typography.bodyLarge,
@@ -137,6 +155,8 @@ fun BodyText(
     overflow = overflow,
     bold = bold,
     italic = italic,
+    underline = underline,
+    onClick = onClick,
 )
 
 /** Rótulo de campo, botão ou chip. Mapeia para `labelLarge`. */
@@ -151,6 +171,8 @@ fun LabelText(
     overflow: TextOverflow = TextOverflow.Ellipsis,
     bold: Boolean = false,
     italic: Boolean = false,
+    underline: Boolean = false,
+    onClick: (() -> Unit)? = null,
 ) = BaseText(
     text = text,
     style = MaterialTheme.typography.labelLarge,
@@ -162,6 +184,8 @@ fun LabelText(
     overflow = overflow,
     bold = bold,
     italic = italic,
+    underline = underline,
+    onClick = onClick,
 )
 
 /** Texto pequeno auxiliar (timestamps, legendas de imagem). Mapeia para `bodySmall` + `onSurfaceVariant`. */
@@ -176,6 +200,8 @@ fun CaptionText(
     overflow: TextOverflow = TextOverflow.Clip,
     bold: Boolean = false,
     italic: Boolean = false,
+    underline: Boolean = false,
+    onClick: (() -> Unit)? = null,
 ) = BaseText(
     text = text,
     style = MaterialTheme.typography.bodySmall,
@@ -187,6 +213,8 @@ fun CaptionText(
     overflow = overflow,
     bold = bold,
     italic = italic,
+    underline = underline,
+    onClick = onClick,
 )
 
 /**
@@ -204,6 +232,8 @@ fun OverlineText(
     overflow: TextOverflow = TextOverflow.Ellipsis,
     bold: Boolean = false,
     italic: Boolean = false,
+    underline: Boolean = false,
+    onClick: (() -> Unit)? = null,
 ) = BaseText(
     text = text.uppercase(),
     style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.5.sp),
@@ -215,6 +245,8 @@ fun OverlineText(
     overflow = overflow,
     bold = bold,
     italic = italic,
+    underline = underline,
+    onClick = onClick,
 )
 
 /** Base compartilhada: um `Text` com estilo fixo e os parâmetros comuns encaminhados. */
@@ -230,17 +262,19 @@ private fun BaseText(
     overflow: TextOverflow,
     bold: Boolean,
     italic: Boolean,
+    underline: Boolean,
+    onClick: (() -> Unit)?,
 ) {
     Text(
         text = text,
-        modifier = modifier,
+        modifier = if (onClick != null) modifier.clickable(onClick = onClick) else modifier,
         color = color.copy(alpha = color.alpha * alpha),
         textAlign = textAlign,
         maxLines = maxLines,
         overflow = overflow,
-        // `null` = não sobrescreve; mantém o valor definido em `style`.
         fontWeight = if (bold) FontWeight.Bold else null,
         fontStyle = if (italic) FontStyle.Italic else null,
+        textDecoration = if (underline) TextDecoration.Underline else null,
         style = style,
     )
 }
@@ -263,6 +297,8 @@ private fun TextsPreview() {
             LabelText("Label")
             CaptionText("Caption")
             BodyText("Body com 50% de opacidade", alpha = 0.5f)
+            LabelText("Label clicável", onClick = {})
+            BodyText("Body sublinhado", underline = true)
         }
     }
 }
