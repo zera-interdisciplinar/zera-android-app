@@ -27,7 +27,11 @@ import com.zera.android.view.theme.ZeraTheme
  *
  * Parâmetros comuns:
  * - [modifier]: modificador externo.
- * - [color]: cor do texto. Padrão: `primary` do tema.
+ * - [color]: cor do texto. Cada componente já tem um padrão semântico (ver docs abaixo);
+ *   textos de base (Headline/Title/Body) usam `primary`, textos auxiliares (Label/Subtitle/
+ *   Caption/Overline) usam `onSurfaceVariant`, mais claro e com menos destaque.
+ * - [alpha]: transparência aplicada sobre [color] (`1f` = opaco, `0f` = invisível). Útil para
+ *   variações rápidas de ênfase sem precisar passar uma [Color] customizada.
  * - [textAlign]: alinhamento horizontal.
  * - [maxLines] / [overflow]: controle de truncamento.
  * - [bold]: quando `true`, força `FontWeight.Bold`; quando `false`, mantém o peso do estilo.
@@ -40,29 +44,33 @@ fun HeadlineText(
     text: String,
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colorScheme.primary,
+    alpha: Float = 1f,
     textAlign: TextAlign? = null,
     maxLines: Int = Int.MAX_VALUE,
     overflow: TextOverflow = TextOverflow.Clip,
     bold: Boolean = false,
     italic: Boolean = false,
-) = BaseText(
-    text = text,
-    style = MaterialTheme.typography.headlineLarge,
-    modifier = modifier,
-    color = color,
-    textAlign = textAlign,
-    maxLines = maxLines,
-    overflow = overflow,
-    bold = bold,
-    italic = italic,
-)
-
+) {
+    BaseText(
+        text = text,
+        style = MaterialTheme.typography.headlineLarge,
+        modifier = modifier,
+        color = color,
+        alpha = alpha,
+        textAlign = textAlign,
+        maxLines = maxLines,
+        overflow = overflow,
+        bold = bold,
+        italic = italic,
+    )
+}
 /** Título de seção ou card. Mapeia para `titleLarge`. */
 @Composable
 fun TitleText(
     text: String,
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colorScheme.primary,
+    alpha: Float = 1f,
     textAlign: TextAlign? = null,
     maxLines: Int = Int.MAX_VALUE,
     overflow: TextOverflow = TextOverflow.Clip,
@@ -73,6 +81,7 @@ fun TitleText(
     style = MaterialTheme.typography.titleLarge,
     modifier = modifier,
     color = color,
+    alpha = alpha,
     textAlign = textAlign,
     maxLines = maxLines,
     overflow = overflow,
@@ -85,7 +94,8 @@ fun TitleText(
 fun SubtitleText(
     text: String,
     modifier: Modifier = Modifier,
-    color: Color = MaterialTheme.colorScheme.primary,
+    color: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+    alpha: Float = 1f,
     textAlign: TextAlign? = null,
     maxLines: Int = Int.MAX_VALUE,
     overflow: TextOverflow = TextOverflow.Clip,
@@ -96,6 +106,7 @@ fun SubtitleText(
     style = MaterialTheme.typography.titleMedium,
     modifier = modifier,
     color = color,
+    alpha = alpha,
     textAlign = textAlign,
     maxLines = maxLines,
     overflow = overflow,
@@ -109,6 +120,7 @@ fun BodyText(
     text: String,
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colorScheme.primary,
+    alpha: Float = 1f,
     textAlign: TextAlign? = null,
     maxLines: Int = Int.MAX_VALUE,
     overflow: TextOverflow = TextOverflow.Clip,
@@ -119,6 +131,7 @@ fun BodyText(
     style = MaterialTheme.typography.bodyLarge,
     modifier = modifier,
     color = color,
+    alpha = alpha,
     textAlign = textAlign,
     maxLines = maxLines,
     overflow = overflow,
@@ -131,7 +144,8 @@ fun BodyText(
 fun LabelText(
     text: String,
     modifier: Modifier = Modifier,
-    color: Color = MaterialTheme.colorScheme.primary,
+    color: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+    alpha: Float = 1f,
     textAlign: TextAlign? = null,
     maxLines: Int = 1,
     overflow: TextOverflow = TextOverflow.Ellipsis,
@@ -142,6 +156,7 @@ fun LabelText(
     style = MaterialTheme.typography.labelLarge,
     modifier = modifier,
     color = color,
+    alpha = alpha,
     textAlign = textAlign,
     maxLines = maxLines,
     overflow = overflow,
@@ -154,7 +169,8 @@ fun LabelText(
 fun CaptionText(
     text: String,
     modifier: Modifier = Modifier,
-    color: Color = MaterialTheme.colorScheme.primary,
+    color: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+    alpha: Float = 1f,
     textAlign: TextAlign? = null,
     maxLines: Int = Int.MAX_VALUE,
     overflow: TextOverflow = TextOverflow.Clip,
@@ -165,6 +181,7 @@ fun CaptionText(
     style = MaterialTheme.typography.bodySmall,
     modifier = modifier,
     color = color,
+    alpha = alpha,
     textAlign = textAlign,
     maxLines = maxLines,
     overflow = overflow,
@@ -180,7 +197,8 @@ fun CaptionText(
 fun OverlineText(
     text: String,
     modifier: Modifier = Modifier,
-    color: Color = MaterialTheme.colorScheme.primary,
+    color: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+    alpha: Float = 1f,
     textAlign: TextAlign? = null,
     maxLines: Int = 1,
     overflow: TextOverflow = TextOverflow.Ellipsis,
@@ -191,6 +209,7 @@ fun OverlineText(
     style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.5.sp),
     modifier = modifier,
     color = color,
+    alpha = alpha,
     textAlign = textAlign,
     maxLines = maxLines,
     overflow = overflow,
@@ -205,6 +224,7 @@ private fun BaseText(
     style: TextStyle,
     modifier: Modifier,
     color: Color,
+    alpha: Float,
     textAlign: TextAlign?,
     maxLines: Int,
     overflow: TextOverflow,
@@ -214,7 +234,7 @@ private fun BaseText(
     Text(
         text = text,
         modifier = modifier,
-        color = color,
+        color = color.copy(alpha = color.alpha * alpha),
         textAlign = textAlign,
         maxLines = maxLines,
         overflow = overflow,
@@ -242,6 +262,7 @@ private fun TextsPreview() {
             BodyText("Body em itálico", italic = true)
             LabelText("Label")
             CaptionText("Caption")
+            BodyText("Body com 50% de opacidade", alpha = 0.5f)
         }
     }
 }
