@@ -31,7 +31,7 @@ fun WelcomeScreen(){
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Logo(Modifier.width(250.dp).padding(bottom = Spacing.xLarge))
+            Logo(Modifier.width(250.dp).padding(bottom = Spacing.small))
             TitleText(text = "Bem vindo!", bold = true)
             Spacer(Modifier.height(Spacing.huge))
             ZeraButton(
