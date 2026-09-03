@@ -11,7 +11,7 @@ val Red50 = Color(0xFFEC401D)
 
 // Shades of Yellow
 val DarkYellow35 = Color(0xFFA36809)
-val Orange50 = Color(0xFFF59E0B)
+val Orange50 = Color(0xFFEC9E1D)
 val PastelYellow95 = Color(0xFFFFF2DA)
 val TransparentYellow27 = Color(0x45DEC591)
 val PastelYellow90 = Color(0xFFF2EAD9)
