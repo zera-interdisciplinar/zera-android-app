@@ -17,6 +17,18 @@ fun ZeraNavHost(){
         ZeraNavigator.commands.collect { command ->
             when (command) {
                 is NavCommand.Navigate -> navController.navigate(command.route)
+
+                is NavCommand.PushAndPop -> {
+                    // Captura a tela atual antes de navegar, pois após o navigate()
+                    // o topo da pilha já passa a ser a nova rota.
+                    val previousDestinationId = navController.currentDestination?.id
+                    navController.navigate(command.route) {
+                        if (previousDestinationId != null) {
+                            popUpTo(previousDestinationId) { inclusive = true }
+                        }
+                    }
+                }
+
                 NavCommand.GoBack -> navController.popBackStack()
             }
         }
