@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.zera.android.view.screens.SplashScreen
+import com.zera.android.view.screens.WelcomeScreen
 
 @Composable
 fun ZeraNavHost(){
@@ -27,6 +28,9 @@ fun ZeraNavHost(){
     ) {
         composable<Route.Splash> {
             SplashScreen()
+        }
+        composable<Route.Welcome>{
+            WelcomeScreen()
         }
     }
 }
