@@ -1,4 +1,4 @@
-package com.zera.android.view.components
+package com.zera.android.view.components.outros
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.tooling.preview.Preview
@@ -20,16 +19,10 @@ import com.zera.android.view.theme.ZeraTheme
  * e faixas amarelas no canto inferior esquerdo.
  */
 @Composable
-fun SplashBackground(
-    modifier: Modifier = Modifier,
-    backgroundColor: Color = MaterialTheme.colorScheme.surface,
-    topStripeColor: Color = TransparentBlue40,
-    topStripeColorSecondary: Color = TransparentBlue17,
-    bottomStripeColor: Color = TransparentYellow27,
-) {
+fun SplashBackground() {
     Canvas(
-        modifier = modifier
-            .background(backgroundColor)
+        modifier = Modifier.fillMaxSize()
+            .background(MaterialTheme.colorScheme.surface)
             .clearAndSetSemantics {},
     ) {
         val w = size.width
@@ -43,7 +36,7 @@ fun SplashBackground(
             lineTo(w * 0.42f, h * 0.07f)
             close()
         }
-        drawPath(topPath, color = topStripeColor)
+        drawPath(topPath, color = TransparentBlue40)
 
         val topPath2 = Path().apply {
             moveTo(w * 0.68f, h * 0.10f)
@@ -52,7 +45,7 @@ fun SplashBackground(
             lineTo(w * 0.55f, h * 0.14f)
             close()
         }
-        drawPath(topPath2, color = topStripeColorSecondary)
+        drawPath(topPath2, color = TransparentBlue17)
 
         // faixas inferiores esquerdas
         val bottomPath = Path().apply {
@@ -61,7 +54,7 @@ fun SplashBackground(
             lineTo(w * 0f, h * 1f)
             close()
         }
-        drawPath(bottomPath, color = bottomStripeColor)
+        drawPath(bottomPath, color = TransparentYellow27)
 
         val bottomPath2 = Path().apply {
             moveTo(w * 0.0f, h * 0.7f)
@@ -70,7 +63,7 @@ fun SplashBackground(
             lineTo(w * 0.7f, h * 1f)
             close()
         }
-        drawPath(bottomPath2, color = bottomStripeColor)
+        drawPath(bottomPath2, color = TransparentYellow27)
     }
 }
 
@@ -78,6 +71,6 @@ fun SplashBackground(
 @Composable
 private fun SplashBackgroundPreview() {
     ZeraTheme {
-        SplashBackground(modifier = Modifier.fillMaxSize())
+        SplashBackground()
     }
 }
