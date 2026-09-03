@@ -2,11 +2,15 @@ package com.zera.android.view.components.buttons
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import com.zera.android.view.components.texts.BodyText
 import com.zera.android.view.theme.Radius
 import com.zera.android.view.theme.Spacing
@@ -22,6 +26,9 @@ import com.zera.android.view.theme.ZeraTheme
  * @param style família de cor do botão. Ver [ZeraButtonStyle].
  * @param type hierarquia visual dentro do estilo. Ver [ZeraButtonType].
  * @param enabled habilita ou desabilita a interação.
+ * @param width largura fixa em dp. Quando informado, ignora [fillMaxWidth], [maxWidth] e [minWidth].
+ * @param maxWidth largura máxima em dp (útil junto de [fillMaxWidth]). Ignorado se [width] for informado.
+ * @param minWidth largura mínima em dp. Ignorado se [width] for informado.
  */
 @Composable
 fun ZeraButton(
@@ -32,14 +39,29 @@ fun ZeraButton(
     style: ZeraButtonStyle = ZeraButtonStyle.Blue,
     type: ZeraButtonType = ZeraButtonType.Primary,
     enabled: Boolean = true,
+    width: Int? = null,
+    maxWidth: Int? = null,
+    minWidth: Int? = null,
 ) {
     val (_, content) = buttonColorPair(style, type)
     Button(
         onClick = onClick,
-        modifier = modifier.then(if (fillMaxWidth) Modifier.fillMaxWidth() else Modifier),
+        modifier = modifier
+            .then(if (fillMaxWidth && width == null) Modifier.fillMaxWidth() else Modifier)
+            .then(if (width != null) Modifier.width(width.dp) else Modifier)
+            .then(
+                if (width == null && (minWidth != null || maxWidth != null)) {
+                    Modifier.widthIn(
+                        min = minWidth?.dp ?: Dp.Unspecified,
+                        max = maxWidth?.dp ?: Dp.Unspecified,
+                    )
+                } else Modifier
+            ),
         enabled = enabled,
         colors = buttonColors(style, type),
-        shape = RoundedCornerShape(Radius.large)
+        border = buttonBorder(style, type),
+        shape = RoundedCornerShape(Radius.large),
+
     ) {
         BodyText(
             text = text,
@@ -58,7 +80,7 @@ private fun ZeraButtonPreview() {
             text = "Continuar",
             onClick = {},
             modifier = Modifier.padding(Spacing.medium),
-            style = ZeraButtonStyle.Green,
+            style = ZeraButtonStyle.Yellow,
         )
     }
 }
@@ -71,7 +93,7 @@ private fun ZeraButtonSecondaryPreview() {
             text = "Secundário",
             onClick = {},
             fillMaxWidth = true,
-            style = ZeraButtonStyle.Green,
+            style = ZeraButtonStyle.Yellow,
             type = ZeraButtonType.Secondary,
             modifier = Modifier.padding(Spacing.medium),
         )
