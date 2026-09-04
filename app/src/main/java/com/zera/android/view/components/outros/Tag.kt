@@ -10,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.zera.android.view.components.containers.ZeraBox
-import com.zera.android.view.components.containers.ZeraBoxStyle
 import com.zera.android.view.components.texts.LabelText
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraColorFamily
@@ -57,7 +56,7 @@ fun Tag(
 @Composable
 private fun TagPreview() {
     ZeraTheme {
-        ZeraBox(style = ZeraBoxStyle.Blue) {
+        ZeraBox(style = ZeraColorFamily.Blue) {
             Column(verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
                 Tag(text = "Em aprovação", style = ZeraColorFamily.Yellow)
                 Tag(text = "Aprovado", style = ZeraColorFamily.Green)

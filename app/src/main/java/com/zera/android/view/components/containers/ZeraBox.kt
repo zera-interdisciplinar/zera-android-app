@@ -20,6 +20,7 @@ import com.zera.android.view.components.texts.BodyText
 import com.zera.android.view.components.texts.HeadlineText
 import com.zera.android.view.theme.Radius
 import com.zera.android.view.theme.Spacing
+import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.view.theme.ZeraTheme
 
 /**
@@ -35,7 +36,7 @@ import com.zera.android.view.theme.ZeraTheme
  * `color = LocalContentColor.current` neles quando estiverem sobre um box colorido.
  *
  * @param modifier modificador externo opcional.
- * @param style família de cor do box. Ver [ZeraBoxStyle].
+ * @param style família de cor do box. Ver [ZeraColorFamily].
  * @param type hierarquia visual dentro do estilo. Ver [ZeraBoxType].
  * @param shape forma do box.
  * @param contentPadding espaçamento interno entre a borda do box e o [content].
@@ -44,7 +45,7 @@ import com.zera.android.view.theme.ZeraTheme
 @Composable
 fun ZeraBox(
     modifier: Modifier = Modifier,
-    style: ZeraBoxStyle = ZeraBoxStyle.Blue,
+    style: ZeraColorFamily = ZeraColorFamily.Blue,
     type: ZeraBoxType = ZeraBoxType.Primary,
     shape: Shape = RoundedCornerShape(Radius.large),
     contentPadding: PaddingValues = PaddingValues(Spacing.large),
@@ -73,7 +74,7 @@ private fun ZeraBoxPreview() {
             modifier = Modifier.padding(Spacing.medium),
             verticalArrangement = Arrangement.spacedBy(Spacing.medium),
         ) {
-            ZeraBox(style = ZeraBoxStyle.Blue) {
+            ZeraBox(style = ZeraColorFamily.Blue) {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(Spacing.medium),
                     verticalAlignment = Alignment.CenterVertically,
@@ -90,7 +91,7 @@ private fun ZeraBoxPreview() {
                         )
                     }
                     ZeraBox(
-                        style = ZeraBoxStyle.Yellow,
+                        style = ZeraColorFamily.Yellow,
                         shape = CircleShape,
                         contentPadding = PaddingValues(
                             horizontal = Spacing.large,
@@ -102,7 +103,7 @@ private fun ZeraBoxPreview() {
                 }
             }
 
-            ZeraBox(style = ZeraBoxStyle.Green, type = ZeraBoxType.Secondary) {
+            ZeraBox(style = ZeraColorFamily.Green, type = ZeraBoxType.Secondary) {
                 BodyText(text = "Secundário com borda", color = LocalContentColor.current)
             }
         }
