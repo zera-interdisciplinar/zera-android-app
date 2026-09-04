@@ -13,7 +13,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zera.android.view.components.buttons.ZeraButton
-import com.zera.android.view.components.buttons.ZeraButtonStyle
 import com.zera.android.view.components.buttons.ZeraButtonType
 import com.zera.android.view.components.logo.Logo
 import com.zera.android.view.components.outros.SplashBackground
@@ -22,6 +21,7 @@ import com.zera.android.view.components.texts.TitleText
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.view.theme.Spacing
+import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.view.theme.ZeraTheme
 
 @Composable
@@ -41,7 +41,7 @@ fun WelcomeScreen(){
             Column() {
                 ZeraButton(
                     text = "Login",
-                    style = ZeraButtonStyle.Blue,
+                    style = ZeraColorFamily.Blue,
                     fillMaxWidth = true,
                     maxWidth = 200,
                     onClick = {
@@ -51,7 +51,7 @@ fun WelcomeScreen(){
                 Spacer(Modifier.height(Spacing.small))
                 ZeraButton(
                     text = "Primeiro Acesso",
-                    style = ZeraButtonStyle.Yellow,
+                    style = ZeraColorFamily.Yellow,
                     type = ZeraButtonType.Secondary,
                     fillMaxWidth = true,
                     onClick = {

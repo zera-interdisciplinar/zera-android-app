@@ -20,7 +20,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zera.android.view.components.buttons.ZeraButton
-import com.zera.android.view.components.buttons.ZeraButtonStyle
 import com.zera.android.view.components.buttons.ZeraButtonType
 import com.zera.android.view.components.inputs.ZeraInputType
 import com.zera.android.view.components.inputs.ZeraTextInput

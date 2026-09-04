@@ -7,44 +7,24 @@ import androidx.compose.ui.unit.dp
 import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.view.theme.palette
 
-/**
- * Família de cor do [ZeraBox].
- *
- * Espelho de [ZeraColorFamily] para a API dos containers; o [ZeraBoxType] decide
- * qual par do grupo (base ou container) é usado.
- */
-enum class ZeraBoxStyle {
-    Blue,
-    Red,
-    Yellow,
-    Green,
-}
-
-/** Hierarquia visual do [ZeraBox] dentro de um [ZeraBoxStyle]. */
+/** Hierarquia visual do [ZeraBox] dentro de uma [ZeraColorFamily]. */
 enum class ZeraBoxType {
     Primary,
     Secondary,
 }
 
-internal fun ZeraBoxStyle.family(): ZeraColorFamily = when (this) {
-    ZeraBoxStyle.Blue -> ZeraColorFamily.Blue
-    ZeraBoxStyle.Red -> ZeraColorFamily.Red
-    ZeraBoxStyle.Yellow -> ZeraColorFamily.Yellow
-    ZeraBoxStyle.Green -> ZeraColorFamily.Green
-}
-
 /**
  * Par (fundo, conteúdo) do [style] para o [type] escolhido.
  *
- * @param style família de cor. Ver [ZeraBoxStyle].
+ * @param style família de cor. Ver [ZeraColorFamily].
  * @param type hierarquia visual dentro do estilo. Ver [ZeraBoxType].
  */
 @Composable
 internal fun boxColorPair(
-    style: ZeraBoxStyle,
+    style: ZeraColorFamily,
     type: ZeraBoxType,
 ): Pair<Color, Color> {
-    val palette = style.family().palette()
+    val palette = style.palette()
     return when (type) {
         ZeraBoxType.Primary -> palette.base to palette.onBase
         ZeraBoxType.Secondary -> palette.container to palette.onContainer
@@ -57,16 +37,16 @@ internal fun boxColorPair(
  * Boxes [ZeraBoxType.Secondary] recebem uma borda na cor base do [style], que
  * contrasta com o fundo (container) mais claro. Demais tipos não têm borda.
  *
- * @param style família de cor. Ver [ZeraBoxStyle].
+ * @param style família de cor. Ver [ZeraColorFamily].
  * @param type hierarquia visual dentro do estilo. Ver [ZeraBoxType].
  */
 @Composable
 internal fun boxBorder(
-    style: ZeraBoxStyle,
+    style: ZeraColorFamily,
     type: ZeraBoxType,
 ): BorderStroke? {
     return when (type) {
-        ZeraBoxType.Secondary -> BorderStroke(2.dp, style.family().palette().base.copy(alpha = 0.5f))
+        ZeraBoxType.Secondary -> BorderStroke(2.dp, style.palette().base.copy(alpha = 0.5f))
         else -> null
     }
 }

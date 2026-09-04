@@ -13,6 +13,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.zera.android.view.theme.Spacing
+import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.view.theme.ZeraTheme
 import com.zera.android.view.theme.icons.ZeraIcon
 
@@ -28,7 +29,7 @@ import com.zera.android.view.theme.icons.ZeraIcon
  * @param contentDescription descrição para acessibilidade. Passe `null` apenas quando
  *   o botão for puramente decorativo ou redundante com um rótulo próximo.
  * @param modifier modificador externo opcional.
- * @param style família de cor do botão. Ver [ZeraButtonStyle].
+ * @param style família de cor do botão. Ver [ZeraColorFamily].
  * @param type hierarquia visual dentro do estilo. Ver [ZeraButtonType].
  * @param enabled habilita ou desabilita a interação.
  * @param size diâmetro do botão em dp. O ícone ocupa metade desse valor.
@@ -39,7 +40,7 @@ fun IconButton(
     onClick: () -> Unit,
     contentDescription: String?,
     modifier: Modifier = Modifier,
-    style: ZeraButtonStyle = ZeraButtonStyle.Blue,
+    style: ZeraColorFamily = ZeraColorFamily.Blue,
     type: ZeraButtonType = ZeraButtonType.Primary,
     enabled: Boolean = true,
     size: Dp = 48.dp,
@@ -75,13 +76,13 @@ private fun IconButtonPreview() {
                 icon = ZeraIcon.Plus,
                 onClick = {},
                 contentDescription = "Adicionar",
-                style = ZeraButtonStyle.Blue,
+                style = ZeraColorFamily.Blue,
             )
             IconButton(
                 icon = ZeraIcon.Close,
                 onClick = {},
                 contentDescription = "Fechar",
-                style = ZeraButtonStyle.Red,
+                style = ZeraColorFamily.Red,
                 type = ZeraButtonType.Secondary,
             )
         }

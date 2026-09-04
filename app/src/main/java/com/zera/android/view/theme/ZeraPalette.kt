@@ -10,9 +10,9 @@ import androidx.compose.ui.graphics.Color
  * [androidx.compose.material3.ColorScheme]: uma cor "base" mais forte e um
  * "container" mais claro, cada uma com sua cor de conteúdo.
  *
- * É o ponto único onde o mapa `família -> cores do tema` vive. Os componentes
- * expõem seus próprios enums (`ZeraButtonStyle`, `ZeraBoxStyle`, ...) e convertem
- * para [ZeraColorFamily] internamente.
+ * É o ponto único onde o mapa `família -> cores do tema` vive. Componentes
+ * coloridos (`ZeraButton`, `ZeraBox`, `Tag`, ...) recebem [ZeraColorFamily]
+ * diretamente como parâmetro `style`, sem enums espelho próprios.
  */
 enum class ZeraColorFamily {
     Blue,

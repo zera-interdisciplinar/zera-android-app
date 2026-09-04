@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import com.zera.android.view.components.texts.BodyText
 import com.zera.android.view.theme.Radius
 import com.zera.android.view.theme.Spacing
+import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.view.theme.ZeraTheme
 import com.zera.android.view.theme.icons.ZeraIcon
 
@@ -26,7 +27,7 @@ import com.zera.android.view.theme.icons.ZeraIcon
  * @param onClick ação executada ao tocar no botão.
  * @param modifier modificador externo opcional.
  * @param fillMaxWidth quando `true`, o botão ocupa toda a largura disponível do container.
- * @param style família de cor do botão. Ver [ZeraButtonStyle].
+ * @param style família de cor do botão. Ver [ZeraColorFamily].
  * @param type hierarquia visual dentro do estilo. Ver [ZeraButtonType].
  * @param enabled habilita ou desabilita a interação.
  * @param icon ícone opcional do catálogo [ZeraIcon]. Quando não for `null`, é exibido
@@ -41,7 +42,7 @@ fun ZeraButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     fillMaxWidth: Boolean = false,
-    style: ZeraButtonStyle = ZeraButtonStyle.Blue,
+    style: ZeraColorFamily = ZeraColorFamily.Blue,
     type: ZeraButtonType = ZeraButtonType.Primary,
     enabled: Boolean = true,
     icon: ZeraIcon? = null,
@@ -99,7 +100,7 @@ private fun ZeraButtonPreview() {
             text = "Continuar",
             onClick = {},
             modifier = Modifier.padding(Spacing.medium),
-            style = ZeraButtonStyle.Yellow,
+            style = ZeraColorFamily.Yellow,
         )
     }
 }
@@ -112,7 +113,7 @@ private fun ZeraButtonWithIconPreview() {
             text = "Continuar",
             onClick = {},
             modifier = Modifier.padding(Spacing.medium),
-            style = ZeraButtonStyle.Blue,
+            style = ZeraColorFamily.Blue,
             icon = ZeraIcon.ProceedArrow,
         )
     }
@@ -126,7 +127,7 @@ private fun ZeraButtonSecondaryPreview() {
             text = "Secundário",
             onClick = {},
             fillMaxWidth = true,
-            style = ZeraButtonStyle.Yellow,
+            style = ZeraColorFamily.Yellow,
             type = ZeraButtonType.Secondary,
             modifier = Modifier.padding(Spacing.medium),
         )
