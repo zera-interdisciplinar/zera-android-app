@@ -1,14 +1,15 @@
 package com.zera.android.view.components.buttons
 
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
+import com.zera.android.view.theme.ZeraColorFamily
+import com.zera.android.view.theme.ZeraPalette
+import com.zera.android.view.theme.palette
 
 /**
  * Família de cor do [ZeraButton].
  *
- * Cada valor aponta para um grupo de papéis do [androidx.compose.material3.ColorScheme]
- * (cor base + container). O [ZeraButtonType] decide qual par do grupo é usado.
+ * Espelho de [ZeraColorFamily] para a API dos botões; o [ZeraButtonType] decide
+ * qual par do grupo (base ou container) é usado.
  */
 enum class ZeraButtonStyle {
     Blue,
@@ -16,42 +17,13 @@ enum class ZeraButtonStyle {
     Yellow,
     Green,
 }
-internal data class ZeraButtonPalette(
-    val base: Color,
-    val onBase: Color,
-    val container: Color,
-    val onContainer: Color,
-)
-@Composable
-internal fun ZeraButtonStyle.palette(): ZeraButtonPalette {
-    val scheme = MaterialTheme.colorScheme
-    return when (this) {
-        ZeraButtonStyle.Blue -> ZeraButtonPalette(
-            base = scheme.primary,
-            onBase = scheme.onPrimary,
-            container = scheme.primaryContainer,
-            onContainer = scheme.onPrimaryContainer,
-        )
 
-        ZeraButtonStyle.Red -> ZeraButtonPalette(
-            base = scheme.error,
-            onBase = scheme.onError,
-            container = scheme.errorContainer,
-            onContainer = scheme.onErrorContainer,
-        )
-
-        ZeraButtonStyle.Yellow -> ZeraButtonPalette(
-            base = scheme.secondary,
-            onBase = scheme.onSecondary,
-            container = scheme.secondaryContainer,
-            onContainer = scheme.onSecondaryContainer,
-        )
-
-        ZeraButtonStyle.Green -> ZeraButtonPalette(
-            base = scheme.tertiary,
-            onBase = scheme.onTertiary,
-            container = scheme.tertiaryContainer,
-            onContainer = scheme.onTertiaryContainer,
-        )
-    }
+internal fun ZeraButtonStyle.family(): ZeraColorFamily = when (this) {
+    ZeraButtonStyle.Blue -> ZeraColorFamily.Blue
+    ZeraButtonStyle.Red -> ZeraColorFamily.Red
+    ZeraButtonStyle.Yellow -> ZeraColorFamily.Yellow
+    ZeraButtonStyle.Green -> ZeraColorFamily.Green
 }
+
+@Composable
+internal fun ZeraButtonStyle.palette(): ZeraPalette = family().palette()
