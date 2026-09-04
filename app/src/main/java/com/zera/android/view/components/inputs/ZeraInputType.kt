@@ -18,8 +18,16 @@ enum class ZeraInputType {
     Phone,
     Number,
     Decimal;
+
+    /** `true` quando o conteúdo deve ser mascarado por padrão (campo de senha). */
     val isSecret: Boolean
         get() = this == Password
+
+    /**
+     * Monta as [KeyboardOptions] (tipo de teclado, capitalização e ação) para este tipo.
+     *
+     * @param imeAction ação exibida no botão do teclado (Concluído, Próximo, ...).
+     */
     fun keyboardOptions(imeAction: ImeAction = ImeAction.Default): KeyboardOptions {
         val keyboardType = when (this) {
             Text -> KeyboardType.Text
