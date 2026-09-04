@@ -1,4 +1,4 @@
-package com.zera.android.view.components.cards
+package com.zera.android.view.components.lists
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
