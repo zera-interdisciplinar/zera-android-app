@@ -1,5 +1,7 @@
 package com.zera.android.view.components.buttons
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -15,6 +17,7 @@ import com.zera.android.view.components.texts.BodyText
 import com.zera.android.view.theme.Radius
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
+import com.zera.android.view.theme.icons.ZeraIcon
 
 /**
  * Botão padrão do app.
@@ -26,6 +29,8 @@ import com.zera.android.view.theme.ZeraTheme
  * @param style família de cor do botão. Ver [ZeraButtonStyle].
  * @param type hierarquia visual dentro do estilo. Ver [ZeraButtonType].
  * @param enabled habilita ou desabilita a interação.
+ * @param icon ícone opcional do catálogo [ZeraIcon]. Quando não for `null`, é exibido
+ *   logo ao lado do texto.
  * @param width largura fixa em dp. Quando informado, ignora [fillMaxWidth], [maxWidth] e [minWidth].
  * @param maxWidth largura máxima em dp (útil junto de [fillMaxWidth]). Ignorado se [width] for informado.
  * @param minWidth largura mínima em dp. Ignorado se [width] for informado.
@@ -39,6 +44,7 @@ fun ZeraButton(
     style: ZeraButtonStyle = ZeraButtonStyle.Blue,
     type: ZeraButtonType = ZeraButtonType.Primary,
     enabled: Boolean = true,
+    icon: ZeraIcon? = null,
     width: Int? = null,
     maxWidth: Int? = null,
     minWidth: Int? = null,
@@ -63,12 +69,25 @@ fun ZeraButton(
         shape = RoundedCornerShape(Radius.large),
 
     ) {
-        BodyText(
-            text = text,
-            bold = true,
-            color = content,
-            modifier = Modifier.padding(horizontal = Spacing.medium),
-        )
+        Row(
+            modifier = Modifier.padding(horizontal = Spacing.small),
+        ){
+            BodyText(
+                text = text,
+                bold = true,
+                color = content,
+                modifier = Modifier.padding(horizontal = Spacing.small)
+            )
+            if (icon != null) {
+                ZeraIcon(
+                    icon = icon,
+                    contentDescription = null,
+                    size = Spacing.large,
+                    tint = content,
+                    modifier = Modifier.padding(end = Spacing.medium),
+                )
+            }
+        }
     }
 }
 
@@ -81,6 +100,20 @@ private fun ZeraButtonPreview() {
             onClick = {},
             modifier = Modifier.padding(Spacing.medium),
             style = ZeraButtonStyle.Yellow,
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun ZeraButtonWithIconPreview() {
+    ZeraTheme {
+        ZeraButton(
+            text = "Continuar",
+            onClick = {},
+            modifier = Modifier.padding(Spacing.medium),
+            style = ZeraButtonStyle.Blue,
+            icon = ZeraIcon.ProceedArrow,
         )
     }
 }
