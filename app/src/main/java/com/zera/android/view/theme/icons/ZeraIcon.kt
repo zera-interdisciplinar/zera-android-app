@@ -37,6 +37,7 @@ enum class ZeraIcon(@DrawableRes val resId: Int) {
     Home(R.drawable.home),
     InfoCircle(R.drawable.info_circle),
     LeftArrow(R.drawable.left_arrow),
+    RightArrow(R.drawable.right_arrow),
     LeftUTurn(R.drawable.left_u_turn),
     Location(R.drawable.location),
     Megaphone(R.drawable.megaphone),
