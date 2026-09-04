@@ -7,12 +7,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
+/** Hierarquia visual do [ZeraButton] dentro de um [ZeraButtonStyle]. */
 enum class ZeraButtonType {
     Primary,
     Secondary,
 }
 
-/** Par (fundo, conteúdo) do [style] para o [type] escolhido. */
+/**
+ * Par (fundo, conteúdo) do [style] para o [type] escolhido.
+ *
+ * @param style família de cor. Ver [ZeraButtonStyle].
+ * @param type hierarquia visual dentro do estilo. Ver [ZeraButtonType].
+ */
 @Composable
 internal fun buttonColorPair(
     style: ZeraButtonStyle,
@@ -30,6 +36,9 @@ internal fun buttonColorPair(
  *
  * Botões [ZeraButtonType.Secondary] recebem uma borda na cor base do [style],
  * que contrasta com o fundo (container) mais claro. Demais tipos não têm borda.
+ *
+ * @param style família de cor. Ver [ZeraButtonStyle].
+ * @param type hierarquia visual dentro do estilo. Ver [ZeraButtonType].
  */
 @Composable
 internal fun buttonBorder(
@@ -42,6 +51,13 @@ internal fun buttonBorder(
     }
 }
 
+/**
+ * [ButtonColors] (fundo + conteúdo) do [style] para o [type] escolhido, prontas
+ * para o parâmetro `colors` do [androidx.compose.material3.Button].
+ *
+ * @param style família de cor. Ver [ZeraButtonStyle].
+ * @param type hierarquia visual dentro do estilo. Ver [ZeraButtonType].
+ */
 @Composable
 internal fun buttonColors(
     style: ZeraButtonStyle,

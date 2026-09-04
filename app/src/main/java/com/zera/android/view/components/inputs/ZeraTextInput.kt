@@ -27,6 +27,21 @@ import com.zera.android.view.theme.Radius
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
 
+/**
+ * Campo de texto padrão do app.
+ *
+ * @param onValueChange chamado a cada alteração do texto digitado.
+ * @param modifier modificador externo opcional.
+ * @param value texto atual do campo (estado controlado pelo chamador).
+ * @param label rótulo exibido acima do campo. Omitido quando vazio.
+ * @param placeholder texto de dica exibido quando [value] está vazio.
+ * @param type tipo de entrada: define teclado, capitalização e mascaramento. Ver [ZeraInputType].
+ * @param imeAction ação exibida no botão do teclado (Concluído, Próximo, ...).
+ * @param enabled habilita ou desabilita a interação.
+ * @param isError quando `true`, destaca o campo com a cor de erro.
+ * @param errorMessage mensagem exibida abaixo do campo quando [isError] for `true`.
+ * @param width largura fixa. Quando `null`, o campo ocupa toda a largura disponível.
+ */
 @Composable
 fun ZeraTextInput(
     onValueChange: (String) -> Unit,

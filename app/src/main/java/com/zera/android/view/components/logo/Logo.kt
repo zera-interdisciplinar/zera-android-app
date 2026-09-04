@@ -14,6 +14,12 @@ import com.zera.android.view.theme.ZeraTheme
 /** Proporção original do ic_logo.xml (viewport 595 x 154). */
 private const val LOGO_ASPECT_RATIO = 595f / 154f
 
+/**
+ * Logo do app, com proporção fixa igual à do drawable original.
+ *
+ * @param modifier modificador externo opcional. Use-o para controlar o tamanho
+ *   (ex.: `Modifier.width(200.dp)`); a altura acompanha [LOGO_ASPECT_RATIO].
+ */
 @Composable
 fun Logo(
     modifier: Modifier = Modifier,
