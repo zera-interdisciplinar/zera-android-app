@@ -33,8 +33,8 @@ private val IconBoxSize = 48.dp
  * Item clicável de uma lista de produtos: quadrado de ícone à esquerda, nome e
  * ID do produto ao centro, seta de "avançar" à direita.
  *
- * Usado para compor listas (ex.: um `ProductList`, criado depois) — este
- * composable só desenha a linha de um item.
+ * Usado para compor listas (ver [ProductList]) — este composable só desenha
+ * a linha de um item.
  *
  * @param itemName nome do produto.
  * @param itemId ID do produto, exibido apenas para referência visual (ex.: "265964"
