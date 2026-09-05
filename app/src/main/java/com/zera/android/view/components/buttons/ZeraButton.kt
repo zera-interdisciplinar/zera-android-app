@@ -133,3 +133,18 @@ private fun ZeraButtonSecondaryPreview() {
         )
     }
 }
+
+@Preview
+@Composable
+private fun ZeraButtonTertiaryPreview() {
+    ZeraTheme {
+        ZeraButton(
+            text = "Terciário",
+            onClick = {},
+            fillMaxWidth = true,
+            style = ZeraColorFamily.Yellow,
+            type = ZeraButtonType.Tertiary,
+            modifier = Modifier.padding(Spacing.medium),
+        )
+    }
+}

@@ -85,6 +85,13 @@ private fun IconButtonPreview() {
                 style = ZeraColorFamily.Red,
                 type = ZeraButtonType.Secondary,
             )
+            IconButton(
+                icon = ZeraIcon.Bell,
+                onClick = {},
+                contentDescription = "Notificações",
+                type = ZeraButtonType.Secondary,
+                style = ZeraColorFamily.Yellow,
+            )
         }
     }
 }
