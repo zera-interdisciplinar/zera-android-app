@@ -58,7 +58,7 @@ fun Notification(
             modifier = Modifier.padding(Spacing.medium),
             verticalArrangement = Arrangement.spacedBy(Spacing.small),
         ) {
-            BodyText(text = label, bold = true, color = palette.onContainer)
+            TitleText(text = label, bold = true, color = palette.onContainer)
             BodyText(text = text, color = MaterialTheme.colorScheme.onSurfaceVariant)
             if (redirect != null) {
                 Row(
