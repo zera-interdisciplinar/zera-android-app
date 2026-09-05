@@ -13,6 +13,7 @@ import com.zera.android.view.theme.palette
 enum class ZeraButtonType {
     Primary,
     Secondary,
+    Tertiary,
 }
 
 /**
@@ -30,6 +31,7 @@ internal fun buttonColorPair(
     return when (type) {
         ZeraButtonType.Primary -> palette.base to palette.onBase
         ZeraButtonType.Secondary -> palette.container to palette.onContainer
+        ZeraButtonType.Tertiary -> Color.Transparent to palette.base
     }
 }
 
