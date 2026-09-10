@@ -56,9 +56,9 @@ fun EmployeeRegisterScreen(){
             )
             ZeraTokenInput(
                 value = token,
-                onValueChange = {},
+                onValueChange = { token = it },
                 label = "Código de convite",
-                onFilled = { token = it },
+                onFilled = {},
             )
         }
         Spacer(Modifier.height(Spacing.xLarge))
