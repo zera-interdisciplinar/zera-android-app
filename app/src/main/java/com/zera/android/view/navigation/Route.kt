@@ -13,6 +13,9 @@ sealed interface Route{
     @Serializable
     data object Login : Route
 
+    @Serializable
+    data object Register : Route
+
     // ROTAS DE GESTOR
     @Serializable
     data object ManagerHome : Route

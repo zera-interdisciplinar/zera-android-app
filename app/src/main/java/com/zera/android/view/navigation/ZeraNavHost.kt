@@ -6,6 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.zera.android.view.screens.EmployeeRegisterScreen
 import com.zera.android.view.screens.LoginScreen
 import com.zera.android.view.screens.SplashScreen
 import com.zera.android.view.screens.WelcomeScreen
@@ -49,6 +50,9 @@ fun ZeraNavHost(){
         }
         composable<Route.Login>{
             LoginScreen()
+        }
+        composable<Route.Register>{
+            EmployeeRegisterScreen()
         }
         composable<Route.ManagerHome>{
             ManagerHome()
