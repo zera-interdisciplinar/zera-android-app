@@ -1,6 +1,7 @@
 package com.zera.android.model.remote.client
 
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
+import com.zera.android.model.local.SharedPreferencesManager
 import com.zera.android.model.remote.service.AuthService
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
@@ -13,10 +14,15 @@ object ApiClient {
 
     private val okHttpClient = OkHttpClient.Builder()
         .addInterceptor { chain ->
-            val request = chain.request().newBuilder()
+            val requestBuilder = chain.request().newBuilder()
                 .addHeader("apiKey", "zera1405")
-                .build()
-            chain.proceed(request)
+
+            val accessToken = SharedPreferencesManager.getAccessToken()
+            if (!accessToken.isNullOrBlank()) {
+                requestBuilder.header("Authorization", "Bearer $accessToken")
+            }
+
+            chain.proceed(requestBuilder.build())
         }
         .build()
 
