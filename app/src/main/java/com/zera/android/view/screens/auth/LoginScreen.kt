@@ -1,4 +1,4 @@
-package com.zera.android.view.screens
+package com.zera.android.view.screens.auth
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,6 +28,8 @@ import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.components.texts.TitleText
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
+import com.zera.android.view.transition.SharedElementKeys
+import com.zera.android.view.transition.sharedTransition
 import com.zera.android.viewmodel.auth.SingInViewModel
 
 @Composable
@@ -45,7 +47,7 @@ fun LoginScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.padding(horizontal = Spacing.xLarge)
         ) {
-            Logo(Modifier.width(250.dp).padding(bottom = Spacing.small))
+            Logo(Modifier.sharedTransition(SharedElementKeys.Logo).width(250.dp).padding(bottom = Spacing.small))
             TitleText(text = "Bem vindo!", bold = true)
             Spacer(Modifier.height(Spacing.medium))
             ZeraTextInput(

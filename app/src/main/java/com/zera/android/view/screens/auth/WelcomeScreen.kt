@@ -1,4 +1,4 @@
-package com.zera.android.view.screens
+package com.zera.android.view.screens.auth
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,6 +23,8 @@ import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.view.theme.ZeraTheme
+import com.zera.android.view.transition.SharedElementKeys
+import com.zera.android.view.transition.sharedTransition
 
 @Composable
 fun WelcomeScreen(){
@@ -35,7 +37,7 @@ fun WelcomeScreen(){
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.padding(horizontal = Spacing.xLarge)
         ) {
-            Logo(Modifier.width(250.dp).padding(bottom = Spacing.small))
+            Logo(Modifier.sharedTransition(SharedElementKeys.Logo).width(250.dp).padding(bottom = Spacing.small))
             TitleText(text = "Bem vindo!", bold = true)
             Spacer(Modifier.height(Spacing.huge))
             Column() {
