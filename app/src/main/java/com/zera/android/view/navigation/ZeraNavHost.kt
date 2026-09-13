@@ -1,18 +1,24 @@
 package com.zera.android.view.navigation
 
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.zera.android.view.screens.EmployeeRegisterScreen
-import com.zera.android.view.screens.LoginScreen
+import com.zera.android.view.screens.auth.EmployeeRegisterScreen
+import com.zera.android.view.screens.auth.LoginScreen
 import com.zera.android.view.screens.SplashScreen
-import com.zera.android.view.screens.WelcomeScreen
+import com.zera.android.view.screens.auth.WelcomeScreen
 import com.zera.android.view.screens.employee.EmployeeHome
 import com.zera.android.view.screens.manager.ManagerHome
+import com.zera.android.view.transition.LocalAnimatedVisibilityScope
+import com.zera.android.view.transition.LocalSharedTransitionScope
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun ZeraNavHost(){
     val navController : NavHostController = rememberNavController()
@@ -38,27 +44,37 @@ fun ZeraNavHost(){
         }
     }
 
-    NavHost(
-        navController = navController,
-        startDestination = Route.Splash
-    ) {
-        composable<Route.Splash> {
-            SplashScreen()
-        }
-        composable<Route.Welcome>{
-            WelcomeScreen()
-        }
-        composable<Route.Login>{
-            LoginScreen()
-        }
-        composable<Route.Register>{
-            EmployeeRegisterScreen()
-        }
-        composable<Route.ManagerHome>{
-            ManagerHome()
-        }
-        composable<Route.EmployeeHome>{
-            EmployeeHome()
+    SharedTransitionLayout {
+        CompositionLocalProvider(LocalSharedTransitionScope provides this) {
+            NavHost(
+                navController = navController,
+                startDestination = Route.Splash
+            ) {
+                composable<Route.Splash> {
+                    SplashScreen()
+                }
+                composable<Route.Welcome> {
+                    CompositionLocalProvider(LocalAnimatedVisibilityScope provides this) {
+                        WelcomeScreen()
+                    }
+                }
+                composable<Route.Login> {
+                    CompositionLocalProvider(LocalAnimatedVisibilityScope provides this) {
+                        LoginScreen()
+                    }
+                }
+                composable<Route.Register> {
+                    CompositionLocalProvider(LocalAnimatedVisibilityScope provides this) {
+                        EmployeeRegisterScreen()
+                    }
+                }
+                composable<Route.ManagerHome> {
+                    ManagerHome()
+                }
+                composable<Route.EmployeeHome> {
+                    EmployeeHome()
+                }
+            }
         }
     }
 }
