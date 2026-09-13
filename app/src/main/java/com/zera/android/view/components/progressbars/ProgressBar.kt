@@ -12,8 +12,9 @@ import com.zera.android.view.theme.ZeraTheme
 /**
  * Barra de progresso linear do app.
  *
+ * @param modifier modificador externo opcional.
  * @param progress quando `null`, exibe um indicador indeterminado; caso contrário,
- * mostra o progresso atual (0f..1f).
+ *   mostra o progresso atual (0f..1f).
  */
 @Composable
 fun ProgressBar(

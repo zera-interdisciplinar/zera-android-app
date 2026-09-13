@@ -10,17 +10,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zera.android.view.components.buttons.ZeraButton
-import com.zera.android.view.components.buttons.ZeraButtonStyle
 import com.zera.android.view.components.buttons.ZeraButtonType
 import com.zera.android.view.components.inputs.ZeraInputType
 import com.zera.android.view.components.inputs.ZeraTextInput
@@ -30,11 +28,13 @@ import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.components.texts.TitleText
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
+import com.zera.android.viewmodel.auth.SingInViewModel
 
 @Composable
-fun LoginScreen() {
-    var email by rememberSaveable { mutableStateOf("") }
-    var senha by rememberSaveable { mutableStateOf("") }
+fun LoginScreen(
+    viewModel: SingInViewModel = viewModel()
+) {
+    val state by viewModel.state
 
     SplashBackground()
     Box(
@@ -51,8 +51,8 @@ fun LoginScreen() {
             ZeraTextInput(
                 label = "Email",
                 placeholder = "Seu email",
-                value = email,
-                onValueChange = { email = it },
+                value = state.email,
+                onValueChange = { viewModel.onEmailChange(it) },
                 type = ZeraInputType.Email,
                 imeAction = ImeAction.Next,
                 modifier = Modifier.padding(vertical = Spacing.medium)
@@ -60,8 +60,8 @@ fun LoginScreen() {
             ZeraTextInput(
                 label = "Senha",
                 placeholder = "Senha aqui",
-                value = senha,
-                onValueChange = { senha = it },
+                value = state.password,
+                onValueChange = { viewModel.onPasswordChange(it) },
                 type = ZeraInputType.Password,
                 imeAction = ImeAction.Done,
                 modifier = Modifier.padding(top = Spacing.medium)
@@ -74,13 +74,18 @@ fun LoginScreen() {
                 modifier = Modifier.fillMaxWidth().padding(Spacing.small),
             )
             Spacer(Modifier.height(Spacing.xLarge))
+            if (state.errorMessage != null) {
+                CaptionText(
+                    text = state.errorMessage ?: "",
+                    color = Color.Red,
+                    modifier = Modifier.padding(bottom = Spacing.small),
+                )
+            }
             Column() {
                 ZeraButton(
-                    text = "Entrar",
-
-                    onClick = {
-
-                    },
+                    text = if (state.isLoading) "Entrando..." else "Entrar",
+                    enabled = !state.isLoading,
+                    onClick = { viewModel.signIn() },
                     modifier = Modifier.padding(Spacing.small),
                     fillMaxWidth = true,
                 )

@@ -1,5 +1,7 @@
 package com.zera.android.view.components.buttons
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -14,7 +16,9 @@ import androidx.compose.ui.unit.dp
 import com.zera.android.view.components.texts.BodyText
 import com.zera.android.view.theme.Radius
 import com.zera.android.view.theme.Spacing
+import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.view.theme.ZeraTheme
+import com.zera.android.view.theme.icons.ZeraIcon
 
 /**
  * Botão padrão do app.
@@ -23,9 +27,11 @@ import com.zera.android.view.theme.ZeraTheme
  * @param onClick ação executada ao tocar no botão.
  * @param modifier modificador externo opcional.
  * @param fillMaxWidth quando `true`, o botão ocupa toda a largura disponível do container.
- * @param style família de cor do botão. Ver [ZeraButtonStyle].
+ * @param style família de cor do botão. Ver [ZeraColorFamily].
  * @param type hierarquia visual dentro do estilo. Ver [ZeraButtonType].
  * @param enabled habilita ou desabilita a interação.
+ * @param icon ícone opcional do catálogo [ZeraIcon]. Quando não for `null`, é exibido
+ *   logo ao lado do texto.
  * @param width largura fixa em dp. Quando informado, ignora [fillMaxWidth], [maxWidth] e [minWidth].
  * @param maxWidth largura máxima em dp (útil junto de [fillMaxWidth]). Ignorado se [width] for informado.
  * @param minWidth largura mínima em dp. Ignorado se [width] for informado.
@@ -36,9 +42,10 @@ fun ZeraButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     fillMaxWidth: Boolean = false,
-    style: ZeraButtonStyle = ZeraButtonStyle.Blue,
+    style: ZeraColorFamily = ZeraColorFamily.Blue,
     type: ZeraButtonType = ZeraButtonType.Primary,
     enabled: Boolean = true,
+    icon: ZeraIcon? = null,
     width: Int? = null,
     maxWidth: Int? = null,
     minWidth: Int? = null,
@@ -63,12 +70,25 @@ fun ZeraButton(
         shape = RoundedCornerShape(Radius.large),
 
     ) {
-        BodyText(
-            text = text,
-            bold = true,
-            color = content,
-            modifier = Modifier.padding(horizontal = Spacing.medium),
-        )
+        Row(
+            modifier = Modifier.padding(horizontal = Spacing.small),
+        ){
+            BodyText(
+                text = text,
+                bold = true,
+                color = content,
+                modifier = Modifier.padding(horizontal = Spacing.small)
+            )
+            if (icon != null) {
+                ZeraIcon(
+                    icon = icon,
+                    contentDescription = null,
+                    size = Spacing.large,
+                    tint = content,
+                    modifier = Modifier.padding(end = Spacing.medium),
+                )
+            }
+        }
     }
 }
 
@@ -80,7 +100,21 @@ private fun ZeraButtonPreview() {
             text = "Continuar",
             onClick = {},
             modifier = Modifier.padding(Spacing.medium),
-            style = ZeraButtonStyle.Yellow,
+            style = ZeraColorFamily.Yellow,
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun ZeraButtonWithIconPreview() {
+    ZeraTheme {
+        ZeraButton(
+            text = "Continuar",
+            onClick = {},
+            modifier = Modifier.padding(Spacing.medium),
+            style = ZeraColorFamily.Blue,
+            icon = ZeraIcon.ProceedArrow,
         )
     }
 }
@@ -93,8 +127,23 @@ private fun ZeraButtonSecondaryPreview() {
             text = "Secundário",
             onClick = {},
             fillMaxWidth = true,
-            style = ZeraButtonStyle.Yellow,
+            style = ZeraColorFamily.Yellow,
             type = ZeraButtonType.Secondary,
+            modifier = Modifier.padding(Spacing.medium),
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun ZeraButtonTertiaryPreview() {
+    ZeraTheme {
+        ZeraButton(
+            text = "Terciário",
+            onClick = {},
+            fillMaxWidth = true,
+            style = ZeraColorFamily.Yellow,
+            type = ZeraButtonType.Tertiary,
             modifier = Modifier.padding(Spacing.medium),
         )
     }
