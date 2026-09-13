@@ -6,22 +6,32 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.zera.android.view.theme.ZeraColorFamily
+import com.zera.android.view.theme.palette
 
+/** Hierarquia visual do [ZeraButton] dentro de uma [ZeraColorFamily]. */
 enum class ZeraButtonType {
     Primary,
     Secondary,
+    Tertiary,
 }
 
-/** Par (fundo, conteúdo) do [style] para o [type] escolhido. */
+/**
+ * Par (fundo, conteúdo) do [style] para o [type] escolhido.
+ *
+ * @param style família de cor. Ver [ZeraColorFamily].
+ * @param type hierarquia visual dentro do estilo. Ver [ZeraButtonType].
+ */
 @Composable
 internal fun buttonColorPair(
-    style: ZeraButtonStyle,
+    style: ZeraColorFamily,
     type: ZeraButtonType,
 ): Pair<Color, Color> {
     val palette = style.palette()
     return when (type) {
         ZeraButtonType.Primary -> palette.base to palette.onBase
         ZeraButtonType.Secondary -> palette.container to palette.onContainer
+        ZeraButtonType.Tertiary -> Color.Transparent to palette.base
     }
 }
 
@@ -30,10 +40,13 @@ internal fun buttonColorPair(
  *
  * Botões [ZeraButtonType.Secondary] recebem uma borda na cor base do [style],
  * que contrasta com o fundo (container) mais claro. Demais tipos não têm borda.
+ *
+ * @param style família de cor. Ver [ZeraColorFamily].
+ * @param type hierarquia visual dentro do estilo. Ver [ZeraButtonType].
  */
 @Composable
 internal fun buttonBorder(
-    style: ZeraButtonStyle,
+    style: ZeraColorFamily,
     type: ZeraButtonType,
 ): BorderStroke? {
     return when (type) {
@@ -42,9 +55,16 @@ internal fun buttonBorder(
     }
 }
 
+/**
+ * [ButtonColors] (fundo + conteúdo) do [style] para o [type] escolhido, prontas
+ * para o parâmetro `colors` do [androidx.compose.material3.Button].
+ *
+ * @param style família de cor. Ver [ZeraColorFamily].
+ * @param type hierarquia visual dentro do estilo. Ver [ZeraButtonType].
+ */
 @Composable
 internal fun buttonColors(
-    style: ZeraButtonStyle,
+    style: ZeraColorFamily,
     type: ZeraButtonType,
 ): ButtonColors {
     val (container, content) = buttonColorPair(style, type)

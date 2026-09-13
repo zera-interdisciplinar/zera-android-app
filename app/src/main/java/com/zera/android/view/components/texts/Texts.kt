@@ -20,6 +20,27 @@ import androidx.compose.ui.unit.sp
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
 
+/*
+ * Família de componentes de texto do app. Cada função fixa um papel do type scale
+ * (Material 3) e uma cor padrão; os demais parâmetros são comuns e encaminhados
+ * para o [Text] subjacente (ver `BaseText`).
+ *
+ * Parâmetros compartilhados por todos:
+ *
+ * @param text conteúdo textual a exibir.
+ * @param modifier modificador externo opcional.
+ * @param color cor do texto (o padrão varia por componente).
+ * @param alpha opacidade multiplicada sobre a [color], de 0f (transparente) a 1f (opaco).
+ * @param textAlign alinhamento horizontal do texto; `null` mantém o padrão do layout.
+ * @param maxLines número máximo de linhas antes de aplicar [overflow].
+ * @param overflow tratamento visual quando o texto excede [maxLines] (cortar, reticências...).
+ * @param bold quando `true`, aplica peso negrito.
+ * @param italic quando `true`, aplica estilo itálico.
+ * @param underline quando `true`, adiciona sublinhado.
+ * @param onClick quando não `null`, torna o texto clicável e executa esta ação ao toque.
+ */
+
+/** Título de tela ou destaque principal. Mapeia para `headlineLarge` + `primary`. */
 @Composable
 fun HeadlineText(
     text: String,
@@ -48,7 +69,7 @@ fun HeadlineText(
     onClick = onClick,
 )
 
-/** Título de seção ou card. Mapeia para `titleLarge`. */
+/** Título de seção ou card. Mapeia para `titleLarge` + `primary`. */
 @Composable
 fun TitleText(
     text: String,
@@ -106,7 +127,7 @@ fun SubtitleText(
     onClick = onClick,
 )
 
-/** Texto corrido / parágrafos. Mapeia para `bodyLarge`. */
+/** Texto corrido / parágrafos. Mapeia para `bodyLarge` + `primary`. */
 @Composable
 fun BodyText(
     text: String,
@@ -135,7 +156,11 @@ fun BodyText(
     onClick = onClick,
 )
 
-/** Rótulo de campo, botão ou chip. Mapeia para `labelLarge`. */
+/**
+ * Rótulo de campo, botão ou chip. Mapeia para `labelLarge` + `onSurfaceVariant`.
+ *
+ * Diferente dos demais, o padrão é 1 linha com reticências no overflow.
+ */
 @Composable
 fun LabelText(
     text: String,
@@ -195,7 +220,9 @@ fun CaptionText(
 
 /**
  * Texto pequeno em caixa alta acima de um título (padrão Material clássico "overline").
- * Mapeia para `labelSmall` + espaçamento entre letras; o texto é convertido para maiúsculas.
+ * Mapeia para `labelSmall` + espaçamento entre letras; o [text] é convertido para maiúsculas.
+ *
+ * Assim como [LabelText], o padrão é 1 linha com reticências no overflow.
  */
 @Composable
 fun OverlineText(
@@ -225,7 +252,22 @@ fun OverlineText(
     onClick = onClick,
 )
 
-/** Base compartilhada: um `Text` com estilo fixo e os parâmetros comuns encaminhados. */
+/**
+ * Base compartilhada: um [Text] com [style] fixo e os parâmetros comuns encaminhados.
+ *
+ * @param text conteúdo textual a exibir.
+ * @param style papel do type scale aplicado (definido por cada componente público).
+ * @param modifier modificador externo opcional.
+ * @param color cor do texto.
+ * @param alpha opacidade multiplicada sobre a [color], de 0f a 1f.
+ * @param textAlign alinhamento horizontal do texto; `null` mantém o padrão do layout.
+ * @param maxLines número máximo de linhas antes de aplicar [overflow].
+ * @param overflow tratamento visual quando o texto excede [maxLines].
+ * @param bold quando `true`, aplica peso negrito.
+ * @param italic quando `true`, aplica estilo itálico.
+ * @param underline quando `true`, adiciona sublinhado.
+ * @param onClick quando não `null`, torna o texto clicável e executa esta ação ao toque.
+ */
 @Composable
 private fun BaseText(
     text: String,
