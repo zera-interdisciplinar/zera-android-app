@@ -61,14 +61,14 @@ fun EmployeeRegisterScreen(){
                 value = email,
                 label = "Email",
                 placeholder = "Seu email",
-                onValueChange = { name = it },
+                onValueChange = { email = it },
                 type = ZeraInputType.Email
             )
             ZeraTextInput(
                 value = password,
                 label = "Senha",
                 placeholder = "Senha aqui",
-                onValueChange = { name = it },
+                onValueChange = { password = it },
                 type = ZeraInputType.Password
             )
             ZeraTokenInput(
