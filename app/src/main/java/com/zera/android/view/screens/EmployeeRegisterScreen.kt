@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zera.android.view.components.buttons.ZeraButton
+import com.zera.android.view.components.inputs.ZeraInputType
 import com.zera.android.view.components.inputs.ZeraTextInput
 import com.zera.android.view.components.inputs.ZeraTokenInput
 import com.zera.android.view.components.logo.Logo
@@ -33,6 +34,8 @@ import com.zera.android.view.theme.ZeraTheme
 fun EmployeeRegisterScreen(){
     var token by rememberSaveable { mutableStateOf("") }
     var name by rememberSaveable { mutableStateOf("") }
+    var email by rememberSaveable { mutableStateOf("") }
+    var password by rememberSaveable { mutableStateOf("") }
     SplashBackground()
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -53,6 +56,20 @@ fun EmployeeRegisterScreen(){
                 label = "Nome",
                 placeholder = "Insira seu nome aqui",
                 onValueChange = { name = it }
+            )
+            ZeraTextInput(
+                value = email,
+                label = "Email",
+                placeholder = "Seu email",
+                onValueChange = { name = it },
+                type = ZeraInputType.Email
+            )
+            ZeraTextInput(
+                value = password,
+                label = "Senha",
+                placeholder = "Senha aqui",
+                onValueChange = { name = it },
+                type = ZeraInputType.Password
             )
             ZeraTokenInput(
                 value = token,
