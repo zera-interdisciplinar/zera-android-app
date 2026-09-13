@@ -1,4 +1,4 @@
-package com.zera.android.view.screens
+package com.zera.android.view.screens.auth
 
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -29,6 +29,8 @@ import com.zera.android.view.components.outros.SplashBackground
 import com.zera.android.view.components.texts.TitleText
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
+import com.zera.android.view.transition.SharedElementKeys
+import com.zera.android.view.transition.sharedTransition
 
 @Composable
 fun EmployeeRegisterScreen(){
@@ -48,7 +50,7 @@ fun EmployeeRegisterScreen(){
             modifier = Modifier.padding(horizontal = Spacing.xLarge)
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally){
-                Logo(Modifier.width(250.dp).padding(bottom = Spacing.small))
+                Logo(Modifier.sharedTransition(SharedElementKeys.Logo).width(250.dp).padding(bottom = Spacing.small))
                 TitleText("Cadastrar funcionario", bold = true)
             }
             ZeraTextInput(
