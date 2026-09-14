@@ -5,13 +5,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.zera.android.view.theme.ZeraTheme
 
 @Composable
-fun EmployeeHome() {
+fun EmployeeHomeScreen() {
 
 }
 
 @Composable
 @Preview
-fun EmployeeHomePreview() {
+fun EmployeeHomeScreenPreview() {
     ZeraTheme(){
 
     }
