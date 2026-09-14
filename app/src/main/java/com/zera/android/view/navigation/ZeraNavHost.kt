@@ -61,7 +61,9 @@ fun ZeraNavHost(){
                 startDestination = Route.Splash
             ) {
                 composable<Route.Splash> {
-                    SplashScreen()
+                    CompositionLocalProvider(LocalAnimatedVisibilityScope provides this) {
+                        SplashScreen()
+                    }
                 }
                 composable<Route.Welcome> {
                     CompositionLocalProvider(LocalAnimatedVisibilityScope provides this) {
