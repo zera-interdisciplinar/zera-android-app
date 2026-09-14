@@ -58,7 +58,7 @@ fun ZeraNavHost(){
                         WelcomeScreen()
                     }
                 }
-                composable<Route.Login> {
+                composable<Route.SignIn> {
                     CompositionLocalProvider(LocalAnimatedVisibilityScope provides this) {
                         LoginScreen()
                     }
