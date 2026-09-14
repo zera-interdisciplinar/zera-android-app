@@ -11,7 +11,7 @@ sealed interface Route{
     data object Welcome : Route
 
     @Serializable
-    data object Login : Route
+    data object SignIn : Route
 
     @Serializable
     data object Register : Route

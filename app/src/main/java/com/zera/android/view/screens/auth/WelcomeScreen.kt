@@ -47,7 +47,7 @@ fun WelcomeScreen(){
                     fillMaxWidth = true,
                     maxWidth = 200,
                     onClick = {
-                        ZeraNavigator.push(Route.Login)
+                        ZeraNavigator.push(Route.SignIn)
                     }
                 )
                 Spacer(Modifier.height(Spacing.small))
