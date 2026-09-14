@@ -16,11 +16,11 @@ object ZeraNavigator {
         _commands.trySend(NavCommand.GoBack)
     }
 
-    /**
-     * Navega para [route] e remove a tela atual da pilha, impedindo que o usuário
-     * volte para ela. Ver [NavCommand.PushAndPop].
-     */
     fun pushAndPop(route: Route){
         _commands.trySend(NavCommand.PushAndPop(route))
+    }
+
+    fun pushAndPopAll(route: Route){
+        _commands.trySend(NavCommand.PushAndPopAll(route))
     }
 }
