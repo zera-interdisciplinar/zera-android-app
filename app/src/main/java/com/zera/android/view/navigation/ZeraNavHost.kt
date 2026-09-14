@@ -39,6 +39,16 @@ fun ZeraNavHost(){
                     }
                 }
 
+                is NavCommand.PushAndPopAll -> {
+                    // Limpa a pilha inteira (todas as telas anteriores, incluindo a
+                    // de início), então a nova rota fica sozinha na pilha.
+                    navController.navigate(command.route) {
+                        popUpTo(navController.graph.id) {
+                            inclusive = true
+                        }
+                    }
+                }
+
                 NavCommand.GoBack -> navController.popBackStack()
             }
         }
