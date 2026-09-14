@@ -5,7 +5,7 @@ import androidx.compose.ui.graphics.Color
 val White100 = Color(0xFFFFFFFF)
 
 // Shades of Red
-val PastelRed85 = Color(0xFFFFB2B2)
+val PastelRed85 = Color(0xFFFDE3DE)
 val DarkRed40 = Color(0xFFB43119)
 val Red50 = Color(0xFFEC401D)
 
