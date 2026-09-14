@@ -57,7 +57,7 @@ fun WelcomeScreen(){
                     type = ZeraButtonType.Secondary,
                     fillMaxWidth = true,
                     onClick = {
-                        ZeraNavigator.push(Route.Register)
+                        ZeraNavigator.push(Route.SignUp)
                     }
                 )
             }
