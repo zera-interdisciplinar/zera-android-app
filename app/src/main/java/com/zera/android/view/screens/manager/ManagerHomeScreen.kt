@@ -15,16 +15,16 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zera.android.view.components.buttons.IconButton
 import com.zera.android.view.components.cards.ShortcutCard
 import com.zera.android.view.components.cards.StockOccupationCard
-import com.zera.android.view.components.lists.NotificationItem
 import com.zera.android.view.components.lists.NotificationList
-import com.zera.android.view.components.lists.ProductItem
 import com.zera.android.view.components.lists.ProductList
 import com.zera.android.view.components.navigation.BottomNavBar
 import com.zera.android.view.components.navigation.UpperNavBar
@@ -34,31 +34,15 @@ import com.zera.android.view.components.texts.LabelText
 import com.zera.android.view.components.texts.TitleText
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.theme.Spacing
-import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.view.theme.ZeraTheme
 import com.zera.android.view.theme.icons.ZeraIcon
+import com.zera.android.viewmodel.manager.ManagerHomeViewModel
 
 @Composable
-fun ManagerHome() {
-    // TODO: substituir pelos dados vindos do back
-    val notifications = listOf(
-        NotificationItem(
-            id = "1",
-            label = "5 produtos sem classificação",
-            text = "Aguardando revisão do gestor",
-            style = ZeraColorFamily.Yellow,
-        ),
-        NotificationItem(
-            id = "2",
-            label = "Material reciclável em rota incorreta",
-            text = "Verifique a ocorrência registrada",
-            style = ZeraColorFamily.Red,
-        ),
-    )
-    val latestProducts = listOf(
-        ProductItem(id = "265964", name = "Placa de vídeo"),
-        ProductItem(id = "118203", name = "Teclado mecânico", icon = ZeraIcon.Box),
-    )
+fun ManagerHomeScreen(
+    viewModel: ManagerHomeViewModel = viewModel()
+) {
+    val state by viewModel.state
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.surface,
@@ -97,11 +81,11 @@ fun ManagerHome() {
             verticalArrangement = Arrangement.spacedBy(Spacing.medium),
         ) {
             Column(modifier = Modifier.padding(horizontal = Spacing.small)) {
-                BodyText(text = "Natalia Flores", bold = true)
-                CaptionText(text = "Gestor")
+                BodyText(text = state.userName, bold = true)
+                CaptionText(text = state.userRole)
             }
 
-            StockOccupationCard(itemCount = 300, occupation = 0.6f)
+            StockOccupationCard(itemCount = state.stockItemCount, occupation = state.stockOccupation)
 
             TitleText(
                 text = "Resumo geral",
@@ -111,14 +95,14 @@ fun ManagerHome() {
             Row(horizontalArrangement = Arrangement.spacedBy(Spacing.medium)) {
                 ShortcutCard(
                     label = "Itens",
-                    value = "1.230",
+                    value = state.totalItems,
                     labelIcon = ZeraIcon.Box,
                     onClick = { /* TODO: navegar para itens */ },
                     modifier = Modifier.weight(1f),
                 )
                 ShortcutCard(
                     label = "Funcionários",
-                    value = "43",
+                    value = state.totalEmployees,
                     labelIcon = ZeraIcon.Group,
                     onClick = { /* TODO: navegar para funcionários */ },
                     modifier = Modifier.weight(1f),
@@ -131,7 +115,7 @@ fun ManagerHome() {
                 color = MaterialTheme.colorScheme.onSurface,
             )
             NotificationList(
-                notifications = notifications,
+                notifications = state.notifications,
                 onItemClick = { /* TODO: abrir alerta */ },
                 contentPadding = PaddingValues(Spacing.none),
                 modifier = Modifier.heightIn(max = 400.dp),
@@ -155,7 +139,7 @@ fun ManagerHome() {
                 )
             }
             ProductList(
-                products = latestProducts,
+                products = state.latestProducts,
                 onItemClick = { /* TODO: abrir item */ },
                 contentPadding = PaddingValues(Spacing.none),
                 modifier = Modifier.heightIn(max = 400.dp),
@@ -166,8 +150,8 @@ fun ManagerHome() {
 
 @Composable
 @Preview(heightDp = 900)
-fun ManagerHomePreview() {
+fun ManagerHomeScreenPreview() {
     ZeraTheme {
-        ManagerHome()
+        ManagerHomeScreen()
     }
 }
