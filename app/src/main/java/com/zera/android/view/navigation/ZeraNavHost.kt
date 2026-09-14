@@ -9,8 +9,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.zera.android.view.screens.auth.EmployeeRegisterScreen
-import com.zera.android.view.screens.auth.LoginScreen
+import com.zera.android.view.screens.auth.SignInScreen
+import com.zera.android.view.screens.auth.SignUpScreen
 import com.zera.android.view.screens.SplashScreen
 import com.zera.android.view.screens.auth.WelcomeScreen
 import com.zera.android.view.screens.employee.EmployeeHome
@@ -60,12 +60,12 @@ fun ZeraNavHost(){
                 }
                 composable<Route.SignIn> {
                     CompositionLocalProvider(LocalAnimatedVisibilityScope provides this) {
-                        LoginScreen()
+                        SignInScreen()
                     }
                 }
-                composable<Route.Register> {
+                composable<Route.SignUp> {
                     CompositionLocalProvider(LocalAnimatedVisibilityScope provides this) {
-                        EmployeeRegisterScreen()
+                        SignUpScreen()
                     }
                 }
                 composable<Route.ManagerHome> {

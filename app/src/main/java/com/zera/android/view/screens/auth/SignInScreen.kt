@@ -32,7 +32,7 @@ import com.zera.android.view.transition.sharedTransition
 import com.zera.android.viewmodel.auth.SingInViewModel
 
 @Composable
-fun LoginScreen(
+fun SignInScreen(
     viewModel: SingInViewModel = viewModel()
 ) {
     val state by viewModel.state
@@ -97,8 +97,8 @@ fun LoginScreen(
 
 @Composable
 @Preview
-fun LoginScreenPreview(){
+fun SignInScreenPreview(){
     ZeraTheme() {
-        LoginScreen()
+        SignInScreen()
     }
 }
