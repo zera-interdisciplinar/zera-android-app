@@ -1,4 +1,4 @@
-package com.zera.android.view.screens
+package com.zera.android.view.screens.auth
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,13 +16,14 @@ import com.zera.android.view.components.buttons.ZeraButton
 import com.zera.android.view.components.buttons.ZeraButtonType
 import com.zera.android.view.components.logo.Logo
 import com.zera.android.view.components.outros.SplashBackground
-import com.zera.android.view.components.texts.LabelText
 import com.zera.android.view.components.texts.TitleText
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.view.theme.ZeraTheme
+import com.zera.android.view.transition.SharedElementKeys
+import com.zera.android.view.transition.sharedTransition
 
 @Composable
 fun WelcomeScreen(){
@@ -35,7 +36,7 @@ fun WelcomeScreen(){
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.padding(horizontal = Spacing.xLarge)
         ) {
-            Logo(Modifier.width(250.dp).padding(bottom = Spacing.small))
+            Logo(Modifier.sharedTransition(SharedElementKeys.Logo).width(250.dp).padding(bottom = Spacing.small))
             TitleText(text = "Bem vindo!", bold = true)
             Spacer(Modifier.height(Spacing.huge))
             Column() {
@@ -45,7 +46,7 @@ fun WelcomeScreen(){
                     fillMaxWidth = true,
                     maxWidth = 200,
                     onClick = {
-                        ZeraNavigator.push(Route.Login)
+                        ZeraNavigator.push(Route.SignIn)
                     }
                 )
                 Spacer(Modifier.height(Spacing.small))
@@ -55,7 +56,7 @@ fun WelcomeScreen(){
                     type = ZeraButtonType.Secondary,
                     fillMaxWidth = true,
                     onClick = {
-                        ZeraNavigator.push(Route.Register)
+                        ZeraNavigator.push(Route.SignUp)
                     }
                 )
             }
