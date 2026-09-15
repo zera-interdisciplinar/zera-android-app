@@ -1,6 +1,5 @@
-package com.zera.android.view.screens
+package com.zera.android.view.screens.auth
 
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -8,14 +7,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -29,13 +24,16 @@ import com.zera.android.view.components.outros.SplashBackground
 import com.zera.android.view.components.texts.TitleText
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
+import com.zera.android.view.transition.SharedElementKeys
+import com.zera.android.view.transition.sharedTransition
+import com.zera.android.viewmodel.auth.SignUpViewModel
 
 @Composable
-fun EmployeeRegisterScreen(){
-    var token by rememberSaveable { mutableStateOf("") }
-    var name by rememberSaveable { mutableStateOf("") }
-    var email by rememberSaveable { mutableStateOf("") }
-    var password by rememberSaveable { mutableStateOf("") }
+fun SignUpScreen(
+    viewModel: SignUpViewModel = viewModel()
+) {
+    val state by viewModel.state
+
     SplashBackground()
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -48,32 +46,32 @@ fun EmployeeRegisterScreen(){
             modifier = Modifier.padding(horizontal = Spacing.xLarge)
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally){
-                Logo(Modifier.width(250.dp).padding(bottom = Spacing.small))
+                Logo(Modifier.sharedTransition(SharedElementKeys.Logo).width(250.dp).padding(bottom = Spacing.small))
                 TitleText("Cadastrar funcionario", bold = true)
             }
             ZeraTextInput(
-                value = name,
+                value = state.name,
                 label = "Nome",
                 placeholder = "Insira seu nome aqui",
-                onValueChange = { name = it }
+                onValueChange = { viewModel.onNameChange(it) }
             )
             ZeraTextInput(
-                value = email,
+                value = state.email,
                 label = "Email",
                 placeholder = "Seu email",
-                onValueChange = { email = it },
+                onValueChange = { viewModel.onEmailChange(it) },
                 type = ZeraInputType.Email
             )
             ZeraTextInput(
-                value = password,
+                value = state.password,
                 label = "Senha",
                 placeholder = "Senha aqui",
-                onValueChange = { password = it },
+                onValueChange = { viewModel.onPasswordChange(it) },
                 type = ZeraInputType.Password
             )
             ZeraTokenInput(
-                value = token,
-                onValueChange = { token = it },
+                value = state.token,
+                onValueChange = { viewModel.onTokenChange(it) },
                 label = "Código de convite",
                 onFilled = {},
             )
@@ -82,7 +80,7 @@ fun EmployeeRegisterScreen(){
         Box{
             ZeraButton(
                 text = "Entrar",
-                onClick = {}
+                onClick = { viewModel.signUp() }
             )
         }
 
@@ -92,8 +90,8 @@ fun EmployeeRegisterScreen(){
 
 @Composable
 @Preview
-fun EmployeeRegisterScreenPreview(){
+fun SignUpScreenPreview(){
     ZeraTheme() {
-        EmployeeRegisterScreen()
+        SignUpScreen()
     }
 }

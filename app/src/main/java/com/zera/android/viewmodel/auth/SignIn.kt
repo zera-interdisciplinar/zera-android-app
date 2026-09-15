@@ -57,7 +57,7 @@ class SingInViewModel : ViewModel() {
                     // default to login screen
                     else -> {
                         _state.value = _state.value.copy(isLoading = false, errorMessage = "Invalid role")
-                        ZeraNavigator.pushAndPop(Route.Login)
+                        ZeraNavigator.pushAndPop(Route.SignIn)
                     }
                 }
             } catch (e: Exception) {

@@ -1,4 +1,4 @@
-package com.zera.android.view.screens
+package com.zera.android.view.screens.auth
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,7 +19,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zera.android.view.components.buttons.ZeraButton
-import com.zera.android.view.components.buttons.ZeraButtonType
 import com.zera.android.view.components.inputs.ZeraInputType
 import com.zera.android.view.components.inputs.ZeraTextInput
 import com.zera.android.view.components.logo.Logo
@@ -28,10 +27,12 @@ import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.components.texts.TitleText
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
+import com.zera.android.view.transition.SharedElementKeys
+import com.zera.android.view.transition.sharedTransition
 import com.zera.android.viewmodel.auth.SingInViewModel
 
 @Composable
-fun LoginScreen(
+fun SignInScreen(
     viewModel: SingInViewModel = viewModel()
 ) {
     val state by viewModel.state
@@ -45,7 +46,7 @@ fun LoginScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.padding(horizontal = Spacing.xLarge)
         ) {
-            Logo(Modifier.width(250.dp).padding(bottom = Spacing.small))
+            Logo(Modifier.sharedTransition(SharedElementKeys.Logo).width(250.dp).padding(bottom = Spacing.small))
             TitleText(text = "Bem vindo!", bold = true)
             Spacer(Modifier.height(Spacing.medium))
             ZeraTextInput(
@@ -96,8 +97,8 @@ fun LoginScreen(
 
 @Composable
 @Preview
-fun LoginScreenPreview(){
+fun SignInScreenPreview(){
     ZeraTheme() {
-        LoginScreen()
+        SignInScreen()
     }
 }
