@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.zera.android.view.components.texts.BodyText
 import com.zera.android.view.theme.Spacing
+import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.view.theme.ZeraTheme
 import com.zera.android.view.theme.icons.ZeraIcon
 
@@ -24,11 +25,16 @@ import com.zera.android.view.theme.icons.ZeraIcon
  * @param name nome do produto.
  * @param icon ícone do catálogo [ZeraIcon] exibido no item. Quando `null`, o
  *   [ProductListItem] usa seu ícone padrão.
+ * @param statusText texto curto de status (ex.: "Pendente"). Quando não `null`,
+ *   o item exibe uma tag de status em vez da seta de "avançar".
+ * @param statusStyle família de cor da tag de status. Só tem efeito quando [statusText] não é `null`.
  */
 data class ProductItem(
     val id: String,
     val name: String,
     val icon: ZeraIcon? = null,
+    val statusText: String? = null,
+    val statusStyle: ZeraColorFamily = ZeraColorFamily.Yellow,
 )
 
 /**
@@ -76,6 +82,8 @@ fun ProductList(
                 itemName = product.name,
                 itemId = product.id,
                 icon = product.icon,
+                statusText = product.statusText,
+                statusStyle = product.statusStyle,
                 onClick = { onItemClick(product) },
             )
         }
