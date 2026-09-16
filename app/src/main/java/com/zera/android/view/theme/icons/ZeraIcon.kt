@@ -40,6 +40,7 @@ enum class ZeraIcon(@DrawableRes val resId: Int) {
     RightArrow(R.drawable.right_arrow),
     LeftUTurn(R.drawable.left_u_turn),
     Location(R.drawable.location),
+    MagnifyingGlass(R.drawable.magnifying_glass),
     Megaphone(R.drawable.megaphone),
     Placeholder(R.drawable.placeholder),
     Plus(R.drawable.plus),
