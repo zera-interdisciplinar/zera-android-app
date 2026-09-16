@@ -37,7 +37,11 @@ import com.zera.android.view.theme.icons.ZeraIcon
  * @param modifier modificador externo opcional, aplicado ao [Scaffold].
  * @param fabIcon ícone do botão flutuante. Quando `null`, nenhum FAB é exibido.
  * @param onFabClick ação do botão flutuante. Só é usada quando [fabIcon] não for `null`.
- * @param content conteúdo da tela, desenhado dentro da [Column] rolável do Scaffold.
+ * @param scrollable quando `true` (padrão), a [Column] do conteúdo rola inteira. Use
+ *   `false` quando [content] já tiver seu próprio elemento rolável (ex.: uma lista longa
+ *   em [com.zera.android.view.components.lists.ProductList] com `Modifier.weight(1f)`) —
+ *   caso contrário, um `LazyColumn` dentro de uma `Column` rolável quebra em tempo de execução.
+ * @param content conteúdo da tela, desenhado dentro da [Column] do Scaffold.
  */
 @Composable
 fun ManagerScaffold(
@@ -45,6 +49,7 @@ fun ManagerScaffold(
     modifier: Modifier = Modifier,
     fabIcon: ZeraIcon? = ZeraIcon.Chatbot,
     onFabClick: () -> Unit = {},
+    scrollable: Boolean = true,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Scaffold(
@@ -82,7 +87,7 @@ fun ManagerScaffold(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .verticalScroll(rememberScrollState())
+                .then(if (scrollable) Modifier.verticalScroll(rememberScrollState()) else Modifier)
                 .padding(horizontal = Spacing.medium, vertical = Spacing.small),
             verticalArrangement = Arrangement.spacedBy(Spacing.medium),
             content = content,
