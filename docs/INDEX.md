@@ -20,7 +20,7 @@ Esta pasta é a fonte de verdade técnica do app Android do Zera, seguindo prát
 
 ## 2. Guia de leitura por tipo de tarefa
 
-Ver [10-fluxos-de-trabalho.md](10-fluxos-de-trabalho.md) — cobre criação de tela, criação/ajuste de componente do Design System, alteração de regra de negócio, integração de endpoint, adição de dependência, correção de bug, criação de domínio novo e mudanças de navegação, cada um com o que checar antes/durante e os gatilhos para parar e perguntar ao usuário em vez de decidir sozinho.
+Ver [10-fluxos-de-trabalho.md](10-fluxos-de-trabalho.md) — cobre criação de tela, criação/ajuste de componente do Design System, alteração de regra de negócio, integração de endpoint, adição de dependência, correção de bug, criação de domínio novo, mudanças de navegação e atualização da documentação a partir do diff da branch, cada um com o que checar antes/durante e os gatilhos para parar e perguntar ao usuário em vez de decidir sozinho.
 
 ## 3. Regra de atualização da documentação
 
