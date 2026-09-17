@@ -57,6 +57,6 @@ Como Funcionário convidado, quero me cadastrar informando meu nome, email, senh
 
 ## Referências
 
-- Regras de negócio: [../05-regras-de-negocio/](../05-regras-de-negocio/) (ainda não escritas para o domínio de autenticação)
+- Regras de negócio: `../05-regras-de-negocio/` (ainda não escritas para o domínio de autenticação)
 - Contratos de API: [../06-contratos-api.md](../06-contratos-api.md), seção "Autenticação (AuthService)"
 - Padrões de `ViewModel`/`State`: [../02-padroes-e-convencoes.md](../02-padroes-e-convencoes.md), seção "Convenções de ViewModel e State"

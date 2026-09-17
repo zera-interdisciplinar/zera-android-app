@@ -59,7 +59,7 @@ Como Gestor, quero ver um resumo do estoque, dos alertas pendentes e dos último
 ## Fora de escopo desta spec
 
 - Telas de destino dos atalhos (Itens, Funcionários, listagem completa de produtos, chatbot) — cada uma terá spec própria quando implementada.
-- Cálculo/regra de negócio por trás da ocupação de estoque e dos alertas — pertence a [../05-regras-de-negocio/](../05-regras-de-negocio/) quando o domínio de inventário for especificado.
+- Cálculo/regra de negócio por trás da ocupação de estoque e dos alertas — pertence a `../05-regras-de-negocio/` quando o domínio de inventário for especificado.
 
 ## Referências
 
