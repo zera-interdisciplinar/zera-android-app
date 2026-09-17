@@ -71,6 +71,6 @@ Como usuário cadastrado (Funcionário ou Gestor), quero entrar com meu email e 
 
 ## Referências
 
-- Regras de negócio: [../05-regras-de-negocio/](../05-regras-de-negocio/) (ainda não escritas para o domínio de autenticação)
+- Regras de negócio: `../05-regras-de-negocio/` (ainda não escritas para o domínio de autenticação)
 - Contratos de API: [../06-contratos-api.md](../06-contratos-api.md), seção "Autenticação (AuthService)"
 - Arquitetura / navegação: [../01-arquitetura.md](../01-arquitetura.md), seção "Navegação"

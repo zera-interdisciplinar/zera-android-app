@@ -137,6 +137,24 @@ E termina com **Ao terminar**, lembrando quais docs sugerir atualizar (ver regra
 
 **Ao terminar:** se a mudança contradiz uma decisão registrada no ADR-0001, criar um **novo ADR** que a substitui — não reescrever o ADR-0001 (decisões antigas não são apagadas, ficam registradas com seu contexto histórico).
 
+## 9. Atualizar a documentação a partir do que foi implementado
+
+**Antes de começar**
+- Quando o usuário pedir para atualizar a documentação sem listar exatamente o que mudou (ex.: "atualiza a doc com o que fizemos nessa branch", "documenta essas mudanças"), **não confie na memória da conversa nem em suposições** — confira o diff real da branch.
+- **O diff tem que ser o da branch inteira contra a branch base, não o working tree.** `git diff` sozinho só mostra mudanças não commitadas — é cego a tudo que já foi commitado na branch. Use algo como `git diff main...HEAD` (a notação `...` já compara contra o ponto onde a branch divergiu de `main`, via merge-base), não `git diff main HEAD` (que compara as duas pontas diretamente e pode incluir mudanças de `main` que não são desta branch).
+- Se não estiver claro qual é a branch base (nem sempre é `main`), confirme com o usuário antes de gerar o diff.
+
+**Durante**
+- Para cada arquivo alterado no diff, identifique o tipo de mudança e aplique o item correspondente deste mesmo documento para decidir o que precisa de atualização (tela nova → itens 1/2; regra de negócio → item 3; endpoint/contrato → item 4; dependência → item 5; navegação → item 8; etc.).
+- Baseie o conteúdo da atualização no que o diff mostra de fato — não generalize a partir de nome de arquivo ou mensagem de commit sem olhar o código alterado.
+
+**Quando envolver o usuário**
+- Sempre antes de aplicar a edição na documentação (regra geral da seção 3 do [INDEX.md](INDEX.md)) — o mapeamento diff → docs pode ser feito sozinho, mas a escrita final é proposta, não aplicada sem confirmação.
+- O diff cobre uma feature sem spec/regra correspondente ainda — perguntar se cria a spec/regra do zero (a partir dos templates em `07-especificacoes/template-spec.md` / `05-regras-de-negocio/template-regra-negocio.md`) ou só sinaliza a lacuna.
+- O diff mistura mudanças de mais de uma feature/tarefa — confirmar se a atualização deve cobrir tudo de uma vez ou ser dividida.
+
+**Ao terminar:** garantir que os documentos listados na regra de atualização (seção 3 do [INDEX.md](INDEX.md)) foram cobertos.
+
 ## Quando em dúvida, pare e pergunte
 
 Resumo dos gatilhos que se repetem acima:
@@ -147,3 +165,4 @@ Resumo dos gatilhos que se repetem acima:
 - Corrigir uma inconsistência já registrada em `02-padroes-e-convencoes.md` como parte de uma tarefa não relacionada a ela.
 - Decisão que merece um ADR (nova dependência estrutural, mudança de padrão arquitetural).
 - Modelagem de dados para um domínio ainda não implementado.
+- Branch base incerta ao gerar o diff para uma atualização de documentação.
