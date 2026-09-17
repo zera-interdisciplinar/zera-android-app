@@ -89,11 +89,13 @@ Arquivo: `view/components/cards/`.
 - **`ShortcutCard(label, value, onClick, modifier, labelIcon, enabled)`** — atalho clicável: rótulo + valor em destaque + seta. `value` já vem formatado como string pelo chamador.
 - **`StockOccupationCard(itemCount, occupation, modifier)`** — card de destaque com total de itens e um `ZeraBox` circular com a porcentagem de ocupação (`occupation` de `0f` a `1f`).
 - **`Notification(label, text, modifier, style, redirect)`** — card de alerta/notificação; `redirect` opcional adiciona a ação "Resolver agora →".
+- **`ItemSummaryCard(itemId, itemName, itemSubtitle, statusText, modifier, icon, statusStyle)`** — card de destaque no topo de uma tela de detalhe de item: miniatura à esquerda ("ID {itemId}" + nome + subtítulo) e uma `Tag` de status à direita; composto sobre `ZeraBox(style = ZeraColorFamily.Blue)`.
 
 ```kotlin
 ShortcutCard(label = "Itens", value = state.totalItems, labelIcon = ZeraIcon.Box, onClick = { /* navegar */ })
 StockOccupationCard(itemCount = 300, occupation = 0.6f)
 Notification(label = "Recusado pelo gestor", text = "Chip controlador", style = ZeraColorFamily.Red)
+ItemSummaryCard(itemId = "265964", itemName = "Placa de vídeo", itemSubtitle = "Notebook Mac", statusText = "Em aprovação")
 ```
 
 ## Listas
@@ -103,17 +105,19 @@ Arquivo: `view/components/lists/`.
 - **`NotificationItem(id, label, text, style)`** + **`NotificationList(notifications, modifier, onItemClick, contentPadding, emptyContent)`** — lista rolável de `Notification`; ocupa só a altura do conteúdo (use `Modifier.heightIn(max = ...)` dentro de um container que já rola).
 - **`ProductItem(id, name, icon)`** + **`ProductList(products, onItemClick, modifier, contentPadding, emptyContent)`** — lista rolável de `ProductListItem`.
 - **`ProductListItem(itemName, itemId, onClick, modifier, icon)`** — item individual (ícone + nome + ID + seta); reutilizável fora de `ProductList`.
+- **`EditableFieldRow(label, value, modifier, onEditClick)`** — linha de detalhe de campo (rótulo + valor em negrito + lápis de editar opcional à direita); usada em telas de detalhe (ex.: "Detalhes do Item"), diferente de `ProductListItem` (que representa um item de lista de produtos). `onEditClick = null` (padrão) esconde o lápis.
 
 ```kotlin
 NotificationList(notifications = state.notifications, onItemClick = { /* abrir alerta */ }, modifier = Modifier.heightIn(max = 400.dp))
 ProductList(products = state.latestProducts, onItemClick = { /* abrir item */ })
+EditableFieldRow(label = "Categoria", value = state.category, onEditClick = { viewModel.onEditClick() })
 ```
 
 ## Navegação (componentes visuais)
 
 Arquivo: `view/components/navigation/`. Estes componentes são **apenas visuais** — não conhecem `Route` nem `ZeraNavigator` diretamente (exceção: `BottomNavBar`, que já recebe `Route` para destacar o item ativo, mas ainda não dispara navegação real — ver "Inconsistências conhecidas" em [02-padroes-e-convencoes.md](02-padroes-e-convencoes.md)).
 
-- **`UpperNavBar(title, modifier, goBack)`** — barra superior com título e (opcional) botão "Voltar"; ações de notificação/perfil ainda são `TODO`.
+- **`UpperNavBar(title, modifier, goBack, onBackClick)`** — barra superior com título e (opcional) botão "Voltar", que já dispara `onBackClick`; ações de notificação/perfil ainda são `TODO`.
 - **`BottomNavBar(modifier, currentRoute)`** — barra inferior com 4 atalhos + botão central de escanear (`ZeraIcon.QrCode`); usa `ShortCutButton` internamente.
 - **`ManagerScaffold(title, modifier, fabIcon, onFabClick, content: @Composable ColumnScope.() -> Unit)`** (em `view/screens/manager/ManagerScaffold.kt`, não em `view/components/` — é específico das telas do Gestor) — casca compartilhada com `UpperNavBar` + `Column` rolável + `BottomNavBar` fixado em `Route.ManagerHome` + FAB de assistente virtual.
 
