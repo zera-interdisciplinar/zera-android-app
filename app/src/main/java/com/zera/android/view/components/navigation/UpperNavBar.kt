@@ -15,6 +15,7 @@ import com.zera.android.view.components.buttons.IconButton
 import com.zera.android.view.components.buttons.ZeraButtonType
 import com.zera.android.view.components.texts.BodyText
 import com.zera.android.view.components.texts.HeadlineText
+import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
 import com.zera.android.view.theme.icons.ZeraIcon
@@ -27,21 +28,20 @@ import com.zera.android.view.theme.icons.ZeraIcon
  * logo abaixo; à direita os atalhos de notificações e de perfil.
  *
  * Este componente é apenas visual — ele não conhece rotas nem navegação. Passe as
- * ações pelos callbacks ([onBackClick], [onNotificationsClick], [onProfileClick]).
+ * ações pelos callbacks ([onBackClick] e, ainda como `TODO`, notificações/perfil).
  *
  * @param title título da tela, exibido abaixo do botão "Voltar". Quando [goBack] é
  *   `false`, ele ocupa também o espaço que seria do botão.
  * @param modifier modificador externo opcional.
  * @param goBack quando `true`, exibe o botão "Voltar" acima do título.
  * @param onBackClick ação do botão "Voltar". Só é usada quando [goBack] é `true`.
- * @param onNotificationsClick ação do botão de notificações.
- * @param onProfileClick ação do botão de perfil.
  */
 @Composable
 fun UpperNavBar(
     title: String,
     modifier: Modifier = Modifier,
     goBack: Boolean = false,
+    onBackClick: () -> Unit = { ZeraNavigator.goBack() },
 ) {
     Box(
         modifier = modifier.fillMaxWidth().padding(Spacing.small)
@@ -62,7 +62,7 @@ fun UpperNavBar(
                     ) {
                         IconButton(
                             icon = ZeraIcon.LeftUTurn,
-                            onClick = { /*TODO: adicionar goBack*/},
+                            onClick = onBackClick,
                             contentDescription = "Voltar",
                             type = ZeraButtonType.Tertiary,
                         )
