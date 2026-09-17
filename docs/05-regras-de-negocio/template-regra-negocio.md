@@ -32,6 +32,6 @@
 
 ## Referências
 
-- Specs relacionadas: [../07-especificacoes/](../07-especificacoes/)
-- Contratos de API: [../06-contratos-api.md](../06-contratos-api.md)
-- Modelo de dados: [../04-modelo-de-dados.md](../04-modelo-de-dados.md)
+- Specs relacionadas: `../07-especificacoes/[arquivo].md`
+- Contratos de API: `../06-contratos-api.md`
+- Modelo de dados: `../04-modelo-de-dados.md`
