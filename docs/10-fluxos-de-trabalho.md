@@ -20,9 +20,9 @@ E termina com **Ao terminar**, lembrando quais docs sugerir atualizar (ver regra
 - **Levantamento de componentes (obrigatório, faça antes de escrever a tela):** liste todo componente de UI "principal" que a tela vai precisar (botão, input, card, tag, lista, etc.) e confira cada um em [03-catalogo-componentes.md](03-catalogo-componentes.md). Isso é especialmente crítico quando o usuário fornece uma **imagem/mockup de referência** — não modele visualmente algo parecido "na mão" dentro da tela. **Se algum componente necessário ainda não existir no catálogo, pare antes de montar a tela e proponha ao usuário o fluxo de criação desse componente** (item 2 deste documento). Só continue montando a tela depois que os componentes que faltam existirem.
 
 **Durante**
-- `ViewModel` novo (ou reaproveitado) coordena dados e navegação; a `Screen` só renderiza `state` e encaminha eventos — ver regra estrita em [01-arquitetura.md](01-arquitetura.md#separação-entre-view-e-lógica-regra-estrita).
+- `ViewModel` novo (ou reaproveitado) coordena dados e navegação; a `Screen` só renderiza `state` e encaminha eventos — ver "Separação entre View e lógica (regra estrita)" em [01-arquitetura.md](01-arquitetura.md).
 - **Composição restrita a componentes existentes:** o corpo da tela só pode usar (a) componentes do Design System já catalogados em `03-catalogo-componentes.md` e (b) primitivas de layout genéricas do Compose usadas apenas para alinhar/conter esses componentes (`Box`, `Row`, `Column`, `Spacer`, `LazyColumn`, `PaddingValues`, etc.). É **proibido** usar diretamente um widget "cru" do Material/Compose que duplique o papel de um componente do catálogo (`Text`, `Button`, `TextField`, `Icon`, `Card` do Material direto na tela, por exemplo). Se o catálogo não cobre o caso, a solução é criar o componente que falta (ver item 2 abaixo) — nunca contornar com um widget genérico improvisado.
-- **Zero medida livre:** é **proibido** usar valores soltos de cor, espaçamento ou raio de borda. Cor sempre via `ZeraColorFamily`/`.palette()` (ou um papel do `MaterialTheme.colorScheme` quando não há família de cor aplicável); espaçamento sempre via `Spacing.*`; raio de borda sempre via `Radius.*`. A única exceção tolerada é para `width`/`height` pontuais de um elemento específico do layout (ex.: a largura de um ícone maior que o padrão, a altura de um card) — e mesmo essa exceção deve virar uma `private val` nomeada no topo do arquivo, nunca um número solto inline (ver [02-padroes-e-convencoes.md](02-padroes-e-convencoes.md#estilo-de-código-kotlin)).
+- **Zero medida livre:** é **proibido** usar valores soltos de cor, espaçamento ou raio de borda. Cor sempre via `ZeraColorFamily`/`.palette()` (ou um papel do `MaterialTheme.colorScheme` quando não há família de cor aplicável); espaçamento sempre via `Spacing.*`; raio de borda sempre via `Radius.*`. A única exceção tolerada é para `width`/`height` pontuais de um elemento específico do layout (ex.: a largura de um ícone maior que o padrão, a altura de um card) — e mesmo essa exceção deve virar uma `private val` nomeada no topo do arquivo, nunca um número solto inline (ver "Estilo de código Kotlin" em [02-padroes-e-convencoes.md](02-padroes-e-convencoes.md)).
 
 **Quando envolver o usuário**
 - Falta um componente do catálogo para atender a uma imagem de referência (ou a qualquer necessidade visual da tela) — é o próprio gatilho do "pare e proponha o fluxo de criação" acima; nunca resolver sozinho com um substituto improvisado ou com medidas/cores livres "só para essa tela".
@@ -38,7 +38,7 @@ E termina com **Ao terminar**, lembrando quais docs sugerir atualizar (ver regra
 - Docs: [03-catalogo-componentes.md](03-catalogo-componentes.md) (existe algo parecido?), [02-padroes-e-convencoes.md](02-padroes-e-convencoes.md) (critério de prefixo `Zera`, pasta por família, tokens).
 
 **Durante**
-- **Recomendado, não proibido** (diferente da regra estrita de telas — ver item 1): prefira cor via `ZeraColorFamily.palette()` e espaçamento/raio via `Spacing`/`Radius`. Um componente de baixo nível às vezes precisa de uma medida própria que não faz sentido como token global (ex.: diâmetro de um círculo, largura de uma célula de OTP) — nesse caso, use um valor direto, mas sempre como `private val` nomeada no topo do arquivo, nunca um número solto inline (ver [02-padroes-e-convencoes.md](02-padroes-e-convencoes.md#estilo-de-código-kotlin)).
+- **Recomendado, não proibido** (diferente da regra estrita de telas — ver item 1): prefira cor via `ZeraColorFamily.palette()` e espaçamento/raio via `Spacing`/`Radius`. Um componente de baixo nível às vezes precisa de uma medida própria que não faz sentido como token global (ex.: diâmetro de um círculo, largura de uma célula de OTP) — nesse caso, use um valor direto, mas sempre como `private val` nomeada no topo do arquivo, nunca um número solto inline (ver "Estilo de código Kotlin" em [02-padroes-e-convencoes.md](02-padroes-e-convencoes.md)).
 - `@Preview` cobrindo o caso comum e variantes relevantes (erro, vazio, com/sem ícone).
 
 **Quando envolver o usuário**
@@ -55,7 +55,7 @@ E termina com **Ao terminar**, lembrando quais docs sugerir atualizar (ver regra
 - Código: todos os pontos que implementam a regra — tipicamente `usecase` e `ViewModel`; a `View` não deveria ter nenhuma lógica de regra para ajustar (se tiver, é ela mesma uma inconsistência a reportar, não a replicar).
 
 **Durante**
-- A regra de negócio em si mora no `usecase` (e, quando envolve decisão de fluxo — ex.: para onde navegar —, no `ViewModel`). Nunca na `View` nem embutida num DTO. Se a regra passar a ser usada por mais de um `usecase`/`ViewModel`, avalie se já vale a pena extrair um ponto comum — hoje não há camada de `Repository` nem serviço de domínio compartilhado (ver [01-arquitetura.md](01-arquitetura.md#visão-geral-das-camadas)).
+- A regra de negócio em si mora no `usecase` (e, quando envolve decisão de fluxo — ex.: para onde navegar —, no `ViewModel`). Nunca na `View` nem embutida num DTO. Se a regra passar a ser usada por mais de um `usecase`/`ViewModel`, avalie se já vale a pena extrair um ponto comum — hoje não há camada de `Repository` nem serviço de domínio compartilhado (ver "Visão geral das camadas" em [01-arquitetura.md](01-arquitetura.md)).
 
 **Quando envolver o usuário**
 - **Sempre que a regra não estiver clara ou completa no documento, ou conflitar com o que o código faz hoje** — regra de negócio é decisão de produto, não algo para o modelo inferir a partir do código.
@@ -70,7 +70,7 @@ E termina com **Ao terminar**, lembrando quais docs sugerir atualizar (ver regra
 - Código: `model/remote/service/` (interface do serviço), `model/entity/<domínio>/` (DTOs), `ApiClient` (para expor o novo `service`, se for o caso).
 
 **Durante**
-- A chamada de rede em si fica no `usecase`, nunca direto na `Screen` nem "solta" no `ViewModel` sem passar por um `usecase`. O `usecase` fala com `ApiClient.<service>` e, quando precisar, com `SharedPreferencesManager` — não existe camada de `Repository` intermediária hoje (ver [01-arquitetura.md](01-arquitetura.md#visão-geral-das-camadas)).
+- A chamada de rede em si fica no `usecase`, nunca direto na `Screen` nem "solta" no `ViewModel` sem passar por um `usecase`. O `usecase` fala com `ApiClient.<service>` e, quando precisar, com `SharedPreferencesManager` — não existe camada de `Repository` intermediária hoje (ver "Visão geral das camadas" em [01-arquitetura.md](01-arquitetura.md)).
 
 **Quando envolver o usuário**
 - **Qualquer contrato ainda não fechado com o backend** — não adivinhar formato de payload (o caso já conhecido: `invitations/redeem` reaproveitando um DTO que não cobre todos os campos da tela de cadastro). Confirmar o contrato real antes de implementar contra um payload suposto.
@@ -104,7 +104,7 @@ E termina com **Ao terminar**, lembrando quais docs sugerir atualizar (ver regra
 
 **Quando envolver o usuário**
 - A correção implica mudar um contrato de API já documentado.
-- O "bug" é, na verdade, uma inconsistência já registrada em [02-padroes-e-convencoes.md](02-padroes-e-convencoes.md#inconsistências-conhecidas) (ex.: o erro de digitação "Sing"/"Sign", ou `ViewModel.state` expondo `MutableState`) — **não corrigir de forma incidental dentro de uma tarefa não relacionada**; um rename ou mudança de assinatura desse tipo afeta múltiplos arquivos e merece ser uma tarefa própria, combinada antes com o usuário.
+- O "bug" é, na verdade, uma inconsistência já registrada em "Inconsistências conhecidas", [02-padroes-e-convencoes.md](02-padroes-e-convencoes.md) (ex.: o erro de digitação "Sing"/"Sign", ou `ViewModel.state` expondo `MutableState`) — **não corrigir de forma incidental dentro de uma tarefa não relacionada**; um rename ou mudança de assinatura desse tipo afeta múltiplos arquivos e merece ser uma tarefa própria, combinada antes com o usuário.
 
 **Ao terminar:** feedback padrão (seção 5 do [INDEX.md](INDEX.md)).
 
@@ -115,7 +115,7 @@ E termina com **Ao terminar**, lembrando quais docs sugerir atualizar (ver regra
 - Código: seguir a estrutura por camada já estabelecida (`model/entity/<domínio>/`, `model/usecase/<domínio>/`, `viewmodel/<domínio>/`, `view/screens/<domínio>/`), replicando o padrão do domínio `auth`/`manager`.
 
 **Durante**
-- Reforçando onde cada responsabilidade fica, para o domínio novo inteiro: DTOs em `model/entity/<domínio>/`; chamadas de API e regra de acesso a dado em `model/usecase/<domínio>/` (sem `Repository`, como no resto do projeto); coordenação de estado e navegação em `viewmodel/<domínio>/`; apresentação pura em `view/screens/<domínio>/` — seguindo a regra estrita de separação View/lógica em [01-arquitetura.md](01-arquitetura.md#separação-entre-view-e-lógica-regra-estrita).
+- Reforçando onde cada responsabilidade fica, para o domínio novo inteiro: DTOs em `model/entity/<domínio>/`; chamadas de API e regra de acesso a dado em `model/usecase/<domínio>/` (sem `Repository`, como no resto do projeto); coordenação de estado e navegação em `viewmodel/<domínio>/`; apresentação pura em `view/screens/<domínio>/` — seguindo a regra estrita de separação View/lógica em [01-arquitetura.md](01-arquitetura.md).
 
 **Quando envolver o usuário**
 - Modelagem de dados da hierarquia Categoria → Modelo → Produto e do código de barras composto — tem decisões em aberto (chave composta vs. entidades relacionadas, por exemplo) que não devem ser resolvidas sozinho.
@@ -126,7 +126,7 @@ E termina com **Ao terminar**, lembrando quais docs sugerir atualizar (ver regra
 ## 8. Mexer em navegação (rotas, `ZeraNavigator`, telas por perfil)
 
 **Antes de começar**
-- Docs: [01-arquitetura.md](01-arquitetura.md#navegação) e [08-decisoes-arquiteturais/0001-navegacao-centralizada-zeranavigator.md](08-decisoes-arquiteturais/0001-navegacao-centralizada-zeranavigator.md); [00-contexto-geral.md](00-contexto-geral.md) para a nota sobre o Administrador não ter fluxo hoje.
+- Docs: [01-arquitetura.md](01-arquitetura.md) (seção "Navegação") e [08-decisoes-arquiteturais/0001-navegacao-centralizada-zeranavigator.md](08-decisoes-arquiteturais/0001-navegacao-centralizada-zeranavigator.md); [00-contexto-geral.md](00-contexto-geral.md) para a nota sobre o Administrador não ter fluxo hoje.
 
 **Durante**
 - Rota nova sempre `sealed interface Route` + `@Serializable`; navegação disparada pelo `ViewModel` (regra estrita em `01`), exceto as duas telas incondicionais já registradas como exceção (`SplashScreen`, `WelcomeScreen`).

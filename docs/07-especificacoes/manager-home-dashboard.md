@@ -63,5 +63,5 @@ Como Gestor, quero ver um resumo do estoque, dos alertas pendentes e dos último
 
 ## Referências
 
-- Catálogo de componentes usados: [../03-catalogo-componentes.md](../03-catalogo-componentes.md#cards) e [#listas](../03-catalogo-componentes.md#listas)
-- Arquitetura / separação View-lógica: [../01-arquitetura.md](../01-arquitetura.md#separação-entre-view-e-lógica-regra-estrita)
+- Catálogo de componentes usados: [../03-catalogo-componentes.md](../03-catalogo-componentes.md), seções "Cards" e "Listas"
+- Arquitetura / separação View-lógica: [../01-arquitetura.md](../01-arquitetura.md), seção "Separação entre View e lógica (regra estrita)"

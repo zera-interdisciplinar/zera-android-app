@@ -6,7 +6,7 @@ Aceito e implementado.
 
 ## Contexto
 
-Jetpack Navigation Compose exige uma referência ao `NavHostController` para disparar navegação (`navController.navigate(...)`). O app segue a regra de que a `View` não deve conter lógica (ver [01-arquitetura.md](../01-arquitetura.md#separação-entre-view-e-lógica-regra-estrita)) e que é o `ViewModel` quem decide, na maioria dos casos, para onde navegar (ex.: `SingInViewModel.signIn()` decide a rota de destino a partir do `role` do usuário). Um `ViewModel`, porém, não deveria depender de um `NavHostController` (um objeto de Compose/Navigation), sob risco de acoplar lógica de negócio a um tipo de UI e dificultar testes.
+Jetpack Navigation Compose exige uma referência ao `NavHostController` para disparar navegação (`navController.navigate(...)`). O app segue a regra de que a `View` não deve conter lógica (ver "Separação entre View e lógica (regra estrita)" em [01-arquitetura.md](../01-arquitetura.md)) e que é o `ViewModel` quem decide, na maioria dos casos, para onde navegar (ex.: `SingInViewModel.signIn()` decide a rota de destino a partir do `role` do usuário). Um `ViewModel`, porém, não deveria depender de um `NavHostController` (um objeto de Compose/Navigation), sob risco de acoplar lógica de negócio a um tipo de UI e dificultar testes.
 
 ## Decisão
 

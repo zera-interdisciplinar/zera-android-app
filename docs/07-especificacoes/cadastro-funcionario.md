@@ -40,7 +40,7 @@ Como Funcionário convidado, quero me cadastrar informando meu nome, email, senh
 ## Critérios de aceite
 
 - [ ] `SignUpViewModel.signUp()` implementado, seguindo o mesmo roteiro de `SingInViewModel.signIn()` (`isLoading`/`errorMessage`, `viewModelScope.launch`, tratamento de exceção)
-- [ ] Contrato de API de cadastro definido e alinhado com os campos coletados pela tela (nome, email, senha, código de convite) — ver ressalva em [../06-contratos-api.md](../06-contratos-api.md#autenticação-authservice)
+- [ ] Contrato de API de cadastro definido e alinhado com os campos coletados pela tela (nome, email, senha, código de convite) — ver ressalva em [../06-contratos-api.md](../06-contratos-api.md), seção "Autenticação (AuthService)"
 - [ ] Validação client-side dos campos obrigatórios antes de chamar a API
 - [ ] Redirecionamento para a área correta após cadastro bem-sucedido
 
@@ -57,6 +57,6 @@ Como Funcionário convidado, quero me cadastrar informando meu nome, email, senh
 
 ## Referências
 
-- Regras de negócio: [../05-regras-de-negocio/autenticacao.md](../05-regras-de-negocio/autenticacao.md) (em rascunho)
-- Contratos de API: [../06-contratos-api.md](../06-contratos-api.md#autenticação-authservice)
-- Padrões de `ViewModel`/`State`: [../02-padroes-e-convencoes.md](../02-padroes-e-convencoes.md#convenções-de-viewmodel-e-state)
+- Regras de negócio: [../05-regras-de-negocio/](../05-regras-de-negocio/) (ainda não escritas para o domínio de autenticação)
+- Contratos de API: [../06-contratos-api.md](../06-contratos-api.md), seção "Autenticação (AuthService)"
+- Padrões de `ViewModel`/`State`: [../02-padroes-e-convencoes.md](../02-padroes-e-convencoes.md), seção "Convenções de ViewModel e State"
