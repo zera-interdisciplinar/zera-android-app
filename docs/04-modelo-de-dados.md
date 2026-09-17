@@ -4,10 +4,10 @@
 
 Pacote `model/entity/auth/`, `@Serializable` (kotlinx.serialization).
 
-- **`SingInRequestDTO(email: String, password: String)`** — corpo do `POST auth/login`. Também é reaproveitado (hoje, sem campos suficientes) pelo `POST invitations/redeem` — ver ressalva em [06-contratos-api.md](06-contratos-api.md#autenticação-authservice).
+- **`SingInRequestDTO(email: String, password: String)`** — corpo do `POST auth/login`. Também é reaproveitado (hoje, sem campos suficientes) pelo `POST invitations/redeem` — ver ressalva na seção "Autenticação (AuthService)" de [06-contratos-api.md](06-contratos-api.md).
 - **`SingInResponseDTO(userId, accessToken, refreshToken, tokenType, expiresIn: Long)`** — resposta do login; campos `var` (mutáveis), sem valor padrão.
 
-> Nota de nomenclatura: a grafia "Sing" (em vez de "Sign") é a mesma usada nas classes de código — ver [02-padroes-e-convencoes.md](02-padroes-e-convencoes.md#inconsistências-conhecidas).
+> Nota de nomenclatura: a grafia "Sing" (em vez de "Sign") é a mesma usada nas classes de código — ver "Inconsistências conhecidas" em [02-padroes-e-convencoes.md](02-padroes-e-convencoes.md).
 
 ## DTOs de usuário
 

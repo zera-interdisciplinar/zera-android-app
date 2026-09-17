@@ -11,7 +11,7 @@ Esta pasta é a fonte de verdade técnica do app Android do Zera, seguindo prát
 | [02-padroes-e-convencoes.md](02-padroes-e-convencoes.md) | Convenções de nomenclatura, organização de pastas, estilo de código Compose/Kotlin, inconsistências conhecidas. |
 | [03-catalogo-componentes.md](03-catalogo-componentes.md) | Design System (tokens, textos, botões, containers, inputs, cards, listas, navegação, ícones) e componentes de domínio reutilizáveis. |
 | [04-modelo-de-dados.md](04-modelo-de-dados.md) | DTOs, persistência local (SharedPreferences) e mapeamentos entre camadas. |
-| [05-regras-de-negocio/](05-regras-de-negocio/) | Um arquivo por domínio de negócio (hoje: `autenticacao.md`). |
+| [05-regras-de-negocio/](05-regras-de-negocio/) | Um arquivo por domínio de negócio, com `template-regra-negocio.md` como modelo padrão. |
 | [06-contratos-api.md](06-contratos-api.md) | Endpoints consumidos, payloads, autenticação e tratamento de erros. |
 | [07-especificacoes/](07-especificacoes/) | Um arquivo por feature/user story no formato Given/When/Then, com `template-spec.md` como modelo padrão. |
 | [08-decisoes-arquiteturais/](08-decisoes-arquiteturais/) | ADRs curtos: decisão, alternativas consideradas e motivo da escolha. |

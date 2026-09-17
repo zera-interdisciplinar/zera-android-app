@@ -18,7 +18,7 @@ O app distingue três perfis, com permissões cumulativas (Administrador ⊃ Ges
 - **Gestor** — além do que o Funcionário faz, acompanha a operação: geração e visualização de relatórios, gestão de alertas, análise preventiva de manutenção, consulta ao inventário, criação de categorias e modelos.
 - **Administrador** — acesso total, incluindo gestão de usuários, configuração de parâmetros do sistema, confirmação de descartes e envio de relatórios para recicladoras.
 
-O papel do usuário autenticado (`role` em `SelfUserResponseDTO`) define para qual área do app ele é direcionado após o login — ver [05-regras-de-negocio/autenticacao.md](05-regras-de-negocio/autenticacao.md).
+O papel do usuário autenticado (`role` em `SelfUserResponseDTO`) define para qual área do app ele é direcionado após o login — ver [05-regras-de-negocio/](05-regras-de-negocio/) (regras de autenticação ainda não escritas; usar `template-regra-negocio.md` como base).
 
 > O Administrador é um perfil de permissões do sistema (ver escopo de produto), mas **não tem, até o momento, nenhum fluxo ou tela específica no app** — as seções a seguir cobrem apenas Gestor e Funcionário.
 

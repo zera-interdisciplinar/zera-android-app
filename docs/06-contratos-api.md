@@ -20,7 +20,7 @@
 | `POST` | `auth/login` | `SingInRequestDTO(email, password)` | `SingInResponseDTO` | `SingIn.execute()` (login) |
 | `POST` | `invitations/redeem` | `SingInRequestDTO(email, password)` | `SingInResponseDTO` | ainda não chamado por nenhum `usecase` |
 
-> **Contrato em aberto:** `SignUpScreen`/`SignUpViewModel` coletam `name`, `email`, `password` e `token` (código de convite), mas `signUp()` no `AuthService` reaproveita `SingInRequestDTO`, que só tem `email`/`password` — não há campo para `name` nem para o código de convite. O formato real do payload de `invitations/redeem` precisa ser confirmado com o backend antes de implementar `SignUpViewModel.signUp()` (hoje um `TODO`). Ver também [02-padroes-e-convencoes.md](02-padroes-e-convencoes.md#inconsistências-conhecidas).
+> **Contrato em aberto:** `SignUpScreen`/`SignUpViewModel` coletam `name`, `email`, `password` e `token` (código de convite), mas `signUp()` no `AuthService` reaproveita `SingInRequestDTO`, que só tem `email`/`password` — não há campo para `name` nem para o código de convite. O formato real do payload de `invitations/redeem` precisa ser confirmado com o backend antes de implementar `SignUpViewModel.signUp()` (hoje um `TODO`). Ver também "Inconsistências conhecidas" em [02-padroes-e-convencoes.md](02-padroes-e-convencoes.md).
 
 ## Usuário (SelfUserService)
 

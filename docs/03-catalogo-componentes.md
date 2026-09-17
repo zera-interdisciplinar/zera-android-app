@@ -111,7 +111,7 @@ ProductList(products = state.latestProducts, onItemClick = { /* abrir item */ })
 
 ## Navegação (componentes visuais)
 
-Arquivo: `view/components/navigation/`. Estes componentes são **apenas visuais** — não conhecem `Route` nem `ZeraNavigator` diretamente (exceção: `BottomNavBar`, que já recebe `Route` para destacar o item ativo, mas ainda não dispara navegação real — ver [02-padroes-e-convencoes.md](02-padroes-e-convencoes.md#inconsistências-conhecidas)).
+Arquivo: `view/components/navigation/`. Estes componentes são **apenas visuais** — não conhecem `Route` nem `ZeraNavigator` diretamente (exceção: `BottomNavBar`, que já recebe `Route` para destacar o item ativo, mas ainda não dispara navegação real — ver "Inconsistências conhecidas" em [02-padroes-e-convencoes.md](02-padroes-e-convencoes.md)).
 
 - **`UpperNavBar(title, modifier, goBack)`** — barra superior com título e (opcional) botão "Voltar"; ações de notificação/perfil ainda são `TODO`.
 - **`BottomNavBar(modifier, currentRoute)`** — barra inferior com 4 atalhos + botão central de escanear (`ZeraIcon.QrCode`); usa `ShortCutButton` internamente.

@@ -54,7 +54,7 @@ Como usuário cadastrado (Funcionário ou Gestor), quero entrar com meu email e 
 - [x] Redirecionamento correto por perfil (`EMPLOYEE` → `EmployeeHome`, `MANAGER` → `ManagerHome`)
 - [x] Erro exibido em caso de falha (validação, credenciais, rede, perfil desconhecido)
 - [x] Pilha de navegação anterior é removida ao redirecionar após login (`pushAndPop`)
-- [ ] Mensagens de erro amigáveis (hoje é o texto bruto da exceção — ver [06-contratos-api.md](../06-contratos-api.md#tratamento-de-erros))
+- [ ] Mensagens de erro amigáveis (hoje é o texto bruto da exceção — ver "Tratamento de erros" em [06-contratos-api.md](../06-contratos-api.md))
 
 ## Edge cases considerados
 
@@ -66,11 +66,11 @@ Como usuário cadastrado (Funcionário ou Gestor), quero entrar com meu email e 
 ## Fora de escopo desta spec
 
 - "Esqueci minha senha" — o link existe na UI (`CaptionText` em `SignInScreen`) mas sem ação implementada (`onClick = {}`).
-- Refresh automático de token expirado — não implementado (ver [06-contratos-api.md](../06-contratos-api.md#tratamento-de-erros)).
+- Refresh automático de token expirado — não implementado (ver "Tratamento de erros" em [06-contratos-api.md](../06-contratos-api.md)).
 - Cadastro de novo usuário — ver [cadastro-funcionario.md](cadastro-funcionario.md).
 
 ## Referências
 
-- Regras de negócio: [../05-regras-de-negocio/autenticacao.md](../05-regras-de-negocio/autenticacao.md) (em rascunho)
-- Contratos de API: [../06-contratos-api.md](../06-contratos-api.md#autenticação-authservice)
-- Arquitetura / navegação: [../01-arquitetura.md](../01-arquitetura.md#navegação)
+- Regras de negócio: [../05-regras-de-negocio/](../05-regras-de-negocio/) (ainda não escritas para o domínio de autenticação)
+- Contratos de API: [../06-contratos-api.md](../06-contratos-api.md), seção "Autenticação (AuthService)"
+- Arquitetura / navegação: [../01-arquitetura.md](../01-arquitetura.md), seção "Navegação"

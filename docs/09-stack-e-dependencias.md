@@ -12,7 +12,7 @@
 
 - **Jetpack Compose** via `androidx.compose:compose-bom:2025.09.00` (BOM — as versões individuais das libs de Compose seguem o que o BOM fixa).
 - **Material 3** (`androidx.compose.material3:material3`) como sistema de componentes base, customizado pelo Design System do app (`view/theme`, `view/components` — ver [03-catalogo-componentes.md](03-catalogo-componentes.md)).
-- **Navigation Compose** (`androidx.navigation:navigation-compose:2.9.8`), usado com rotas tipadas (`@Serializable`) — ver [01-arquitetura.md](01-arquitetura.md#navegação).
+- **Navigation Compose** (`androidx.navigation:navigation-compose:2.9.8`), usado com rotas tipadas (`@Serializable`) — ver a seção "Navegação" em [01-arquitetura.md](01-arquitetura.md).
 - `androidx-lifecycle-viewmodel-compose` / `androidx-lifecycle-runtime-ktx` (2.9.3) — integração do `ViewModel` com Compose (`viewModel()`, `viewModelScope`).
 - `androidx-activity-compose` (1.13.0) — `ComponentActivity.setContent`.
 - Fonte customizada **Inter** (`res/font/`), aplicada via `Type.kt` sobre o type scale padrão do Material 3.
@@ -22,11 +22,11 @@
 - **Retrofit** 3.0.0 + **OkHttp** 5.2.1 (com `okhttp-logging-interceptor`) para as chamadas HTTP.
 - **kotlinx.serialization** 1.11.0 como formato de serialização, integrado ao Retrofit via `retrofit2-kotlinx-serialization-converter` 1.0.0 (em vez de Gson/Moshi).
 
-Ver configuração completa em [06-contratos-api.md](06-contratos-api.md#configuração-base-apiclient).
+Ver configuração completa na seção "Configuração base (ApiClient)" de [06-contratos-api.md](06-contratos-api.md).
 
 ## Persistência local
 
-- Apenas `android.content.SharedPreferences` (via `androidx.core.content.edit` da `androidx-core-ktx`), encapsulado em `SharedPreferencesManager`. Não há Room nem outro banco embarcado no projeto hoje — ver [04-modelo-de-dados.md](04-modelo-de-dados.md#persistência-local-sharedpreferences).
+- Apenas `android.content.SharedPreferences` (via `androidx.core.content.edit` da `androidx-core-ktx`), encapsulado em `SharedPreferencesManager`. Não há Room nem outro banco embarcado no projeto hoje — ver a seção "Persistência local (SharedPreferences)" em [04-modelo-de-dados.md](04-modelo-de-dados.md).
 
 ## Firebase (configurado, não utilizado)
 
