@@ -87,7 +87,7 @@ fun ZeraTextInput(
                     shape = RoundedCornerShape(Radius.large),
                 )
                 .background(
-                    color = MaterialTheme.colorScheme.surfaceContainerLowest,
+                    color = MaterialTheme.colorScheme.surface,
                     shape = RoundedCornerShape(Radius.large),
                 )
                 .padding(horizontal = Spacing.medium, vertical = Spacing.small),

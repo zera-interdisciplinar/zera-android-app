@@ -3,6 +3,7 @@ package com.zera.android.view.theme
 import androidx.compose.ui.graphics.Color
 
 val White100 = Color(0xFFFFFFFF)
+val White90 = Color(0xFFE6E6E6)
 
 // Shades of Red
 val PastelRed85 = Color(0xFFFDE3DE)

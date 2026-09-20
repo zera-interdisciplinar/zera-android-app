@@ -54,7 +54,7 @@ fun ManagerScaffold(
 ) {
     Scaffold(
         modifier = modifier,
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             UpperNavBar(
                 title = title,
