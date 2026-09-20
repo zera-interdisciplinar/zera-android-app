@@ -31,7 +31,7 @@ fun BottomNavBar(
     Row(
         modifier = modifier
             .background(
-                color = MaterialTheme.colorScheme.surfaceContainerLowest,
+                color = MaterialTheme.colorScheme.surface,
                 shape = RoundedCornerShape(Radius.xLarge),
             )
             .padding(horizontal = Spacing.small, vertical = Spacing.small),

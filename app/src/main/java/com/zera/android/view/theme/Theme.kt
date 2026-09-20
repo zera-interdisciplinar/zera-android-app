@@ -38,9 +38,10 @@ private val LightColorScheme = lightColorScheme(
     errorContainer = PastelRed85,
     onErrorContainer = DarkRed40,
 
-    surface = PastelYellow90,
-    surfaceContainerLowest = White100,
-    surfaceContainerLow = White95,
+    background = PastelYellow90,
+    surface = White100,
+    surfaceContainerLowest = White95,
+    surfaceContainerLow = White90,
     onSurface = DarkBlue15,
     onSurfaceVariant = Gray45,
     outline = LightPastelBlue90

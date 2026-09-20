@@ -65,7 +65,7 @@ fun ZeraSearchInput(
                 shape = RoundedCornerShape(Radius.large),
             )
             .background(
-                color = MaterialTheme.colorScheme.surfaceContainerLowest,
+                color = MaterialTheme.colorScheme.surface,
                 shape = RoundedCornerShape(Radius.large),
             )
             .padding(start = Spacing.medium, end = Spacing.small, top = Spacing.small, bottom = Spacing.small),

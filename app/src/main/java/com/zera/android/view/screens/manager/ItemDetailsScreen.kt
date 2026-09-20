@@ -33,7 +33,7 @@ fun ItemDetailsScreen(
     val state by viewModel.state
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             UpperNavBar(
                 title = "Detalhes do Item",
