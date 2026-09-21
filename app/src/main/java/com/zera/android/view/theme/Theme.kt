@@ -44,7 +44,8 @@ private val LightColorScheme = lightColorScheme(
     surfaceContainerLow = White90,
     onSurface = DarkBlue15,
     onSurfaceVariant = Gray45,
-    outline = LightPastelBlue90
+    outline = LightPastelBlue90,
+    scrim = TransparentBlue17
 )
 
 @Composable

@@ -30,4 +30,4 @@ val White95 = Color(0xFFE9EEF9)
 val DarkBlue25 = Color(0xFF162F71)
 
 val TransparentBlue40 = Color(0x662A58CE)
-val TransparentBlue17 = Color(0x2B2A58CE)
+val TransparentBlue17 = Color(0x40122038)
