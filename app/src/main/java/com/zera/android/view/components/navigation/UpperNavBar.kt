@@ -28,13 +28,15 @@ import com.zera.android.view.theme.icons.ZeraIcon
  * logo abaixo; à direita os atalhos de notificações e de perfil.
  *
  * Este componente é apenas visual — ele não conhece rotas nem navegação. Passe as
- * ações pelos callbacks ([onBackClick] e, ainda como `TODO`, notificações/perfil).
+ * ações pelos callbacks ([onBackClick] e, ainda como `TODO`, notificações/perfil/menu).
  *
  * @param title título da tela, exibido abaixo do botão "Voltar". Quando [goBack] é
  *   `false`, ele ocupa também o espaço que seria do botão.
  * @param modifier modificador externo opcional.
  * @param goBack quando `true`, exibe o botão "Voltar" acima do título.
  * @param onBackClick ação do botão "Voltar". Só é usada quando [goBack] é `true`.
+ * @param showActions quando `true` (padrão), exibe os atalhos de notificações/perfil/menu
+ *   à direita. Use `false` em telas que só precisam do botão "Voltar" (ex.: "Perfil").
  */
 @Composable
 fun UpperNavBar(
@@ -42,6 +44,7 @@ fun UpperNavBar(
     modifier: Modifier = Modifier,
     goBack: Boolean = false,
     onBackClick: () -> Unit = { ZeraNavigator.goBack() },
+    showActions: Boolean = true,
 ) {
     Box(
         modifier = modifier.fillMaxWidth().padding(Spacing.small)
@@ -81,28 +84,30 @@ fun UpperNavBar(
                 )
             }
 
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(Spacing.small),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                IconButton(
-                    icon = ZeraIcon.Bell,
-                    onClick = { /* TODO: adicionar rota para notificações */ },
-                    contentDescription = "Notificações",
-                    type = ZeraButtonType.Secondary,
-                )
-                IconButton(
-                    icon = ZeraIcon.Profile,
-                    onClick = { /* TODO: adicionar rota para perfil */ },
-                    contentDescription = "Perfil",
-                    type = ZeraButtonType.Primary,
-                )
-                IconButton(
-                    icon = ZeraIcon.Menu,
-                    onClick = {},
-                    contentDescription = "Menu",
-                    type = ZeraButtonType.Tertiary
-                )
+            if (showActions) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.small),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    IconButton(
+                        icon = ZeraIcon.Bell,
+                        onClick = { /* TODO: adicionar rota para notificações */ },
+                        contentDescription = "Notificações",
+                        type = ZeraButtonType.Secondary,
+                    )
+                    IconButton(
+                        icon = ZeraIcon.Profile,
+                        onClick = { /* TODO: adicionar rota para perfil */ },
+                        contentDescription = "Perfil",
+                        type = ZeraButtonType.Primary,
+                    )
+                    IconButton(
+                        icon = ZeraIcon.Menu,
+                        onClick = {},
+                        contentDescription = "Menu",
+                        type = ZeraButtonType.Tertiary
+                    )
+                }
             }
         }
     }
@@ -122,5 +127,13 @@ private fun UpperNavBarWithBackPreview() {
 private fun UpperNavBarWithoutBackPreview() {
     ZeraTheme {
         UpperNavBar(title = "Modelos")
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun UpperNavBarWithoutActionsPreview() {
+    ZeraTheme {
+        UpperNavBar(title = "Perfil", goBack = true, showActions = false)
     }
 }
