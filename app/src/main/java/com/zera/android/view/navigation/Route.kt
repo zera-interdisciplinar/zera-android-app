@@ -29,4 +29,8 @@ sealed interface Route{
     // ROTAS DE OPERARIO
     @Serializable
     data object EmployeeHome : Route
+
+    // ROTAS COMPARTILHADAS
+    @Serializable
+    data object Profile : Route
 }
