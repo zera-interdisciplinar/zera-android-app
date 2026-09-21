@@ -97,6 +97,12 @@ fun UpperNavBar(
                     contentDescription = "Perfil",
                     type = ZeraButtonType.Primary,
                 )
+                IconButton(
+                    icon = ZeraIcon.Menu,
+                    onClick = {},
+                    contentDescription = "Menu",
+                    type = ZeraButtonType.Tertiary
+                )
             }
         }
     }
