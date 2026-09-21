@@ -106,24 +106,43 @@ Arquivo: `view/components/lists/`.
 - **`ProductItem(id, name, icon)`** + **`ProductList(products, onItemClick, modifier, contentPadding, emptyContent)`** — lista rolável de `ProductListItem`.
 - **`ProductListItem(itemName, itemId, onClick, modifier, icon)`** — item individual (ícone + nome + ID + seta); reutilizável fora de `ProductList`.
 - **`EditableFieldRow(label, value, modifier, onEditClick)`** — linha de detalhe de campo (rótulo + valor em negrito + lápis de editar opcional à direita); usada em telas de detalhe (ex.: "Detalhes do Item"), diferente de `ProductListItem` (que representa um item de lista de produtos). `onEditClick = null` (padrão) esconde o lápis.
+- **`EmployeeItem(id, name, role, isPending)`** + **`EmployeeList(employees, onItemClick, modifier, contentPadding, emptyContent)`** — lista rolável de `EmployeeListItem`.
+- **`EmployeeListItem(name, role, isPending, onClick, modifier)`** — item individual (avatar circular + nome + "cargo · status" + seta); reutilizável fora de `EmployeeList`. `isPending = true` mostra "Pendente" em laranja (`ZeraColorFamily.Yellow`) em vez de "Ativo" em cinza, no texto e no avatar. Ainda não recebe foto de perfil — o avatar é só um círculo colorido.
 
 ```kotlin
 NotificationList(notifications = state.notifications, onItemClick = { /* abrir alerta */ }, modifier = Modifier.heightIn(max = 400.dp))
 ProductList(products = state.latestProducts, onItemClick = { /* abrir item */ })
 EditableFieldRow(label = "Categoria", value = state.category, onEditClick = { viewModel.onEditClick() })
+EmployeeList(employees = state.employees, onItemClick = { /* abrir colaborador */ }, modifier = Modifier.weight(1f))
 ```
 
 ## Navegação (componentes visuais)
 
 Arquivo: `view/components/navigation/`. Estes componentes são **apenas visuais** — não conhecem `Route` nem `ZeraNavigator` diretamente (exceção: `BottomNavBar`, que já recebe `Route` para destacar o item ativo, mas ainda não dispara navegação real — ver "Inconsistências conhecidas" em [02-padroes-e-convencoes.md](02-padroes-e-convencoes.md)).
 
-- **`UpperNavBar(title, modifier, goBack, onBackClick)`** — barra superior com título e (opcional) botão "Voltar", que já dispara `onBackClick`; ações de notificação/perfil ainda são `TODO`.
+- **`UpperNavBar(title, modifier, goBack, onBackClick)`** — barra superior com título, (opcional) botão "Voltar" e os atalhos de notificações/perfil/menu à direita (perfil e menu ainda sem ação real, só visuais).
 - **`BottomNavBar(modifier, currentRoute)`** — barra inferior com 4 atalhos + botão central de escanear (`ZeraIcon.QrCode`); usa `ShortCutButton` internamente.
-- **`ManagerScaffold(title, modifier, fabIcon, onFabClick, content: @Composable ColumnScope.() -> Unit)`** (em `view/screens/manager/ManagerScaffold.kt`, não em `view/components/` — é específico das telas do Gestor) — casca compartilhada com `UpperNavBar` + `Column` rolável + `BottomNavBar` fixado em `Route.ManagerHome` + FAB de assistente virtual.
+- **`ManagerScaffold(title, modifier, goBack, onBackClick, fabIcon, onFabClick, scrollable, content: @Composable ColumnScope.() -> Unit)`** (em `view/screens/manager/ManagerScaffold.kt`, não em `view/components/` — é específico das telas do Gestor) — casca compartilhada com `UpperNavBar` + `Column` (rolável quando `scrollable = true`, padrão) + `BottomNavBar` fixado em `Route.ManagerHome` + FAB de assistente virtual. `goBack = true` exibe o botão "Voltar" na `UpperNavBar` — use em telas acessadas por navegação (ex.: "Colaboradores", aberta a partir de um atalho do Home), diferente das telas raiz do `BottomNavBar` (ex.: `ManagerHomeScreen`).
 
 ```kotlin
 ManagerScaffold(title = "Visão geral", onFabClick = { /* abrir chatbot */ }) {
     BodyText(text = "Conteúdo da tela")
+}
+```
+
+## Overlays
+
+Arquivo: `view/components/overlays/BottomSheet.kt`.
+
+- **`BottomSheet(onDismissRequest, modifier, sheetState, scrimColor, contentPadding, content: @Composable ColumnScope.() -> Unit)`** — base de um bottom sheet modal (`ModalBottomSheet` do Material 3 com *drag handle*, cantos e espaçamento padrão já resolvidos via `Radius`/`Spacing`). `scrimColor` (padrão `BottomSheetDefaults.ScrimColor`) escurece o restante da tela atrás do sheet; tocar nessa área também dispara `onDismissRequest`. Não define conteúdo próprio; sem prefixo `Zera` por não ser parametrizado por `ZeraColorFamily`. O chamador controla a visibilidade compondo o `BottomSheet` condicionalmente (ex.: `if (showSheet) { ... }`).
+
+```kotlin
+if (showDamageSheet) {
+    BottomSheet(onDismissRequest = { showDamageSheet = false }) {
+        TitleText(text = "Quais danos o item possui?")
+        ZeraChipsGroup(options = danos, selected = selecionado, onSelectedChange = { selecionado = it }, stacked = true)
+        ZeraButton(text = "Confirmar danos", onClick = {}, fillMaxWidth = true)
+    }
 }
 ```
 
