@@ -6,8 +6,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.zera.android.view.screens.EmployeeRegisterScreen
-import com.zera.android.view.screens.LoginScreen
+import com.zera.android.view.screens.auth.SingInScreen
+import com.zera.android.view.screens.auth.SingUpScreen
 import com.zera.android.view.screens.SplashScreen
 import com.zera.android.view.screens.WelcomeScreen
 import com.zera.android.view.screens.employee.EmployeeHome
@@ -33,6 +33,13 @@ fun ZeraNavHost(){
                     }
                 }
 
+                is NavCommand.PushAndClear -> {
+                    navController.navigate(command.route) {
+                        popUpTo(navController.graph.id) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                }
+
                 NavCommand.GoBack -> navController.popBackStack()
             }
         }
@@ -49,10 +56,10 @@ fun ZeraNavHost(){
             WelcomeScreen()
         }
         composable<Route.Login>{
-            LoginScreen()
+            SingInScreen()
         }
         composable<Route.Register>{
-            EmployeeRegisterScreen()
+            SingUpScreen()
         }
         composable<Route.ManagerHome>{
             ManagerHome()

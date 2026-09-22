@@ -51,13 +51,13 @@ class SingInViewModel : ViewModel() {
 
                 // in case of success navigate to the home screen according to the role of the user
                 when (selfUser.role) {
-                    "EMPLOYEE" -> ZeraNavigator.pushAndPop(Route.EmployeeHome)
-                    "MANAGER" -> ZeraNavigator.pushAndPop(Route.ManagerHome)
-
-                    // default to login screen
+                    "EMPLOYEE" -> ZeraNavigator.pushAndClear(Route.EmployeeHome)
+                    "MANAGER" -> ZeraNavigator.pushAndClear(Route.ManagerHome)
                     else -> {
-                        _state.value = _state.value.copy(isLoading = false, errorMessage = "Invalid role")
-                        ZeraNavigator.pushAndPop(Route.Login)
+                        _state.value = _state.value.copy(
+                            isLoading = false,
+                            errorMessage = "Perfil inválido. Tente entrar novamente."
+                        )
                     }
                 }
             } catch (e: Exception) {

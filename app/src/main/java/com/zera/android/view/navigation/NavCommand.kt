@@ -1,11 +1,16 @@
 package com.zera.android.view.navigation
 
-sealed interface NavCommand{
+sealed interface NavCommand {
     data class Navigate(
-        val route : Route
+        val route: Route
     ) : NavCommand
+
     data class PushAndPop(
-        val route : Route
+        val route: Route
+    ) : NavCommand
+
+    data class PushAndClear(
+        val route: Route
     ) : NavCommand
 
     data object GoBack : NavCommand
