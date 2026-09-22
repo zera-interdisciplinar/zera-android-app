@@ -167,5 +167,38 @@ ZeraIcon(ZeraIcon.Check, contentDescription = null, tint = MaterialTheme.colorSc
 - **`ProgressBar(modifier, progress)`** (`view/components/progressbars/ProgressBar.kt`) — barra linear; `progress = null` → indeterminada.
 - **`CircularProgressBar(progress, label, modifier, color)`** (`view/components/progressbars/CircularProgressBar.kt`) — indicador circular com porcentagem central e rótulo opcional.
 
+## Gráficos
+
+Arquivo: `view/components/graphs/`.
+
+- **`rankedBarGraphColors(items, valueOf)`** (`GraphColorCycle.kt`, `internal`) — lógica de cor compartilhada pelos dois gráficos de barra abaixo: ordena `items` por `valueOf` decrescente e devolve um mapa índice-original → `ZeraColorFamily`, ciclando `BarGraphColorCycle` = `[Blue, Yellow, Green]` (1º maior valor = azul, 2º = amarelo, 3º = verde, 4º = azul de novo...). Não depende da ordem de `items`, só do valor.
+- **`BarGraphItem(label, percentage)`** + **`HorizontalBarGraph(items, modifier, labelWeight, barHeight)`** (`HorizontalBarGraph.kt`) — gráfico de barras horizontais dentro de um card branco (`Surface` própria, cantos `Radius.medium`), uma linha por `BarGraphItem`: rótulo à esquerda, barra preenchida proporcionalmente a `percentage` (`0f`..`1f`, **já calculado por quem chama** — ver TODO de regra de negócio abaixo) e a porcentagem por extenso à direita, ambos na cor atribuída por `rankedBarGraphColors`. `TODO` no componente: animar o preenchimento da barra (ex.: `animateFloatAsState`).
+
+```kotlin
+HorizontalBarGraph(
+    items = listOf(
+        BarGraphItem(label = "Eletrônicos", percentage = 0.5f), // maior % → Azul
+        BarGraphItem(label = "Plásticos", percentage = 0.42f),  // 2º maior → Amarelo
+        BarGraphItem(label = "Outros", percentage = 0.2f),      // 3º maior → Verde
+    ),
+)
+```
+
+- **`VerticalBarGraphItem(label, value)`** + **`VerticalBarGraph(items, modifier, title, barWidth, maxBarHeight)`** (`VerticalBarGraph.kt`) — gráfico de colunas verticais dentro de um card branco (mesma `Surface`/cantos do `HorizontalBarGraph`), com `title` opcional no topo (`LabelText` em negrito). Uma coluna por `VerticalBarGraphItem`: valor acima (formatado sem casas decimais quando é inteiro), barra com altura proporcional ao maior `value` da lista (a de maior valor preenche `maxBarHeight` por completo) e rótulo abaixo — cor automática igual ao `HorizontalBarGraph`, via `rankedBarGraphColors`. Diferente de `percentage`, `value` é um valor bruto (ex.: kg descartados) — a normalização (maior = barra cheia) é feita dentro do próprio componente, não por quem chama. `TODO` no componente: animar a altura da barra (ex.: `animateDpAsState`).
+
+```kotlin
+VerticalBarGraph(
+    title = "Materiais descartados (kg)",
+    items = listOf(
+        VerticalBarGraphItem(label = "Mai", value = 7f),
+        VerticalBarGraphItem(label = "Jun", value = 10f),
+        VerticalBarGraphItem(label = "Jul", value = 29f), // maior valor → Azul, barra cheia
+        VerticalBarGraphItem(label = "Ago", value = 12f),
+    ),
+)
+```
+
+> **TODO (regra de negócio):** o cálculo dos valores exibidos (`BarGraphItem.percentage` / `VerticalBarGraphItem.value`) a partir dos dados brutos (ex.: contagem de itens por categoria, kg descartados por mês) deve ser feito no `ViewModel` da tela que usar esses componentes, não nos componentes em si. Documentar essa regra em `05-regras-de-negocio/` quando o primeiro caso de uso real for implementado (hoje não há tela consumindo `HorizontalBarGraph`/`VerticalBarGraph` ainda).
+
 
 Ao introduzir o segundo ou terceiro caso de uso com necessidades em comum (ex.: tratamento de erro padronizado, retry, cache), avalie formalizar essas abstrações e registre a decisão em [08-decisoes-arquiteturais/](08-decisoes-arquiteturais/).
