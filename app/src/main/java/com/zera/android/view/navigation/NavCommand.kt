@@ -9,7 +9,7 @@ sealed interface NavCommand {
         val route: Route
     ) : NavCommand
 
-    data class PushAndClear(
+    data class PushAndPopAll(
         val route: Route
     ) : NavCommand
 

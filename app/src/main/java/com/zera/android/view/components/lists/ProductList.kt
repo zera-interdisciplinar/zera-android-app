@@ -3,7 +3,8 @@ package com.zera.android.view.components.lists
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
@@ -24,7 +25,7 @@ import com.zera.android.view.theme.icons.ZeraIcon
  * @param icon ícone do catálogo [ZeraIcon] exibido no item. Quando `null`, o
  *   [ProductListItem] usa seu ícone padrão.
  */
-data class Product(
+data class ProductItem(
     val id: String,
     val name: String,
     val icon: ZeraIcon? = null,
@@ -34,29 +35,40 @@ data class Product(
  * Lista rolável de produtos: recebe os dados em [products] e renderiza um
  * [ProductListItem] para cada um.
  *
+ * A lista ocupa apenas a altura do seu conteúdo. Quando for colocada dentro de um
+ * container com rolagem vertical, limite a altura pelo [modifier]
+ * (ex.: `Modifier.heightIn(max = 400.dp)`).
+ *
  * @param products produtos a exibir, na ordem em que devem aparecer.
- * @param onItemClick ação executada ao tocar em um item, recebendo o [Product] clicado.
+ * @param onItemClick ação executada ao tocar em um item, recebendo o [ProductItem] clicado.
  * @param modifier modificador externo opcional.
+ * @param contentPadding espaçamento interno entre a borda da lista e os itens.
  * @param emptyContent conteúdo exibido quando [products] está vazio. Por padrão,
  *   uma mensagem de texto simples.
  */
 @Composable
 fun ProductList(
-    products: List<Product>,
-    onItemClick: (Product) -> Unit,
+    products: List<ProductItem>,
+    onItemClick: (ProductItem) -> Unit,
     modifier: Modifier = Modifier,
+    contentPadding: PaddingValues = PaddingValues(Spacing.medium),
     emptyContent: @Composable () -> Unit = { BodyText(text = "Nenhum produto encontrado") },
 ) {
     if (products.isEmpty()) {
-        Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Box(
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(contentPadding),
+            contentAlignment = Alignment.Center,
+        ) {
             emptyContent()
         }
         return
     }
 
     LazyColumn(
-        modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(Spacing.medium),
+        modifier = modifier.fillMaxWidth(),
+        contentPadding = contentPadding,
         verticalArrangement = Arrangement.spacedBy(Spacing.small),
     ) {
         items(products, key = { it.id }) { product ->
@@ -76,9 +88,9 @@ private fun ProductListPreview() {
     ZeraTheme {
         ProductList(
             products = listOf(
-                Product(id = "265964", name = "Placa de vídeo"),
-                Product(id = "118203", name = "Teclado mecânico", icon = ZeraIcon.Box),
-                Product(id = "330912", name = "Mouse sem fio"),
+                ProductItem(id = "265964", name = "Placa de vídeo"),
+                ProductItem(id = "118203", name = "Teclado mecânico", icon = ZeraIcon.Box),
+                ProductItem(id = "330912", name = "Mouse sem fio"),
             ),
             onItemClick = {},
         )

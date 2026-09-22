@@ -25,9 +25,9 @@ object ZeraNavigator {
     }
 
     /**
-     * Navega para [route] e esvazia a pilha (Splash, Welcome, Login, Register, etc.).
+     * Navega para [route] e esvazia a pilha (Splash, Welcome, SignIn, SignUp, etc.).
      */
-    fun pushAndClear(route: Route) {
-        _commands.trySend(NavCommand.PushAndClear(route))
+    fun pushAndPopAll(route: Route) {
+        _commands.trySend(NavCommand.PushAndPopAll(route))
     }
 }

@@ -10,23 +10,39 @@ import com.zera.android.view.navigation.ZeraNavigator
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 
-data class InvitationState(
-    val token: String = "",
+data class SignUpState(
     val name: String = "",
     val email: String = "",
     val password: String = "",
+    val token: String = "",
     val isLoading: Boolean = false,
     val errorMessage: String? = null
 )
 
-class InvitationViewModel : ViewModel() {
-    private val _state = mutableStateOf(InvitationState())
+class SignUpViewModel : ViewModel() {
+    private val _state = mutableStateOf(SignUpState())
     val state = _state
 
-    private val useCase = InvitationUseCase()
+    private val invitationUseCase = InvitationUseCase()
     private val signInUseCase = SingIn()
 
-    fun redeem() {
+    fun onNameChange(newName: String) {
+        _state.value = _state.value.copy(name = newName)
+    }
+
+    fun onEmailChange(newEmail: String) {
+        _state.value = _state.value.copy(email = newEmail)
+    }
+
+    fun onPasswordChange(newPassword: String) {
+        _state.value = _state.value.copy(password = newPassword)
+    }
+
+    fun onTokenChange(newToken: String) {
+        _state.value = _state.value.copy(token = newToken)
+    }
+
+    fun signUp() {
         _state.value = _state.value.copy(isLoading = true, errorMessage = null)
 
         val current = _state.value
@@ -54,7 +70,7 @@ class InvitationViewModel : ViewModel() {
 
         viewModelScope.launch {
             try {
-                useCase.execute(current.token, current.name, current.email, current.password)
+                invitationUseCase.execute(current.token, current.name, current.email, current.password)
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
                     isLoading = false,
@@ -67,13 +83,13 @@ class InvitationViewModel : ViewModel() {
                 val selfUser = signInUseCase.execute(current.email, current.password)
                 _state.value = _state.value.copy(isLoading = false)
                 when (selfUser.role) {
-                    "MANAGER" -> ZeraNavigator.pushAndClear(Route.ManagerHome)
-                    "EMPLOYEE" -> ZeraNavigator.pushAndClear(Route.EmployeeHome)
+                    "MANAGER" -> ZeraNavigator.pushAndPopAll(Route.ManagerHome)
+                    "EMPLOYEE" -> ZeraNavigator.pushAndPopAll(Route.EmployeeHome)
                     else -> {
                         _state.value = _state.value.copy(
                             errorMessage = "Cadastro feito, mas o perfil retornado não é válido. Entre pelo login."
                         )
-                        ZeraNavigator.pushAndPop(Route.Login)
+                        ZeraNavigator.pushAndPop(Route.SignIn)
                     }
                 }
             } catch (e: Exception) {
@@ -81,22 +97,9 @@ class InvitationViewModel : ViewModel() {
                     isLoading = false,
                     errorMessage = "Cadastro feito, mas o login automático falhou. Entre com o mesmo e-mail."
                 )
-                ZeraNavigator.pushAndPop(Route.Login)
+                ZeraNavigator.pushAndPop(Route.SignIn)
             }
         }
-    }
-
-    fun onTokenChange(newToken: String) {
-        _state.value = _state.value.copy(token = newToken)
-    }
-    fun onNameChange(newName: String) {
-        _state.value = _state.value.copy(name = newName)
-    }
-    fun onEmailChange(newEmail: String) {
-        _state.value = _state.value.copy(email = newEmail)
-    }
-    fun onPasswordChange(newPassword: String) {
-        _state.value = _state.value.copy(password = newPassword)
     }
 
     private fun isValidEmail(email: String): Boolean {
