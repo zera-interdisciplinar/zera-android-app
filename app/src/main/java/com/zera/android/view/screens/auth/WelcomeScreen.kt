@@ -61,6 +61,29 @@ fun WelcomeScreen(){
                 )
             }
             Spacer(Modifier.height(Spacing.medium))
+
+            // TODO: botões provisórios para teste, remover antes de mergear
+            Column {
+                ZeraButton(
+                    text = "[TESTE] Home Funcionário",
+                    style = ZeraColorFamily.Blue,
+                    type = ZeraButtonType.Secondary,
+                    fillMaxWidth = true,
+                    onClick = {
+                        ZeraNavigator.push(Route.EmployeeHome)
+                    }
+                )
+                Spacer(Modifier.height(Spacing.small))
+                ZeraButton(
+                    text = "[TESTE] Home Gestor",
+                    style = ZeraColorFamily.Yellow,
+                    type = ZeraButtonType.Secondary,
+                    fillMaxWidth = true,
+                    onClick = {
+                        ZeraNavigator.push(Route.ManagerHome)
+                    }
+                )
+            }
         }
     }
 
