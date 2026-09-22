@@ -8,6 +8,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import com.zera.android.model.remote.service.SelfUserService
+import com.zera.android.model.remote.service.InvitationService
 
 object ApiClient {
     private val json = Json { ignoreUnknownKeys = true }
@@ -37,4 +38,7 @@ object ApiClient {
     
     // service for self user
     val selfUserService: SelfUserService by lazy { retrofit.create(SelfUserService::class.java) }
+    
+    // service for invitation
+    val invitationService: InvitationService by lazy { retrofit.create(InvitationService::class.java) }
 }
