@@ -120,7 +120,7 @@ EmployeeList(employees = state.employees, onItemClick = { /* abrir colaborador *
 
 Arquivo: `view/components/navigation/`. Estes componentes são **apenas visuais** — não conhecem `Route` nem `ZeraNavigator` diretamente (exceção: `BottomNavBar`, que já recebe `Route` para destacar o item ativo, mas ainda não dispara navegação real — ver "Inconsistências conhecidas" em [02-padroes-e-convencoes.md](02-padroes-e-convencoes.md)).
 
-- **`UpperNavBar(title, modifier, goBack, onBackClick)`** — barra superior com título, (opcional) botão "Voltar" e os atalhos de notificações/perfil/menu à direita (perfil e menu ainda sem ação real, só visuais).
+- **`UpperNavBar(title, modifier, goBack, onBackClick, showActions)`** — barra superior com título, (opcional) botão "Voltar" e os atalhos de notificações/perfil/menu à direita (perfil e menu ainda sem ação real, só visuais). `showActions = false` esconde os três atalhos à direita — use em telas que só precisam do "Voltar" (ex.: "Perfil").
 - **`BottomNavBar(modifier, currentRoute)`** — barra inferior com 4 atalhos + botão central de escanear (`ZeraIcon.QrCode`); usa `ShortCutButton` internamente.
 - **`ManagerScaffold(title, modifier, goBack, onBackClick, fabIcon, onFabClick, scrollable, content: @Composable ColumnScope.() -> Unit)`** (em `view/screens/manager/ManagerScaffold.kt`, não em `view/components/` — é específico das telas do Gestor) — casca compartilhada com `UpperNavBar` + `Column` (rolável quando `scrollable = true`, padrão) + `BottomNavBar` fixado em `Route.ManagerHome` + FAB de assistente virtual. `goBack = true` exibe o botão "Voltar" na `UpperNavBar` — use em telas acessadas por navegação (ex.: "Colaboradores", aberta a partir de um atalho do Home), diferente das telas raiz do `BottomNavBar` (ex.: `ManagerHomeScreen`).
 
@@ -132,10 +132,10 @@ ManagerScaffold(title = "Visão geral", onFabClick = { /* abrir chatbot */ }) {
 
 ## Overlays
 
-Arquivo: `view/components/overlays/BottomSheet.kt`.
+Arquivo: `view/components/overlays/`.
 
-- **`BottomSheet(onDismissRequest, modifier, sheetState, scrimColor, contentPadding, content: @Composable ColumnScope.() -> Unit)`** — base de um bottom sheet modal (`ModalBottomSheet` do Material 3 com *drag handle*, cantos e espaçamento padrão já resolvidos via `Radius`/`Spacing`). `scrimColor` (padrão `BottomSheetDefaults.ScrimColor`) escurece o restante da tela atrás do sheet; tocar nessa área também dispara `onDismissRequest`. Não define conteúdo próprio; sem prefixo `Zera` por não ser parametrizado por `ZeraColorFamily`. O chamador controla a visibilidade compondo o `BottomSheet` condicionalmente (ex.: `if (showSheet) { ... }`).
-
+- **`BottomSheet(onDismissRequest, modifier, sheetState, scrimColor, contentPadding, content: @Composable ColumnScope.() -> Unit)`** (`BottomSheet.kt`) — base de um bottom sheet modal (`ModalBottomSheet` do Material 3 com *drag handle*, cantos e espaçamento padrão já resolvidos via `Radius`/`Spacing`). `scrimColor` (padrão `BottomSheetDefaults.ScrimColor`) escurece o restante da tela atrás do sheet; tocar nessa área também dispara `onDismissRequest`. Não define conteúdo próprio; sem prefixo `Zera` por não ser parametrizado por `ZeraColorFamily`. O chamador controla a visibilidade compondo o `BottomSheet` condicionalmente (ex.: `if (showSheet) { ... }`).
+- **`PopupDialog(onDismissRequest, modifier, contentPadding, content: @Composable ColumnScope.() -> Unit)`** (`PopupDialog.kt`) — base de um popup modal centralizado (usa o `Dialog` do Compose, que já resolve scrim + fechar ao tocar fora/voltar) com um botão de fechar (X) fixo no canto superior direito. Mesma convenção de visibilidade do `BottomSheet`: o chamador guarda um campo no `State` do `ViewModel` (`String?`/`Boolean`) e só compõe o `PopupDialog` com `if (...) { ... }` — o `ViewModel` nunca chama Compose diretamente, só atualiza esse campo.
 ```kotlin
 if (showDamageSheet) {
     BottomSheet(onDismissRequest = { showDamageSheet = false }) {
@@ -150,7 +150,7 @@ if (showDamageSheet) {
 
 Arquivo: `view/theme/icons/`.
 
-- **`ZeraIcon`** (enum) — catálogo de ícones (`Bell`, `Box`, `Chatbot`, `Check`, `Close`, `Crate`, `DownArrow`, `Download`, `Edit`, `Exclamation`, `Gear`, `Graph`, `Group`, `Home`, `InfoCircle`, `LeftArrow`, `RightArrow`, `LeftUTurn`, `Location`, `Megaphone`, `Placeholder`, `Plus`, `ProceedArrow`, `Profile`, `QrCode`, `Recycle`, `RightUTurn`, `Screen`, `Send`, `Truck`, `Wrench`), cada um apontando para um drawable vetorial.
+- **`ZeraIcon`** (enum) — catálogo de ícones (`Bell`, `Box`, `Chatbot`, `Check`, `Close`, `Crate`, `DownArrow`, `Download`, `Edit`, `Exclamation`, `Gear`, `Graph`, `Group`, `Home`, `InfoCircle`, `LeftArrow`, `RightArrow`, `LeftUTurn`, `Location`, `Megaphone`, `Menu`, `Placeholder`, `Plus`, `ProceedArrow`, `Profile`, `QrCode`, `Recycle`, `RightUTurn`, `Screen`, `Send`, `Truck`, `Wrench`), cada um apontando para um drawable vetorial.
 - **`ZeraIcon(icon, contentDescription, modifier, size, tint)`** (composable) — desenha o ícone; `size` padrão 24dp, `tint` padrão `LocalContentColor.current` (ver `ZeraIconDefaults`).
 
 ```kotlin
@@ -163,6 +163,7 @@ ZeraIcon(ZeraIcon.Check, contentDescription = null, tint = MaterialTheme.colorSc
 - **`Logo(modifier)`** (`view/components/logo/Logo.kt`) — logo do app com proporção fixa (595:154); controle de tamanho via `Modifier.width(...)`.
 - **`SplashBackground()`** (`view/components/outros/SplashBackground.kt`) — arte decorativa de fundo da splash/telas de auth (faixas coloridas via `Canvas`).
 - **`Tag(text, modifier, style, contentPadding)`** (`view/components/outros/Tag.kt`) — pílula de status curta, sempre no par (container, conteúdo) de uma `ZeraColorFamily`.
+- **`Avatar(initials, modifier, photoUrl, size, style)`** (`view/components/outros/Avatar.kt`) — avatar circular do usuário; mostra as `initials` (calculadas por quem chama, ex.: no `ViewModel`) quando `photoUrl` é `null` (padrão). Quando `photoUrl` é informada, **ainda não carrega a foto de verdade** — não há lib de carregamento de imagem (ex.: Coil) no projeto ainda; por enquanto só troca as iniciais por um ícone de placeholder (`TODO` no componente).
 - **`ProgressBar(modifier, progress)`** (`view/components/progressbars/ProgressBar.kt`) — barra linear; `progress = null` → indeterminada.
 - **`CircularProgressBar(progress, label, modifier, color)`** (`view/components/progressbars/CircularProgressBar.kt`) — indicador circular com porcentagem central e rótulo opcional.
 
