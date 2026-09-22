@@ -30,11 +30,13 @@ import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
-import com.zera.android.viewmodel.auth.InvitationViewModel
+import com.zera.android.view.transition.SharedElementKeys
+import com.zera.android.view.transition.sharedTransition
+import com.zera.android.viewmodel.auth.SignUpViewModel
 
 @Composable
-fun SingUpScreen(
-    viewModel: InvitationViewModel = viewModel()
+fun SignUpScreen(
+    viewModel: SignUpViewModel = viewModel()
 ) {
     val state by viewModel.state
 
@@ -50,7 +52,12 @@ fun SingUpScreen(
             modifier = Modifier.padding(horizontal = Spacing.xLarge)
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Logo(Modifier.width(250.dp).padding(bottom = Spacing.small))
+                Logo(
+                    Modifier
+                        .sharedTransition(SharedElementKeys.Logo)
+                        .width(250.dp)
+                        .padding(bottom = Spacing.small)
+                )
                 TitleText("Cadastrar funcionario", bold = true)
             }
             ZeraTextInput(
@@ -78,7 +85,7 @@ fun SingUpScreen(
                 onValueChange = { viewModel.onTokenChange(it) },
                 label = "Código de convite",
                 isError = state.errorMessage != null && state.token.length != 6,
-                onFilled = { viewModel.redeem() },
+                onFilled = { viewModel.signUp() },
             )
         }
         Spacer(Modifier.height(Spacing.xLarge))
@@ -93,13 +100,13 @@ fun SingUpScreen(
             ZeraButton(
                 text = if (state.isLoading) "Cadastrando..." else "Cadastrar",
                 enabled = !state.isLoading,
-                onClick = { viewModel.redeem() }
+                onClick = { viewModel.signUp() }
             )
         }
         CaptionText(
             text = "Já tenho conta",
             underline = true,
-            onClick = { ZeraNavigator.push(Route.Login) },
+            onClick = { ZeraNavigator.push(Route.SignIn) },
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth().padding(Spacing.small),
         )
@@ -108,8 +115,8 @@ fun SingUpScreen(
 
 @Composable
 @Preview
-fun SingUpScreenPreview() {
+fun SignUpScreenPreview() {
     ZeraTheme {
-        SingUpScreen()
+        SignUpScreen()
     }
 }

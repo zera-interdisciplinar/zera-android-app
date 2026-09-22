@@ -9,7 +9,6 @@ import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
 import kotlinx.coroutines.launch
 
-
 data class SingInState(
     val email: String = "",
     val password: String = "",
@@ -34,7 +33,6 @@ class SingInViewModel : ViewModel() {
     fun signIn() {
         _state.value = _state.value.copy(isLoading = true, errorMessage = null)
 
-        // A simple client-side validation for email and password
         if (state.value.email.isBlank() || state.value.password.isBlank()) {
             _state.value = _state.value.copy(
                 isLoading = false,
@@ -43,16 +41,14 @@ class SingInViewModel : ViewModel() {
             return
         }
 
-        // Call the authentication use case here
         viewModelScope.launch {
             try {
-                var selfUser : SelfUserResponseDTO = useCase.execute(state.value.email, state.value.password)
+                val selfUser: SelfUserResponseDTO = useCase.execute(state.value.email, state.value.password)
                 _state.value = _state.value.copy(isLoading = false)
 
-                // in case of success navigate to the home screen according to the role of the user
                 when (selfUser.role) {
-                    "EMPLOYEE" -> ZeraNavigator.pushAndClear(Route.EmployeeHome)
-                    "MANAGER" -> ZeraNavigator.pushAndClear(Route.ManagerHome)
+                    "EMPLOYEE" -> ZeraNavigator.pushAndPopAll(Route.EmployeeHome)
+                    "MANAGER" -> ZeraNavigator.pushAndPopAll(Route.ManagerHome)
                     else -> {
                         _state.value = _state.value.copy(
                             isLoading = false,
