@@ -6,7 +6,8 @@ O app é um módulo Android único (`:app`) organizado em três camadas, inspira
 
 - **`model`** — dados e regras de acesso a dados: DTOs (`model/entity`), persistência local (`model/local`), acesso remoto via Retrofit (`model/remote`) e casos de uso (`model/usecase`).
 - **`viewmodel`** — um `ViewModel` por tela (ou por feature de tela), expõe um `State` imutável via `mutableStateOf` e métodos de intenção (`onEmailChange`, `signIn`, ...). Instancia o(s) `usecase` que precisa diretamente (`val useCase = SingIn()`), sem injeção.
-- **`view`** — Jetpack Compose puro: `screens` (telas, uma por rota), `components` (Design System reutilizável — ver [03-catalogo-componentes.md](03-catalogo-componentes.md)), `navigation` (rotas e navegação), `theme` (tokens visuais) e `transition` (transições compartilhadas entre telas).
+  - Subpasta `shared/`: `ViewModels` de telas acessadas por mais de um tipo de usuário (ex.: "Perfil", acessada tanto por Gestor quanto por Operário) — ver a mesma convenção em `view/screens/shared/` logo abaixo.
+- **`view`** — Jetpack Compose puro: `screens` (telas, uma por rota, organizadas por domínio — `auth/`, `manager/`, `employee/` e `shared/` para telas comuns a mais de um tipo de usuário), `components` (Design System reutilizável — ver [03-catalogo-componentes.md](03-catalogo-componentes.md)), `navigation` (rotas e navegação), `theme` (tokens visuais) e `transition` (transições compartilhadas entre telas).
 
 Não há camada de `Repository` separada: o `usecase` fala diretamente com `ApiClient.<service>` e com `SharedPreferencesManager`. Para o volume atual de regras isso é suficiente; se a lógica de acesso a dados crescer (ex.: cache local, múltiplas fontes), vale reavaliar (registrar a decisão em [08-decisoes-arquiteturais/](08-decisoes-arquiteturais/) quando isso acontecer).
 
@@ -34,9 +35,9 @@ com.zera.android
 │   │   ├── client/        ApiClient (Retrofit + OkHttp, singleton)
 │   │   └── service/       interfaces Retrofit (AuthService, SelfUserService, ...)
 │   └── usecase/           regra de negócio de acesso a dados, por domínio (auth/SingIn, ...)
-├── viewmodel/             um ViewModel por tela/feature, por domínio (auth/, manager/, ...)
+├── viewmodel/             um ViewModel por tela/feature, por domínio (auth/, manager/, shared/, ...)
 └── view
-    ├── screens/           telas Compose, por domínio (auth/, manager/, employee/) + telas soltas (SplashScreen)
+    ├── screens/           telas Compose, por domínio (auth/, manager/, employee/, shared/) + telas soltas (SplashScreen)
     ├── components/        Design System (buttons, cards, containers, inputs, lists, navigation, texts, ...)
     ├── navigation/         Route, NavCommand, ZeraNavigator, ZeraNavHost
     ├── theme/              tokens (cores, tipografia, espaçamento, raio) + ícones
@@ -44,6 +45,8 @@ com.zera.android
 ```
 
 A organização é **por camada primeiro, por domínio depois** (`model/usecase/auth`, `viewmodel/auth`, `view/screens/auth`), e não por feature verticalizada. Ao adicionar um domínio novo, siga esse mesmo padrão de subpasta.
+
+`shared/` é um "domínio" especial para telas acessadas por mais de um tipo de usuário (ex.: "Perfil", acessada tanto por Gestor quanto por Operário) — não use os domínios `manager/`/`employee/` para esses casos, mesmo que a tela tenha sido pensada a partir de um mockup de um perfil específico.
 
 ## Fluxo de dados entre camadas
 
