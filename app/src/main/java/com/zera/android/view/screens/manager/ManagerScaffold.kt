@@ -17,7 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zera.android.view.components.buttons.IconButton
-import com.zera.android.view.components.navigation.BottomNavBar
+import com.zera.android.view.components.navigation.ManagerBottomNavBar
 import com.zera.android.view.components.navigation.UpperNavBar
 import com.zera.android.view.components.texts.BodyText
 import com.zera.android.view.navigation.Route
@@ -73,7 +73,7 @@ fun ManagerScaffold(
             )
         },
         bottomBar = {
-            BottomNavBar(
+            ManagerBottomNavBar(
                 currentRoute = Route.ManagerHome,
                 modifier = Modifier
                     .fillMaxWidth()
