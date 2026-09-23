@@ -17,6 +17,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zera.android.view.components.buttons.ZeraButton
 import com.zera.android.view.components.buttons.ZeraButtonType
+import com.zera.android.view.components.inputs.ZeraInputType
 import com.zera.android.view.components.lists.EditableFieldRow
 import com.zera.android.view.components.navigation.UpperNavBar
 import com.zera.android.view.components.outros.Avatar
@@ -79,9 +80,29 @@ fun ProfileScreen(
                 type = ZeraButtonType.Secondary,
             )
 
-            EditableFieldRow(label = "Nome", value = state.fullName, onEditClick = viewModel::onEditNameClick)
-            EditableFieldRow(label = "E-mail", value = state.email, onEditClick = viewModel::onEditEmailClick)
-            EditableFieldRow(label = "Telefone", value = state.phone, onEditClick = viewModel::onEditPhoneClick)
+            EditableFieldRow(
+                label = "Nome",
+                value = state.fullName,
+                onEditClick = viewModel::onEditNameClick,
+            )
+            EditableFieldRow(
+                label = "E-mail",
+                value = state.email,
+                inputType = ZeraInputType.Email,
+                onEditClick = viewModel::onEditEmailClick,
+                validate = { email ->
+                    if (email.contains("@")) null else "E-mail inválido"
+                },
+            )
+            EditableFieldRow(
+                label = "Telefone",
+                value = state.phone,
+                inputType = ZeraInputType.Phone,
+                onEditClick = viewModel::onEditPhoneClick,
+                validate = { phone ->
+                    if (phone.count(Char::isDigit) >= 10) null else "Telefone inválido"
+                },
+            )
             EditableFieldRow(label = "Cargo", value = state.position)
         }
     }
