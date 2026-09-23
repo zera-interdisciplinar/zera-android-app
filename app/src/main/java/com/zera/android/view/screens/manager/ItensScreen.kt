@@ -10,6 +10,7 @@ import com.zera.android.view.components.inputs.ZeraChipsGroup
 import com.zera.android.view.components.inputs.ZeraSearchInput
 import com.zera.android.view.components.lists.ProductList
 import com.zera.android.view.components.texts.TitleText
+import com.zera.android.view.navigation.Route
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
 import com.zera.android.viewmodel.manager.ItensViewModel
@@ -22,6 +23,7 @@ fun ItensScreen(
 
     ManagerScaffold(
         title = "Itens",
+        currentRoute = Route.Itens,
         scrollable = false,
         onFabClick = { /* TODO: abrir chatbot */ },
     ) {

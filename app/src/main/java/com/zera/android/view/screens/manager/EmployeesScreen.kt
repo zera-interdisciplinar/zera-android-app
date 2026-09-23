@@ -22,6 +22,7 @@ import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.components.texts.HeadlineText
 import com.zera.android.view.components.texts.LabelText
 import com.zera.android.view.components.texts.TitleText
+import com.zera.android.view.navigation.Route
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.view.theme.ZeraTheme
@@ -36,6 +37,7 @@ fun EmployeesScreen(
 
     ManagerScaffold(
         title = "Colaboradores",
+        currentRoute = Route.Employees,
         goBack = true,
         onBackClick = viewModel::onBackClick,
         onFabClick = { /* TODO: abrir chatbot */ },

@@ -23,6 +23,7 @@ import com.zera.android.view.components.texts.HeadlineText
 import com.zera.android.view.components.texts.LabelText
 import com.zera.android.view.components.texts.SubtitleText
 import com.zera.android.view.components.texts.TitleText
+import com.zera.android.view.navigation.Route
 import com.zera.android.view.theme.Radius
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraColorFamily
@@ -39,6 +40,7 @@ fun IndexesScreen(
 
     ManagerScaffold(
         title = "Indicadores",
+        currentRoute = Route.Indexes,
         goBack = true,
     ) {
         SubtitleText(text = "Acompanhe desempenho e impacto")
