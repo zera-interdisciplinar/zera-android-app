@@ -78,8 +78,7 @@ fun ItemDetailsScreen(
                 itemId = state.itemId,
                 itemName = state.itemName,
                 itemSubtitle = state.itemSubtitle,
-                statusText = state.statusText,
-                statusStyle = state.statusStyle,
+                status = state.status,
             )
 
             EditableFieldRow(label = "Categoria", value = state.category, onEditClick = viewModel::onEditClick)

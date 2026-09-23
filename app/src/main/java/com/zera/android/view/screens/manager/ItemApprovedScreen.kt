@@ -95,8 +95,7 @@ fun ItemApprovedScreen(
                     itemName = state.itemName,
                     itemSubtitle = state.itemSubtitle,
                     itemId = state.itemId,
-                    statusText = state.statusText,
-                    statusStyle = state.statusStyle,
+                    status = state.status,
                 )
 
                 ZeraButton(
