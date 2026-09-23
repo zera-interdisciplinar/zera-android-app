@@ -1,4 +1,4 @@
-package com.zera.android.view.components.progressbars
+package com.zera.android.view.components.graphs
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,7 +19,7 @@ import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
 
 @Composable
-fun CircularProgressBar(
+fun CircularGraph(
     progress: () -> Float,
     label: String? = null,
     modifier: Modifier = Modifier,
@@ -52,9 +52,9 @@ fun CircularProgressBar(
 
 @Preview(showBackground = false)
 @Composable
-fun CircularProgressBarPreview(){
+fun CircularGraphPreview(){
     ZeraTheme() {
-        CircularProgressBar(
+        CircularGraph(
             progress = {0.75f},
             label = "Meta",
         )

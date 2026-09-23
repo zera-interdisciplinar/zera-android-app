@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.zera.android.view.components.outros.Tag
 import com.zera.android.view.components.texts.BodyText
 import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.theme.Radius
@@ -44,6 +45,9 @@ private val IconBoxSize = 48.dp
  *   disponível por padrão ([Modifier.fillMaxWidth]).
  * @param icon ícone do catálogo [ZeraIcon] exibido no quadrado à esquerda. Quando
  *   `null` (padrão), usa [ZeraIcon.Placeholder].
+ * @param statusText texto curto de status (ex.: "Pendente"). Quando não `null`,
+ *   substitui a seta de "avançar" por uma [Tag] com esse texto na cor [statusStyle].
+ * @param statusStyle família de cor da [Tag] de status. Só tem efeito quando [statusText] não é `null`.
  */
 @Composable
 fun ProductListItem(
@@ -52,12 +56,14 @@ fun ProductListItem(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     icon: ZeraIcon? = null,
+    statusText: String? = null,
+    statusStyle: ZeraColorFamily = ZeraColorFamily.Yellow,
 ) {
     Surface(
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(Radius.large),
-        color = MaterialTheme.colorScheme.surfaceContainerLowest,
+        color = MaterialTheme.colorScheme.surface,
         contentColor = MaterialTheme.colorScheme.onSurface,
     ) {
         Row(
@@ -87,12 +93,16 @@ fun ProductListItem(
                 BodyText(text = itemName, bold = true)
                 CaptionText(text = "ID $itemId")
             }
-            ZeraIcon(
-                icon = ZeraIcon.ProceedArrow,
-                contentDescription = null,
-                size = Spacing.medium,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            if (statusText != null) {
+                Tag(text = statusText, style = statusStyle)
+            } else {
+                ZeraIcon(
+                    icon = ZeraIcon.ProceedArrow,
+                    contentDescription = null,
+                    size = Spacing.medium,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
     }
 }
@@ -114,6 +124,27 @@ private fun ProductListItemPreview() {
                 itemName = "Teclado mecânico",
                 itemId = "118203",
                 icon = ZeraIcon.Box,
+                onClick = {},
+            )
+            ProductListItem(
+                itemName = "Placa de vídeo",
+                itemId = "265964",
+                statusText = "Pendente",
+                statusStyle = ZeraColorFamily.Yellow,
+                onClick = {},
+            )
+            ProductListItem(
+                itemName = "Placa de vídeo",
+                itemId = "265965",
+                statusText = "Reprovado",
+                statusStyle = ZeraColorFamily.Red,
+                onClick = {},
+            )
+            ProductListItem(
+                itemName = "Placa de vídeo",
+                itemId = "265966",
+                statusText = "Aprovada",
+                statusStyle = ZeraColorFamily.Green,
                 onClick = {},
             )
         }

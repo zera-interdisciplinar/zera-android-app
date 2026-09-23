@@ -22,6 +22,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -71,6 +72,7 @@ fun ZeraTokenInput(
     onFilled: (String) -> Unit = {},
 ) {
     val code = value.filter(Char::isDigit).take(size)
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     Column(modifier = modifier) {
         if (label.isNotEmpty()) {
@@ -93,7 +95,12 @@ fun ZeraTokenInput(
                 imeAction = ImeAction.Done,
             ),
             keyboardActions = KeyboardActions(
-                onDone = { if (code.length == size) onFilled(code) },
+                onDone = {
+                    if (code.length == size) {
+                        onFilled(code)
+                        keyboardController?.hide()
+                    }
+                },
             ),
             decorationBox = {
                 Row(horizontalArrangement = Arrangement.spacedBy(Spacing.small)) {

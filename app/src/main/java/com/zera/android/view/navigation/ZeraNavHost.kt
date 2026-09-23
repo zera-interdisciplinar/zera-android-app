@@ -14,7 +14,13 @@ import com.zera.android.view.screens.auth.SignUpScreen
 import com.zera.android.view.screens.SplashScreen
 import com.zera.android.view.screens.auth.WelcomeScreen
 import com.zera.android.view.screens.employee.EmployeeHomeScreen
+import com.zera.android.view.screens.manager.EmployeesScreen
+import com.zera.android.view.screens.manager.IndexesScreen
+import com.zera.android.view.screens.manager.ItemApprovedScreen
+import com.zera.android.view.screens.manager.ItemDetailsScreen
+import com.zera.android.view.screens.manager.ItensScreen
 import com.zera.android.view.screens.manager.ManagerHomeScreen
+import com.zera.android.view.screens.shared.ProfileScreen
 import com.zera.android.view.transition.LocalAnimatedVisibilityScope
 import com.zera.android.view.transition.LocalSharedTransitionScope
 
@@ -80,8 +86,26 @@ fun ZeraNavHost() {
                 composable<Route.ManagerHome> {
                     ManagerHomeScreen()
                 }
+                composable<Route.ItemDetails> {
+                    ItemDetailsScreen()
+                }
+                composable<Route.Employees> {
+                    EmployeesScreen()
+                }
+                composable<Route.ItemApproved> {
+                    ItemApprovedScreen()
+                }
+                composable<Route.Indexes> {
+                    IndexesScreen()
+                }
+                composable<Route.Itens> {
+                    ItensScreen()
+                }
                 composable<Route.EmployeeHome> {
                     EmployeeHomeScreen()
+                }
+                composable<Route.Profile> {
+                    ProfileScreen()
                 }
             }
         }
