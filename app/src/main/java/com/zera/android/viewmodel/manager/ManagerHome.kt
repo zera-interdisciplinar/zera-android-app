@@ -4,6 +4,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.zera.android.view.components.lists.NotificationItem
 import com.zera.android.view.components.lists.ProductItem
+import com.zera.android.view.navigation.Route
+import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.view.theme.icons.ZeraIcon
 
@@ -58,5 +60,13 @@ class ManagerHomeViewModel : ViewModel() {
 
     private fun loadDashboard() {
         // TODO: buscar o resumo do gestor no back e atualizar o _state (isLoading / errorMessage inclusos)
+    }
+
+    fun onItemCardClick() {
+        ZeraNavigator.push(Route.Itens)
+    }
+
+    fun onEmployeesCardClick() {
+        ZeraNavigator.push(Route.Employees)
     }
 }
