@@ -23,6 +23,7 @@ import com.zera.android.view.components.texts.BodyText
 import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.components.texts.LabelText
 import com.zera.android.view.components.texts.TitleText
+import com.zera.android.view.navigation.Route
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
 import com.zera.android.view.theme.icons.ZeraIcon
@@ -36,6 +37,7 @@ fun ManagerHomeScreen(
 
     ManagerScaffold(
         title = "Visão geral",
+        currentRoute = Route.ManagerHome,
         onFabClick = { /* TODO: abrir chatbot */ },
     ) {
         Column(modifier = Modifier.padding(horizontal = Spacing.small)) {
@@ -55,14 +57,14 @@ fun ManagerHomeScreen(
                 label = "Itens",
                 value = state.totalItems,
                 labelIcon = ZeraIcon.Box,
-                onClick = { /* TODO: navegar para itens */ },
+                onClick = viewModel::onItemCardClick,
                 modifier = Modifier.weight(1f),
             )
             ShortcutCard(
                 label = "Funcionários",
                 value = state.totalEmployees,
                 labelIcon = ZeraIcon.Group,
-                onClick = { /* TODO: navegar para funcionários */ },
+                onClick = viewModel::onEmployeesCardClick,
                 modifier = Modifier.weight(1f),
             )
         }

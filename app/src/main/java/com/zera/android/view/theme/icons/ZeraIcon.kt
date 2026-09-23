@@ -40,6 +40,7 @@ enum class ZeraIcon(@DrawableRes val resId: Int) {
     RightArrow(R.drawable.right_arrow),
     LeftUTurn(R.drawable.left_u_turn),
     Location(R.drawable.location),
+    MagnifyingGlass(R.drawable.magnifying_glass),
     Megaphone(R.drawable.megaphone),
     Placeholder(R.drawable.placeholder),
     Plus(R.drawable.plus),
@@ -51,7 +52,10 @@ enum class ZeraIcon(@DrawableRes val resId: Int) {
     Screen(R.drawable.screen),
     Send(R.drawable.send),
     Truck(R.drawable.truck),
-    Wrench(R.drawable.wrench);
+    Wrench(R.drawable.wrench),
+    Menu(R.drawable.menu),
+
+    BriefCase(R.drawable.brief_case);
 
     /** `Painter` do ícone, para composables que pedem `painter` em vez de aceitar [ZeraIcon]. */
     @Composable

@@ -111,7 +111,7 @@ private fun ZeraChip(
 ) {
     val palette = style.palette()
     val borderColor = if (selected) palette.base.copy(alpha = 0.5f) else MaterialTheme.colorScheme.outlineVariant
-    val containerColor = if (selected) palette.container else MaterialTheme.colorScheme.surfaceContainerLowest
+    val containerColor = if (selected) palette.container else MaterialTheme.colorScheme.surface
     val contentColor = if (selected) palette.onContainer else MaterialTheme.colorScheme.onSurfaceVariant
 
     Surface(

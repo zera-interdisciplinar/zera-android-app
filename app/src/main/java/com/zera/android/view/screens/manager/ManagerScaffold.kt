@@ -17,10 +17,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zera.android.view.components.buttons.IconButton
-import com.zera.android.view.components.navigation.BottomNavBar
+import com.zera.android.view.components.navigation.ManagerBottomNavBar
 import com.zera.android.view.components.navigation.UpperNavBar
 import com.zera.android.view.components.texts.BodyText
 import com.zera.android.view.navigation.Route
+import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
 import com.zera.android.view.theme.icons.ZeraIcon
@@ -28,39 +29,55 @@ import com.zera.android.view.theme.icons.ZeraIcon
 /**
  * Casca (Scaffold) compartilhada pelas telas da área do gestor.
  *
- * Já monta a [UpperNavBar] (com o [title] da tela), a [BottomNavBar] fixada em
- * [Route.ManagerHome] e o botão flutuante de assistente virtual — com os insets de
- * status bar / navigation bar já aplicados. Cada tela só precisa passar o [title] e
- * o [content], que é desenhado dentro de uma [Column] rolável.
+ * Já monta a [UpperNavBar] (com o [title] da tela), o [ManagerBottomNavBar] e o botão
+ * flutuante de assistente virtual — com os insets de status bar / navigation bar já
+ * aplicados. Cada tela só precisa passar o [title], a própria [currentRoute] e o
+ * [content], que é desenhado dentro de uma [Column] rolável.
  *
  * @param title título exibido na [UpperNavBar].
+ * @param currentRoute rota da própria tela, repassada ao [ManagerBottomNavBar] para
+ *   destacar e desabilitar o atalho que levaria para a tela atual.
  * @param modifier modificador externo opcional, aplicado ao [Scaffold].
+ * @param goBack quando `true`, exibe o botão "Voltar" na [UpperNavBar] — use em telas
+ *   acessadas por navegação (ex.: um atalho do Home), diferente das telas raiz do
+ *   [ManagerBottomNavBar] (ex.: [ManagerHomeScreen]).
+ * @param onBackClick ação do botão "Voltar". Só é usada quando [goBack] é `true`.
  * @param fabIcon ícone do botão flutuante. Quando `null`, nenhum FAB é exibido.
  * @param onFabClick ação do botão flutuante. Só é usada quando [fabIcon] não for `null`.
- * @param content conteúdo da tela, desenhado dentro da [Column] rolável do Scaffold.
+ * @param scrollable quando `true` (padrão), a [Column] do conteúdo rola inteira. Use
+ *   `false` quando [content] já tiver seu próprio elemento rolável (ex.: uma lista longa
+ *   em [com.zera.android.view.components.lists.ProductList] com `Modifier.weight(1f)`) —
+ *   caso contrário, um `LazyColumn` dentro de uma `Column` rolável quebra em tempo de execução.
+ * @param content conteúdo da tela, desenhado dentro da [Column] do Scaffold.
  */
 @Composable
 fun ManagerScaffold(
     title: String,
+    currentRoute: Route,
     modifier: Modifier = Modifier,
+    goBack: Boolean = false,
+    onBackClick: () -> Unit = { ZeraNavigator.goBack() },
     fabIcon: ZeraIcon? = ZeraIcon.Chatbot,
     onFabClick: () -> Unit = {},
+    scrollable: Boolean = true,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Scaffold(
         modifier = modifier,
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             UpperNavBar(
                 title = title,
+                goBack = goBack,
+                onBackClick = onBackClick,
                 modifier = Modifier
                     .statusBarsPadding()
                     .padding(horizontal = Spacing.small),
             )
         },
         bottomBar = {
-            BottomNavBar(
-                currentRoute = Route.ManagerHome,
+            ManagerBottomNavBar(
+                currentRoute = currentRoute,
                 modifier = Modifier
                     .fillMaxWidth()
                     .navigationBarsPadding()
@@ -82,7 +99,7 @@ fun ManagerScaffold(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .verticalScroll(rememberScrollState())
+                .then(if (scrollable) Modifier.verticalScroll(rememberScrollState()) else Modifier)
                 .padding(horizontal = Spacing.medium, vertical = Spacing.small),
             verticalArrangement = Arrangement.spacedBy(Spacing.medium),
             content = content,
@@ -94,7 +111,7 @@ fun ManagerScaffold(
 @Composable
 private fun ManagerScaffoldPreview() {
     ZeraTheme {
-        ManagerScaffold(title = "Visão geral") {
+        ManagerScaffold(title = "Visão geral", currentRoute = Route.ManagerHome) {
             BodyText(text = "Conteúdo da tela")
         }
     }

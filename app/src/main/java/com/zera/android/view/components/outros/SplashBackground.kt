@@ -22,7 +22,7 @@ import com.zera.android.view.theme.ZeraTheme
 fun SplashBackground() {
     Canvas(
         modifier = Modifier.fillMaxSize()
-            .background(MaterialTheme.colorScheme.surface)
+            .background(MaterialTheme.colorScheme.background)
             .clearAndSetSemantics {},
     ) {
         val w = size.width

@@ -2,13 +2,9 @@ package com.zera.android.view.components.navigation
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -16,7 +12,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zera.android.view.components.buttons.IconButton
-import com.zera.android.view.components.texts.LabelText
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.theme.Radius
 import com.zera.android.view.theme.Spacing
@@ -24,14 +19,14 @@ import com.zera.android.view.theme.ZeraTheme
 import com.zera.android.view.theme.icons.ZeraIcon
 
 @Composable
-fun BottomNavBar(
+fun EmployeeBottomNavBar(
     modifier: Modifier = Modifier,
     currentRoute: Route
 ) {
     Row(
         modifier = modifier
             .background(
-                color = MaterialTheme.colorScheme.surfaceContainerLowest,
+                color = MaterialTheme.colorScheme.surface,
                 shape = RoundedCornerShape(Radius.xLarge),
             )
             .padding(horizontal = Spacing.small, vertical = Spacing.small),
@@ -42,16 +37,16 @@ fun BottomNavBar(
             modifier = Modifier.weight(1f),
             label = "Início",
             contentDescription = "Botão para Home",
-            route = Route.Welcome,
+            onClick = {}, // TODO: fluxo de navegação do Operário ainda não existe
             icon = ZeraIcon.Home,
             selected = if (currentRoute == Route.ManagerHome || currentRoute == Route.EmployeeHome) true else false,
         )
         ShortCutButton(
             modifier = Modifier.weight(1f),
-            label = "Indicadores",
-            contentDescription = "Botão para Indicadores",
-            route = Route.Welcome,
-            icon = ZeraIcon.Graph,
+            label = "Central",
+            contentDescription = "Botão para Central",
+            onClick = {}, // TODO: fluxo de navegação do Operário ainda não existe
+            icon = ZeraIcon.BriefCase,
             selected = false,
         )
         IconButton(
@@ -64,7 +59,7 @@ fun BottomNavBar(
             modifier = Modifier.weight(1f),
             label = "Reciclagem",
             contentDescription = "Botão para Reciclagem",
-            route = Route.Welcome,
+            onClick = {}, // TODO: fluxo de navegação do Operário ainda não existe
             icon = ZeraIcon.Recycle,
             selected = false,
         )
@@ -72,53 +67,17 @@ fun BottomNavBar(
             modifier = Modifier.weight(1f),
             label = "Itens",
             contentDescription = "Botão para Itens",
-            route = Route.Welcome,
-            icon = ZeraIcon.Bell,
+            onClick = {}, // TODO: fluxo de navegação do Operário ainda não existe
+            icon = ZeraIcon.Crate,
             selected = false,
         )
     }
 }
 
 @Composable
-fun ShortCutButton(
-    label: String,
-    route: Route,
-    contentDescription: String,
-    modifier: Modifier = Modifier,
-    selected: Boolean = false,
-    icon: ZeraIcon = ZeraIcon.Placeholder,
-) {
-    val contentColor =
-        if (selected) MaterialTheme.colorScheme.onSurface
-        else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-
-    Button(
-        onClick = {
-            //TODO: Criar o ViewModel proprio para este componente (Para realizar as navegações)
-        },
-        modifier = modifier,
-        enabled = !selected,
-        contentPadding = PaddingValues(Spacing.micro),
-        colors = ButtonDefaults.textButtonColors(
-            contentColor = contentColor,
-            disabledContentColor = MaterialTheme.colorScheme.onSurface,
-        ),
-    ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            ZeraIcon(
-                icon = icon,
-                contentDescription = contentDescription,
-            )
-            LabelText(label, color = contentColor, bold = selected)
-        }
-    }
-}
-
-
-@Composable
 @Preview(widthDp = 800)
-fun BottomNavBarPreview() {
+fun EmployeeBottomNavBarPreview() {
     ZeraTheme {
-        BottomNavBar(currentRoute = Route.Welcome)
+        EmployeeBottomNavBar(currentRoute = Route.Welcome)
     }
 }
