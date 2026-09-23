@@ -15,6 +15,7 @@ import com.zera.android.view.components.buttons.IconButton
 import com.zera.android.view.components.buttons.ZeraButtonType
 import com.zera.android.view.components.texts.BodyText
 import com.zera.android.view.components.texts.TitleText
+import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
@@ -27,8 +28,8 @@ import com.zera.android.view.theme.icons.ZeraIcon
  * em dois blocos: à esquerda o botão "Voltar" (opcional) com o título da tela
  * logo abaixo; à direita os atalhos de notificações e de perfil.
  *
- * Este componente é apenas visual — ele não conhece rotas nem navegação. Passe as
- * ações pelos callbacks ([onBackClick] e, ainda como `TODO`, notificações/perfil/menu).
+ * O clique em "Voltar" e em "Perfil" já navega (via [ZeraNavigator]). Notificações e
+ * menu ainda estão como `TODO`.
  *
  * @param title título da tela, exibido abaixo do botão "Voltar". Quando [goBack] é
  *   `false`, ele ocupa também o espaço que seria do botão.
@@ -96,7 +97,7 @@ fun UpperNavBar(
                     )
                     IconButton(
                         icon = ZeraIcon.Profile,
-                        onClick = { /* TODO: adicionar rota para perfil */ },
+                        onClick = { ZeraNavigator.push(Route.Profile) },
                         contentDescription = "Perfil",
                         type = ZeraButtonType.Primary,
                     )
