@@ -8,19 +8,26 @@ object ZeraNavigator {
     private val _commands = Channel<NavCommand>(Channel.BUFFERED)
     val commands: Flow<NavCommand> = _commands.receiveAsFlow()
 
-    fun push(route: Route){
+    fun push(route: Route) {
         _commands.trySend(NavCommand.Navigate(route))
     }
 
-    fun goBack(){
+    fun goBack() {
         _commands.trySend(NavCommand.GoBack)
     }
 
-    fun pushAndPop(route: Route){
+    /**
+     * Navega para [route] e remove a tela atual da pilha, impedindo que o usuário
+     * volte para ela. Ver [NavCommand.PushAndPop].
+     */
+    fun pushAndPop(route: Route) {
         _commands.trySend(NavCommand.PushAndPop(route))
     }
 
-    fun pushAndPopAll(route: Route){
+    /**
+     * Navega para [route] e esvazia a pilha (Splash, Welcome, SignIn, SignUp, etc.).
+     */
+    fun pushAndPopAll(route: Route) {
         _commands.trySend(NavCommand.PushAndPopAll(route))
     }
 }

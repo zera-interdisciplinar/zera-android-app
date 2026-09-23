@@ -26,8 +26,8 @@ import com.zera.android.view.transition.LocalSharedTransitionScope
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun ZeraNavHost(){
-    val navController : NavHostController = rememberNavController()
+fun ZeraNavHost() {
+    val navController: NavHostController = rememberNavController()
 
     LaunchedEffect(Unit) {
         ZeraNavigator.commands.collect { command ->
@@ -35,8 +35,6 @@ fun ZeraNavHost(){
                 is NavCommand.Navigate -> navController.navigate(command.route)
 
                 is NavCommand.PushAndPop -> {
-                    // Captura a tela atual antes de navegar, pois após o navigate()
-                    // o topo da pilha já passa a ser a nova rota.
                     val previousDestinationId = navController.currentDestination?.id
                     navController.navigate(command.route) {
                         if (previousDestinationId != null) {
@@ -46,12 +44,11 @@ fun ZeraNavHost(){
                 }
 
                 is NavCommand.PushAndPopAll -> {
-                    // Limpa a pilha inteira (todas as telas anteriores, incluindo a
-                    // de início), então a nova rota fica sozinha na pilha.
                     navController.navigate(command.route) {
                         popUpTo(navController.graph.id) {
                             inclusive = true
                         }
+                        launchSingleTop = true
                     }
                 }
 
