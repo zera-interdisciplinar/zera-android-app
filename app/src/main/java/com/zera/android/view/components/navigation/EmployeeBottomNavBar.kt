@@ -37,7 +37,7 @@ fun EmployeeBottomNavBar(
             modifier = Modifier.weight(1f),
             label = "Início",
             contentDescription = "Botão para Home",
-            route = Route.Welcome,
+            onClick = {}, // TODO: fluxo de navegação do Operário ainda não existe
             icon = ZeraIcon.Home,
             selected = if (currentRoute == Route.ManagerHome || currentRoute == Route.EmployeeHome) true else false,
         )
@@ -45,7 +45,7 @@ fun EmployeeBottomNavBar(
             modifier = Modifier.weight(1f),
             label = "Central",
             contentDescription = "Botão para Central",
-            route = Route.Welcome,
+            onClick = {}, // TODO: fluxo de navegação do Operário ainda não existe
             icon = ZeraIcon.BriefCase,
             selected = false,
         )
@@ -59,7 +59,7 @@ fun EmployeeBottomNavBar(
             modifier = Modifier.weight(1f),
             label = "Reciclagem",
             contentDescription = "Botão para Reciclagem",
-            route = Route.Welcome,
+            onClick = {}, // TODO: fluxo de navegação do Operário ainda não existe
             icon = ZeraIcon.Recycle,
             selected = false,
         )
@@ -67,7 +67,7 @@ fun EmployeeBottomNavBar(
             modifier = Modifier.weight(1f),
             label = "Itens",
             contentDescription = "Botão para Itens",
-            route = Route.Welcome,
+            onClick = {}, // TODO: fluxo de navegação do Operário ainda não existe
             icon = ZeraIcon.Crate,
             selected = false,
         )
