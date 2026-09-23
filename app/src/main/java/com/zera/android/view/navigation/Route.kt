@@ -29,6 +29,9 @@ sealed interface Route{
     @Serializable
     data object ItemApproved : Route
 
+    @Serializable
+    data object Indexes : Route
+
     // ROTAS DE OPERARIO
     @Serializable
     data object EmployeeHome : Route
