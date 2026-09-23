@@ -18,6 +18,7 @@ import com.zera.android.view.screens.manager.EmployeesScreen
 import com.zera.android.view.screens.manager.IndexesScreen
 import com.zera.android.view.screens.manager.ItemApprovedScreen
 import com.zera.android.view.screens.manager.ItemDetailsScreen
+import com.zera.android.view.screens.manager.ItensScreen
 import com.zera.android.view.screens.manager.ManagerHomeScreen
 import com.zera.android.view.screens.shared.ProfileScreen
 import com.zera.android.view.transition.LocalAnimatedVisibilityScope
@@ -99,6 +100,9 @@ fun ZeraNavHost(){
                 }
                 composable<Route.Indexes> {
                     IndexesScreen()
+                }
+                composable<Route.Itens> {
+                    ItensScreen()
                 }
                 composable<Route.EmployeeHome> {
                     EmployeeHomeScreen()
