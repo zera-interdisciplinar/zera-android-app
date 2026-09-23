@@ -9,6 +9,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import com.zera.android.view.screens.auth.SignInScreen
 import com.zera.android.view.screens.auth.SignUpScreen
 import com.zera.android.view.screens.SplashScreen
@@ -86,8 +87,9 @@ fun ZeraNavHost() {
                 composable<Route.ManagerHome> {
                     ManagerHomeScreen()
                 }
-                composable<Route.ItemDetails> {
-                    ItemDetailsScreen()
+                composable<Route.ItemDetails> { backStackEntry ->
+                    val route = backStackEntry.toRoute<Route.ItemDetails>()
+                    ItemDetailsScreen(itemId = route.itemId)
                 }
                 composable<Route.Employees> {
                     EmployeesScreen()

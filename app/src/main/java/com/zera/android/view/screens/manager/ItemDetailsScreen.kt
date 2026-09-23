@@ -28,6 +28,7 @@ import com.zera.android.viewmodel.manager.ItemDetailsViewModel
 
 @Composable
 fun ItemDetailsScreen(
+    itemId: String,
     viewModel: ItemDetailsViewModel = viewModel()
 ) {
     val state by viewModel.state
@@ -94,6 +95,6 @@ fun ItemDetailsScreen(
 @Preview(heightDp = 900)
 fun ItemDetailsScreenPreview() {
     ZeraTheme {
-        ItemDetailsScreen()
+        ItemDetailsScreen(itemId = "265964")
     }
 }
