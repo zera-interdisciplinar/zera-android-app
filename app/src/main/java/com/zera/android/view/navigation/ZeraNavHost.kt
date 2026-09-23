@@ -15,6 +15,7 @@ import com.zera.android.view.screens.SplashScreen
 import com.zera.android.view.screens.auth.WelcomeScreen
 import com.zera.android.view.screens.employee.EmployeeHomeScreen
 import com.zera.android.view.screens.manager.EmployeesScreen
+import com.zera.android.view.screens.manager.IndexesScreen
 import com.zera.android.view.screens.manager.ItemApprovedScreen
 import com.zera.android.view.screens.manager.ItemDetailsScreen
 import com.zera.android.view.screens.manager.ManagerHomeScreen
@@ -95,6 +96,9 @@ fun ZeraNavHost(){
                 }
                 composable<Route.ItemApproved> {
                     ItemApprovedScreen()
+                }
+                composable<Route.Indexes> {
+                    IndexesScreen()
                 }
                 composable<Route.EmployeeHome> {
                     EmployeeHomeScreen()
