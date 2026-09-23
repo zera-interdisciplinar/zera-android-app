@@ -24,6 +24,7 @@ fun ItensScreen(
     ManagerScaffold(
         title = "Itens",
         currentRoute = Route.Itens,
+        goBack = true,
         scrollable = false,
         onFabClick = { /* TODO: abrir chatbot */ },
     ) {
