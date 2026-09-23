@@ -57,14 +57,14 @@ fun ManagerHomeScreen(
                 label = "Itens",
                 value = state.totalItems,
                 labelIcon = ZeraIcon.Box,
-                onClick = { /* TODO: navegar para itens */ },
+                onClick = viewModel::onItemCardClick,
                 modifier = Modifier.weight(1f),
             )
             ShortcutCard(
                 label = "Funcionários",
                 value = state.totalEmployees,
                 labelIcon = ZeraIcon.Group,
-                onClick = { /* TODO: navegar para funcionários */ },
+                onClick = viewModel::onEmployeesCardClick,
                 modifier = Modifier.weight(1f),
             )
         }
