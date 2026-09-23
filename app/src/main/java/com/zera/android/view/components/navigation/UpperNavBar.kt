@@ -14,7 +14,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.zera.android.view.components.buttons.IconButton
 import com.zera.android.view.components.buttons.ZeraButtonType
 import com.zera.android.view.components.texts.BodyText
-import com.zera.android.view.components.texts.HeadlineText
+import com.zera.android.view.components.texts.TitleText
 import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
@@ -75,12 +75,11 @@ fun UpperNavBar(
                         )
                     }
                 }
-                HeadlineText(
+                TitleText(
                     text = title,
                     bold = true,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(horizontal = Spacing.small),
                 )
             }
 
