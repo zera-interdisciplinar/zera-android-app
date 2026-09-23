@@ -16,7 +16,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zera.android.view.components.texts.BodyText
 import com.zera.android.view.components.texts.LabelText
-import com.zera.android.view.components.texts.TitleText
 import com.zera.android.view.theme.Radius
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraColorFamily
@@ -58,7 +57,7 @@ fun Notification(
             modifier = Modifier.padding(Spacing.medium),
             verticalArrangement = Arrangement.spacedBy(Spacing.small),
         ) {
-            TitleText(text = label, bold = true, color = palette.onContainer)
+            BodyText(text = label, bold = true, color = palette.onContainer)
             BodyText(text = text, color = MaterialTheme.colorScheme.onSurfaceVariant)
             if (redirect != null) {
                 Row(
