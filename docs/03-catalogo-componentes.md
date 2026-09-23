@@ -91,6 +91,7 @@ Arquivo: `view/components/cards/`.
 - **`Notification(label, text, modifier, style, redirect)`** — card de alerta/notificação; `redirect` opcional adiciona a ação "Resolver agora →".
 - **`ItemSummaryCard(itemId, itemName, itemSubtitle, status, modifier, icon)`** — card de destaque no topo de uma tela de detalhe de item: miniatura à esquerda ("ID {itemId}" + nome + subtítulo) e um `ItemStatusTag` à direita; composto sobre `ZeraBox(style = ZeraColorFamily.Blue)`. `status: ItemStatus` (ver seção "Outros componentes visuais").
 - **`ApprovedItemCard(itemName, itemSubtitle, itemId, status, modifier)`** — card branco simples (sem miniatura) com o resumo de um item: título ("nome · subtítulo") + legenda "ID {itemId}" + `ItemStatusTag`; usado na tela de confirmação de aprovação (`ItemApprovedScreen`), diferente do `ItemSummaryCard` (card azul com miniatura).
+- **`InviteCard(code, name, expireTime, modifier, onCopyCodeClick)`** — card de convite pendente: código, nome do operador convidado e prazo de expiração (`expireTime` em horas, formatado pelo próprio componente como "Expira em {expireTime}h") + ação "Copiar código"; composto sobre `ZeraBox(style = ZeraColorFamily.Yellow, type = ZeraBoxType.Secondary)`. Usado em `EmployeesScreen`.
 
 ```kotlin
 ShortcutCard(label = "Itens", value = state.totalItems, labelIcon = ZeraIcon.Box, onClick = { /* navegar */ })
@@ -98,6 +99,7 @@ StockOccupationCard(itemCount = 300, occupation = 0.6f)
 Notification(label = "Recusado pelo gestor", text = "Chip controlador", style = ZeraColorFamily.Red)
 ItemSummaryCard(itemId = "265964", itemName = "Placa de vídeo", itemSubtitle = "Notebook Mac", status = ItemStatus.PendingApproval)
 ApprovedItemCard(itemName = "Placa de vídeo", itemSubtitle = "Notebook Mac", itemId = "265964", status = ItemStatus.PendingApproval)
+InviteCard(code = "120443", name = "Operadora Carol the Best", expireTime = 23, onCopyCodeClick = { /* copiar código */ })
 ```
 
 ## Listas
