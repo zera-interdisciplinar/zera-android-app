@@ -84,7 +84,7 @@ fun ZeraButton(
                     contentDescription = null,
                     size = Spacing.large,
                     tint = content,
-                    modifier = Modifier.padding(end = Spacing.medium),
+                    modifier = Modifier.padding(end = Spacing.small),
                 )
             }
         }
