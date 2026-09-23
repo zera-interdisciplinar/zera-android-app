@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zera.android.view.components.buttons.IconButton
 import com.zera.android.view.components.texts.LabelText
 import com.zera.android.view.navigation.Route
@@ -22,11 +23,13 @@ import com.zera.android.view.theme.Radius
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
 import com.zera.android.view.theme.icons.ZeraIcon
+import com.zera.android.viewmodel.navigation.ManagerBottomNavBarViewModel
 
 @Composable
 fun ManagerBottomNavBar(
     modifier: Modifier = Modifier,
-    currentRoute: Route
+    currentRoute: Route,
+    viewModel: ManagerBottomNavBarViewModel = viewModel(),
 ) {
     Row(
         modifier = modifier
@@ -42,39 +45,40 @@ fun ManagerBottomNavBar(
             modifier = Modifier.weight(1f),
             label = "Início",
             contentDescription = "Botão para Home",
-            route = Route.Welcome,
+            onClick = viewModel::onHomeClick,
             icon = ZeraIcon.Home,
-            selected = if (currentRoute == Route.ManagerHome || currentRoute == Route.EmployeeHome) true else false,
+            selected = currentRoute == Route.ManagerHome,
         )
         ShortCutButton(
             modifier = Modifier.weight(1f),
             label = "Indicadores",
             contentDescription = "Botão para Indicadores",
-            route = Route.Welcome,
+            onClick = viewModel::onIndexesClick,
             icon = ZeraIcon.Graph,
-            selected = false,
+            selected = currentRoute == Route.Indexes,
         )
         IconButton(
             icon = ZeraIcon.Plus,
-            onClick = {},
-            contentDescription = "Adicionar item",
+            onClick = viewModel::onEmployeesClick,
+            contentDescription = "Colaboradores",
+            enabled = currentRoute != Route.Employees,
             size = 64.dp
         )
         ShortCutButton(
             modifier = Modifier.weight(1f),
             label = "Reciclagem",
             contentDescription = "Botão para Reciclagem",
-            route = Route.Welcome,
+            onClick = viewModel::onRecyclingClick,
             icon = ZeraIcon.Recycle,
-            selected = false,
+            selected = false, // TODO: ainda não existe uma Route de Reciclagem para comparar
         )
         ShortCutButton(
             modifier = Modifier.weight(1f),
             label = "Itens",
             contentDescription = "Botão para Itens",
-            route = Route.Welcome,
+            onClick = viewModel::onItensClick,
             icon = ZeraIcon.Bell,
-            selected = false,
+            selected = currentRoute == Route.Itens,
         )
     }
 }
@@ -82,8 +86,8 @@ fun ManagerBottomNavBar(
 @Composable
 fun ShortCutButton(
     label: String,
-    route: Route,
     contentDescription: String,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
     selected: Boolean = false,
     icon: ZeraIcon = ZeraIcon.Placeholder,
@@ -93,9 +97,7 @@ fun ShortCutButton(
         else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
 
     Button(
-        onClick = {
-            //TODO: Criar o ViewModel proprio para este componente (Para realizar as navegações)
-        },
+        onClick = onClick,
         modifier = modifier,
         enabled = !selected,
         contentPadding = PaddingValues(Spacing.micro),
@@ -119,6 +121,6 @@ fun ShortCutButton(
 @Preview(widthDp = 800)
 fun ManagerBottomNavBarPreview() {
     ZeraTheme {
-        ManagerBottomNavBar(currentRoute = Route.Welcome)
+        ManagerBottomNavBar(currentRoute = Route.ManagerHome)
     }
 }

@@ -29,16 +29,18 @@ import com.zera.android.view.theme.icons.ZeraIcon
 /**
  * Casca (Scaffold) compartilhada pelas telas da área do gestor.
  *
- * Já monta a [UpperNavBar] (com o [title] da tela), a [BottomNavBar] fixada em
- * [Route.ManagerHome] e o botão flutuante de assistente virtual — com os insets de
- * status bar / navigation bar já aplicados. Cada tela só precisa passar o [title] e
- * o [content], que é desenhado dentro de uma [Column] rolável.
+ * Já monta a [UpperNavBar] (com o [title] da tela), o [ManagerBottomNavBar] e o botão
+ * flutuante de assistente virtual — com os insets de status bar / navigation bar já
+ * aplicados. Cada tela só precisa passar o [title], a própria [currentRoute] e o
+ * [content], que é desenhado dentro de uma [Column] rolável.
  *
  * @param title título exibido na [UpperNavBar].
+ * @param currentRoute rota da própria tela, repassada ao [ManagerBottomNavBar] para
+ *   destacar e desabilitar o atalho que levaria para a tela atual.
  * @param modifier modificador externo opcional, aplicado ao [Scaffold].
  * @param goBack quando `true`, exibe o botão "Voltar" na [UpperNavBar] — use em telas
  *   acessadas por navegação (ex.: um atalho do Home), diferente das telas raiz do
- *   [BottomNavBar] (ex.: [ManagerHomeScreen]).
+ *   [ManagerBottomNavBar] (ex.: [ManagerHomeScreen]).
  * @param onBackClick ação do botão "Voltar". Só é usada quando [goBack] é `true`.
  * @param fabIcon ícone do botão flutuante. Quando `null`, nenhum FAB é exibido.
  * @param onFabClick ação do botão flutuante. Só é usada quando [fabIcon] não for `null`.
@@ -51,6 +53,7 @@ import com.zera.android.view.theme.icons.ZeraIcon
 @Composable
 fun ManagerScaffold(
     title: String,
+    currentRoute: Route,
     modifier: Modifier = Modifier,
     goBack: Boolean = false,
     onBackClick: () -> Unit = { ZeraNavigator.goBack() },
@@ -74,7 +77,7 @@ fun ManagerScaffold(
         },
         bottomBar = {
             ManagerBottomNavBar(
-                currentRoute = Route.ManagerHome,
+                currentRoute = currentRoute,
                 modifier = Modifier
                     .fillMaxWidth()
                     .navigationBarsPadding()
@@ -108,7 +111,7 @@ fun ManagerScaffold(
 @Composable
 private fun ManagerScaffoldPreview() {
     ZeraTheme {
-        ManagerScaffold(title = "Visão geral") {
+        ManagerScaffold(title = "Visão geral", currentRoute = Route.ManagerHome) {
             BodyText(text = "Conteúdo da tela")
         }
     }
