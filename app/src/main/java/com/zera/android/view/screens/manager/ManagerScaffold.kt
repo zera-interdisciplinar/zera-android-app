@@ -1,27 +1,35 @@
 package com.zera.android.view.screens.manager
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zera.android.view.components.buttons.IconButton
+import com.zera.android.view.components.containers.ZeraGradientBox
 import com.zera.android.view.components.navigation.ManagerBottomNavBar
 import com.zera.android.view.components.navigation.UpperNavBar
 import com.zera.android.view.components.texts.BodyText
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
+import com.zera.android.view.theme.NoColor
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
 import com.zera.android.view.theme.icons.ZeraIcon
@@ -95,15 +103,37 @@ fun ManagerScaffold(
             }
         },
     ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .then(if (scrollable) Modifier.verticalScroll(rememberScrollState()) else Modifier)
-                .padding(horizontal = Spacing.medium, vertical = Spacing.small),
-            verticalArrangement = Arrangement.spacedBy(Spacing.medium),
-            content = content,
-        )
+        Box(){
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .then(if (scrollable) Modifier.verticalScroll(rememberScrollState()) else Modifier)
+                    .padding(horizontal = Spacing.medium, vertical = Spacing.small)
+                    .background(color = MaterialTheme.colorScheme.background),
+                verticalArrangement = Arrangement.spacedBy(Spacing.medium),
+                content = content,
+            )
+            ZeraGradientBox(
+                brush = Brush.verticalGradient(
+                    colors = listOf(MaterialTheme.colorScheme.background, NoColor)
+                ),
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .fillMaxWidth()
+                    .height(25.dp)
+            ){}
+            ZeraGradientBox(
+                brush = Brush.verticalGradient(
+                    colors = listOf(NoColor, MaterialTheme.colorScheme.background)
+                ),
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .fillMaxWidth()
+                    .height(25.dp)
+                    .align(Alignment.BottomEnd)
+            ){}
+        }
     }
 }
 
