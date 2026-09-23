@@ -89,13 +89,15 @@ Arquivo: `view/components/cards/`.
 - **`ShortcutCard(label, value, onClick, modifier, labelIcon, enabled)`** — atalho clicável: rótulo + valor em destaque + seta. `value` já vem formatado como string pelo chamador.
 - **`StockOccupationCard(itemCount, occupation, modifier)`** — card de destaque com total de itens e um `ZeraBox` circular com a porcentagem de ocupação (`occupation` de `0f` a `1f`).
 - **`Notification(label, text, modifier, style, redirect)`** — card de alerta/notificação; `redirect` opcional adiciona a ação "Resolver agora →".
-- **`ItemSummaryCard(itemId, itemName, itemSubtitle, statusText, modifier, icon, statusStyle)`** — card de destaque no topo de uma tela de detalhe de item: miniatura à esquerda ("ID {itemId}" + nome + subtítulo) e uma `Tag` de status à direita; composto sobre `ZeraBox(style = ZeraColorFamily.Blue)`.
+- **`ItemSummaryCard(itemId, itemName, itemSubtitle, status, modifier, icon)`** — card de destaque no topo de uma tela de detalhe de item: miniatura à esquerda ("ID {itemId}" + nome + subtítulo) e um `ItemStatusTag` à direita; composto sobre `ZeraBox(style = ZeraColorFamily.Blue)`. `status: ItemStatus` (ver seção "Outros componentes visuais").
+- **`ApprovedItemCard(itemName, itemSubtitle, itemId, status, modifier)`** — card branco simples (sem miniatura) com o resumo de um item: título ("nome · subtítulo") + legenda "ID {itemId}" + `ItemStatusTag`; usado na tela de confirmação de aprovação (`ItemApprovedScreen`), diferente do `ItemSummaryCard` (card azul com miniatura).
 
 ```kotlin
 ShortcutCard(label = "Itens", value = state.totalItems, labelIcon = ZeraIcon.Box, onClick = { /* navegar */ })
 StockOccupationCard(itemCount = 300, occupation = 0.6f)
 Notification(label = "Recusado pelo gestor", text = "Chip controlador", style = ZeraColorFamily.Red)
-ItemSummaryCard(itemId = "265964", itemName = "Placa de vídeo", itemSubtitle = "Notebook Mac", statusText = "Em aprovação")
+ItemSummaryCard(itemId = "265964", itemName = "Placa de vídeo", itemSubtitle = "Notebook Mac", status = ItemStatus.PendingApproval)
+ApprovedItemCard(itemName = "Placa de vídeo", itemSubtitle = "Notebook Mac", itemId = "265964", status = ItemStatus.PendingApproval)
 ```
 
 ## Listas
@@ -163,6 +165,8 @@ ZeraIcon(ZeraIcon.Check, contentDescription = null, tint = MaterialTheme.colorSc
 - **`Logo(modifier)`** (`view/components/logo/Logo.kt`) — logo do app com proporção fixa (595:154); controle de tamanho via `Modifier.width(...)`.
 - **`SplashBackground()`** (`view/components/outros/SplashBackground.kt`) — arte decorativa de fundo da splash/telas de auth (faixas coloridas via `Canvas`).
 - **`Tag(text, modifier, style, contentPadding)`** (`view/components/outros/Tag.kt`) — pílula de status curta, sempre no par (container, conteúdo) de uma `ZeraColorFamily`.
+- **`ItemStatus`** (enum, `view/components/outros/ItemStatus.kt`) — status de um item, espelhando parte do enum do backend; cada valor já carrega `label` (texto) e `colorFamily`: `PendingApproval` ("Pendente", Yellow), `Rejected` ("Recusado", Red), `InStock` ("Aprovado", Green), `InMaintenance` ("Em manutenção", Yellow), `AwaitingEvaluation` ("Em aprovação", Yellow), `Disposed` ("Descartado", Red). O backend também tem `DRAFT`/`REMOVED`, ainda não modelados aqui (sem chip definido). **Escopo atual**: usado só por `ItemSummaryCard`/`ApprovedItemCard` (`ItemDetailsScreen`/`ItemApprovedScreen`) — `ProductItem`/`ProductListItem` (listas em `ItensScreen`/`ManagerHomeScreen`) continuam com `statusText`/`statusStyle` soltos, por decisão explícita de manter o escopo do enum restrito por enquanto.
+- **`ItemStatusTag(status, modifier)`** (mesmo arquivo) — `Tag` pré-preenchida com o `label`/`colorFamily` de um `ItemStatus`; quem desenha o chip só passa o `status`, sem duplicar texto/cor.
 - **`Avatar(initials, modifier, photoUrl, size, style)`** (`view/components/outros/Avatar.kt`) — avatar circular do usuário; mostra as `initials` (calculadas por quem chama, ex.: no `ViewModel`) quando `photoUrl` é `null` (padrão). Quando `photoUrl` é informada, **ainda não carrega a foto de verdade** — não há lib de carregamento de imagem (ex.: Coil) no projeto ainda; por enquanto só troca as iniciais por um ícone de placeholder (`TODO` no componente).
 - **`ProgressBar(modifier, progress)`** (`view/components/progressbars/ProgressBar.kt`) — barra linear; `progress = null` → indeterminada.
 - **`CircularProgressBar(progress, label, modifier, color)`** (`view/components/progressbars/CircularProgressBar.kt`) — indicador circular com porcentagem central e rótulo opcional.
