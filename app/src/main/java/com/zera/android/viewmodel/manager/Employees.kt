@@ -10,7 +10,7 @@ data class EmployeesState(
     val hasPendingInvites: Boolean = false,
     val pendingInviteCode: String = "",
     val pendingInviteOperatorName: String = "",
-    val pendingInviteExpiresIn: String = "",
+    val pendingInviteExpiresIn: Int = 0,
     val employees: List<EmployeeItem> = emptyList(),
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
@@ -24,7 +24,7 @@ class EmployeesViewModel : ViewModel() {
             hasPendingInvites = true,
             pendingInviteCode = "120443",
             pendingInviteOperatorName = "Operadora Carol the Best",
-            pendingInviteExpiresIn = "23h",
+            pendingInviteExpiresIn = 23,
             employees = listOf(
                 EmployeeItem(id = "1", name = "Caroll the Best", role = "Operador", isPending = true),
                 EmployeeItem(id = "2", name = "Kevin Não Jun", role = "Operador"),

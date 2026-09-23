@@ -13,12 +13,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.ui.unit.dp
 import com.zera.android.view.components.buttons.ZeraButton
+import com.zera.android.view.components.cards.InviteCard
 import com.zera.android.view.components.containers.ZeraBox
-import com.zera.android.view.components.containers.ZeraBoxType
 import com.zera.android.view.components.lists.EmployeeList
-import com.zera.android.view.components.texts.BodyText
-import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.components.texts.HeadlineText
 import com.zera.android.view.components.texts.LabelText
 import com.zera.android.view.components.texts.TitleText
@@ -41,7 +41,6 @@ fun EmployeesScreen(
         goBack = true,
         onBackClick = viewModel::onBackClick,
         onFabClick = { /* TODO: abrir chatbot */ },
-        scrollable = false,
     ) {
         ZeraBox(style = ZeraColorFamily.Blue) {
             Row(
@@ -75,39 +74,21 @@ fun EmployeesScreen(
                 bold = true,
                 color = MaterialTheme.colorScheme.onSurface,
             )
-            ZeraBox(style = ZeraColorFamily.Yellow, type = ZeraBoxType.Secondary) {
-                Column(verticalArrangement = Arrangement.spacedBy(Spacing.micro)) {
-                    CaptionText(
-                        text = "Código ${state.pendingInviteCode}",
-                        bold = true,
-                        color = LocalContentColor.current,
-                    )
-                    BodyText(
-                        text = state.pendingInviteOperatorName,
-                        bold = true,
-                        color = LocalContentColor.current,
-                    )
-                    Row(horizontalArrangement = Arrangement.spacedBy(Spacing.micro)) {
-                        CaptionText(
-                            text = "Expira em ${state.pendingInviteExpiresIn} ·",
-                            color = LocalContentColor.current,
-                        )
-                        LabelText(
-                            text = "Copiar código",
-                            bold = true,
-                            color = LocalContentColor.current,
-                            onClick = viewModel::onCopyInviteCodeClick,
-                        )
-                    }
-                }
-            }
+            InviteCard(
+                code = state.pendingInviteCode,
+                name = state.pendingInviteOperatorName,
+                expireTime = state.pendingInviteExpiresIn,
+                onCopyCodeClick = viewModel::onCopyInviteCodeClick,
+            )
         }
 
+        // TODO: EmployeeList é uma LazyColumn com scroll próprio (limitada por heightIn)
+        // dentro da Column rolável do ManagerScaffold — revisar essa dupla rolagem depois.
         EmployeeList(
             employees = state.employees,
             onItemClick = viewModel::onEmployeeClick,
             contentPadding = PaddingValues(Spacing.none),
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.heightIn(max = 400.dp),
         )
     }
 }
