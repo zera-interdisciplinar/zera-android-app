@@ -120,11 +120,12 @@ EmployeeList(employees = state.employees, onItemClick = { /* abrir colaborador *
 
 ## Navegação (componentes visuais)
 
-Arquivo: `view/components/navigation/`. Estes componentes são **apenas visuais** — não conhecem `Route` nem `ZeraNavigator` diretamente (exceção: `BottomNavBar`, que já recebe `Route` para destacar o item ativo, mas ainda não dispara navegação real — ver "Inconsistências conhecidas" em [02-padroes-e-convencoes.md](02-padroes-e-convencoes.md)).
+Arquivo: `view/components/navigation/`. Estes componentes são **apenas visuais** — não conhecem `Route` nem `ZeraNavigator` diretamente (exceção: `ManagerBottomNavBar`/`EmployeeBottomNavBar`, que já recebem `Route` para destacar o item ativo, mas ainda não disparam navegação real — ver "Inconsistências conhecidas" em [02-padroes-e-convencoes.md](02-padroes-e-convencoes.md)).
 
 - **`UpperNavBar(title, modifier, goBack, onBackClick, showActions)`** — barra superior com título, (opcional) botão "Voltar" e os atalhos de notificações/perfil/menu à direita (perfil e menu ainda sem ação real, só visuais). `showActions = false` esconde os três atalhos à direita — use em telas que só precisam do "Voltar" (ex.: "Perfil").
-- **`BottomNavBar(modifier, currentRoute)`** — barra inferior com 4 atalhos + botão central de escanear (`ZeraIcon.QrCode`); usa `ShortCutButton` internamente.
-- **`ManagerScaffold(title, modifier, goBack, onBackClick, fabIcon, onFabClick, scrollable, content: @Composable ColumnScope.() -> Unit)`** (em `view/screens/manager/ManagerScaffold.kt`, não em `view/components/` — é específico das telas do Gestor) — casca compartilhada com `UpperNavBar` + `Column` (rolável quando `scrollable = true`, padrão) + `BottomNavBar` fixado em `Route.ManagerHome` + FAB de assistente virtual. `goBack = true` exibe o botão "Voltar" na `UpperNavBar` — use em telas acessadas por navegação (ex.: "Colaboradores", aberta a partir de um atalho do Home), diferente das telas raiz do `BottomNavBar` (ex.: `ManagerHomeScreen`).
+- **`ManagerBottomNavBar(modifier, currentRoute)`** — barra inferior do fluxo de Gestor: atalhos "Início"/"Indicadores"/"Reciclagem"/"Itens" + botão central de adicionar item (`ZeraIcon.Plus`); usa `ShortCutButton` internamente.
+- **`EmployeeBottomNavBar(modifier, currentRoute)`** — barra inferior do fluxo de Operário: atalhos "Início"/"Central"/"Reciclagem"/"Itens" + botão central de escanear (`ZeraIcon.QrCode`); mesmo `ShortCutButton` interno de `ManagerBottomNavBar`.
+- **`ManagerScaffold(title, modifier, goBack, onBackClick, fabIcon, onFabClick, scrollable, content: @Composable ColumnScope.() -> Unit)`** (em `view/screens/manager/ManagerScaffold.kt`, não em `view/components/` — é específico das telas do Gestor) — casca compartilhada com `UpperNavBar` + `Column` (rolável quando `scrollable = true`, padrão) + `ManagerBottomNavBar` fixado em `Route.ManagerHome` + FAB de assistente virtual. `goBack = true` exibe o botão "Voltar" na `UpperNavBar` — use em telas acessadas por navegação (ex.: "Colaboradores", aberta a partir de um atalho do Home), diferente das telas raiz do `ManagerBottomNavBar` (ex.: `ManagerHomeScreen`).
 
 ```kotlin
 ManagerScaffold(title = "Visão geral", onFabClick = { /* abrir chatbot */ }) {
@@ -152,8 +153,10 @@ if (showDamageSheet) {
 
 Arquivo: `view/theme/icons/`.
 
-- **`ZeraIcon`** (enum) — catálogo de ícones (`Bell`, `Box`, `Chatbot`, `Check`, `Close`, `Crate`, `DownArrow`, `Download`, `Edit`, `Exclamation`, `Gear`, `Graph`, `Group`, `Home`, `InfoCircle`, `LeftArrow`, `RightArrow`, `LeftUTurn`, `Location`, `Megaphone`, `Menu`, `Placeholder`, `Plus`, `ProceedArrow`, `Profile`, `QrCode`, `Recycle`, `RightUTurn`, `Screen`, `Send`, `Truck`, `Wrench`), cada um apontando para um drawable vetorial.
+- **`ZeraIcon`** (enum) — catálogo de ícones (`Bell`, `Box`, `BriefCase`, `Chatbot`, `Check`, `Close`, `Crate`, `DownArrow`, `Download`, `Edit`, `Exclamation`, `Gear`, `Graph`, `Group`, `Home`, `InfoCircle`, `LeftArrow`, `RightArrow`, `LeftUTurn`, `Location`, `MagnifyingGlass`, `Megaphone`, `Menu`, `Placeholder`, `Plus`, `ProceedArrow`, `Profile`, `QrCode`, `Recycle`, `RightUTurn`, `Screen`, `Send`, `Truck`, `Wrench`), cada um apontando para um drawable vetorial.
 - **`ZeraIcon(icon, contentDescription, modifier, size, tint)`** (composable) — desenha o ícone; `size` padrão 24dp, `tint` padrão `LocalContentColor.current` (ver `ZeraIconDefaults`).
+
+> **Ícones nunca são gerados por IA.** Os drawables vetoriais em `res/drawable/` são todos portados manualmente (por quem está pedindo a tela/componente) a partir de um kit de ícones real, para manter o estilo (stroke 1.5, sem preenchimento) consistente. Se uma tela ou componente precisar de um ícone que não existe em `ZeraIcon`, **não invente um substituto nem peça para gerar um novo SVG por IA** — avise o usuário que o ícone está faltando e peça para ele portar o `.xml` do ícone para `res/drawable/` e adicionar a entrada correspondente em `ZeraIcon`; só então use o ícone no componente/tela.
 
 ```kotlin
 ZeraIcon(ZeraIcon.Bell, contentDescription = "Notificações")
