@@ -3,8 +3,6 @@ package com.zera.android.view.screens.shared
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
@@ -20,12 +18,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zera.android.view.components.buttons.ZeraButton
 import com.zera.android.view.components.buttons.ZeraButtonType
 import com.zera.android.view.components.lists.EditableFieldRow
-import com.zera.android.view.components.navigation.BottomNavBar
 import com.zera.android.view.components.navigation.UpperNavBar
 import com.zera.android.view.components.outros.Avatar
 import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.components.texts.HeadlineText
-import com.zera.android.view.navigation.Route
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.view.theme.ZeraTheme
@@ -48,15 +44,6 @@ fun ProfileScreen(
                 modifier = Modifier
                     .statusBarsPadding()
                     .padding(horizontal = Spacing.small),
-            )
-        },
-        bottomBar = {
-            BottomNavBar(
-                currentRoute = Route.Welcome,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .navigationBarsPadding()
-                    .padding(horizontal = Spacing.medium, vertical = Spacing.small),
             )
         },
     ) { innerPadding ->
