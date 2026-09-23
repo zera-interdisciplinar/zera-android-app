@@ -2,16 +2,15 @@ package com.zera.android.viewmodel.manager
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import com.zera.android.view.components.outros.ItemStatus
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
-import com.zera.android.view.theme.ZeraColorFamily
 
 data class ItemApprovedState(
     val itemId: String = "",
     val itemName: String = "",
     val itemSubtitle: String = "",
-    val statusText: String = "",
-    val statusStyle: ZeraColorFamily = ZeraColorFamily.Yellow,
+    val status: ItemStatus = ItemStatus.PendingApproval,
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
 )
@@ -24,8 +23,7 @@ class ItemApprovedViewModel : ViewModel() {
             itemId = "265964",
             itemName = "Placa de vídeo",
             itemSubtitle = "Notebook Mac",
-            statusText = "Em aprovação",
-            statusStyle = ZeraColorFamily.Yellow,
+            status = ItemStatus.PendingApproval,
         )
     )
     val state = _state

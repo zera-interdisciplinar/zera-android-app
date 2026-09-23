@@ -18,7 +18,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zera.android.view.components.containers.ZeraBox
-import com.zera.android.view.components.outros.Tag
+import com.zera.android.view.components.outros.ItemStatus
+import com.zera.android.view.components.outros.ItemStatusTag
 import com.zera.android.view.components.texts.BodyText
 import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.components.texts.TitleText
@@ -38,22 +39,20 @@ private val ThumbnailSize = 72.dp
  * @param itemId ID do item, exibido como "ID {itemId}".
  * @param itemName nome do item, em destaque.
  * @param itemSubtitle subtítulo complementar (ex.: o modelo do item).
- * @param statusText texto curto exibido na [Tag] de status (ex.: "Em aprovação").
+ * @param status status do item, exibido como [ItemStatusTag].
  * @param modifier modificador externo opcional. O card já ocupa toda a largura
  *   disponível por padrão ([Modifier.fillMaxWidth]).
  * @param icon ícone do catálogo [ZeraIcon] exibido na miniatura. Quando `null`
  *   (padrão), usa [ZeraIcon.Placeholder].
- * @param statusStyle família de cor da [Tag] de status.
  */
 @Composable
 fun ItemSummaryCard(
     itemId: String,
     itemName: String,
     itemSubtitle: String,
-    statusText: String,
+    status: ItemStatus,
     modifier: Modifier = Modifier,
     icon: ZeraIcon? = null,
-    statusStyle: ZeraColorFamily = ZeraColorFamily.Yellow,
 ) {
     ZeraBox(
         modifier = modifier.fillMaxWidth(),
@@ -83,7 +82,7 @@ fun ItemSummaryCard(
                     TitleText(text = itemName, bold = true, color = LocalContentColor.current)
                     BodyText(text = itemSubtitle, color = LocalContentColor.current)
                 }
-                Tag(text = statusText, style = statusStyle)
+                ItemStatusTag(status = status)
             }
         }
     }
@@ -97,8 +96,7 @@ private fun ItemSummaryCardPreview() {
             itemId = "265964",
             itemName = "Placa de vídeo",
             itemSubtitle = "Notebook Mac",
-            statusText = "Em aprovação",
-            statusStyle = ZeraColorFamily.Yellow,
+            status = ItemStatus.PendingApproval,
             modifier = Modifier.padding(Spacing.medium),
         )
     }
