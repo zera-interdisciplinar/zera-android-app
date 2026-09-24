@@ -45,7 +45,7 @@ fun ManagerBottomNavBar(
             modifier = Modifier.weight(1f),
             label = "Início",
             contentDescription = "Botão para Home",
-            onClick = viewModel::onHomeClick,
+            onClick = { viewModel.onHomeClick(currentRoute) },
             icon = ZeraIcon.Home,
             selected = currentRoute == Route.ManagerHome,
         )
@@ -53,13 +53,13 @@ fun ManagerBottomNavBar(
             modifier = Modifier.weight(1f),
             label = "Indicadores",
             contentDescription = "Botão para Indicadores",
-            onClick = viewModel::onIndexesClick,
+            onClick = { viewModel.onIndexesClick(currentRoute) },
             icon = ZeraIcon.Graph,
             selected = currentRoute == Route.Indexes,
         )
         IconButton(
             icon = ZeraIcon.Plus,
-            onClick = viewModel::onEmployeesClick,
+            onClick = { viewModel.onEmployeesClick(currentRoute) },
             contentDescription = "Colaboradores",
             enabled = currentRoute != Route.Employees,
             size = 64.dp
@@ -76,7 +76,7 @@ fun ManagerBottomNavBar(
             modifier = Modifier.weight(1f),
             label = "Itens",
             contentDescription = "Botão para Itens",
-            onClick = viewModel::onItensClick,
+            onClick = { viewModel.onItensClick(currentRoute) },
             icon = ZeraIcon.Bell,
             selected = currentRoute == Route.Itens,
         )

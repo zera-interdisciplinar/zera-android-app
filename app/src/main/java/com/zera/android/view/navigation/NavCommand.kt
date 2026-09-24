@@ -6,7 +6,8 @@ sealed interface NavCommand {
     ) : NavCommand
 
     data class PushAndPop(
-        val route: Route
+        val route: Route,
+        val popCount: Int = 1,
     ) : NavCommand
 
     data class PushAndPopAll(

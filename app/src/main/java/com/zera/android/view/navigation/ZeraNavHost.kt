@@ -5,6 +5,7 @@ import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.navigation.NavGraph
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -36,10 +37,14 @@ fun ZeraNavHost() {
                 is NavCommand.Navigate -> navController.navigate(command.route)
 
                 is NavCommand.PushAndPop -> {
-                    val previousDestinationId = navController.currentDestination?.id
+                    val backStack = navController.currentBackStack.value
+                        .filter { it.destination !is NavGraph }
+                    val popFromIndex = (backStack.size - command.popCount).coerceAtLeast(0)
+                    val popFromId = backStack.getOrNull(popFromIndex)?.destination?.id
+                        ?: navController.currentDestination?.id
                     navController.navigate(command.route) {
-                        if (previousDestinationId != null) {
-                            popUpTo(previousDestinationId) { inclusive = true }
+                        if (popFromId != null) {
+                            popUpTo(popFromId) { inclusive = true }
                         }
                     }
                 }
