@@ -60,6 +60,8 @@ fun ManagerHomeScreen(
                 labelIcon = ZeraIcon.Box,
                 onClick = viewModel::onItemCardClick,
                 modifier = Modifier.weight(1f),
+                description = "↑ 12%",
+                descriptionColor = MaterialTheme.colorScheme.tertiary
             )
             ShortcutCard(
                 label = "Funcionários",
@@ -67,6 +69,8 @@ fun ManagerHomeScreen(
                 labelIcon = ZeraIcon.Group,
                 onClick = viewModel::onEmployeesCardClick,
                 modifier = Modifier.weight(1f),
+                description = "2 pendentes",
+                descriptionColor = MaterialTheme.colorScheme.secondary
             )
         }
 
