@@ -28,7 +28,7 @@ import com.zera.android.view.theme.ZeraTheme
 data class NotificationItem(
     val id: String,
     val label: String,
-    val text: String,
+    val text: String? = null,
     val style: ZeraColorFamily = ZeraColorFamily.Yellow,
 )
 

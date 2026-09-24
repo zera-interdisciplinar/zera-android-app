@@ -36,13 +36,11 @@ class ManagerHomeViewModel : ViewModel() {
                 NotificationItem(
                     id = "1",
                     label = "5 produtos sem classificação",
-                    text = "Aguardando revisão do gestor",
                     style = ZeraColorFamily.Yellow,
                 ),
                 NotificationItem(
                     id = "2",
                     label = "Material reciclável em rota incorreta",
-                    text = "Verifique a ocorrência registrada",
                     style = ZeraColorFamily.Red,
                 ),
             ),
