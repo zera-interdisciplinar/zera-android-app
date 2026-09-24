@@ -20,6 +20,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zera.android.view.components.buttons.IconButton
@@ -33,6 +35,9 @@ import com.zera.android.view.theme.NoColor
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
 import com.zera.android.view.theme.icons.ZeraIcon
+
+private val TopFadeHeight = 15.dp
+private val BottomFadeHeight = 25.dp
 
 /**
  * Casca (Scaffold) compartilhada pelas telas da área do gestor.
@@ -103,12 +108,17 @@ fun ManagerScaffold(
             }
         },
     ) { innerPadding ->
-        Box(){
+        val scrollState = rememberScrollState()
+        val density = LocalDensity.current
+        val topFadePx = with(density) { TopFadeHeight.toPx() }
+        val bottomFadePx = with(density) { BottomFadeHeight.toPx() }
+
+        Box {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
-                    .then(if (scrollable) Modifier.verticalScroll(rememberScrollState()) else Modifier)
+                    .then(if (scrollable) Modifier.verticalScroll(scrollState) else Modifier)
                     .padding(horizontal = Spacing.medium, vertical = Spacing.small)
                     .background(color = MaterialTheme.colorScheme.background),
                 verticalArrangement = Arrangement.spacedBy(Spacing.medium),
@@ -119,19 +129,31 @@ fun ManagerScaffold(
                     colors = listOf(MaterialTheme.colorScheme.background, NoColor)
                 ),
                 modifier = Modifier
+                    .align(Alignment.TopStart)
                     .padding(innerPadding)
                     .fillMaxWidth()
-                    .height(25.dp)
+                    .height(TopFadeHeight)
+                    .graphicsLayer {
+                        // Sem scroll próprio (scrollable = false) o gradiente fica sempre visível.
+                        alpha = if (scrollable) (scrollState.value / topFadePx).coerceIn(0f, 1f) else 1f
+                    }
             ){}
             ZeraGradientBox(
                 brush = Brush.verticalGradient(
                     colors = listOf(NoColor, MaterialTheme.colorScheme.background)
                 ),
                 modifier = Modifier
+                    .align(Alignment.BottomEnd)
                     .padding(innerPadding)
                     .fillMaxWidth()
-                    .height(25.dp)
-                    .align(Alignment.BottomEnd)
+                    .height(BottomFadeHeight)
+                    .graphicsLayer {
+                        alpha = if (scrollable) {
+                            ((scrollState.maxValue - scrollState.value) / bottomFadePx).coerceIn(0f, 1f)
+                        } else {
+                            1f
+                        }   
+                    }
             ){}
         }
     }
