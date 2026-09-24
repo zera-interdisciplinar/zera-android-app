@@ -32,7 +32,7 @@ fun ItensScreen(
         ZeraSearchInput(
             value = state.searchQuery,
             onValueChange = viewModel::onSearchQueryChange,
-            placeholder = "Pesquisar por ID, Nome ou Material...",
+            placeholder = "Pesquisar por ID ou Nome...",
             onSearch = {}
         )
         ZeraChipsGroup(
