@@ -13,6 +13,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zera.android.view.components.graphs.CircularGraph
 import com.zera.android.view.components.graphs.HorizontalBarGraph
@@ -90,6 +91,7 @@ fun IndexesScreen(
         VerticalBarGraph(
             title = "Materiais descartados (kg)",
             items = state.monthlyEvolution,
+            barWidth = 55.dp
         )
 
         TitleText(
