@@ -41,7 +41,7 @@ com.zera.android
     ├── components/        Design System (buttons, cards, containers, inputs, lists, navigation, texts, ...)
     ├── navigation/         Route, NavCommand, ZeraNavigator, ZeraNavHost
     ├── theme/              tokens (cores, tipografia, espaçamento, raio) + ícones
-    └── transition/         SharedElement (transições compartilhadas entre telas)
+    └── transition/         SharedElement (transições compartilhadas), ScreenAnimation e ScreenAnimationRegistry (animações de entrada/saída de tela)
 ```
 
 A organização é **por camada primeiro, por domínio depois** (`model/usecase/auth`, `viewmodel/auth`, `view/screens/auth`), e não por feature verticalizada. Ao adicionar um domínio novo, siga esse mesmo padrão de subpasta.
@@ -74,14 +74,29 @@ O `State` de cada tela é uma `data class` imutável (`copy()` a cada mudança) 
 
 A navegação usa **Jetpack Navigation Compose** com rotas tipadas (`sealed interface Route`, `@Serializable`), mas o disparo de navegação **não é feito diretamente pelas telas** — é centralizado em `ZeraNavigator` (`view/navigation/ZeraNavigator.kt`), um singleton que expõe um `Flow<NavCommand>` (`Channel` por baixo) consumido uma única vez em `ZeraNavHost`.
 
-- `ZeraNavigator.push(route)` — navega mantendo a pilha (`Navigate`).
-- `ZeraNavigator.pushAndPop(route)` — substitui a tela atual pela nova (`PushAndPop`), usado por exemplo ao sair da Splash ou redirecionar após o login.
-- `ZeraNavigator.pushAndPopAll(route)` — limpa toda a pilha de navegação, deixando só a nova rota (`PushAndPopAll`).
-- `ZeraNavigator.goBack()` — volta uma tela (`GoBack`).
+- `ZeraNavigator.push(route, animation)` — navega mantendo a pilha (`Navigate`).
+- `ZeraNavigator.pushAndPop(route, popCount, animation)` — substitui a tela atual pela nova (`PushAndPop`), usado por exemplo ao sair da Splash ou redirecionar após o login.
+- `ZeraNavigator.pushAndPopAll(route, animation)` — limpa toda a pilha de navegação, deixando só a nova rota (`PushAndPopAll`).
+- `ZeraNavigator.goBack()` — volta uma tela (`GoBack`); não recebe animação, ela é derivada da tela removida (ver abaixo).
+
+O parâmetro `animation` é um `ScreenAnimation` e é opcional (padrão `Fade`).
 
 Qualquer camada (tipicamente o `ViewModel`, mas também `Screens` simples como `WelcomeScreen`) pode chamar `ZeraNavigator` diretamente, sem precisar de referência ao `NavHostController`. Isso desacopla `ViewModels` de Compose/Navigation-Compose, mas também significa que a navegação não é unit-testável isoladamente sem observar o `Flow` de comandos.
 
-O app usa `SharedTransitionLayout` (API experimental do Compose) para animar elementos compartilhados entre telas (hoje, o logo — ver [view/transition/SharedElement.kt](../app/src/main/java/com/zera/android/view/transition/SharedElement.kt)); os escopos necessários (`LocalSharedTransitionScope`, `LocalAnimatedVisibilityScope`) são providos em `ZeraNavHost` e consumidos pelo modifier `Modifier.sharedTransition(key)`.
+### Animações de tela
+
+A animação de entrada/saída é escolhida por quem empilha a tela (`ZeraNavigator.push(Route.X, ScreenAnimation.SlideVertical)`), não fixada na rota. Os tipos disponíveis são `Fade`, `SlideHorizontal`, `SlideVertical` e `None` (`view/transition/ScreenAnimation.kt`); cada um define quatro transições: `enter()` (tela nova entrando), `exit()` (tela anterior saindo), `popEnter()` (tela anterior voltando) e `popExit()` (tela removida saindo).
+
+O `ScreenAnimationRegistry` (`view/transition/ScreenAnimationRegistry.kt`), criado em `ZeraNavHost`, associa a animação ao `id` de cada `NavBackStackEntry`:
+
+- `prepare(animation, navController)` roda antes de cada `navigate`: remove do mapa as telas que já saíram da pilha e guarda a animação como pendente.
+- `of(entry)` roda nas lambdas de transição do `NavHost`: se a tela já está no mapa, devolve a animação registrada; se é nova, grava a pendente (ou `Fade`) e a limpa.
+
+O `NavHost` usa `of(targetState)` em `enterTransition`/`exitTransition` e `of(initialState)` em `popEnterTransition`/`popExitTransition`. Assim o "voltar" (inclusive o gesto/botão do sistema, que não passa pelo `ZeraNavigator`) reverte a animação com que a tela foi empilhada. Limitações: se um `navigate` não gerar transição (ex.: `launchSingleTop` na mesma tela), a animação pendente vaza para a próxima navegação; e o mapa vive em memória, então após process death as telas restauradas usam `Fade`. Ver [ADR-0002](08-decisoes-arquiteturais/0002-animacao-de-tela-por-comando-de-navegacao.md).
+
+### Elementos compartilhados
+
+O app usa `SharedTransitionLayout` (API experimental do Compose) para animar elementos compartilhados entre telas (hoje, o logo e a `ManagerBottomNavBar` — ver [view/transition/SharedElement.kt](../app/src/main/java/com/zera/android/view/transition/SharedElement.kt)); os escopos necessários (`LocalSharedTransitionScope`, `LocalAnimatedVisibilityScope`) são providos em `ZeraNavHost` e consumidos pelo modifier `Modifier.sharedTransition(key)`. Uma tela só participa de um shared element se o seu `composable<>` estiver envolvido em `CompositionLocalProvider(LocalAnimatedVisibilityScope provides this)`; hoje isso vale para as telas de auth (`Splash`, `Welcome`, `SignIn`, `SignUp`) e para as quatro telas do `ManagerScaffold` (`ManagerHome`, `Employees`, `Indexes`, `Itens`).
 
 ## Concorrência (coroutines)
 

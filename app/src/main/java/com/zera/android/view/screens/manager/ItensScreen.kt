@@ -11,6 +11,7 @@ import com.zera.android.view.components.inputs.ZeraSearchInput
 import com.zera.android.view.components.lists.ProductList
 import com.zera.android.view.components.texts.TitleText
 import com.zera.android.view.navigation.Route
+import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
 import com.zera.android.viewmodel.manager.ItensViewModel
@@ -31,7 +32,7 @@ fun ItensScreen(
         ZeraSearchInput(
             value = state.searchQuery,
             onValueChange = viewModel::onSearchQueryChange,
-            placeholder = "Pesquisar por ID, Nome ou Material...",
+            placeholder = "Pesquisar por ID ou Nome...",
             onSearch = {}
         )
         ZeraChipsGroup(
@@ -42,7 +43,9 @@ fun ItensScreen(
         TitleText(text = state.totalItemsLabel, bold = true)
         ProductList(
             products = state.items,
-            onItemClick = { /* TODO: abrir detalhes do item */ },
+            onItemClick = { product ->
+                ZeraNavigator.push(Route.ItemDetails(itemId = product.id))
+            },
             contentPadding = PaddingValues(vertical = Spacing.small),
             modifier = Modifier.weight(1f),
         )

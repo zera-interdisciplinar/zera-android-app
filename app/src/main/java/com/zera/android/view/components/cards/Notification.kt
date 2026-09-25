@@ -40,9 +40,9 @@ import com.zera.android.view.theme.palette
 @Composable
 fun Notification(
     label: String,
-    text: String,
     modifier: Modifier = Modifier,
     style: ZeraColorFamily = ZeraColorFamily.Yellow,
+    text: String? = null,
     redirect: (() -> Unit)? = null,
 ) {
     val palette = style.palette()
@@ -58,7 +58,9 @@ fun Notification(
             verticalArrangement = Arrangement.spacedBy(Spacing.small),
         ) {
             BodyText(text = label, bold = true, color = palette.onContainer)
-            BodyText(text = text, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            if(text!=null){
+                BodyText(text = text, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
             if (redirect != null) {
                 Row(
                     modifier = Modifier.clickable(onClick = redirect),
@@ -88,7 +90,6 @@ private fun NotificationPreview() {
         ) {
             Notification(
                 label = "Completar cadastro",
-                text = "Teclado mecânico · faltam danos",
                 style = ZeraColorFamily.Yellow,
                 redirect = {},
             )

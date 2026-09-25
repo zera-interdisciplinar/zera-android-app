@@ -31,3 +31,5 @@ val DarkBlue25 = Color(0xFF162F71)
 
 val TransparentBlue40 = Color(0x662A58CE)
 val TransparentBlue17 = Color(0x40122038)
+
+val NoColor = Color(0x00000000)

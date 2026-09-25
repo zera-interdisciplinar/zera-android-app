@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 
 object SharedElementKeys {
     const val Logo = "logo"
+    const val ManagerBottomNavBar = "manager_bottom_nav_bar"
 }
 @OptIn(ExperimentalSharedTransitionApi::class)
 val LocalSharedTransitionScope = compositionLocalOf<SharedTransitionScope?> { null }

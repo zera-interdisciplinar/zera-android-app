@@ -75,7 +75,7 @@ fun VerticalBarGraph(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(Spacing.large),
+                .padding(Spacing.medium),
             verticalArrangement = Arrangement.spacedBy(Spacing.large),
         ) {
             if (title != null) {

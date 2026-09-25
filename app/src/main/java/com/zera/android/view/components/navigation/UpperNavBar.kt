@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.zera.android.view.components.buttons.IconButton
 import com.zera.android.view.components.buttons.ZeraButtonType
 import com.zera.android.view.components.texts.BodyText
@@ -50,65 +51,73 @@ fun UpperNavBar(
     Box(
         modifier = modifier.fillMaxWidth().padding(Spacing.small)
     ) {
-        Row(
+        Column(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(Spacing.medium),
-            verticalAlignment = Alignment.Top,
+            verticalArrangement = Arrangement.spacedBy(Spacing.micro),
         ) {
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(Spacing.micro),
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                if (goBack) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(Spacing.small),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        IconButton(
-                            icon = ZeraIcon.LeftUTurn,
-                            onClick = onBackClick,
-                            contentDescription = "Voltar",
-                            type = ZeraButtonType.Tertiary,
-                        )
-                        BodyText(
-                            text = "Voltar",
-                            bold = true,
-                        )
+                Box(modifier = Modifier.weight(1f)) {
+                    if (goBack) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(Spacing.small),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            IconButton(
+                                icon = ZeraIcon.LeftUTurn,
+                                onClick = onBackClick,
+                                contentDescription = "Voltar",
+                                type = ZeraButtonType.Tertiary,
+                                size = 34.dp
+                            )
+                            BodyText(
+                                text = "Voltar",
+                                bold = true,
+                            )
+                        }
                     }
                 }
-                TitleText(
-                    text = title,
-                    bold = true,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
 
-            if (showActions) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(Spacing.small),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    IconButton(
-                        icon = ZeraIcon.Bell,
-                        onClick = { /* TODO: adicionar rota para notificações */ },
-                        contentDescription = "Notificações",
-                        type = ZeraButtonType.Secondary,
-                    )
-                    IconButton(
-                        icon = ZeraIcon.Profile,
-                        onClick = { ZeraNavigator.push(Route.Profile) },
-                        contentDescription = "Perfil",
-                        type = ZeraButtonType.Primary,
-                    )
-                    IconButton(
-                        icon = ZeraIcon.Menu,
-                        onClick = {},
-                        contentDescription = "Menu",
-                        type = ZeraButtonType.Tertiary
-                    )
+                Box {
+                    if (showActions) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(Spacing.small),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            IconButton(
+                                icon = ZeraIcon.Bell,
+                                onClick = { /* TODO: adicionar rota para notificações */ },
+                                contentDescription = "Notificações",
+                                type = ZeraButtonType.Secondary,
+                                size = 34.dp
+                            )
+                            IconButton(
+                                icon = ZeraIcon.Profile,
+                                onClick = { ZeraNavigator.push(Route.Profile) },
+                                contentDescription = "Perfil",
+                                type = ZeraButtonType.Primary,
+                                size = 34.dp
+                            )
+                            IconButton(
+                                icon = ZeraIcon.Menu,
+                                onClick = {},
+                                contentDescription = "Menu",
+                                type = ZeraButtonType.Tertiary,
+                                size = 34.dp
+                            )
+                        }
+                    }
                 }
             }
+
+            TitleText(
+                text = title,
+                bold = true,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
         }
     }
 }

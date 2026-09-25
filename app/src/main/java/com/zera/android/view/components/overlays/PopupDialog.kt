@@ -31,8 +31,8 @@ private val CloseButtonSize = 32.dp
 /**
  * Base de um popup modal: container branco arredondado, centralizado, que sobrepõe
  * toda a tela (usa o `Dialog` do Compose, que já traz o scrim e o comportamento de
- * fechar ao tocar fora ou apertar voltar). Tem um botão de fechar (X) fixo no canto
- * superior direito.
+feat: * fechar ao tocar fora ou apertar voltar). Por padrão tem um botão de fechar (X) fixo no
+ * canto superior direito, que pode ser ocultado com [hasDismissButton].
  *
  * Não define nenhum conteúdo próprio — [content] é livre para compor o que for
  * necessário (ex.: [InviteCreatedDialog]). O chamador controla a visibilidade
@@ -43,6 +43,8 @@ private val CloseButtonSize = 32.dp
  * @param onDismissRequest chamado quando o usuário toca no X, toca fora do popup ou
  *   aperta voltar.
  * @param modifier modificador externo opcional.
+ * @param hasDismissButton quando `true` (padrão), exibe o botão de fechar (X) no canto
+ *   superior direito. Tocar fora ou apertar voltar continua fechando o popup.
  * @param contentPadding espaçamento interno entre a borda do popup e o [content].
  * @param content conteúdo desenhado dentro do popup.
  */
@@ -50,6 +52,7 @@ private val CloseButtonSize = 32.dp
 fun PopupDialog(
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier,
+    hasDismissButton: Boolean = true,
     contentPadding: PaddingValues = PaddingValues(Spacing.large),
     content: @Composable ColumnScope.() -> Unit,
 ) {
@@ -60,16 +63,18 @@ fun PopupDialog(
             color = MaterialTheme.colorScheme.surface,
         ) {
             Box {
-                IconButton(
-                    icon = ZeraIcon.Close,
-                    onClick = onDismissRequest,
-                    contentDescription = "Fechar",
-                    type = ZeraButtonType.Tertiary,
-                    size = CloseButtonSize,
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(Spacing.small),
-                )
+                if (hasDismissButton) {
+                    IconButton(
+                        icon = ZeraIcon.Close,
+                        onClick = onDismissRequest,
+                        contentDescription = "Fechar",
+                        type = ZeraButtonType.Tertiary,
+                        size = CloseButtonSize,
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(Spacing.small),
+                    )
+                }
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()

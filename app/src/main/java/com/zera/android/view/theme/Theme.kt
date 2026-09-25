@@ -45,7 +45,8 @@ private val LightColorScheme = lightColorScheme(
     onSurface = DarkBlue15,
     onSurfaceVariant = Gray45,
     outline = LightPastelBlue90,
-    scrim = TransparentBlue17
+    scrim = TransparentBlue17,
+
 )
 
 @Composable

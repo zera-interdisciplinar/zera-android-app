@@ -24,6 +24,7 @@ import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.components.texts.LabelText
 import com.zera.android.view.components.texts.TitleText
 import com.zera.android.view.navigation.Route
+import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
 import com.zera.android.view.theme.icons.ZeraIcon
@@ -59,6 +60,8 @@ fun ManagerHomeScreen(
                 labelIcon = ZeraIcon.Box,
                 onClick = viewModel::onItemCardClick,
                 modifier = Modifier.weight(1f),
+                description = "↑ 12%",
+                descriptionColor = MaterialTheme.colorScheme.tertiary
             )
             ShortcutCard(
                 label = "Funcionários",
@@ -66,6 +69,8 @@ fun ManagerHomeScreen(
                 labelIcon = ZeraIcon.Group,
                 onClick = viewModel::onEmployeesCardClick,
                 modifier = Modifier.weight(1f),
+                description = "2 pendentes",
+                descriptionColor = MaterialTheme.colorScheme.secondary
             )
         }
 
@@ -100,7 +105,9 @@ fun ManagerHomeScreen(
         }
         ProductList(
             products = state.latestProducts,
-            onItemClick = { /* TODO: abrir item */ },
+            onItemClick = { product ->
+                ZeraNavigator.push(Route.ItemDetails(itemId = product.id))
+            },
             contentPadding = PaddingValues(Spacing.none),
             modifier = Modifier.heightIn(max = 400.dp),
         )

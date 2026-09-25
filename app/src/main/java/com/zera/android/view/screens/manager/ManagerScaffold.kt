@@ -1,30 +1,45 @@
 package com.zera.android.view.screens.manager
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zera.android.view.components.buttons.IconButton
+import com.zera.android.view.components.containers.ZeraGradientBox
 import com.zera.android.view.components.navigation.ManagerBottomNavBar
 import com.zera.android.view.components.navigation.UpperNavBar
 import com.zera.android.view.components.texts.BodyText
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
+import com.zera.android.view.theme.NoColor
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
 import com.zera.android.view.theme.icons.ZeraIcon
+import com.zera.android.view.transition.SharedElementKeys
+import com.zera.android.view.transition.sharedTransition
+
+private val TopFadeHeight = 15.dp
+private val BottomFadeHeight = 25.dp
 
 /**
  * Casca (Scaffold) compartilhada pelas telas da área do gestor.
@@ -81,7 +96,8 @@ fun ManagerScaffold(
                 modifier = Modifier
                     .fillMaxWidth()
                     .navigationBarsPadding()
-                    .padding(horizontal = Spacing.medium, vertical = Spacing.small),
+                    .padding(horizontal = Spacing.medium, vertical = Spacing.small)
+                    .sharedTransition(SharedElementKeys.ManagerBottomNavBar),
             )
         },
         floatingActionButton = {
@@ -95,15 +111,54 @@ fun ManagerScaffold(
             }
         },
     ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .then(if (scrollable) Modifier.verticalScroll(rememberScrollState()) else Modifier)
-                .padding(horizontal = Spacing.medium, vertical = Spacing.small),
-            verticalArrangement = Arrangement.spacedBy(Spacing.medium),
-            content = content,
-        )
+        val scrollState = rememberScrollState()
+        val density = LocalDensity.current
+        val topFadePx = with(density) { TopFadeHeight.toPx() }
+        val bottomFadePx = with(density) { BottomFadeHeight.toPx() }
+
+        Box {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .then(if (scrollable) Modifier.verticalScroll(scrollState) else Modifier)
+                    .padding(horizontal = Spacing.medium, vertical = Spacing.small)
+                    .background(color = MaterialTheme.colorScheme.background),
+                verticalArrangement = Arrangement.spacedBy(Spacing.medium),
+                content = content,
+            )
+            ZeraGradientBox(
+                brush = Brush.verticalGradient(
+                    colors = listOf(MaterialTheme.colorScheme.background, NoColor)
+                ),
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(innerPadding)
+                    .fillMaxWidth()
+                    .height(TopFadeHeight)
+                    .graphicsLayer {
+                        // Sem scroll próprio (scrollable = false) o gradiente fica sempre visível.
+                        alpha = if (scrollable) (scrollState.value / topFadePx).coerceIn(0f, 1f) else 1f
+                    }
+            ){}
+            ZeraGradientBox(
+                brush = Brush.verticalGradient(
+                    colors = listOf(NoColor, MaterialTheme.colorScheme.background)
+                ),
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(innerPadding)
+                    .fillMaxWidth()
+                    .height(BottomFadeHeight)
+                    .graphicsLayer {
+                        alpha = if (scrollable) {
+                            ((scrollState.maxValue - scrollState.value) / bottomFadePx).coerceIn(0f, 1f)
+                        } else {
+                            1f
+                        }   
+                    }
+            ){}
+        }
     }
 }
 
