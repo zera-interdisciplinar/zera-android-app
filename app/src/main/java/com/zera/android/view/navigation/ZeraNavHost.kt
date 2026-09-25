@@ -5,6 +5,7 @@ import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.navigation.NavGraph
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -25,18 +26,24 @@ import com.zera.android.view.screens.manager.ManagerHomeScreen
 import com.zera.android.view.screens.shared.ProfileScreen
 import com.zera.android.view.transition.LocalAnimatedVisibilityScope
 import com.zera.android.view.transition.LocalSharedTransitionScope
+import com.zera.android.view.transition.ScreenAnimationRegistry
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun ZeraNavHost() {
     val navController: NavHostController = rememberNavController()
+    val animations = remember { ScreenAnimationRegistry() }
 
     LaunchedEffect(Unit) {
         ZeraNavigator.commands.collect { command ->
             when (command) {
-                is NavCommand.Navigate -> navController.navigate(command.route)
+                is NavCommand.Navigate -> {
+                    animations.prepare(command.animation, navController)
+                    navController.navigate(command.route)
+                }
 
                 is NavCommand.PushAndPop -> {
+                    animations.prepare(command.animation, navController)
                     val backStack = navController.currentBackStack.value
                         .filter { it.destination !is NavGraph }
                     val popFromIndex = (backStack.size - command.popCount).coerceAtLeast(0)
@@ -50,6 +57,7 @@ fun ZeraNavHost() {
                 }
 
                 is NavCommand.PushAndPopAll -> {
+                    animations.prepare(command.animation, navController)
                     navController.navigate(command.route) {
                         popUpTo(navController.graph.id) {
                             inclusive = true
@@ -67,7 +75,11 @@ fun ZeraNavHost() {
         CompositionLocalProvider(LocalSharedTransitionScope provides this) {
             NavHost(
                 navController = navController,
-                startDestination = Route.Splash
+                startDestination = Route.Splash,
+                enterTransition = { animations.of(targetState).enter() },
+                exitTransition = { animations.of(targetState).exit() },
+                popEnterTransition = { animations.of(initialState).popEnter() },
+                popExitTransition = { animations.of(initialState).popExit() },
             ) {
                 composable<Route.Splash> {
                     CompositionLocalProvider(LocalAnimatedVisibilityScope provides this) {
@@ -90,23 +102,31 @@ fun ZeraNavHost() {
                     }
                 }
                 composable<Route.ManagerHome> {
-                    ManagerHomeScreen()
+                    CompositionLocalProvider(LocalAnimatedVisibilityScope provides this) {
+                        ManagerHomeScreen()
+                    }
                 }
                 composable<Route.ItemDetails> { backStackEntry ->
                     val route = backStackEntry.toRoute<Route.ItemDetails>()
                     ItemDetailsScreen(itemId = route.itemId)
                 }
                 composable<Route.Employees> {
-                    EmployeesScreen()
+                    CompositionLocalProvider(LocalAnimatedVisibilityScope provides this) {
+                        EmployeesScreen()
+                    }
                 }
                 composable<Route.ItemApproved> {
                     ItemApprovedScreen()
                 }
                 composable<Route.Indexes> {
-                    IndexesScreen()
+                    CompositionLocalProvider(LocalAnimatedVisibilityScope provides this) {
+                        IndexesScreen()
+                    }
                 }
                 composable<Route.Itens> {
-                    ItensScreen()
+                    CompositionLocalProvider(LocalAnimatedVisibilityScope provides this) {
+                        ItensScreen()
+                    }
                 }
                 composable<Route.EmployeeHome> {
                     EmployeeHomeScreen()
