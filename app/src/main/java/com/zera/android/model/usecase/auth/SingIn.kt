@@ -4,19 +4,23 @@ import com.zera.android.model.remote.client.ApiClient
 import com.zera.android.model.entity.auth.SingInRequestDTO
 import com.zera.android.model.local.SharedPreferencesManager
 import com.zera.android.model.entity.user.SelfUserResponseDTO
+import com.zera.android.config.SetupApp
+import kotlinx.serialization.json.JsonPrimitive
+
 class SingIn {
     suspend fun execute(email: String, password: String): SelfUserResponseDTO {
-        // build the sign in request
         val signInRequest = SingInRequestDTO(email, password)
 
         val response = ApiClient.authService.signIn(signInRequest)
 
-        // save the access token and refresh token in shared preferences
         SharedPreferencesManager.saveAccessToken(response.accessToken)
         SharedPreferencesManager.saveRefreshToken(response.refreshToken)
-        
-        // get the self user to discover the user role and redirect to the correct screen
+
         val selfUser = ApiClient.selfUserService.getSelfUser(response.userId)
+
+        SetupApp.loadFlags(
+            mapOf("user_id" to JsonPrimitive(selfUser.userId)),
+        )
 
         return selfUser
     }

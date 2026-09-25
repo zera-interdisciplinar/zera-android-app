@@ -1,0 +1,5 @@
+## Copie para local.properties (já no .gitignore) e preencha.
+
+scrapy.api.url=https://host/v1/
+scrapy.api.key=
+adm.core.api.key=

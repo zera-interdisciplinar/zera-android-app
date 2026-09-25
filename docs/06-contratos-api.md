@@ -6,7 +6,7 @@
 
 - **Base URL** (ambiente QA): `http://35.247.253.238/qa/administrative/api/v1/` — HTTP puro, por isso o `AndroidManifest.xml` declara `android:usesCleartextTraffic="true"`.
 - **Interceptor OkHttp** aplicado a toda requisição:
-  - header `apiKey` fixo (`"zera1405"`) — valor hardcoded no código-fonte, não em config/BuildConfig. Considerar mover para um mecanismo de configuração por ambiente antes de builds de produção.
+  - header `apiKey` lido de `adm.core.api.key` no `local.properties` (`BuildConfig.ADM_CORE_API_KEY`).
   - header `Authorization: Bearer <accessToken>`, quando há um `accessToken` salvo em `SharedPreferencesManager` (ausente apenas na primeira tela de login).
 - **Serialização**: `kotlinx.serialization.json.Json { ignoreUnknownKeys = true }` via `retrofit2-kotlinx-serialization-converter`.
 - **Services expostos**: `authService` (`AuthService`), `selfUserService` (`SelfUserService`).
