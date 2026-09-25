@@ -1,11 +1,11 @@
 package com.zera.android.viewmodel.navigation
 
-import androidx.lifecycle.ViewModel
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.view.transition.ScreenAnimation
+import com.zera.android.viewmodel.ZeraViewModel
 
-class ManagerBottomNavBarViewModel : ViewModel() {
+class ManagerBottomNavBarViewModel : ZeraViewModel() {
     /**
      * A partir da Home, navega por [ZeraNavigator.push] (empilha normalmente).
      *

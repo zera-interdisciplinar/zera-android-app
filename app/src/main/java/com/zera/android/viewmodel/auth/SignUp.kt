@@ -1,12 +1,12 @@
 package com.zera.android.viewmodel.auth
 
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zera.android.model.usecase.auth.InvitationUseCase
 import com.zera.android.model.usecase.auth.SingIn
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
+import com.zera.android.viewmodel.ZeraViewModel
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 
@@ -19,7 +19,7 @@ data class SignUpState(
     val errorMessage: String? = null
 )
 
-class SignUpViewModel : ViewModel() {
+class SignUpViewModel : ZeraViewModel() {
     private val _state = mutableStateOf(SignUpState())
     val state = _state
 

@@ -1,9 +1,9 @@
 package com.zera.android.viewmodel.manager
 
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.ViewModel
 import com.zera.android.view.components.lists.EmployeeItem
 import com.zera.android.view.navigation.ZeraNavigator
+import com.zera.android.viewmodel.ZeraViewModel
 
 data class EmployeesState(
     val activeEmployeesCount: Int = 0,
@@ -16,7 +16,7 @@ data class EmployeesState(
     val errorMessage: String? = null,
 )
 
-class EmployeesViewModel : ViewModel() {
+class EmployeesViewModel : ZeraViewModel() {
     // TODO: substituir os dados de exemplo pela chamada ao back (ver loadEmployees)
     private val _state = mutableStateOf(
         EmployeesState(

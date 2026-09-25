@@ -9,6 +9,8 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+// it does not extend Zeraviewmodel because the boot has not yet run, so the Environments variable does not exist.
+// other screens inherit ZeraViewModel after the setup() method.
 class SplashViewModel : ViewModel() {
     init {
         viewModelScope.launch {

@@ -1,10 +1,10 @@
 package com.zera.android.viewmodel.manager
 
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.ViewModel
 import com.zera.android.view.components.outros.ItemStatus
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
+import com.zera.android.viewmodel.ZeraViewModel
 
 data class ItemApprovedState(
     val itemId: String = "",
@@ -15,7 +15,7 @@ data class ItemApprovedState(
     val errorMessage: String? = null,
 )
 
-class ItemApprovedViewModel : ViewModel() {
+class ItemApprovedViewModel : ZeraViewModel() {
     // TODO: substituir os dados de exemplo pelo item recebido por parâmetro de
     // navegação assim que essa tela for alcançada a partir de um fluxo real de aprovação
     private val _state = mutableStateOf(
