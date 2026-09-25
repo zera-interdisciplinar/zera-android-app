@@ -130,6 +130,8 @@ E termina com **Ao terminar**, lembrando quais docs sugerir atualizar (ver regra
 
 **Durante**
 - Rota nova sempre `sealed interface Route` + `@Serializable`; navegação disparada pelo `ViewModel` (regra estrita em `01`), exceto as duas telas incondicionais já registradas como exceção (`SplashScreen`, `WelcomeScreen`).
+- Animação de entrada/saída é escolhida na chamada (`ZeraNavigator.push(route, ScreenAnimation.X)`), nunca fixada na rota; o padrão é `Fade`. Animação nova = novo valor no enum `ScreenAnimation` com as quatro transições (`enter`, `exit`, `popEnter`, `popExit`). Não passe animação para `goBack()`: ela é derivada da tela removida via `ScreenAnimationRegistry`.
+- Tela nova que use shared element (ou que deva ter o `ManagerBottomNavBar` fixo) precisa ter o `composable<>` envolvido em `CompositionLocalProvider(LocalAnimatedVisibilityScope provides this)` em `ZeraNavHost`; sem isso `Modifier.sharedTransition` não faz nada.
 
 **Quando envolver o usuário**
 - Introdução da primeira rota/área exclusiva do perfil Administrador — contradiz o que está documentado hoje; confirmar antes.
