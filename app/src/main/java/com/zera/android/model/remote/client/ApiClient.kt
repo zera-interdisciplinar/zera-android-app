@@ -2,7 +2,7 @@ package com.zera.android.model.remote.client
 
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.zera.android.BuildConfig
-import com.zera.android.config.Environments
+import com.zera.android.model.entity.config.Environments
 import com.zera.android.model.local.SharedPreferencesManager
 import com.zera.android.model.remote.service.AuthService
 import com.zera.android.model.remote.service.InvitationService

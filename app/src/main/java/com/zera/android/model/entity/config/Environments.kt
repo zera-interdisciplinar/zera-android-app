@@ -1,4 +1,4 @@
-package com.zera.android.config
+package com.zera.android.model.entity.config
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

@@ -1,4 +1,4 @@
-package com.zera.android.config.scrapy
+package com.zera.android.model.entity.scrapy
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
