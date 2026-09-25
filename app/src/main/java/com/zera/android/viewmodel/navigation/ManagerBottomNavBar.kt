@@ -3,6 +3,7 @@ package com.zera.android.viewmodel.navigation
 import androidx.lifecycle.ViewModel
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
+import com.zera.android.view.transition.ScreenAnimation
 
 class ManagerBottomNavBarViewModel : ViewModel() {
     /**
@@ -17,9 +18,9 @@ class ManagerBottomNavBarViewModel : ViewModel() {
      */
     private fun navigate(currentRoute: Route, target: Route) {
         when {
-            currentRoute == Route.ManagerHome -> ZeraNavigator.push(target)
-            target == Route.ManagerHome -> ZeraNavigator.pushAndPop(target, popCount = 2)
-            else -> ZeraNavigator.pushAndPop(target)
+            currentRoute == Route.ManagerHome -> ZeraNavigator.push(target, animation = ScreenAnimation.None)
+            target == Route.ManagerHome -> ZeraNavigator.pushAndPop(target, popCount = 2, animation = ScreenAnimation.None)
+            else -> ZeraNavigator.pushAndPop(target, animation = ScreenAnimation.None)
         }
     }
 

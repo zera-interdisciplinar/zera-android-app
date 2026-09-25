@@ -35,6 +35,8 @@ import com.zera.android.view.theme.NoColor
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
 import com.zera.android.view.theme.icons.ZeraIcon
+import com.zera.android.view.transition.SharedElementKeys
+import com.zera.android.view.transition.sharedTransition
 
 private val TopFadeHeight = 15.dp
 private val BottomFadeHeight = 25.dp
@@ -94,7 +96,8 @@ fun ManagerScaffold(
                 modifier = Modifier
                     .fillMaxWidth()
                     .navigationBarsPadding()
-                    .padding(horizontal = Spacing.medium, vertical = Spacing.small),
+                    .padding(horizontal = Spacing.medium, vertical = Spacing.small)
+                    .sharedTransition(SharedElementKeys.ManagerBottomNavBar),
             )
         },
         floatingActionButton = {
