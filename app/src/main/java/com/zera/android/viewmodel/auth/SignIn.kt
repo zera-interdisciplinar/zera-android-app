@@ -2,7 +2,7 @@ package com.zera.android.viewmodel.auth
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
-import com.zera.android.model.entity.user.SelfUserResponseDTO
+import com.zera.android.model.dto.user.SelfUserResponseDTO
 import com.zera.android.model.usecase.auth.SingIn
 import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.viewmodel.ZeraViewModel

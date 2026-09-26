@@ -1,7 +1,7 @@
 package com.zera.android.model.usecase.auth
 
-import com.zera.android.model.entity.invitation.RedeemRequestDTO
-import com.zera.android.model.entity.invitation.RedeemResponseDTO
+import com.zera.android.model.dto.invitation.RedeemRequestDTO
+import com.zera.android.model.dto.invitation.RedeemResponseDTO
 import com.zera.android.model.remote.client.ApiClient
 
 class InvitationUseCase {

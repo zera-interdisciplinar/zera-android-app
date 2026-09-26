@@ -1,7 +1,7 @@
 package com.zera.android.model.usecase.auth
 
-import com.zera.android.model.entity.auth.SingInRequestDTO
-import com.zera.android.model.entity.user.SelfUserResponseDTO
+import com.zera.android.model.dto.auth.SingInRequestDTO
+import com.zera.android.model.dto.user.SelfUserResponseDTO
 import com.zera.android.model.local.SharedPreferencesManager
 import com.zera.android.model.remote.client.ApiClient
 import com.zera.android.model.usecase.config.LoadFlags
@@ -23,6 +23,7 @@ class SingIn {
         )
 
         val selfUser = getSelfUser.execute(response.userId)
+        SharedPreferencesManager.saveUnitId(selfUser.unitId)
         loadFlags.execute(selfUser)
         return selfUser
     }

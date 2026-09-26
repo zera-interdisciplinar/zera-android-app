@@ -7,7 +7,13 @@ import kotlinx.serialization.Serializable
 data class Environments(
     @SerialName("ms-adm-core-url")
     val admCoreApiUrl: String,
-    
+
     @SerialName("ms-adm-core-api-key")
     val admCoreApiKey: String,
+
+    @SerialName("ms-inventory-url")
+    val inventoryApiUrl: String,
+
+    @SerialName("ms-inventory-api-key")
+    val inventoryApiKey: String = "",
 )

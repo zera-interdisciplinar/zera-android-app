@@ -19,6 +19,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.zera.android.view.components.texts.BodyText
 import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.components.texts.LabelText
 import com.zera.android.view.theme.Radius
@@ -56,6 +57,8 @@ data class BarGraphItem(
  *   restante vai para a barra + porcentagem). Ajuste se os rótulos forem
  *   tipicamente mais longos/curtos que o padrão.
  * @param barHeight espessura da barra.
+ * @param emptyContent conteúdo exibido quando [items] está vazio. Por padrão,
+ *   uma mensagem de texto simples.
  */
 @Composable
 fun HorizontalBarGraph(
@@ -63,15 +66,27 @@ fun HorizontalBarGraph(
     modifier: Modifier = Modifier,
     labelWeight: Float = 0.32f,
     barHeight: Dp = 14.dp,
+    emptyContent: @Composable () -> Unit = { BodyText(text = "Nenhum resíduo no período") },
 ) {
-    val styleByIndex = rankedBarGraphColors(items) { it.percentage }
-
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(Radius.medium),
         color = MaterialTheme.colorScheme.surface,
         contentColor = MaterialTheme.colorScheme.onSurface,
     ) {
+        if (items.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(Spacing.large),
+                contentAlignment = Alignment.Center,
+            ) {
+                emptyContent()
+            }
+            return@Surface
+        }
+
+        val styleByIndex = rankedBarGraphColors(items) { it.percentage }
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -156,6 +171,17 @@ private fun HorizontalBarGraphPreview() {
                 BarGraphItem(label = "Plásticos", percentage = 0.42f),
                 BarGraphItem(label = "Outros", percentage = 0.2f),
             ),
+            modifier = Modifier.padding(Spacing.medium),
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun HorizontalBarGraphEmptyPreview() {
+    ZeraTheme {
+        HorizontalBarGraph(
+            items = emptyList(),
             modifier = Modifier.padding(Spacing.medium),
         )
     }

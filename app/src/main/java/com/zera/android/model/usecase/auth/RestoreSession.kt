@@ -1,6 +1,6 @@
 package com.zera.android.model.usecase.auth
 
-import com.zera.android.model.entity.user.SelfUserResponseDTO
+import com.zera.android.model.dto.user.SelfUserResponseDTO
 import com.zera.android.model.local.SharedPreferencesManager
 
 class RestoreSession {

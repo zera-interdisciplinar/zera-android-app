@@ -27,7 +27,7 @@ O papel do usuário autenticado (`role` em `SelfUserResponseDTO`) define para qu
 Implementados no app hoje:
 
 1. **Onboarding/login** — splash (`POST /v1/boot` na Scrapy, header `apikey`) → tela de boas-vindas → login ou primeiro acesso (cadastro via código de convite) → `POST /v1/flags` → redirecionamento por perfil (Gestor ou Funcionário).
-2. **Visão geral do Gestor** — dashboard com ocupação de estoque, atalhos (itens/funcionários), alertas e últimos itens cadastrados.
+2. **Visão geral do Gestor** — dashboard com ocupação de estoque, atalhos (itens/funcionários), alertas e últimos itens cadastrados, alimentado por `GET /api/v1/dashboard/home` (`ms-inventory`). A tela de indicadores (`Route.Indexes`) usa `GET /api/v1/dashboard/indicators`. O atalho de funcionários ainda não tem fonte nessa API.
 
 Visão futura (resumo do escopo de produto para Gestor e Funcionário; cada item ganhará spec própria em [07-especificacoes/](07-especificacoes/) quando entrar em desenvolvimento):
 

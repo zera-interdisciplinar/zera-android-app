@@ -2,7 +2,7 @@ package com.zera.android.model.usecase.config
 
 import com.zera.android.BuildConfig
 import com.zera.android.model.config.AppConfig
-import com.zera.android.model.entity.user.SelfUserResponseDTO
+import com.zera.android.model.dto.user.SelfUserResponseDTO
 import com.zera.android.model.remote.client.ScrapyClient
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive

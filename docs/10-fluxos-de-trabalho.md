@@ -44,7 +44,7 @@ E termina com **Ao terminar**, lembrando quais docs sugerir atualizar (ver regra
 **Quando envolver o usuário**
 - Dúvida se o componente deve levar o prefixo `Zera` ou não — o critério em `02` é uma heurística (fundamental/reutilizado amplamente vs. composição específica), não uma regra fechada para todo caso.
 - Mudança que afeta um token global (cor base de `ZeraColorFamily`, escala de `Spacing`/`Radius`) — isso se propaga para todo componente existente.
-- Criação de uma "família" de pasta nova em `view/components/` (nenhuma das existentes — `buttons`, `cards`, `containers`, `inputs`, `lists`, `logo`, `navigation`, `outros`, `progressbars`, `texts`, e as ainda vazias `images`/`overlays` — parece caber).
+- Criação de uma "família" de pasta nova em `view/components/` (nenhuma das existentes — `buttons`, `cards`, `containers`, `graphs`, `inputs`, `lists`, `logo`, `navigation`, `outros`, `progressbars`, `texts`, e as ainda vazias `images`/`overlays` — parece caber).
 
 **Ao terminar:** documentar em `03-catalogo-componentes.md` com assinatura, parâmetros e exemplo de uso.
 
@@ -66,19 +66,20 @@ E termina com **Ao terminar**, lembrando quais docs sugerir atualizar (ver regra
 ## 4. Integrar um novo endpoint ou mudar um contrato existente
 
 **Antes de começar**
-- Docs: [06-contratos-api.md](06-contratos-api.md), [04-modelo-de-dados.md](04-modelo-de-dados.md) e, se for Scrapy, [contrato/contrato-scrapy-api.md](contrato/contrato-scrapy-api.md).
-- Código: `model/remote/service/` (interface do serviço), `model/entity/<domínio>/` (DTOs), `ApiClient` ou `ScrapyClient` (para expor o novo `service`, se for o caso).
+- Docs: [06-contratos-api.md](06-contratos-api.md), [04-modelo-de-dados.md](04-modelo-de-dados.md) e, conforme o serviço, [contrato-scrapy/contrato-scrapy-api.md](contrato-scrapy/contrato-scrapy-api.md) ou [contrato-ms-inventory/contrato-inventory-dashboard.md](contrato-ms-inventory/contrato-inventory-dashboard.md).
+- Código: `model/remote/service/` (interface do serviço), `model/dto/<domínio>/` (DTOs), `ApiClient` / `ScrapyClient` / `InventoryClient` (para expor o novo `service`, se for o caso).
 
 **Durante**
-- A chamada de rede em si fica no `usecase`, nunca direto na `Screen` nem "solta" no `ViewModel` sem passar por um `usecase`. O `usecase` fala com `ApiClient.<service>` ou `ScrapyClient` e, quando precisar, com `SharedPreferencesManager` / `AppConfig` — não existe camada de `Repository` intermediária hoje (ver "Visão geral das camadas" em [01-arquitetura.md](01-arquitetura.md)).
+- A chamada de rede em si fica no `usecase`, nunca direto na `Screen` nem "solta" no `ViewModel` sem passar por um `usecase`. O `usecase` fala com `ApiClient.<service>`, `ScrapyClient` ou `InventoryClient` e, quando precisar, com `SharedPreferencesManager` / `AppConfig` — não existe camada de `Repository` intermediária hoje (ver "Visão geral das camadas" em [01-arquitetura.md](01-arquitetura.md)).
 - Scrapy: header obrigatório é `apikey`, nunca `Authorization: Bearer`. `200` HTML em `/v1/boot` ou `/v1/flags` é roteamento Kong (prefixo do serviço não removido), não contrato.
+- ms-inventory: headers `apiKey` + `Authorization: Bearer` + `X-Unit-Id`. Sem `apiKey` → 401 no Kong; sem unidade → 400.
 
 **Quando envolver o usuário**
-- **Qualquer contrato ainda não fechado com o backend** — não adivinhar formato de payload (o caso já conhecido: `invitations/redeem` reaproveitando um DTO que não cobre todos os campos da tela de cadastro). Confirmar o contrato real antes de implementar contra um payload suposto.
+- **Qualquer contrato ainda não fechado com o backend** — não adivinhar formato de payload. Confirmar o contrato real antes de implementar contra um payload suposto.
 - Mudança que quebra um contrato já documentado em `06-contratos-api.md` e usado por telas existentes.
 - Qualquer decisão sobre tratamento de erro padronizado ou refresh de token — hoje não existe um padrão definido; introduzir um é uma decisão de arquitetura, não uma escolha local de quem está integrando um endpoint específico.
 
-**Ao terminar:** atualizar `06-contratos-api.md` e `04-modelo-de-dados.md`. Se o contrato for da Scrapy, atualizar também `contrato/contrato-scrapy-api.md` e `contrato/contexto.md`.
+**Ao terminar:** atualizar `06-contratos-api.md` e `04-modelo-de-dados.md`. Se o contrato for da Scrapy, atualizar também `contrato-scrapy/`. Se for do `ms-inventory`, atualizar `contrato-ms-inventory/contexto.md` (o `.md` do contrato em si só muda se o backend mudar).
 
 ## 5. Adicionar uma dependência
 
@@ -113,10 +114,10 @@ E termina com **Ao terminar**, lembrando quais docs sugerir atualizar (ver regra
 
 **Antes de começar**
 - Docs: a seção "Visão futura" em [00-contexto-geral.md](00-contexto-geral.md) dá só um resumo leve, de propósito — não é uma spec. Antes de modelar qualquer coisa, confirmar com o usuário o escopo exato da primeira fatia a implementar.
-- Código: seguir a estrutura por camada já estabelecida (`model/entity/<domínio>/`, `model/usecase/<domínio>/`, `viewmodel/<domínio>/`, `view/screens/<domínio>/`), replicando o padrão do domínio `auth`/`manager`.
+- Código: seguir a estrutura por camada já estabelecida (`model/dto/<domínio>/`, `model/entity/` só para o que não é payload, `model/usecase/<domínio>/`, `viewmodel/<domínio>/`, `view/screens/<domínio>/`), replicando o padrão do domínio `auth`/`manager`/`inventory`.
 
 **Durante**
-- Reforçando onde cada responsabilidade fica, para o domínio novo inteiro: DTOs em `model/entity/<domínio>/`; chamadas de API e regra de acesso a dado em `model/usecase/<domínio>/` (sem `Repository`, como no resto do projeto); coordenação de estado e navegação em `viewmodel/<domínio>/`; apresentação pura em `view/screens/<domínio>/` — seguindo a regra estrita de separação View/lógica em [01-arquitetura.md](01-arquitetura.md).
+- Reforçando onde cada responsabilidade fica, para o domínio novo inteiro: DTOs em `model/dto/<domínio>/`; chamadas de API e regra de acesso a dado em `model/usecase/<domínio>/` (sem `Repository`, como no resto do projeto); coordenação de estado e navegação em `viewmodel/<domínio>/`; apresentação pura em `view/screens/<domínio>/` — seguindo a regra estrita de separação View/lógica em [01-arquitetura.md](01-arquitetura.md).
 
 **Quando envolver o usuário**
 - Modelagem de dados da hierarquia Categoria → Modelo → Produto e do código de barras composto — tem decisões em aberto (chave composta vs. entidades relacionadas, por exemplo) que não devem ser resolvidas sozinho.

@@ -1,18 +1,23 @@
 package com.zera.android.view.components.graphs
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -47,6 +52,9 @@ data class VerticalBarGraphItem(
  * A cor de cada barra é automática (ver [rankedBarGraphColors]): ranking decrescente
  * de [VerticalBarGraphItem.value], ciclando `Azul -> Amarelo -> Verde -> Azul...` —
  * independe da ordem de [items], que só define a ordem de exibição das colunas.
+ * Quando as colunas não cabem na largura, a faixa de barras rola na horizontal
+ * (o [title] permanece fixo). Por padrão a posição inicial é o fim da série
+ * (mês mais recente visível).
  *
  * @param items colunas a exibir, na ordem em que devem aparecer.
  * @param modifier modificador externo opcional.
@@ -54,6 +62,8 @@ data class VerticalBarGraphItem(
  * @param barWidth largura de cada barra.
  * @param maxBarHeight altura da barra do maior [VerticalBarGraphItem.value]; as demais
  *   são desenhadas proporcionalmente a ela.
+ * @param scrollToEnd quando `true` (padrão), a faixa começa no último item
+ *   (mais recente). `false` começa no primeiro.
  */
 @Composable
 fun VerticalBarGraph(
@@ -62,9 +72,17 @@ fun VerticalBarGraph(
     title: String? = null,
     barWidth: Dp = 40.dp,
     maxBarHeight: Dp = 140.dp,
+    scrollToEnd: Boolean = true,
 ) {
     val styleByIndex = rankedBarGraphColors(items) { it.value }
     val maxValue = items.maxOfOrNull { it.value } ?: 0f
+    val scrollState = rememberScrollState()
+
+    LaunchedEffect(items, scrollToEnd, scrollState.maxValue) {
+        if (scrollToEnd) {
+            scrollState.scrollTo(scrollState.maxValue)
+        }
+    }
 
     Surface(
         modifier = modifier.fillMaxWidth(),
@@ -81,19 +99,26 @@ fun VerticalBarGraph(
             if (title != null) {
                 LabelText(text = title, bold = true)
             }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.Bottom,
-            ) {
-                items.forEachIndexed { index, item ->
-                    VerticalBarGraphColumn(
-                        item = item,
-                        style = styleByIndex.getValue(index),
-                        heightFraction = if (maxValue > 0f) item.value / maxValue else 0f,
-                        barWidth = barWidth,
-                        maxBarHeight = maxBarHeight,
-                    )
+            BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    modifier = Modifier
+                        .horizontalScroll(scrollState)
+                        .widthIn(min = maxWidth),
+                    horizontalArrangement = Arrangement.spacedBy(
+                        Spacing.medium,
+                        Alignment.CenterHorizontally,
+                    ),
+                    verticalAlignment = Alignment.Bottom,
+                ) {
+                    items.forEachIndexed { index, item ->
+                        VerticalBarGraphColumn(
+                            item = item,
+                            style = styleByIndex.getValue(index),
+                            heightFraction = if (maxValue > 0f) item.value / maxValue else 0f,
+                            barWidth = barWidth,
+                            maxBarHeight = maxBarHeight,
+                        )
+                    }
                 }
             }
         }
@@ -142,6 +167,31 @@ private fun VerticalBarGraphPreview() {
                 VerticalBarGraphItem(label = "Jun", value = 10f),
                 VerticalBarGraphItem(label = "Jul", value = 29f),
                 VerticalBarGraphItem(label = "Ago", value = 12f),
+            ),
+        )
+    }
+}
+
+@Preview()
+@Composable
+private fun VerticalBarGraphTwelveMonthsPreview() {
+    ZeraTheme {
+        VerticalBarGraph(
+            title = "Materiais descartados (kg)",
+            barWidth = 55.dp,
+            items = listOf(
+                VerticalBarGraphItem(label = "Out", value = 8f),
+                VerticalBarGraphItem(label = "Nov", value = 12f),
+                VerticalBarGraphItem(label = "Dez", value = 9f),
+                VerticalBarGraphItem(label = "Jan", value = 25.5f),
+                VerticalBarGraphItem(label = "Fev", value = 40f),
+                VerticalBarGraphItem(label = "Mar", value = 18f),
+                VerticalBarGraphItem(label = "Abr", value = 22f),
+                VerticalBarGraphItem(label = "Mai", value = 7f),
+                VerticalBarGraphItem(label = "Jun", value = 10f),
+                VerticalBarGraphItem(label = "Jul", value = 29f),
+                VerticalBarGraphItem(label = "Ago", value = 12f),
+                VerticalBarGraphItem(label = "Set", value = 15f),
             ),
         )
     }
