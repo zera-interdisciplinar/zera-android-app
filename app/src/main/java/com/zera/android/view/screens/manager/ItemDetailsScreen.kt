@@ -13,10 +13,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.components.buttons.ZeraButton
 import com.zera.android.view.components.buttons.ZeraButtonType
 import com.zera.android.view.components.cards.ItemSummaryCard
@@ -32,6 +34,10 @@ fun ItemDetailsScreen(
     viewModel: ItemDetailsViewModel = viewModel()
 ) {
     val state by viewModel.state
+
+    LaunchedEffect(itemId) {
+        viewModel.loadItem(itemId)
+    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -75,11 +81,16 @@ fun ItemDetailsScreen(
                 .padding(horizontal = Spacing.medium, vertical = Spacing.small),
             verticalArrangement = Arrangement.spacedBy(Spacing.medium),
         ) {
+            state.errorMessage?.let { message ->
+                CaptionText(text = message, color = MaterialTheme.colorScheme.error)
+            }
+
             ItemSummaryCard(
                 itemId = state.itemId,
                 itemName = state.itemName,
                 itemSubtitle = state.itemSubtitle,
                 status = state.status,
+                condition = state.condition,
             )
 
             EditableFieldRow(label = "Categoria", value = state.category, onEditClick = viewModel::onEditClick)

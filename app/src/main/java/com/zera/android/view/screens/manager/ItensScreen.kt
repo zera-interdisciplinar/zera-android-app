@@ -1,6 +1,7 @@
 package com.zera.android.view.screens.manager
 
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -9,6 +10,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zera.android.view.components.inputs.ZeraChipsGroup
 import com.zera.android.view.components.inputs.ZeraSearchInput
 import com.zera.android.view.components.lists.ProductList
+import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.components.texts.TitleText
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
@@ -33,13 +35,16 @@ fun ItensScreen(
             value = state.searchQuery,
             onValueChange = viewModel::onSearchQueryChange,
             placeholder = "Pesquisar por ID ou Nome...",
-            onSearch = {}
+            onSearch = viewModel::onSearch,
         )
         ZeraChipsGroup(
             options = state.filterOptions,
             selected = state.selectedFilter,
             onSelectedChange = viewModel::onFilterChange,
         )
+        state.errorMessage?.let { message ->
+            CaptionText(text = message, color = MaterialTheme.colorScheme.error)
+        }
         TitleText(text = state.totalItemsLabel, bold = true)
         ProductList(
             products = state.items,
