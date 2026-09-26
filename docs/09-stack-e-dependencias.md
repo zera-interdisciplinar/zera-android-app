@@ -36,4 +36,4 @@ O projeto tem o plugin `com.google.gms.google-services` (versão 4.5.0) aplicado
 
 - **JUnit 4** (`junit:junit:4.13.2`) para testes locais (`app/src/test`).
 - **AndroidX Test** (`androidx-junit` 1.3.0, `androidx-espresso-core` 3.7.0) e **Compose UI Test** (`ui-test-junit4`, `ui-test-manifest`) para testes instrumentados (`app/src/androidTest`).
-- Hoje só existem os testes-padrão gerados pelo Android Studio na criação do projeto (`ExampleUnitTest`, `ExampleInstrumentedTest`) — nenhum teste específico do domínio do Zera foi escrito ainda.
+- Além dos testes-padrão do Android Studio (`ExampleUnitTest`, `ExampleInstrumentedTest`), há `ScrapyClientUrlTest` cobrindo a montagem da base URL da Scrapy (prefixo Kong vs URL direta com `/v1`).

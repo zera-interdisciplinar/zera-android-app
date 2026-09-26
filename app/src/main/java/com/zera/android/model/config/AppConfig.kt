@@ -17,4 +17,8 @@ object AppConfig {
     fun updateFlags(value: JsonObject) {
         flags = value
     }
+
+    fun clearFlags() {
+        flags = JsonObject(emptyMap())
+    }
 }

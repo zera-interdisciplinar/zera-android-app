@@ -7,9 +7,9 @@ import retrofit2.http.Body
 import retrofit2.http.POST
 
 interface ScrapyService {
-    @POST("boot")
+    @POST("v1/boot")
     suspend fun boot(): Environments
 
-    @POST("flags")
+    @POST("v1/flags")
     suspend fun flags(@Body request: FlagsRequest): JsonObject
 }

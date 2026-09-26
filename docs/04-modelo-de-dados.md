@@ -15,6 +15,14 @@ Pacote `model/entity/user/`.
 
 - **`SelfUserResponseDTO(userId, name, email, role, status, unitId, createdAt, updatedAt, managerId: String)`** — retornado por `GET users/{userId}`. `role` é uma `String` livre (valores observados: `"MANAGER"`, `"EMPLOYEE"`), não um enum Kotlin — a decisão de rota (`SingInViewModel.signIn()`) faz `when (selfUser.role) { "EMPLOYEE" -> ...; "MANAGER" -> ...; else -> erro }`. Não há um terceiro valor para Administrador (coerente com [00-contexto-geral.md](00-contexto-geral.md), que registra que esse perfil não tem fluxo no app).
 
+## Config dinâmica (Scrapy)
+
+Pacotes `model/entity/config/` e `model/entity/scrapy/`. Contrato: [contrato/contrato-scrapy-api.md](contrato/contrato-scrapy-api.md).
+
+- **`Environments(admCoreApiUrl: String)`** — resposta do `POST /v1/boot`. Campo JSON `ms-adm-core-url`. Guardado em `AppConfig.environments` e usado como base URL do `ApiClient`.
+- **`FlagsRequest(attrs: Map<String, JsonElement>)`** — body do `POST /v1/flags`. `LoadFlags` preenche `user_id`, `role`, `unit_id` e `app_version`.
+- **`AppConfig.flags`** — `JsonObject` com o mapa `key -> value` do `POST /v1/flags` (bool, número, string ou objeto, conforme o admin). Em memória; não vai para `SharedPreferences`.
+
 ## Persistência local (SharedPreferences)
 
 Único mecanismo de persistência local hoje é `SharedPreferencesManager` (`model/local/SharedPreferencesManager.kt`), um `object` sobre um único arquivo de preferências (`"zera_prefs"`):

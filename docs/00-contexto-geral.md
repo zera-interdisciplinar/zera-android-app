@@ -26,7 +26,7 @@ O papel do usuário autenticado (`role` em `SelfUserResponseDTO`) define para qu
 
 Implementados no app hoje:
 
-1. **Onboarding/login** — splash → tela de boas-vindas → login ou primeiro acesso (cadastro via código de convite) → redirecionamento por perfil (Gestor ou Funcionário).
+1. **Onboarding/login** — splash (`POST /v1/boot` na Scrapy, header `apikey`) → tela de boas-vindas → login ou primeiro acesso (cadastro via código de convite) → `POST /v1/flags` → redirecionamento por perfil (Gestor ou Funcionário).
 2. **Visão geral do Gestor** — dashboard com ocupação de estoque, atalhos (itens/funcionários), alertas e últimos itens cadastrados.
 
 Visão futura (resumo do escopo de produto para Gestor e Funcionário; cada item ganhará spec própria em [07-especificacoes/](07-especificacoes/) quando entrar em desenvolvimento):

@@ -17,6 +17,6 @@ class RestoreSession {
     }
 
     fun clearSession() {
-        SharedPreferencesManager.clearSession()
+        signIn.clearSession()
     }
 }
