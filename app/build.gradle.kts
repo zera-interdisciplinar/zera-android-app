@@ -37,7 +37,6 @@ android {
 
         buildConfigField("String", "SCRAPY_API_URL", "\"${localProperty("scrapy.api.url")}\"")
         buildConfigField("String", "SCRAPY_API_KEY", "\"${localProperty("scrapy.api.key")}\"")
-        buildConfigField("String", "ADM_CORE_API_KEY", "\"${localProperty("adm.core.api.key")}\"")
     }
 
     buildTypes {

@@ -1,7 +1,6 @@
 package com.zera.android.model.remote.client
 
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
-import com.zera.android.BuildConfig
 import com.zera.android.model.entity.config.Environments
 import com.zera.android.model.local.SharedPreferencesManager
 import com.zera.android.model.remote.service.AuthService
@@ -15,26 +14,25 @@ import retrofit2.Retrofit
 object ApiClient {
     private val json = Json { ignoreUnknownKeys = true }
 
-    private val okHttpClient = OkHttpClient.Builder()
-        .addInterceptor { chain ->
-            val requestBuilder = chain.request().newBuilder()
-                .addHeader("apiKey", BuildConfig.ADM_CORE_API_KEY)
-
-            val accessToken = SharedPreferencesManager.getAccessToken()
-            if (!accessToken.isNullOrBlank()) {
-                requestBuilder.header("Authorization", "Bearer $accessToken")
-            }
-
-            chain.proceed(requestBuilder.build())
-        }
-        .build()
-
     private lateinit var retrofit: Retrofit
 
     fun init(environments: Environments) {
         val baseUrl = environments.admCoreApiUrl.let { url ->
             if (url.endsWith("/")) url else "$url/"
         }
+        val okHttpClient = OkHttpClient.Builder()
+            .addInterceptor { chain ->
+                val requestBuilder = chain.request().newBuilder()
+                    .header("apiKey", environments.admCoreApiKey)
+
+                val accessToken = SharedPreferencesManager.getAccessToken()
+                if (!accessToken.isNullOrBlank()) {
+                    requestBuilder.header("Authorization", "Bearer $accessToken")
+                }
+
+                chain.proceed(requestBuilder.build())
+            }
+            .build()
         retrofit = Retrofit.Builder()
             .baseUrl(baseUrl)
             .client(okHttpClient)
