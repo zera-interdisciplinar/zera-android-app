@@ -1,8 +1,8 @@
 package com.zera.android.viewmodel.shared
 
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.ViewModel
 import com.zera.android.view.navigation.ZeraNavigator
+import com.zera.android.viewmodel.ZeraViewModel
 
 data class ProfileState(
     val displayName: String = "",
@@ -18,7 +18,7 @@ data class ProfileState(
     val errorMessage: String? = null,
 )
 
-class ProfileViewModel : ViewModel() {
+class ProfileViewModel : ZeraViewModel() {
     // TODO: substituir os dados de exemplo pela chamada ao back (ver loadProfile)
     private val _state = mutableStateOf(
         ProfileState(

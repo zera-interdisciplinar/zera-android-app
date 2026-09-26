@@ -1,13 +1,13 @@
 package com.zera.android.viewmodel.manager
 
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.ViewModel
 import com.zera.android.view.components.lists.NotificationItem
 import com.zera.android.view.components.lists.ProductItem
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.view.theme.icons.ZeraIcon
+import com.zera.android.viewmodel.ZeraViewModel
 
 data class ManagerHomeState(
     val userName: String = "",
@@ -22,7 +22,7 @@ data class ManagerHomeState(
     val errorMessage: String? = null
 )
 
-class ManagerHomeViewModel : ViewModel() {
+class ManagerHomeViewModel : ZeraViewModel() {
     // TODO: substituir os dados de exemplo pela chamada ao back (ver loadDashboard)
     private val _state = mutableStateOf(
         ManagerHomeState(

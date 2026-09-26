@@ -4,12 +4,33 @@
 
 `model/remote/client/ApiClient.kt` é um `object` que monta uma única instância de `Retrofit` (`by lazy` nos `service`s expostos):
 
-- **Base URL** (ambiente QA): `http://35.247.253.238/qa/administrative/api/v1/` — HTTP puro, por isso o `AndroidManifest.xml` declara `android:usesCleartextTraffic="true"`.
+- **Base URL**: definida em `ApiClient.init(environments)` com `environments.admCoreApiUrl` (`ms-adm-core-url` no JSON do `POST /v1/boot` da Scrapy). HTTP puro no QA exige `android:usesCleartextTraffic="true"` no `AndroidManifest.xml`.
 - **Interceptor OkHttp** aplicado a toda requisição:
-  - header `apiKey` fixo (`"zera1405"`) — valor hardcoded no código-fonte, não em config/BuildConfig. Considerar mover para um mecanismo de configuração por ambiente antes de builds de produção.
-  - header `Authorization: Bearer <accessToken>`, quando há um `accessToken` salvo em `SharedPreferencesManager` (ausente apenas na primeira tela de login).
+  - header `apiKey` lido de `adm.core.api.key` no `local.properties` (`BuildConfig.ADM_CORE_API_KEY`).
+  - header `Authorization: Bearer <accessToken>`, quando há um `accessToken` salvo em `SharedPreferencesManager` (ausente apenas na primeira tela de login). Esse Bearer é do **adm-core** (sessão do usuário), não da Scrapy.
 - **Serialização**: `kotlinx.serialization.json.Json { ignoreUnknownKeys = true }` via `retrofit2-kotlinx-serialization-converter`.
-- **Services expostos**: `authService` (`AuthService`), `selfUserService` (`SelfUserService`).
+- **Services expostos**: `authService` (`AuthService`), `selfUserService` (`SelfUserService`), `invitationService` (`InvitationService`).
+
+## Scrapy (ScrapyClient)
+
+Fonte de verdade do contrato: [contrato/contrato-scrapy-api.md](contrato/contrato-scrapy-api.md). Como o app usa hoje: [contrato/contexto.md](contrato/contexto.md).
+
+`model/remote/client/ScrapyClient.kt` é um `object` Retrofit **separado** do `ApiClient` (a Scrapy sobe antes de existir URL do adm-core). Interface: `ScrapyService`.
+
+- **Base URL**: `scrapy.api.url` em `local.properties` (`BuildConfig.SCRAPY_API_URL`). O client normaliza o valor (aceita o prefixo Kong sem `/v1` ou a URL direta com `/v1`) e chama `POST v1/boot` e `POST v1/flags`. Em QA o path público é `http://34.95.129.59/qa/scrapy/v1/boot` — o prefixo `/qa/scrapy` é do Kong e entra **antes** do `/v1`; o backend só registra `/v1/boot` e `/v1/flags`, então o Kong precisa stripar o prefixo do serviço. Sem esse strip, a rota cai no fallback da UI (`200` HTML). Isso é roteamento, não desvio de contrato.
+- **Interceptor OkHttp**: header `apikey` com `BuildConfig.SCRAPY_API_KEY`. O contrato **não** usa `Authorization: Bearer` nessas rotas; o serviço não lê esse header.
+- **Serialização**: o mesmo `Json { ignoreUnknownKeys = true }` do `ApiClient`.
+
+| Método | Endpoint | Body | Resposta | Usado por |
+|---|---|---|---|---|
+| `POST` | `v1/boot` | nenhum | `Environments` (`ms-adm-core-url`) | `Boot.execute()` (splash, antes do login) |
+| `POST` | `v1/flags` | `FlagsRequest(attrs)` | `JsonObject` | `LoadFlags.execute(selfUser)` (depois do login) |
+
+`Boot.execute()` grava o resultado em `AppConfig` e chama `ApiClient.init(environments)`. `LoadFlags` manda `user_id`, `role`, `unit_id` e `app_version` em `attrs`.
+
+Erros do contrato nessas rotas: `400` (body malformado em `/v1/flags`), `401 { "error": "missing api key" }` (header `apikey` ausente), `401 { "error": "invalid api key" }` (key inválida/revogada), `429`, `500`. Qualquer corpo não-JSON (HTML) nessas rotas indica que a chamada não chegou no handler.
+
+Caching por `ETag` / `If-None-Match` está no contrato e **não** está implementado no client hoje.
 
 ## Autenticação (AuthService)
 

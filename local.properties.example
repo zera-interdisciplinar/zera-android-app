@@ -1,0 +1,7 @@
+## Copie para local.properties (já no .gitignore) e preencha.
+
+# Scrapy: prefixo Kong (sem /v1) ou URL direta do serviço (com /v1).
+# QA: http://34.95.129.59/qa/scrapy  →  POST .../qa/scrapy/v1/boot
+# Header: apikey (não Authorization: Bearer). Ver docs/contrato/contrato-scrapy-api.md.
+scrapy.api.url=https://host/v1/
+scrapy.api.key=

@@ -1,9 +1,9 @@
 package com.zera.android.viewmodel.manager
 
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.ViewModel
 import com.zera.android.view.components.graphs.BarGraphItem
 import com.zera.android.view.components.graphs.VerticalBarGraphItem
+import com.zera.android.viewmodel.ZeraViewModel
 
 data class IndexesState(
     val periodFilters: List<String> = listOf("Todos", "Este mês", "Categoria"),
@@ -17,7 +17,7 @@ data class IndexesState(
     val errorMessage: String? = null,
 )
 
-class IndexesViewModel : ViewModel() {
+class IndexesViewModel : ZeraViewModel() {
     // TODO: substituir os dados de exemplo pela chamada ao back assim que o
     // endpoint de indicadores do gestor existir (ver loadIndexes)
     private val _state = mutableStateOf(

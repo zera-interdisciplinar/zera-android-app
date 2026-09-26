@@ -12,5 +12,5 @@ data class SelfUserResponseDTO(
     var unitId: String,
     var createdAt: String,
     var updatedAt: String,
-    var managerId: String,
+    var managerId: String? = null,
 )

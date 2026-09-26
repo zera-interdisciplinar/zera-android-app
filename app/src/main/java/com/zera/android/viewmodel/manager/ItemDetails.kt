@@ -1,9 +1,9 @@
 package com.zera.android.viewmodel.manager
 
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.ViewModel
 import com.zera.android.view.components.outros.ItemStatus
 import com.zera.android.view.navigation.ZeraNavigator
+import com.zera.android.viewmodel.ZeraViewModel
 
 data class ItemDetailsState(
     val itemId: String = "",
@@ -19,7 +19,7 @@ data class ItemDetailsState(
     val errorMessage: String? = null,
 )
 
-class ItemDetailsViewModel : ViewModel() {
+class ItemDetailsViewModel : ZeraViewModel() {
     // TODO: substituir os dados de exemplo pela chamada ao back a partir do ID do item
     // (ver loadItem), recebido por parâmetro de navegação assim que essa tela for wireada
     private val _state = mutableStateOf(

@@ -7,29 +7,25 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zera.android.view.components.logo.Logo
 import com.zera.android.view.components.progressbars.ProgressBar
 import com.zera.android.view.components.outros.SplashBackground
 import com.zera.android.view.components.texts.SubtitleText
-import com.zera.android.view.navigation.Route
-import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
 import com.zera.android.view.transition.SharedElementKeys
 import com.zera.android.view.transition.sharedTransition
-import kotlinx.coroutines.delay
+import com.zera.android.viewmodel.SplashViewModel
 
 @Composable
-fun SplashScreen() {
-    LaunchedEffect(Unit) {
-        delay(2000)
-        ZeraNavigator.pushAndPop(Route.Welcome)
-    }
+fun SplashScreen(
+    viewModel: SplashViewModel = viewModel(),
+) {
     SplashBackground()
     Box(
         modifier = Modifier.fillMaxSize(),

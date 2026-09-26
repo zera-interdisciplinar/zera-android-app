@@ -1,12 +1,13 @@
 package com.zera.android.viewmodel.auth
 
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zera.android.model.usecase.auth.InvitationUseCase
 import com.zera.android.model.usecase.auth.SingIn
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
+import com.zera.android.viewmodel.ZeraViewModel
+import com.zera.android.viewmodel.homeRouteForRole
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 
@@ -19,7 +20,7 @@ data class SignUpState(
     val errorMessage: String? = null
 )
 
-class SignUpViewModel : ViewModel() {
+class SignUpViewModel : ZeraViewModel() {
     private val _state = mutableStateOf(SignUpState())
     val state = _state
 
@@ -82,20 +83,20 @@ class SignUpViewModel : ViewModel() {
             try {
                 val selfUser = signInUseCase.execute(current.email, current.password)
                 _state.value = _state.value.copy(isLoading = false)
-                when (selfUser.role) {
-                    "MANAGER" -> ZeraNavigator.pushAndPopAll(Route.ManagerHome)
-                    "EMPLOYEE" -> ZeraNavigator.pushAndPopAll(Route.EmployeeHome)
-                    else -> {
-                        _state.value = _state.value.copy(
-                            errorMessage = "Cadastro feito, mas o perfil retornado não é válido. Entre pelo login."
-                        )
-                        ZeraNavigator.pushAndPop(Route.SignIn)
-                    }
+                val destination = homeRouteForRole(selfUser.role)
+                if (destination == null) {
+                    signInUseCase.clearSession()
+                    _state.value = _state.value.copy(
+                        errorMessage = "Cadastro expirado, entre novamente.",
+                    )
+                    ZeraNavigator.pushAndPop(Route.SignIn)
+                    return@launch
                 }
+                ZeraNavigator.pushAndPopAll(destination)
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
                     isLoading = false,
-                    errorMessage = "Cadastro feito, mas o login automático falhou. Entre com o mesmo e-mail."
+                    errorMessage = "Cadastro expirado, entre novamente."
                 )
                 ZeraNavigator.pushAndPop(Route.SignIn)
             }

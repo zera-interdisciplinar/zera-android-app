@@ -1,9 +1,9 @@
 package com.zera.android.viewmodel.manager
 
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.ViewModel
 import com.zera.android.view.components.lists.ProductItem
 import com.zera.android.view.theme.ZeraColorFamily
+import com.zera.android.viewmodel.ZeraViewModel
 
 data class ItensState(
     val searchQuery: String = "",
@@ -15,7 +15,7 @@ data class ItensState(
     val errorMessage: String? = null,
 )
 
-class ItensViewModel : ViewModel() {
+class ItensViewModel : ZeraViewModel() {
     // TODO: substituir os dados de exemplo pela chamada ao back (ver loadItems)
     private val _state = mutableStateOf(
         ItensState(

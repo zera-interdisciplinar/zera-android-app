@@ -1,12 +1,24 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
 
     id("com.google.gms.google-services")
-
-
 }
+
+val localProperties = Properties().apply {
+    val file = rootProject.file("local.properties")
+    if (file.exists()) {
+        file.inputStream().use { stream -> load(stream) }
+    }
+}
+
+fun localProperty(key: String): String =
+    localProperties.getProperty(key).orEmpty()
+        .replace("\\", "\\\\")
+        .replace("\"", "\\\"")
 
 android {
     namespace = "com.zera.android"
@@ -22,6 +34,9 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "SCRAPY_API_URL", "\"${localProperty("scrapy.api.url")}\"")
+        buildConfigField("String", "SCRAPY_API_KEY", "\"${localProperty("scrapy.api.key")}\"")
     }
 
     buildTypes {
@@ -39,6 +54,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 

@@ -66,18 +66,19 @@ E termina com **Ao terminar**, lembrando quais docs sugerir atualizar (ver regra
 ## 4. Integrar um novo endpoint ou mudar um contrato existente
 
 **Antes de começar**
-- Docs: [06-contratos-api.md](06-contratos-api.md) e [04-modelo-de-dados.md](04-modelo-de-dados.md).
-- Código: `model/remote/service/` (interface do serviço), `model/entity/<domínio>/` (DTOs), `ApiClient` (para expor o novo `service`, se for o caso).
+- Docs: [06-contratos-api.md](06-contratos-api.md), [04-modelo-de-dados.md](04-modelo-de-dados.md) e, se for Scrapy, [contrato/contrato-scrapy-api.md](contrato/contrato-scrapy-api.md).
+- Código: `model/remote/service/` (interface do serviço), `model/entity/<domínio>/` (DTOs), `ApiClient` ou `ScrapyClient` (para expor o novo `service`, se for o caso).
 
 **Durante**
-- A chamada de rede em si fica no `usecase`, nunca direto na `Screen` nem "solta" no `ViewModel` sem passar por um `usecase`. O `usecase` fala com `ApiClient.<service>` e, quando precisar, com `SharedPreferencesManager` — não existe camada de `Repository` intermediária hoje (ver "Visão geral das camadas" em [01-arquitetura.md](01-arquitetura.md)).
+- A chamada de rede em si fica no `usecase`, nunca direto na `Screen` nem "solta" no `ViewModel` sem passar por um `usecase`. O `usecase` fala com `ApiClient.<service>` ou `ScrapyClient` e, quando precisar, com `SharedPreferencesManager` / `AppConfig` — não existe camada de `Repository` intermediária hoje (ver "Visão geral das camadas" em [01-arquitetura.md](01-arquitetura.md)).
+- Scrapy: header obrigatório é `apikey`, nunca `Authorization: Bearer`. `200` HTML em `/v1/boot` ou `/v1/flags` é roteamento Kong (prefixo do serviço não removido), não contrato.
 
 **Quando envolver o usuário**
 - **Qualquer contrato ainda não fechado com o backend** — não adivinhar formato de payload (o caso já conhecido: `invitations/redeem` reaproveitando um DTO que não cobre todos os campos da tela de cadastro). Confirmar o contrato real antes de implementar contra um payload suposto.
 - Mudança que quebra um contrato já documentado em `06-contratos-api.md` e usado por telas existentes.
 - Qualquer decisão sobre tratamento de erro padronizado ou refresh de token — hoje não existe um padrão definido; introduzir um é uma decisão de arquitetura, não uma escolha local de quem está integrando um endpoint específico.
 
-**Ao terminar:** atualizar `06-contratos-api.md` e `04-modelo-de-dados.md`.
+**Ao terminar:** atualizar `06-contratos-api.md` e `04-modelo-de-dados.md`. Se o contrato for da Scrapy, atualizar também `contrato/contrato-scrapy-api.md` e `contrato/contexto.md`.
 
 ## 5. Adicionar uma dependência
 
