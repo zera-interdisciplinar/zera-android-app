@@ -1,4 +1,4 @@
-package com.zera.android.model.entity.invitation
+package com.zera.android.model.dto.invitation
 
 import kotlinx.serialization.Serializable
 

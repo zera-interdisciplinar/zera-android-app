@@ -181,7 +181,7 @@ ZeraIcon(ZeraIcon.Check, contentDescription = null, tint = MaterialTheme.colorSc
 Arquivo: `view/components/graphs/`.
 
 - **`rankedBarGraphColors(items, valueOf)`** (`GraphColorCycle.kt`, `internal`) — lógica de cor compartilhada pelos dois gráficos de barra abaixo: ordena `items` por `valueOf` decrescente e devolve um mapa índice-original → `ZeraColorFamily`, ciclando `BarGraphColorCycle` = `[Blue, Yellow, Green]` (1º maior valor = azul, 2º = amarelo, 3º = verde, 4º = azul de novo...). Não depende da ordem de `items`, só do valor.
-- **`BarGraphItem(label, percentage)`** + **`HorizontalBarGraph(items, modifier, labelWeight, barHeight)`** (`HorizontalBarGraph.kt`) — gráfico de barras horizontais dentro de um card branco (`Surface` própria, cantos `Radius.medium`), uma linha por `BarGraphItem`: rótulo à esquerda, barra preenchida proporcionalmente a `percentage` (`0f`..`1f`, **já calculado por quem chama** — ver TODO de regra de negócio abaixo) e a porcentagem por extenso à direita, ambos na cor atribuída por `rankedBarGraphColors`. `TODO` no componente: animar o preenchimento da barra (ex.: `animateFloatAsState`).
+- **`BarGraphItem(label, percentage)`** + **`HorizontalBarGraph(items, modifier, labelWeight, barHeight, emptyContent)`** (`HorizontalBarGraph.kt`) — gráfico de barras horizontais dentro de um card branco (`Surface` própria, cantos `Radius.medium`), uma linha por `BarGraphItem`: rótulo à esquerda, barra preenchida proporcionalmente a `percentage` (`0f`..`1f`, **já calculado por quem chama**) e a porcentagem por extenso à direita, ambos na cor atribuída por `rankedBarGraphColors`. Lista vazia renderiza `emptyContent` (padrão: `BodyText("Nenhum resíduo no período")`) em vez de um `Surface` em branco. `TODO` no componente: animar o preenchimento da barra (ex.: `animateFloatAsState`). Primeiro uso real: `IndexesScreen` (resíduos por categoria).
 
 ```kotlin
 HorizontalBarGraph(
@@ -193,7 +193,7 @@ HorizontalBarGraph(
 )
 ```
 
-- **`VerticalBarGraphItem(label, value)`** + **`VerticalBarGraph(items, modifier, title, barWidth, maxBarHeight)`** (`VerticalBarGraph.kt`) — gráfico de colunas verticais dentro de um card branco (mesma `Surface`/cantos do `HorizontalBarGraph`), com `title` opcional no topo (`LabelText` em negrito). Uma coluna por `VerticalBarGraphItem`: valor acima (formatado sem casas decimais quando é inteiro), barra com altura proporcional ao maior `value` da lista (a de maior valor preenche `maxBarHeight` por completo) e rótulo abaixo — cor automática igual ao `HorizontalBarGraph`, via `rankedBarGraphColors`. Diferente de `percentage`, `value` é um valor bruto (ex.: kg descartados) — a normalização (maior = barra cheia) é feita dentro do próprio componente, não por quem chama. `TODO` no componente: animar a altura da barra (ex.: `animateDpAsState`).
+- **`VerticalBarGraphItem(label, value)`** + **`VerticalBarGraph(items, modifier, title, barWidth, maxBarHeight, scrollToEnd)`** (`VerticalBarGraph.kt`) — gráfico de colunas verticais dentro de um card branco (mesma `Surface`/cantos do `HorizontalBarGraph`), com `title` opcional no topo (`LabelText` em negrito). Uma coluna por `VerticalBarGraphItem`: valor acima (formatado sem casas decimais quando é inteiro), barra com altura proporcional ao maior `value` da lista (a de maior valor preenche `maxBarHeight` por completo) e rótulo abaixo — cor automática igual ao `HorizontalBarGraph`, via `rankedBarGraphColors`. Diferente de `percentage`, `value` é um valor bruto (ex.: kg descartados) — a normalização (maior = barra cheia) é feita dentro do próprio componente, não por quem chama. Quando as colunas não cabem na largura, a faixa rola na horizontal (o `title` fica fixo). `scrollToEnd` padrão `true`: a posição inicial é o fim da série (mês mais recente). `TODO` no componente: animar a altura da barra (ex.: `animateDpAsState`). Primeiro uso real: `IndexesScreen` (evolução mensal).
 
 ```kotlin
 VerticalBarGraph(
@@ -207,7 +207,9 @@ VerticalBarGraph(
 )
 ```
 
-> **TODO (regra de negócio):** o cálculo dos valores exibidos (`BarGraphItem.percentage` / `VerticalBarGraphItem.value`) a partir dos dados brutos (ex.: contagem de itens por categoria, kg descartados por mês) deve ser feito no `ViewModel` da tela que usar esses componentes, não nos componentes em si. Documentar essa regra em `05-regras-de-negocio/` quando o primeiro caso de uso real for implementado (hoje não há tela consumindo `HorizontalBarGraph`/`VerticalBarGraph` ainda).
+- **`CircularGraph(progress, label, modifier, color)`** (`CircularGraph.kt`) — anel de progresso (`progress` é `() -> Float` em `0f`..`1f`) com a porcentagem inteira no centro e `label` opcional abaixo. Usado em `IndexesScreen` para a taxa de reciclagem (rótulo fixo "Meta"; a API não envia meta).
+
+> O cálculo dos valores exibidos (`BarGraphItem.percentage` / `VerticalBarGraphItem.value` / progresso do `CircularGraph`) a partir dos dados brutos fica no `ViewModel` da tela, não nos componentes. Regras atuais: [05-regras-de-negocio/inventory-dashboard.md](05-regras-de-negocio/inventory-dashboard.md).
 
 
 Ao introduzir o segundo ou terceiro caso de uso com necessidades em comum (ex.: tratamento de erro padronizado, retry, cache), avalie formalizar essas abstrações e registre a decisão em [08-decisoes-arquiteturais/](08-decisoes-arquiteturais/).

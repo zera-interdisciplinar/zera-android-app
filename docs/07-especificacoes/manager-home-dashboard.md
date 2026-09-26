@@ -4,12 +4,12 @@
 
 - **Feature:** Tela inicial do Gestor
 - **Perfil(is) envolvido(s):** Gestor
-- **Status:** em progresso (layout pronto, dados mockados no `ViewModel`)
-- **Última atualização:** 2026-09-17
+- **Status:** implementado (funcionários ainda sem fonte de dados)
+- **Última atualização:** 2026-09-26
 
 ## Contexto
 
-Primeira tela que o Gestor vê após o login (`Route.ManagerHome`). Dá uma visão rápida da operação: ocupação do estoque, atalhos numéricos (itens/funcionários), alertas importantes e os últimos itens cadastrados. Hoje todos os dados vêm hardcoded em `ManagerHomeViewModel`; `loadDashboard()` é um `TODO`.
+Primeira tela que o Gestor vê após o login (`Route.ManagerHome`). Dá uma visão rápida da operação: ocupação do estoque, atalhos numéricos (itens/funcionários), alertas e os últimos itens cadastrados. Ocupação, itens, alertas e últimos itens vêm de `GET /api/v1/dashboard/home` via `GetManagerHome`. Nome e papel vêm de `GetSelfUser`. O atalho de funcionários **não** faz parte desse contrato e permanece vazio.
 
 ## User story
 
@@ -17,51 +17,62 @@ Como Gestor, quero ver um resumo do estoque, dos alertas pendentes e dos último
 
 ## Cenários (Given/When/Then)
 
-### Cenário: Exibição do resumo (dado real) — planejado
+### Cenário: Exibição do resumo (dado real)
 
 - **Given** o Gestor está autenticado e abre `Route.ManagerHome`
-- **When** `loadDashboard()` é chamado e a API responde com sucesso
-- **Then** `state` é atualizado com ocupação de estoque, total de itens/funcionários, alertas e últimos itens reais (substituindo os mocks atuais)
+- **When** `GetManagerHome.execute()` responde com sucesso
+- **Then** `state` atualiza ocupação (`occupancyPercent` / 100), total de itens ativos, variação percentual, alertas derivados dos contadores e últimos itens de `recentItems.content`
 
 ### Cenário: Lista de alertas vazia
 
-- **Given** não há nenhum alerta pendente
+- **Given** `pendingApproval`, `inMaintenance` e `awaitingEvaluation` são todos zero
 - **When** a tela é exibida
-- **Then** `NotificationList` mostra a mensagem padrão "Nenhuma notificação" (já implementado via `emptyContent`)
+- **Then** `NotificationList` mostra a mensagem padrão "Nenhuma notificação"
 
 ### Cenário: Lista de últimos itens vazia
 
-- **Given** não há nenhum item cadastrado recentemente
+- **Given** `recentItems.content` vem vazio
 - **When** a tela é exibida
-- **Then** `ProductList` mostra a mensagem padrão "Nenhum produto encontrado" (já implementado via `emptyContent`)
+- **Then** `ProductList` mostra a mensagem padrão "Nenhum produto encontrado"
 
-### Cenário: Falha ao carregar o dashboard — planejado
+### Cenário: Falha ao carregar o dashboard
 
-- **Given** a chamada de `loadDashboard()` falha (rede ou servidor)
+- **Given** a chamada de `GetManagerHome` falha (rede ou servidor)
 - **When** a tela é exibida
-- **Then** `state.errorMessage` é preenchido — **hoje `ManagerHomeScreen` não lê `errorMessage` nem `isLoading` do `state`, então nenhum feedback visual existe ainda para esse caso**
+- **Then** `state.errorMessage` é renderizado como `CaptionText` de erro acima do card de ocupação
+
+### Cenário: Atalhos de navegação
+
+- **Given** a home carregou
+- **When** o Gestor toca em "Itens", "Ver Todos" ou "Funcionários"
+- **Then** navega para `Route.Itens` (itens / ver todos) ou `Route.Employees` (funcionários)
 
 ## Critérios de aceite
 
-- [ ] `loadDashboard()` implementado, substituindo os dados mockados por uma chamada real de API
-- [ ] Estado de carregamento (`isLoading`) refletido na UI (ex.: skeleton ou indicador) — campo já existe no `State`, falta o uso na `Screen`
-- [ ] Estado de erro (`errorMessage`) refletido na UI — campo já existe no `State`, falta o uso na `Screen`
-- [x] Estados vazios de alertas e de últimos itens já cobertos
-- [ ] Atalhos "Itens" e "Funcionários" navegam para suas respectivas telas (hoje `onClick` é `TODO`)
-- [ ] "Ver Todos" (últimos itens) navega para a listagem completa (hoje `onClick` é `TODO`)
+- [x] `loadDashboard()` chama a API real (`GetManagerHome`), sem mock de ocupação/itens/alertas/últimos itens
+- [x] Estado de erro (`errorMessage`) refletido na UI
+- [x] Estados vazios de alertas e de últimos itens
+- [x] Atalhos "Itens" e "Funcionários" navegam para suas respectivas telas
+- [x] "Ver Todos" (últimos itens) navega para `Route.Itens`
+- [ ] Total de funcionários preenchido (não existe no Inventory Dashboard — ver TODO no `ManagerHomeViewModel`)
+- [ ] Estado de carregamento (`isLoading`) na UI (campo removido do `State`; a tela não mostra skeleton)
 - [ ] FAB de assistente virtual (`onFabClick`) tem alguma ação (hoje `TODO`)
 
 ## Edge cases considerados
 
-- Estado de erro do `State` existe mas não é renderizado em nenhum lugar da `ManagerHomeScreen` hoje — sinalizado para não ser esquecido ao integrar com a API real.
-- Toque nos atalhos/FAB antes de terem destino implementado — hoje não faz nada (`{ /* TODO: ... */ }`), não deveria travar nem dar crash.
+- Falha ao buscar o usuário logado: a home ainda tenta preencher o dashboard; nome/papel podem ficar vazios.
+- `occupancyPercent` nulo: ocupação cai para `0f`.
+- `activeItemsChangePercent` nulo: o subtítulo do card de itens some.
 
 ## Fora de escopo desta spec
 
-- Telas de destino dos atalhos (Itens, Funcionários, listagem completa de produtos, chatbot) — cada uma terá spec própria quando implementada.
-- Cálculo/regra de negócio por trás da ocupação de estoque e dos alertas — pertence a `../05-regras-de-negocio/` quando o domínio de inventário for especificado.
+- Telas de destino dos atalhos (listagem completa de produtos, gestão de funcionários, chatbot) — cada uma tem (ou terá) spec própria.
+- Cálculo dos agregados no backend (capacidade de estoque, janela de descartes).
+- `GET /api/v1/dashboard/work-center`.
 
 ## Referências
 
+- Regras de negócio: [../05-regras-de-negocio/inventory-dashboard.md](../05-regras-de-negocio/inventory-dashboard.md)
 - Catálogo de componentes usados: [../03-catalogo-componentes.md](../03-catalogo-componentes.md), seções "Cards" e "Listas"
+- Contratos: [../06-contratos-api.md](../06-contratos-api.md), [../contrato-ms-inventory/contrato-inventory-dashboard.md](../contrato-ms-inventory/contrato-inventory-dashboard.md)
 - Arquitetura / separação View-lógica: [../01-arquitetura.md](../01-arquitetura.md), seção "Separação entre View e lógica (regra estrita)"

@@ -46,6 +46,10 @@ fun IndexesScreen(
     ) {
         SubtitleText(text = "Acompanhe desempenho e impacto")
 
+        state.errorMessage?.let { message ->
+            CaptionText(text = message, color = MaterialTheme.colorScheme.error)
+        }
+
         ZeraChipsGroup(
             options = state.periodFilters,
             selected = state.selectedFilter,
@@ -66,17 +70,24 @@ fun IndexesScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
+                val deltaPalette = if (state.recyclingRateDeltaPositive) {
+                    greenPalette
+                } else {
+                    ZeraColorFamily.Red.palette()
+                }
                 Column(verticalArrangement = Arrangement.spacedBy(Spacing.micro)) {
                     LabelText(text = "Taxa de reciclagem")
                     HeadlineText(text = state.recyclingRateLabel, bold = true)
-                    CaptionText(
-                        text = state.recyclingRateDeltaLabel,
-                        color = greenPalette.base,
-                        bold = true,
-                    )
+                    if (state.recyclingRateDeltaLabel.isNotBlank()) {
+                        CaptionText(
+                            text = state.recyclingRateDeltaLabel,
+                            color = deltaPalette.base,
+                            bold = true,
+                        )
+                    }
                 }
                 CircularGraph(
-                    progress = { state.recyclingGoal },
+                    progress = { state.recyclingRateProgress },
                     label = "Meta",
                     color = greenPalette.base,
                 )

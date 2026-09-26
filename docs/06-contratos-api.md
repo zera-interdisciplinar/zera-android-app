@@ -6,14 +6,14 @@
 
 - **Base URL**: definida em `ApiClient.init(environments)` com `environments.admCoreApiUrl` (`ms-adm-core-url` no JSON do `POST /v1/boot` da Scrapy). HTTP puro no QA exige `android:usesCleartextTraffic="true"` no `AndroidManifest.xml`.
 - **Interceptor OkHttp** aplicado a toda requisição:
-  - header `apiKey` lido de `adm.core.api.key` no `local.properties` (`BuildConfig.ADM_CORE_API_KEY`).
+  - header `apiKey` com `environments.admCoreApiKey` (`ms-adm-core-api-key` no boot). Sem esse header o Kong responde 401.
   - header `Authorization: Bearer <accessToken>`, quando há um `accessToken` salvo em `SharedPreferencesManager` (ausente apenas na primeira tela de login). Esse Bearer é do **adm-core** (sessão do usuário), não da Scrapy.
 - **Serialização**: `kotlinx.serialization.json.Json { ignoreUnknownKeys = true }` via `retrofit2-kotlinx-serialization-converter`.
 - **Services expostos**: `authService` (`AuthService`), `selfUserService` (`SelfUserService`), `invitationService` (`InvitationService`).
 
 ## Scrapy (ScrapyClient)
 
-Fonte de verdade do contrato: [contrato/contrato-scrapy-api.md](contrato/contrato-scrapy-api.md). Como o app usa hoje: [contrato/contexto.md](contrato/contexto.md).
+Fonte de verdade do contrato: [contrato-scrapy/contrato-scrapy-api.md](contrato-scrapy/contrato-scrapy-api.md). Como o app usa hoje: [contrato-scrapy/contexto.md](contrato-scrapy/contexto.md).
 
 `model/remote/client/ScrapyClient.kt` é um `object` Retrofit **separado** do `ApiClient` (a Scrapy sobe antes de existir URL do adm-core). Interface: `ScrapyService`.
 
@@ -23,14 +23,34 @@ Fonte de verdade do contrato: [contrato/contrato-scrapy-api.md](contrato/contrat
 
 | Método | Endpoint | Body | Resposta | Usado por |
 |---|---|---|---|---|
-| `POST` | `v1/boot` | nenhum | `Environments` (`ms-adm-core-url`) | `Boot.execute()` (splash, antes do login) |
+| `POST` | `v1/boot` | nenhum | `Environments` (`ms-adm-core-url`, `ms-adm-core-api-key`, `ms-inventory-url`, `ms-inventory-api-key` opcional) | `Boot.execute()` (splash, antes do login) |
 | `POST` | `v1/flags` | `FlagsRequest(attrs)` | `JsonObject` | `LoadFlags.execute(selfUser)` (depois do login) |
 
-`Boot.execute()` grava o resultado em `AppConfig` e chama `ApiClient.init(environments)`. `LoadFlags` manda `user_id`, `role`, `unit_id` e `app_version` em `attrs`.
+`Boot.execute()` grava o resultado em `AppConfig` e chama `ApiClient.init(environments)` e `InventoryClient.init(environments)`. `LoadFlags` manda `user_id`, `role`, `unit_id` e `app_version` em `attrs`.
 
 Erros do contrato nessas rotas: `400` (body malformado em `/v1/flags`), `401 { "error": "missing api key" }` (header `apikey` ausente), `401 { "error": "invalid api key" }` (key inválida/revogada), `429`, `500`. Qualquer corpo não-JSON (HTML) nessas rotas indica que a chamada não chegou no handler.
 
 Caching por `ETag` / `If-None-Match` está no contrato e **não** está implementado no client hoje.
+
+## Inventário (InventoryClient)
+
+Fonte de verdade do contrato: [contrato-ms-inventory/contrato-inventory-dashboard.md](contrato-ms-inventory/contrato-inventory-dashboard.md). Como o app usa hoje: [contrato-ms-inventory/contexto.md](contrato-ms-inventory/contexto.md).
+
+`model/remote/client/InventoryClient.kt` é um `object` Retrofit **separado** (URL própria do boot). Interface: `InventoryService`.
+
+- **Base URL**: `environments.inventoryApiUrl` (`ms-inventory-url`). Se o valor terminar em `/api/v1`, o client remove esse sufixo para não duplicar o path das rotas Retrofit (`api/v1/dashboard/...`).
+- **Interceptor OkHttp**:
+  - `apiKey`: `ms-inventory-api-key`, ou `ms-adm-core-api-key` se a key de inventory vier em branco. Sem `apiKey` o Kong responde **401**.
+  - `Authorization: Bearer <accessToken>` do usuário logado.
+  - `X-Unit-Id`: `SharedPreferencesManager.getUnitId()` (gravado no login). Ausente → **400** no backend.
+- **Serialização**: o mesmo `Json { ignoreUnknownKeys = true }`.
+
+| Método | Endpoint | Query | Resposta | Usado por |
+|---|---|---|---|---|
+| `GET` | `api/v1/dashboard/home` | `page` (default 0), `size` (default 5) | `DashboardHomeResponseDTO` | `GetManagerHome.execute()` (`ManagerHomeViewModel`) |
+| `GET` | `api/v1/dashboard/indicators` | `from`/`to` opcionais (`yyyy-MM-dd`) | `IndicatorsResponseDTO` | `GetIndicators.execute()` (`IndexesViewModel`) |
+
+`GET /api/v1/dashboard/work-center` existe no contrato e **não** tem método no `InventoryService`.
 
 ## Autenticação (AuthService)
 
@@ -39,9 +59,16 @@ Caching por `ETag` / `If-None-Match` está no contrato e **não** está implemen
 | Método | Endpoint | Body | Resposta | Usado por |
 |---|---|---|---|---|
 | `POST` | `auth/login` | `SingInRequestDTO(email, password)` | `SingInResponseDTO` | `SingIn.execute()` (login) |
-| `POST` | `invitations/redeem` | `SingInRequestDTO(email, password)` | `SingInResponseDTO` | ainda não chamado por nenhum `usecase` |
 
-> **Contrato em aberto:** `SignUpScreen`/`SignUpViewModel` coletam `name`, `email`, `password` e `token` (código de convite), mas `signUp()` no `AuthService` reaproveita `SingInRequestDTO`, que só tem `email`/`password` — não há campo para `name` nem para o código de convite. O formato real do payload de `invitations/redeem` precisa ser confirmado com o backend antes de implementar `SignUpViewModel.signUp()` (hoje um `TODO`). Ver também "Inconsistências conhecidas" em [02-padroes-e-convencoes.md](02-padroes-e-convencoes.md).
+## Convite (InvitationService)
+
+`model/remote/service/InvitationService.kt`.
+
+| Método | Endpoint | Body | Resposta | Usado por |
+|---|---|---|---|---|
+| `POST` | `invitations/redeem` | `RedeemRequestDTO(code, name, email, rawPassword)` | `RedeemResponseDTO` | `InvitationUseCase.execute()` (`SignUpViewModel.signUp()`) |
+
+Depois do redeem, o cadastro chama `SingIn.execute` para persistir tokens, `unitId` e flags.
 
 ## Usuário (SelfUserService)
 
@@ -49,18 +76,18 @@ Caching por `ETag` / `If-None-Match` está no contrato e **não** está implemen
 
 | Método | Endpoint | Resposta | Usado por |
 |---|---|---|---|
-| `GET` | `users/{userId}` | `SelfUserResponseDTO` | `SingIn.execute()`, chamado logo após o login (com o `userId` retornado por `auth/login`) para descobrir o `role` e decidir a tela de destino |
+| `GET` | `users/{userId}` | `SelfUserResponseDTO` | `GetSelfUser` — no login (`SingIn.execute`) para `role` + `unitId`; na home do gestor, para nome/papel |
 
 ## Tratamento de erros
 
 Não há tratamento de erro estruturado hoje:
 
-- Não existe um DTO de erro (ex.: `{ "message": ... }`) sendo desserializado — falhas de rede/HTTP chegam ao `ViewModel` como exceções genéricas do Retrofit/OkHttp (`HttpException`, `IOException`, etc.), capturadas por um `catch (e: Exception)` amplo.
-- A mensagem exibida ao usuário é `e.message` diretamente — não há tradução para mensagens amigáveis em português, nem distinção entre erro de credencial inválida (401), erro de servidor (5xx) ou falta de conexão.
+- Não existe um DTO de erro (ex.: `{ "message": ... }` ou RFC 7807 `ProblemDetail` do inventory) sendo desserializado — falhas de rede/HTTP chegam ao `ViewModel` como exceções genéricas do Retrofit/OkHttp (`HttpException`, `IOException`, etc.), capturadas por um `catch (e: Exception)` amplo.
+- Na home e nos indicadores a mensagem exibida é `e.message` diretamente. Cadastro já traduz alguns HTTP codes.
 - Não há fluxo de **refresh de token**: embora `SingInResponseDTO` retorne um `refreshToken`, nada no código hoje o utiliza para renovar a sessão quando o `accessToken` expira — uma resposta 401 em qualquer chamada autenticada hoje resultaria no mesmo tratamento genérico de erro, não num refresh automático.
 
 Ao adicionar tratamento de erro estruturado (DTO de erro, mensagens amigáveis, refresh de token), registre a decisão de formato em [08-decisoes-arquiteturais/](08-decisoes-arquiteturais/), já que impacta todos os `usecase`s existentes e futuros.
 
 ## Endpoints esperados (backlog, ainda não implementados)
 
-Resumo leve dos contratos que o escopo de produto vai exigir (sem especificar payload aqui, já que dependem de definição com o backend): CRUD de categoria/modelo/produto, consulta de produto por código de barras, envio de resultado de triagem, geração e confirmação de relatório de descarte, e registro/consulta de manutenção.
+Resumo leve dos contratos que o escopo de produto vai exigir (sem especificar payload aqui, já que dependem de definição com o backend): CRUD de categoria/modelo/produto, consulta de produto por código de barras, envio de resultado de triagem, geração e confirmação de relatório de descarte, registro/consulta de manutenção, e total de funcionários da unidade.

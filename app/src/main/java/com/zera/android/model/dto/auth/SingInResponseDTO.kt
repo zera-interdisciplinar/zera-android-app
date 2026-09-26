@@ -1,4 +1,4 @@
-package com.zera.android.model.entity.auth
+package com.zera.android.model.dto.auth
 
 import kotlinx.serialization.Serializable
 

@@ -4,12 +4,12 @@
 
 O app é um módulo Android único (`:app`) organizado em três camadas, inspiradas em MVVM, mas sem os componentes de um MVVM "canônico" (não há `Repository` nem `UseCase` com interface/contrato — ver abaixo):
 
-- **`model`** — dados e regras de acesso a dados: DTOs (`model/entity`), persistência local (`model/local`), acesso remoto via Retrofit (`model/remote`) e casos de uso (`model/usecase`).
+- **`model`** — dados e regras de acesso a dados: DTOs de rede (`model/dto`), modelos de domínio/config (`model/entity`), persistência local (`model/local`), acesso remoto via Retrofit (`model/remote`) e casos de uso (`model/usecase`).
 - **`viewmodel`** — um `ViewModel` por tela (ou por feature de tela), expõe um `State` imutável via `mutableStateOf` e métodos de intenção (`onEmailChange`, `signIn`, ...). Instancia o(s) `usecase` que precisa diretamente (`val useCase = SingIn()`), sem injeção.
   - Subpasta `shared/`: `ViewModels` de telas acessadas por mais de um tipo de usuário (ex.: "Perfil", acessada tanto por Gestor quanto por Operário) — ver a mesma convenção em `view/screens/shared/` logo abaixo.
 - **`view`** — Jetpack Compose puro: `screens` (telas, uma por rota, organizadas por domínio — `auth/`, `manager/`, `employee/` e `shared/` para telas comuns a mais de um tipo de usuário), `components` (Design System reutilizável — ver [03-catalogo-componentes.md](03-catalogo-componentes.md)), `navigation` (rotas e navegação), `theme` (tokens visuais) e `transition` (transições compartilhadas entre telas).
 
-Não há camada de `Repository` separada: o `usecase` fala diretamente com `ApiClient.<service>` ou `ScrapyClient` e com `SharedPreferencesManager`. Para o volume atual de regras isso é suficiente; se a lógica de acesso a dados crescer (ex.: cache local, múltiplas fontes), vale reavaliar (registrar a decisão em [08-decisoes-arquiteturais/](08-decisoes-arquiteturais/) quando isso acontecer).
+Não há camada de `Repository` separada: o `usecase` fala diretamente com `ApiClient.<service>`, `ScrapyClient` ou `InventoryClient` e com `SharedPreferencesManager`. Para o volume atual de regras isso é suficiente; se a lógica de acesso a dados crescer (ex.: cache local, múltiplas fontes), vale reavaliar (registrar a decisão em [08-decisoes-arquiteturais/](08-decisoes-arquiteturais/) quando isso acontecer).
 
 ## Separação entre View e lógica (regra estrita)
 
@@ -30,12 +30,13 @@ O `ViewModel` é o único responsável por coordenar coleta de dados (inputs do 
 com.zera.android
 ├── model
 │   ├── config/            AppConfig (envs e flags da Scrapy, em memória)
-│   ├── entity/           DTOs de rede (@Serializable), por domínio (auth, user, config, scrapy, ...)
+│   ├── dto/               DTOs de rede (@Serializable), por domínio (auth, user, invitation, inventory)
+│   ├── entity/            modelos de domínio/config (Environments, UserRole, FlagsRequest)
 │   ├── local/             persistência local (SharedPreferencesManager)
 │   ├── remote/
-│   │   ├── client/        ApiClient e ScrapyClient (Retrofit + OkHttp, singletons)
-│   │   └── service/       interfaces Retrofit (AuthService, SelfUserService, ScrapyService, ...)
-│   └── usecase/           regra de negócio de acesso a dados, por domínio (auth/SingIn, config/Boot, ...)
+│   │   ├── client/        ApiClient, ScrapyClient e InventoryClient (Retrofit + OkHttp, singletons)
+│   │   └── service/       interfaces Retrofit (AuthService, SelfUserService, InvitationService, InventoryService, ScrapyService, ...)
+│   └── usecase/           regra de negócio de acesso a dados, por domínio (auth/SingIn, config/Boot, inventory/GetManagerHome, ...)
 ├── viewmodel/             um ViewModel por tela/feature, por domínio (auth/, manager/, shared/, ...)
 └── view
     ├── screens/           telas Compose, por domínio (auth/, manager/, employee/, shared/) + telas soltas (SplashScreen)
@@ -55,18 +56,19 @@ Fluxo típico de uma ação de usuário (exemplo: login, ver [viewmodel/auth/Sig
 
 1. A `Screen` (Compose) observa o `state` do `ViewModel` (`val state by viewModel.state`) e chama seus métodos em resposta a eventos de UI (`onClick`, `onValueChange`).
 2. O `ViewModel` atualiza seu `State` imediatamente quando cabível (ex.: `isLoading = true`) e lança uma `viewModelScope.launch` para chamar o `usecase`.
-3. O `usecase` chama `ApiClient.<service>` ou `ScrapyClient` (Retrofit, `suspend fun`) e, quando necessário, grava/lê `SharedPreferencesManager` / `AppConfig`.
+3. O `usecase` chama `ApiClient.<service>`, `ScrapyClient` ou `InventoryClient` (Retrofit, `suspend fun`) e, quando necessário, grava/lê `SharedPreferencesManager` / `AppConfig`.
 4. O resultado (sucesso ou exceção) volta ao `ViewModel`, que atualiza o `State` e, se for o caso, dispara uma navegação via `ZeraNavigator`.
 5. A `Screen` recompõe automaticamente a partir do novo `State` (Compose reage a `State` via `getValue`/`by`).
 
-O `State` de cada tela é uma `data class` imutável (`copy()` a cada mudança) guardada em `mutableStateOf` — não `StateFlow`/`MutableStateFlow`. Não há camada de mapeamento DTO → modelo de domínio: os `ViewModels` hoje consomem o DTO de rede diretamente no `State` (ex.: `SelfUserResponseDTO` usado dentro do fluxo de login). Ver [04-modelo-de-dados.md](04-modelo-de-dados.md).
+O `State` de cada tela é uma `data class` imutável (`copy()` a cada mudança) guardada em `mutableStateOf` — não `StateFlow`/`MutableStateFlow`. Não há camada de mapeamento DTO → modelo de domínio: os `ViewModels` de auth usam o DTO de forma transiente (ex.: `SelfUserResponseDTO` só para decidir a rota). Home e indicadores mapeiam o DTO de inventário para campos de UI no próprio `ViewModel` (`ManagerHomeState`, `IndexesState`), sem classe de domínio intermediária. Ver [04-modelo-de-dados.md](04-modelo-de-dados.md).
 
 ## Injeção de dependência
 
 **Não há framework de injeção de dependência** (nem Hilt, nem Koin, nem injeção manual via construtor). As dependências compartilhadas são `object` (singletons de linguagem Kotlin):
 
-- `ScrapyClient` — Retrofit da Scrapy (`POST /v1/boot` e `POST /v1/flags`), header `apikey`. Sobe na splash, antes do `ApiClient`. Contrato em [contrato/contrato-scrapy-api.md](contrato/contrato-scrapy-api.md).
-- `ApiClient` — monta o `Retrofit`/`OkHttpClient` em `init(environments)` com a URL vinda do boot (`ms-adm-core-url`) e expõe os `service`s (`authService`, `selfUserService`, `invitationService`) via `by lazy`.
+- `ScrapyClient` — Retrofit da Scrapy (`POST /v1/boot` e `POST /v1/flags`), header `apikey`. Sobe na splash, antes dos outros clients. Contrato em [contrato-scrapy/contrato-scrapy-api.md](contrato-scrapy/contrato-scrapy-api.md).
+- `ApiClient` — monta o `Retrofit`/`OkHttpClient` em `init(environments)` com a URL vinda do boot (`ms-adm-core-url`), header `apiKey` de `ms-adm-core-api-key`, e expõe os `service`s (`authService`, `selfUserService`, `invitationService`) via `by lazy`.
+- `InventoryClient` — Retrofit do `ms-inventory` em `init(environments)` (`ms-inventory-url`). Headers `apiKey`, `Authorization: Bearer` e `X-Unit-Id`. Expõe `inventoryService`. Contrato em [contrato-ms-inventory/contexto.md](contrato-ms-inventory/contexto.md).
 - `AppConfig` — guarda `environments` e `flags` em memória depois do boot / do `LoadFlags`.
 - `SharedPreferencesManager` — precisa ser inicializado explicitamente em `MainActivity.onCreate` (`SharedPreferencesManager.init(this)`) antes de qualquer leitura/escrita.
 - `ZeraNavigator` — ponto único de comandos de navegação (ver seção seguinte).
@@ -119,6 +121,7 @@ flowchart LR
         UC["UseCase"]
         Scrapy["ScrapyClient (Retrofit)"]
         API["ApiClient (Retrofit)"]
+        Inventory["InventoryClient (Retrofit)"]
         Config["AppConfig"]
         Prefs["SharedPreferencesManager"]
     end
@@ -128,6 +131,7 @@ flowchart LR
     VM -- "viewModelScope.launch" --> UC
     UC --> Scrapy
     UC --> API
+    UC --> Inventory
     UC --> Config
     UC --> Prefs
     VM -- "push / pushAndPop / goBack" --> Nav

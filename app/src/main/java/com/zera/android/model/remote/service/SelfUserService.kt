@@ -1,5 +1,5 @@
 package com.zera.android.model.remote.service
-import com.zera.android.model.entity.user.SelfUserResponseDTO
+import com.zera.android.model.dto.user.SelfUserResponseDTO
 import retrofit2.http.GET
 import retrofit2.http.Path
 

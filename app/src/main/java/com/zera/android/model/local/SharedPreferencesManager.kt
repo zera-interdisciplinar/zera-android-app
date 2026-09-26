@@ -9,6 +9,7 @@ object SharedPreferencesManager {
     private const val KEY_ACCESS_TOKEN = "access_token"
     private const val KEY_REFRESH_TOKEN = "refresh_token"
     private const val KEY_USER_ID = "user_id"
+    private const val KEY_UNIT_ID = "unit_id"
     private const val KEY_EMAIL = "email"
     private const val KEY_PASSWORD = "password"
 
@@ -40,6 +41,12 @@ object SharedPreferencesManager {
 
     fun getUserId(): String? = prefs.getString(KEY_USER_ID, null)
 
+    fun saveUnitId(unitId: String) {
+        prefs.edit { putString(KEY_UNIT_ID, unitId) }
+    }
+
+    fun getUnitId(): String? = prefs.getString(KEY_UNIT_ID, null)
+
     fun getEmail(): String? = prefs.getString(KEY_EMAIL, null)
 
     fun getPassword(): String? = prefs.getString(KEY_PASSWORD, null)
@@ -52,6 +59,7 @@ object SharedPreferencesManager {
             remove(KEY_ACCESS_TOKEN)
             remove(KEY_REFRESH_TOKEN)
             remove(KEY_USER_ID)
+            remove(KEY_UNIT_ID)
             remove(KEY_EMAIL)
             remove(KEY_PASSWORD)
         }

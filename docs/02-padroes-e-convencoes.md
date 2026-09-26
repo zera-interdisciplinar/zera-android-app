@@ -2,8 +2,8 @@
 
 ## Convenções de nomenclatura
 
-- **Pacotes**: `com.zera.android.<camada>.<subpacote>`, camada primeiro (`model`, `viewmodel`, `view`), domínio depois (`auth`, `manager`, `employee`, `user`). Ver estrutura completa em [01-arquitetura.md](01-arquitetura.md).
-- **DTOs**: sufixo `DTO`, `data class` anotada `@Serializable` (kotlinx.serialization). Ex.: `SingInRequestDTO`, `SelfUserResponseDTO`.
+- **Pacotes**: `com.zera.android.<camada>.<subpacote>`, camada primeiro (`model`, `viewmodel`, `view`), domínio depois (`auth`, `manager`, `employee`, `user`, `inventory`). Ver estrutura completa em [01-arquitetura.md](01-arquitetura.md).
+- **DTOs**: sufixo `DTO`, `data class` anotada `@Serializable` (kotlinx.serialization), em `model/dto/<domínio>/`. Ex.: `SingInRequestDTO`, `DashboardHomeResponseDTO`. Modelos que não são payload de API ficam em `model/entity/` (ex.: `Environments`, `UserRole`, `FlagsRequest`).
 - **Casos de uso**: nome no infinitivo/ação, sem sufixo (`SingIn`, não `SingInUseCase`), com um único ponto de entrada `suspend fun execute(...)`.
 - **ViewModels**: arquivo nomeado pela feature (`viewmodel/auth/SignIn.kt`), classe com sufixo `ViewModel` (`SingInViewModel`). O nome do arquivo não repete o sufixo.
 - **State**: `data class <Feature>State` com todos os campos tendo valor padrão (strings vazias, `false`, `null`, `emptyList()`), permitindo instanciar o `ViewModel`/`State` sem argumentos (útil para `@Preview`).
@@ -18,12 +18,13 @@
 
 Regra ao adicionar um domínio novo (ex.: "inventário"):
 
-- `model/entity/inventario/` — DTOs de rede desse domínio.
-- `model/usecase/inventario/` — casos de uso desse domínio.
-- `viewmodel/inventario/` — um `ViewModel` por tela/feature do domínio.
-- `view/screens/inventario/` — telas Compose do domínio.
+- `model/dto/inventory/` — DTOs de rede desse domínio.
+- `model/entity/` — só modelos de domínio/config que não são payload (não misturar DTO aqui).
+- `model/usecase/inventory/` — casos de uso desse domínio.
+- `viewmodel/` — um `ViewModel` por tela (home/indicadores ficam em `viewmodel/manager/`, não numa pasta `inventory/`, porque a tela é do perfil Gestor).
+- `view/screens/` — telas Compose do perfil (`view/screens/manager/`).
 
-Componentes reutilizáveis (usados por mais de um domínio) vão em `view/components/<família>` — famílias hoje existentes: `buttons`, `cards`, `containers`, `images`, `inputs`, `lists`, `logo`, `navigation`, `outros`, `overlays`, `progressbars`, `texts`. `outros` é um bucket genérico (hoje contém `Tag` e `SplashBackground`); antes de adicionar um terceiro componente ali, avalie se ele não define uma família própria (ex.: um componente de status poderia justificar uma pasta `status/`).
+Componentes reutilizáveis (usados por mais de um domínio) vão em `view/components/<família>` — famílias hoje existentes: `buttons`, `cards`, `containers`, `graphs`, `images`, `inputs`, `lists`, `logo`, `navigation`, `outros`, `overlays`, `progressbars`, `texts`. `outros` é um bucket genérico (hoje contém `Tag` e `SplashBackground`); antes de adicionar um terceiro componente ali, avalie se ele não define uma família própria (ex.: um componente de status poderia justificar uma pasta `status/`).
 
 Componentes usados por uma única feature (ex.: `ManagerScaffold`) ficam junto da tela, em `view/screens/<domínio>/`, não em `view/components/`.
 
@@ -52,7 +53,7 @@ Componentes usados por uma única feature (ex.: `ManagerScaffold`) ficam junto d
 - Métodos de intenção nomeados `on<Campo>Change(novoValor)`, que fazem `_state.value = _state.value.copy(<campo> = novoValor)`.
 - Ações assíncronas (`signIn()`, `signUp()`) seguem o mesmo roteiro: setar `isLoading = true, errorMessage = null`, validar sincronamente o que der (client-side), then `viewModelScope.launch { try { ... } catch (e: Exception) { erro } }`.
 - Navegação pós-ação é disparada pelo próprio `ViewModel` via `ZeraNavigator`, nunca pela `Screen`.
-- Feature ainda não integrada ao backend: `ViewModel` e `State` já existem com a forma final esperada, e o método de ação fica com corpo vazio + `TODO:` (ver `SignUpViewModel.signUp()`), em vez de removido ou implementado com dado fake silenciosamente.
+- Feature ainda não integrada ao backend: `ViewModel` e `State` já existem com a forma final esperada, e o método de ação fica com corpo vazio + `TODO:` (ex.: listagem de funcionários), em vez de removido ou implementado com dado fake silenciosamente.
 
 ## Inconsistências conhecidas
 
@@ -60,6 +61,6 @@ Componentes usados por uma única feature (ex.: `ManagerScaffold`) ficam junto d
 
 1. **Erro de digitação "Sing" vs. "Sign"**: todo o domínio de login usa `Sing` (`SingInViewModel`, `SingInState`, caso de uso `SingIn`, `SingInRequestDTO`, `SingInResponseDTO`), enquanto o domínio de cadastro usa a grafia correta `Sign` (`SignUpViewModel`, `SignUpScreen`, `SignInScreen`). Renomear afeta nomes usados em serialização indireta (os campos JSON não usam esses nomes de classe, então o risco é baixo, mas o rename deve ser feito de uma vez em todos os usos).
 2. **`ViewModel.state` expõe `MutableState<T>`, não `State<T>`**: `val state = _state` não converte para somente-leitura, então nada impede (a nível de tipo) que um consumidor externo escreva em `viewModel.state.value` diretamente, quebrando o fluxo unidirecional. Nenhuma tela faz isso hoje, mas o tipo permite.
-3. **Contrato de cadastro incompleto**: `SignUpScreen`/`SignUpViewModel` coletam `name` e `token` (código de convite) além de `email`/`password`, mas `AuthService.signUp()` reutiliza `SingInRequestDTO` (só `email` + `password`) para `POST invitations/redeem`. O formato real do payload de cadastro ainda não está definido — ver [06-contratos-api.md](06-contratos-api.md).
+3. **Atalho de funcionários na home do Gestor sem fonte de dados**: o Inventory Dashboard não devolve total de colaboradores. O card existe na UI, mas `totalEmployees` permanece vazio até outra API cobrir isso — ver [07-especificacoes/manager-home-dashboard.md](07-especificacoes/manager-home-dashboard.md).
 4. **Navegação placeholder em `EmployeeBottomNavBar`**: como o fluxo de Operário ainda não tem telas, todos os `ShortCutButton` estão com `onClick = {}` e `TODO`. Em `ManagerBottomNavBar` a navegação já é real (via `ManagerBottomNavBarViewModel`, usando `push` — há um `TODO` no próprio ViewModel para reavaliar se deveria ser `pushAndPop`), exceto "Reciclagem", que ainda não tem tela/rota. `ManagerScaffold` agora recebe um `currentRoute: Route` explícito de cada tela (cada `Screen` passa a própria rota) e repassa ao `ManagerBottomNavBar`, que usa isso para destacar e desabilitar (`enabled = !selected`) o atalho da tela atual — exceto "Reciclagem", que não tem `Route` própria para comparar ainda.
 5. **Mapeamento de `ItemStatus` do item mockado em `ItemDetailsScreen`/`ItemApprovedScreen` ainda não confirmado**: o item de exemplo (ID `265964`, "aguardando o gestor aprovar o cadastro") usa `ItemStatus.PendingApproval` (rótulo "Pendente") hoje, escolhido por ser semanticamente o mais próximo da KDoc desse valor — mas o mesmo fluxo poderia ser `ItemStatus.AwaitingEvaluation` (rótulo "Em aprovação"), que é o texto que a tela mostrava antes do `ItemStatus` existir. Qual valor é o correto para "item recém-cadastrado, aguardando aprovação do gestor" depende de uma decisão de regra de negócio ainda pendente (não pode ser resolvida só no `ViewModel`) — ver [ItemStatus.kt](../app/src/main/java/com/zera/android/view/components/outros/ItemStatus.kt).

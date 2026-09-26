@@ -46,6 +46,14 @@ fun ManagerHomeScreen(
             CaptionText(text = state.userRole)
         }
 
+        state.errorMessage?.let { message ->
+            CaptionText(
+                text = message,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(horizontal = Spacing.small),
+            )
+        }
+
         StockOccupationCard(itemCount = state.stockItemCount, occupation = state.stockOccupation)
 
         TitleText(
@@ -60,8 +68,12 @@ fun ManagerHomeScreen(
                 labelIcon = ZeraIcon.Box,
                 onClick = viewModel::onItemCardClick,
                 modifier = Modifier.weight(1f),
-                description = "↑ 12%",
-                descriptionColor = MaterialTheme.colorScheme.tertiary
+                description = state.itemsChangeLabel.takeIf { it.isNotBlank() },
+                descriptionColor = if (state.itemsChangePositive) {
+                    MaterialTheme.colorScheme.tertiary
+                } else {
+                    MaterialTheme.colorScheme.error
+                },
             )
             ShortcutCard(
                 label = "Funcionários",
@@ -69,8 +81,8 @@ fun ManagerHomeScreen(
                 labelIcon = ZeraIcon.Group,
                 onClick = viewModel::onEmployeesCardClick,
                 modifier = Modifier.weight(1f),
-                description = "2 pendentes",
-                descriptionColor = MaterialTheme.colorScheme.secondary
+                description = state.employeesDescription,
+                descriptionColor = MaterialTheme.colorScheme.secondary,
             )
         }
 
@@ -100,7 +112,7 @@ fun ManagerHomeScreen(
                 text = "Ver Todos",
                 bold = true,
                 color = MaterialTheme.colorScheme.primary,
-                onClick = { /* TODO: navegar para lista de itens */ },
+                onClick = viewModel::onSeeAllItemsClick,
             )
         }
         ProductList(

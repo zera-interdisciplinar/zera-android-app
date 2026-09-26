@@ -5,7 +5,7 @@
 - **Feature:** Login
 - **Perfil(is) envolvido(s):** Funcionário, Gestor
 - **Status:** implementado
-- **Última atualização:** 2026-09-17
+- **Última atualização:** 2026-09-26
 
 ## Contexto
 
@@ -21,13 +21,13 @@ Como usuário cadastrado (Funcionário ou Gestor), quero entrar com meu email e 
 
 - **Given** o usuário está na tela de login (`Route.SignIn`) com uma conta cadastrada como `EMPLOYEE`
 - **When** preenche email e senha corretos e toca em "Entrar"
-- **Then** os tokens de acesso são salvos, e o usuário é redirecionado para `Route.EmployeeHome`, sem poder voltar para a tela de login
+- **Then** os tokens de acesso e o `unitId` são salvos, e o usuário é redirecionado para `Route.EmployeeHome`, sem poder voltar para a tela de login
 
 ### Cenário: Login bem-sucedido como Gestor
 
 - **Given** o usuário está na tela de login com uma conta cadastrada como `MANAGER`
 - **When** preenche email e senha corretos e toca em "Entrar"
-- **Then** os tokens de acesso são salvos, e o usuário é redirecionado para `Route.ManagerHome`, sem poder voltar para a tela de login
+- **Then** os tokens de acesso e o `unitId` são salvos, e o usuário é redirecionado para `Route.ManagerHome`, sem poder voltar para a tela de login
 
 ### Cenário: Campos obrigatórios vazios
 
@@ -51,6 +51,7 @@ Como usuário cadastrado (Funcionário ou Gestor), quero entrar com meu email e 
 
 - [x] Campos de email e senha são obrigatórios (validação no cliente antes de chamar a API)
 - [x] Tokens de acesso e refresh são persistidos após login bem-sucedido
+- [x] `unitId` do `SelfUserResponseDTO` é persistido (`SharedPreferencesManager.saveUnitId`) para o header `X-Unit-Id` do `InventoryClient`
 - [x] Redirecionamento correto por perfil (`EMPLOYEE` → `EmployeeHome`, `MANAGER` → `ManagerHome`)
 - [x] Erro exibido em caso de falha (validação, credenciais, rede, perfil desconhecido)
 - [x] Pilha de navegação anterior é removida ao redirecionar após login (`pushAndPop`)

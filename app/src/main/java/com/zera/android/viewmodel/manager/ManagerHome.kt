@@ -1,13 +1,21 @@
 package com.zera.android.viewmodel.manager
 
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.viewModelScope
+import com.zera.android.model.dto.inventory.DashboardHomeResponseDTO
+import com.zera.android.model.entity.user.UserRole
+import com.zera.android.model.usecase.auth.GetSelfUser
+import com.zera.android.model.usecase.inventory.GetManagerHome
 import com.zera.android.view.components.lists.NotificationItem
 import com.zera.android.view.components.lists.ProductItem
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.view.theme.ZeraColorFamily
-import com.zera.android.view.theme.icons.ZeraIcon
 import com.zera.android.viewmodel.ZeraViewModel
+import kotlinx.coroutines.launch
+import java.text.NumberFormat
+import java.util.Locale
+import kotlin.math.abs
 
 data class ManagerHomeState(
     val userName: String = "",
@@ -15,41 +23,20 @@ data class ManagerHomeState(
     val stockItemCount: Int = 0,
     val stockOccupation: Float = 0f,
     val totalItems: String = "",
+    val itemsChangeLabel: String = "",
+    val itemsChangePositive: Boolean = true,
     val totalEmployees: String = "",
+    val employeesDescription: String? = null,
     val notifications: List<NotificationItem> = emptyList(),
     val latestProducts: List<ProductItem> = emptyList(),
-    val isLoading: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
 )
 
 class ManagerHomeViewModel : ZeraViewModel() {
-    // TODO: substituir os dados de exemplo pela chamada ao back (ver loadDashboard)
-    private val _state = mutableStateOf(
-        ManagerHomeState(
-            userName = "Natalia Flores",
-            userRole = "Gestor",
-            stockItemCount = 300,
-            stockOccupation = 0.6f,
-            totalItems = "1.230",
-            totalEmployees = "43",
-            notifications = listOf(
-                NotificationItem(
-                    id = "1",
-                    label = "5 produtos sem classificação",
-                    style = ZeraColorFamily.Yellow,
-                ),
-                NotificationItem(
-                    id = "2",
-                    label = "Material reciclável em rota incorreta",
-                    style = ZeraColorFamily.Red,
-                ),
-            ),
-            latestProducts = listOf(
-                ProductItem(id = "265964", name = "Placa de vídeo"),
-                ProductItem(id = "118203", name = "Teclado mecânico", icon = ZeraIcon.Box),
-            ),
-        )
-    )
+    private val getSelfUser = GetSelfUser()
+    private val getManagerHome = GetManagerHome()
+
+    private val _state = mutableStateOf(ManagerHomeState())
     val state = _state
 
     init {
@@ -57,7 +44,40 @@ class ManagerHomeViewModel : ZeraViewModel() {
     }
 
     private fun loadDashboard() {
-        // TODO: buscar o resumo do gestor no back e atualizar o _state (isLoading / errorMessage inclusos)
+        _state.value = _state.value.copy(errorMessage = null)
+        viewModelScope.launch {
+            try {
+                loadLoggedUser()
+                val home = getManagerHome.execute()
+                _state.value = _state.value.copy(
+                    stockItemCount = home.activeItems.toInt(),
+                    stockOccupation = occupationFrom(home),
+                    totalItems = formatCount(home.activeItems),
+                    itemsChangeLabel = formatChangePercent(home.activeItemsChangePercent).orEmpty(),
+                    itemsChangePositive = home.activeItemsChangePercent?.let { it >= 0.0 } ?: true,
+                    notifications = alertsFrom(home),
+                    latestProducts = home.recentItems.content.map { item ->
+                        ProductItem(id = item.id, name = item.name)
+                    },
+                    // TODO: total de funcionários não faz parte do contrato Inventory Dashboard
+                    errorMessage = null,
+                )
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(errorMessage = e.message)
+            }
+        }
+    }
+
+    private suspend fun loadLoggedUser() {
+        try {
+            val user = getSelfUser.execute()
+            _state.value = _state.value.copy(
+                userName = user.name,
+                userRole = roleLabel(user.role),
+            )
+        } catch (_: Exception) {
+            // A home ainda pode ser preenchida sem o nome; o interceptor já tem o token/unidade.
+        }
     }
 
     fun onItemCardClick() {
@@ -66,5 +86,80 @@ class ManagerHomeViewModel : ZeraViewModel() {
 
     fun onEmployeesCardClick() {
         ZeraNavigator.push(Route.Employees)
+    }
+
+    fun onSeeAllItemsClick() {
+        ZeraNavigator.push(Route.Itens)
+    }
+
+    companion object {
+        private val ptBr = Locale.forLanguageTag("pt-BR")
+
+        internal fun occupationFrom(home: DashboardHomeResponseDTO): Float {
+            val percent = home.occupancyPercent ?: return 0f
+            return (percent / 100.0).toFloat().coerceIn(0f, 1f)
+        }
+
+        internal fun formatCount(value: Long): String =
+            NumberFormat.getIntegerInstance(ptBr).format(value)
+
+        internal fun formatChangePercent(value: Double?): String? {
+            if (value == null) return null
+            val arrow = if (value >= 0) "↑" else "↓"
+            return "$arrow ${formatDecimal(abs(value))}%"
+        }
+
+        internal fun alertsFrom(home: DashboardHomeResponseDTO): List<NotificationItem> = listOfNotNull(
+            countAlert(
+                id = "pending-approval",
+                count = home.pendingApproval,
+                singular = "item aguardando aprovação",
+                plural = "itens aguardando aprovação",
+                style = ZeraColorFamily.Yellow,
+            ),
+            countAlert(
+                id = "in-maintenance",
+                count = home.inMaintenance,
+                singular = "item em manutenção",
+                plural = "itens em manutenção",
+                style = ZeraColorFamily.Yellow,
+            ),
+            countAlert(
+                id = "awaiting-evaluation",
+                count = home.awaitingEvaluation,
+                singular = "item aguardando avaliação",
+                plural = "itens aguardando avaliação",
+                style = ZeraColorFamily.Yellow,
+            ),
+        )
+
+        internal fun roleLabel(role: String): String = when (role) {
+            UserRole.MANAGER -> "Gestor"
+            UserRole.EMPLOYEE -> "Operário"
+            else -> role
+        }
+
+        private fun countAlert(
+            id: String,
+            count: Long,
+            singular: String,
+            plural: String,
+            style: ZeraColorFamily,
+        ): NotificationItem? {
+            if (count <= 0) return null
+            val noun = if (count == 1L) singular else plural
+            return NotificationItem(
+                id = id,
+                label = "${formatCount(count)} $noun",
+                style = style,
+            )
+        }
+
+        private fun formatDecimal(value: Double): String {
+            val format = NumberFormat.getNumberInstance(ptBr)
+            format.minimumFractionDigits = 0
+            format.maximumFractionDigits = 1
+            return format.format(value)
+        }
     }
 }
