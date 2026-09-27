@@ -184,6 +184,141 @@ Ambos **já existem** como fluxo de backend:
 
 Existe também `POST /api/v1/items/{id}/reject` (`MANAGER`, corpo com `reason`), útil se a tela ganhar botão "Recusar".
 
+### 2.1 `POST /api/v1/items/{id}/approve`
+
+Aprova o item (`status` → `IN_STOCK`). Exige papel `MANAGER`. Sem corpo.
+
+**Efeito colateral:** se o modelo do item ainda estiver `PENDING_APPROVAL`, o modelo é aprovado junto (decisão de produto v1 — aprovar o item aprova o modelo cadastrado com ele).
+
+```
+POST /api/v1/items/9c858901-8a57-4791-81fe-4c455b099bc9/approve HTTP/1.1
+Authorization: Bearer <token>
+apiKey: <apiKey>
+X-Unit-Id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+```
+
+```bash
+curl -X POST "https://<host>/api/v1/items/9c858901-8a57-4791-81fe-4c455b099bc9/approve" \
+  -H "Authorization: Bearer eyJhbGciOi..." \
+  -H "apiKey: <apiKey>" \
+  -H "X-Unit-Id: 3fa85f64-5717-4562-b3fc-2c963f66afa6"
+```
+
+#### Response — `200 OK`
+
+Corpo: `ItemResponse` do item já com `status: "IN_STOCK"` (mesmo shape da seção 1).
+
+#### Erros
+
+| Status | Quando |
+|---|---|
+| `404` | Item não existe na unidade (`X-Unit-Id`). |
+| `403` | Ator não é `MANAGER`. |
+| `409` | Transição inválida — item não está num status que permite aprovar (ex. já `IN_STOCK`, ou `DISPOSED`). `ProblemDetail` com a mensagem citando o status atual e as transições permitidas. |
+
+---
+
+### 2.2 `POST /api/v1/items/{id}/reject`
+
+Reprova o item (`status` → `REJECTED`). Exige papel `MANAGER`. `reason` é obrigatório — vai para o histórico e para a tela do operário.
+
+**Efeito colateral:** se o modelo estiver `PENDING_APPROVAL` **e** nenhum outro item usar esse modelo, o modelo também é reprovado (com o mesmo `reason`). Se outro item usa o modelo, o modelo não é mexido — reprovar todos os itens daquele modelo por tabela seria destrutivo.
+
+```
+POST /api/v1/items/9c858901-8a57-4791-81fe-4c455b099bc9/reject HTTP/1.1
+Authorization: Bearer <token>
+apiKey: <apiKey>
+X-Unit-Id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+Content-Type: application/json
+
+{ "reason": "Foto ilegível, reenviar" }
+```
+
+```bash
+curl -X POST "https://<host>/api/v1/items/9c858901-8a57-4791-81fe-4c455b099bc9/reject" \
+  -H "Authorization: Bearer eyJhbGciOi..." \
+  -H "apiKey: <apiKey>" \
+  -H "X-Unit-Id: 3fa85f64-5717-4562-b3fc-2c963f66afa6" \
+  -H "Content-Type: application/json" \
+  -d '{"reason": "Foto ilegível, reenviar"}'
+```
+
+| Campo do corpo | Tipo | Obrigatório | Descrição |
+|---|---|---|---|
+| `reason` | string (max 500) | Sim | Motivo da reprovação. Vazio/ausente → `400`. |
+
+#### Response — `200 OK`
+
+Corpo: `ItemResponse` com `status: "REJECTED"`.
+
+#### Erros
+
+| Status | Quando |
+|---|---|
+| `400` | `reason` ausente, vazio ou maior que 500 caracteres. |
+| `404` | Item não existe na unidade. |
+| `403` | Ator não é `MANAGER`. |
+| `409` | Transição inválida para o status atual do item. |
+
+---
+
+### 2.3 `PATCH /api/v1/items/{id}` — editar item (botão "Editar")
+
+Edição parcial: só os campos enviados (não-nulos) são alterados; campo ausente/`null` mantém o valor atual. **Exceção**: `notes` e `serialNumber` com string vazia (`""`) apagam o campo (viram `null`) — é a forma de o app limpar um campo opcional. Não muda `status` (isso é via `/approve`, `/reject` ou `PATCH /{id}/status`), nem `category`/`model` (isso é editado pelo `ModelController`, fora deste contrato). Não exige papel específico além de estar autenticado (`Authz.INVENTORY_OPERATOR`, padrão da classe).
+
+```
+PATCH /api/v1/items/9c858901-8a57-4791-81fe-4c455b099bc9 HTTP/1.1
+Authorization: Bearer <token>
+apiKey: <apiKey>
+X-Unit-Id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+Content-Type: application/json
+
+{
+  "name": "Notebook Dell Latitude 5420",
+  "condition": "USED",
+  "hasDamages": false,
+  "notes": "",
+  "serialNumber": "SN123456",
+  "acquiredAt": "2026-07-01",
+  "manufacturingYear": 2024,
+  "usageIntensity": 3
+}
+```
+
+```bash
+curl -X PATCH "https://<host>/api/v1/items/9c858901-8a57-4791-81fe-4c455b099bc9" \
+  -H "Authorization: Bearer eyJhbGciOi..." \
+  -H "apiKey: <apiKey>" \
+  -H "X-Unit-Id: 3fa85f64-5717-4562-b3fc-2c963f66afa6" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Notebook Dell Latitude 5420", "usageIntensity": 3}'
+```
+
+| Campo do corpo | Tipo | Obrigatório | Observação |
+|---|---|---|---|
+| `name` | string (1-120) | Não | — |
+| `condition` | `ItemCondition` | Não | `NEW`\|`USED`\|`SEMI_DAMAGED`\|`DAMAGED`. |
+| `hasDamages` | boolean | Não | Se `false` e `damages` não vier junto, a lista de danos é limpa. |
+| `damages` | `DamageType[]` | Não | `BROKEN_SCREEN`\|`MISSING_PART`\|`DOES_NOT_POWER_ON`\|`OXIDATION`\|`OTHER`. |
+| `notes` | string (max 500) | Não | `""` apaga. |
+| `serialNumber` | string (max 120) | Não | `""` apaga. |
+| `acquiredAt` | `LocalDate` (`YYYY-MM-DD`) | Não | — |
+| `manufacturingYear` | int | Não | — |
+| `usageIntensity` | int (0-10) | Não | — |
+
+Corpo vazio (`{}`) é válido e não muda nada — devolve o item como está.
+
+#### Response — `200 OK`
+
+Corpo: `ItemResponse` atualizado (mesmo shape da seção 1).
+
+#### Erros
+
+| Status | Quando |
+|---|---|
+| `400` | Campo fora de validação (ex. `usageIntensity` fora de 0-10, `name` vazio se enviado). |
+| `404` | Item não existe na unidade. |
+
 ---
 
 ## Categorias — filtro "Categoria" da busca

@@ -13,6 +13,8 @@ data class ItemResponseDTO(
     @JsonNames("itemStatus", "approvalStatus")
     val status: String? = null,
     val condition: String? = null,
+    val serialNumber: String? = null,
+    val notes: String? = null,
     val createdByName: String? = null,
     val createdAt: String? = null,
     val model: ModelResponseDTO? = null,

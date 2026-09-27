@@ -38,6 +38,7 @@ class ItemDetailsMappingTest {
         )
 
         assertEquals("Usado", state.condition)
+        assertEquals("USED", state.conditionCode)
         assertEquals(ItemStatus.InStock, state.status)
     }
 
@@ -91,6 +92,8 @@ class ItemDetailsMappingTest {
             name = "Notebook Dell Latitude",
             status = "IN_STOCK",
             condition = "USED",
+            serialNumber = "SN123456",
+            notes = "Foto ok",
             createdByName = "João Silva",
             createdAt = "2026-07-01T09:00:00",
             model = ModelResponseDTO(
@@ -109,7 +112,64 @@ class ItemDetailsMappingTest {
         assertEquals("Informática", state.category)
         assertEquals("Plastic", state.material)
         assertEquals("Usado", state.condition)
+        assertEquals("USED", state.conditionCode)
+        assertEquals("SN123456", state.serialNumber)
+        assertEquals("Foto ok", state.notes)
+        assertEquals(false, state.canReview)
         assertEquals("João Silva", state.registeredBy)
         assertEquals("1 de Jul 2026 - 9h00", state.registeredAt)
+    }
+
+    @Test
+    fun mapsConditionLabelBackToBackendCode() {
+        assertEquals("NEW", ItemDetailsViewModel.conditionCodeFrom("Novo"))
+        assertEquals("USED", ItemDetailsViewModel.conditionCodeFrom("usado"))
+        assertEquals("SEMI_DAMAGED", ItemDetailsViewModel.conditionCodeFrom("Semidanificado"))
+        assertEquals("DAMAGED", ItemDetailsViewModel.conditionCodeFrom("DAMAGED"))
+        assertEquals(null, ItemDetailsViewModel.conditionCodeFrom("quebrado"))
+    }
+
+    @Test
+    fun validatesNameLengthFromContract() {
+        assertEquals("Informe o nome do item.", ItemDetailsViewModel.nameValidationError("  "))
+        assertEquals(null, ItemDetailsViewModel.nameValidationError("Notebook"))
+        assertEquals(
+            "O nome deve ter no máximo 120 caracteres.",
+            ItemDetailsViewModel.nameValidationError("a".repeat(121)),
+        )
+    }
+
+    @Test
+    fun validatesRejectReasonFromContract() {
+        assertEquals("Informe o motivo da recusa.", ItemDetailsViewModel.reasonValidationError(""))
+        assertEquals(null, ItemDetailsViewModel.reasonValidationError("Foto ilegível, reenviar"))
+        assertEquals(
+            "O motivo deve ter no máximo 500 caracteres.",
+            ItemDetailsViewModel.reasonValidationError("a".repeat(501)),
+        )
+    }
+
+    @Test
+    fun reviewActionsOnlyForPendingStatuses() {
+        assertEquals(true, ItemDetailsViewModel.canReview(ItemStatus.PendingApproval))
+        assertEquals(true, ItemDetailsViewModel.canReview(ItemStatus.AwaitingEvaluation))
+        assertEquals(false, ItemDetailsViewModel.canReview(ItemStatus.InStock))
+        assertEquals(false, ItemDetailsViewModel.canReview(ItemStatus.Rejected))
+        assertEquals(false, ItemDetailsViewModel.canReview(null))
+    }
+
+    @Test
+    fun usedConditionDoesNotEnableReview() {
+        val state = ItemDetailsViewModel.stateFrom(
+            ItemResponseDTO(
+                id = "id-1",
+                name = "Notebook",
+                status = "IN_STOCK",
+                condition = "USED",
+            ),
+        )
+
+        assertEquals("Usado", state.condition)
+        assertEquals(false, state.canReview)
     }
 }

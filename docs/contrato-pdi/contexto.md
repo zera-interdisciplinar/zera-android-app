@@ -11,13 +11,20 @@ model
 ├── dto/inventory/
 │   ├── ItemResponseDTO.kt          item (lista e detalhe); model/materials/category encaixados
 │   ├── CategoryResponseDTO.kt      chip de categoria
-│   └── DashboardHomeResponseDTO.kt PagedItemsDTO (envelope da lista)
+│   ├── DashboardHomeResponseDTO.kt PagedItemsDTO (envelope da lista)
+│   ├── UpdateItemRequestDTO.kt     PATCH parcial (name, condition, …)
+│   └── RejectItemRequestDTO.kt     POST reject: reason (max 500)
 ├── remote/service/InventoryService.kt
 │   GET api/v1/items, api/v1/items/{id}, api/v1/categories
+│   POST api/v1/items/{id}/approve, api/v1/items/{id}/reject
+│   PATCH api/v1/items/{id}
 └── usecase/inventory/
     ├── GetItems.kt                 catálogo paginado
     ├── GetItemDetails.kt           um item por UUID
-    └── GetCategories.kt            nomes/ids para o filtro
+    ├── GetCategories.kt            nomes/ids para o filtro
+    ├── ApproveItem.kt
+    ├── RejectItem.kt
+    └── UpdateItem.kt
 ```
 
 ViewModels:
@@ -34,14 +41,11 @@ A lista **não** reaproveita `GET /api/v1/dashboard/home.recentItems`: aquele pa
 | `GET /api/v1/items` | `GetItems` | `ItensScreen` |
 | `GET /api/v1/items/{id}` | `GetItemDetails` | `ItemDetailsScreen` |
 | `GET /api/v1/categories` | `GetCategories` | chips de categoria em `ItensScreen` |
+| `POST /api/v1/items/{id}/approve` | `ApproveItem` | `ItemDetailsScreen` → `ItemApprovedScreen` |
+| `POST /api/v1/items/{id}/reject` | `RejectItem` | `ItemDetailsScreen` |
+| `PATCH /api/v1/items/{id}` | `UpdateItem` | `ItemDetailsScreen` |
 
-Não implementados (existem no contrato, mas a tela ainda só lê):
-
-| Rota | Por quê |
-|---|---|
-| `POST /api/v1/items/{id}/approve` | Botão “Aprovar” existe na UI; `onApproveClick` é TODO até a regra de negócio de transição de status ser definida. |
-| `PATCH /api/v1/items/{id}` | Botão “Editar” e lápis das linhas: TODO; a spec de leitura não cobre o corpo de `UpdateItemRequest`. |
-| `POST /api/v1/items/{id}/reject` | Não há botão “Recusar” na tela. |
+O PATCH é parcial: a PDI edita `name`, `condition`, `serialNumber` e `notes`. Ausente/`null` não altera o item. Categoria e material ficam no modelo. `encodeDefaults = false` omite nulos. Approve/reject só na UI se o item estiver pendente; esperam `200` com `ItemResponse` (`IN_STOCK` / `REJECTED`). `400` validação, `403` papel, `404` unidade, `409` transição.
 
 ## O que foi feito na listagem e por quê
 
@@ -73,15 +77,16 @@ Não implementados (existem no contrato, mas a tela ainda só lê):
 | Data de cadastro | `createdAt` formatado `pt-BR` | ISO da API → “26 de set 2026 - 21h11” |
 
 - **Aliases de status.** `ItemStatus.fromBackend` aceita `PENDING` e `APPROVED` além dos enums oficiais, porque payloads antigos/ variados já apareceram.
-- **Botões Editar / Aprovar.** Permanecem visíveis (layout da tela), mas **não** chamam API. Implementar escrita exigiria use cases novos e regra de quem pode aprovar o quê.
+- **Botões Editar / Recusar / Aprovar.** Recusar e Aprovar só aparecem se o status for `PENDING_APPROVAL` ou `AWAITING_EVALUATION` (`canReview`). Item `IN_STOCK` (ex.: condição “Usado”) mostra só Editar. Editar abre popup com nome, condição (chips), número de série e observações; o PATCH manda só o que mudou. Lápis nas linhas correspondentes editam um campo. Categoria, material, autor e data continuam só leitura.
 
 ## Testes
 
 Mapeamento puro (sem Retrofit) em:
 
 - `ItensMappingTest` — query dos chips, merge de páginas, rótulo de total, `productFrom`, `canLoadMore`
-- `ItemDetailsMappingTest` — status, condição, materiais, `stateFrom`
+- `ItemDetailsMappingTest` — status, condição, materiais, `stateFrom`, código de condição
 - `ItemResponseDTOTest` / `CategoryResponseDTOTest` — serialização
+- `UpdateItemRequestDTOTest` / `RejectItemRequestDTOTest` — corpo de escrita
 
 ## O que fazer em caso de dúvida de contrato
 

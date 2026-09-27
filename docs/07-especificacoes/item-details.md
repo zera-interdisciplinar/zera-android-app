@@ -4,7 +4,7 @@
 
 - **Feature:** Detalhe de um item (`ItemDetailsScreen`)
 - **Perfil(is) envolvido(s):** Gestor
-- **Status:** implementado (somente leitura; Editar/Aprovar ainda sem API)
+- **Status:** implementado (leitura + aprovar/recusar/editar nome e condição)
 - **Última atualização:** 2026-09-26
 
 ## Contexto
@@ -35,20 +35,44 @@ Como Gestor, quero ver os dados reais de um item ao abri-lo, para conferir statu
 - **When** o Gestor toca voltar
 - **Then** `ZeraNavigator.goBack()`
 
-### Cenário: Editar / Aprovar
+### Cenário: Editar nome
 
-- **Given** os botões estão visíveis
-- **When** o Gestor toca Editar ou Aprovar
-- **Then** nada é enviado à API (TODOs no `ItemDetailsViewModel`)
+- **Given** a PDI carregou o item
+- **When** o Gestor toca Editar, informa o nome e confirma
+- **Then** o app envia `PATCH /api/v1/items/{id}` só com `name`
+
+### Cenário: Editar condição
+
+- **Given** a linha Condição tem lápis
+- **When** o Gestor confirma um rótulo válido (Novo, Usado, Semidanificado, Danificado)
+- **Then** o app envia `PATCH` com o enum correspondente
+
+### Cenário: Aprovar
+
+- **Given** o item está em um status que o backend aceita
+- **When** o Gestor toca Aprovar
+- **Then** o app chama `POST .../approve` (sem corpo) e, em sucesso, vai para `ItemApprovedScreen` com os dados do item
+
+### Cenário: Recusar
+
+- **Given** o Gestor toca Recusar e informa o motivo
+- **When** confirma
+- **Then** o app chama `POST .../reject` com `{ "reason": "..." }` e recarrega o detalhe
+
+### Cenário: Transição inválida
+
+- **Given** a API responde 409
+- **When** a mutação termina
+- **Then** `errorMessage` explica que o status atual não permite a ação
 
 ## Critérios de aceite
 
 - [x] Sem mock; carga por `itemId` da rota
 - [x] Mapeamento do contrato (nome, modelo, status, categoria, materiais, condição, autor, data)
 - [x] Erro de rede/404 visível
-- [ ] `POST .../approve` no botão Aprovar
-- [ ] `PATCH .../{id}` no botão Editar / lápis
-- [ ] Botão Recusar (`POST .../reject`)
+- [x] `POST .../approve` no botão Aprovar
+- [x] `PATCH .../{id}` no botão Editar / lápis de condição (parcial: só o campo alterado)
+- [x] Botão Recusar (`POST .../reject` com `reason`)
 
 ## Edge cases considerados
 
@@ -60,8 +84,8 @@ Como Gestor, quero ver os dados reais de um item ao abri-lo, para conferir statu
 ## Fora de escopo desta spec
 
 - Listagem (`itens.md`).
-- Fluxo escrito de aprovação/edição (regra de negócio ainda pendente).
-- `ItemApprovedScreen` (tela irmã, não ligada a este GET).
+- PATCH de categoria/material (pertencem ao modelo, não ao item).
+- Chip “Pendentes” pré-selecionado ao sair de `ItemApprovedScreen`.
 
 ## Referências
 

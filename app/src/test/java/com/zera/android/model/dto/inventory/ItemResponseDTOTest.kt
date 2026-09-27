@@ -48,6 +48,7 @@ class ItemResponseDTOTest {
         assertEquals("ITM-0042", item.displayCode)
         assertEquals("IN_STOCK", item.status)
         assertEquals("USED", item.condition)
+        assertEquals("SN123456", item.serialNumber)
         assertEquals("João Silva", item.createdByName)
         assertEquals("2026-07-01T09:00:00", item.createdAt)
         assertEquals("Latitude 5420", item.model?.name)

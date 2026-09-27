@@ -16,6 +16,7 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,9 +43,16 @@ private val IconCircleSize = 96.dp
 
 @Composable
 fun ItemApprovedScreen(
+    itemId: String,
+    itemName: String,
+    itemSubtitle: String,
     viewModel: ItemApprovedViewModel = viewModel()
 ) {
     val state by viewModel.state
+
+    LaunchedEffect(itemId, itemName, itemSubtitle) {
+        viewModel.setItem(itemId, itemName, itemSubtitle)
+    }
     val backgroundPalette = ZeraColorFamily.Blue.palette()
     val checkPalette = ZeraColorFamily.Green.palette()
 
@@ -119,6 +127,10 @@ fun ItemApprovedScreen(
 @Preview(heightDp = 900)
 fun ItemApprovedScreenPreview() {
     ZeraTheme {
-        ItemApprovedScreen()
+        ItemApprovedScreen(
+            itemId = "265964",
+            itemName = "Placa de vídeo",
+            itemSubtitle = "Notebook Mac",
+        )
     }
 }

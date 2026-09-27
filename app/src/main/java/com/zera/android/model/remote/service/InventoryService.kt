@@ -5,7 +5,12 @@ import com.zera.android.model.dto.inventory.DashboardHomeResponseDTO
 import com.zera.android.model.dto.inventory.IndicatorsResponseDTO
 import com.zera.android.model.dto.inventory.ItemResponseDTO
 import com.zera.android.model.dto.inventory.PagedItemsDTO
+import com.zera.android.model.dto.inventory.RejectItemRequestDTO
+import com.zera.android.model.dto.inventory.UpdateItemRequestDTO
+import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.PATCH
+import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -38,4 +43,21 @@ interface InventoryService {
 
     @GET("api/v1/categories")
     suspend fun getCategories(): List<CategoryResponseDTO>
+
+    @POST("api/v1/items/{id}/approve")
+    suspend fun approveItem(
+        @Path("id") id: String,
+    ): ItemResponseDTO
+
+    @POST("api/v1/items/{id}/reject")
+    suspend fun rejectItem(
+        @Path("id") id: String,
+        @Body body: RejectItemRequestDTO,
+    ): ItemResponseDTO
+
+    @PATCH("api/v1/items/{id}")
+    suspend fun updateItem(
+        @Path("id") id: String,
+        @Body body: UpdateItemRequestDTO,
+    ): ItemResponseDTO
 }

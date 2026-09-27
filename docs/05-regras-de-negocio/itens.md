@@ -40,9 +40,11 @@ Tamanho 20. Título = `totalElements` formatado (`1 Item` / `N Itens`). Próxima
 
 A PDI sempre busca `GET /api/v1/items/{id}`. Subtítulo = `model.name`. Categoria = `model.category.name`. Materiais = nomes do modelo, em português com “e”. Condição: `NEW` Novo, `USED` Usado, `SEMI_DAMAGED` Semidanificado, `DAMAGED` Danificado.
 
-### Escrita (ainda não aplicada)
+### Escrita
 
-Aprovar e editar existem no contrato. O app **não** chama essas rotas até a regra de quem pode transicionar status ser fechada.
+- **Aprovar:** `POST /api/v1/items/{id}/approve`, sem corpo, papel `MANAGER`. Sucesso → `ItemApprovedScreen`. `409` = transição inválida.
+- **Recusar:** `POST /api/v1/items/{id}/reject` com `reason` obrigatório.
+- **Editar:** `PATCH /api/v1/items/{id}` parcial. A PDI envia só `name` ou só `condition`. `name` 1–120. Categoria/material não vão no PATCH.
 
 ## Relacionamento com perfis
 
