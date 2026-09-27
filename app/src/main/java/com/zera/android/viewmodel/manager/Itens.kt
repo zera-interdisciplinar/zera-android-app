@@ -35,6 +35,7 @@ data class ItensState(
     val totalItemsLabel: String = "",
     val items: List<ProductItem> = emptyList(),
     val isLoading: Boolean = false,
+    val isLoadingMore: Boolean = false,
     val errorMessage: String? = null,
 ) {
     companion object {
@@ -53,6 +54,8 @@ class ItensViewModel : ZeraViewModel() {
 
     private var categories: List<CategoryResponseDTO> = emptyList()
     private var loadJob: Job? = null
+    private var loadedPage: Int = -1
+    private var totalPages: Int = 0
 
     init {
         loadCategories()
@@ -76,6 +79,18 @@ class ItensViewModel : ZeraViewModel() {
         loadItems()
     }
 
+    fun loadNextPage() {
+        if (!canLoadMore(
+                loadedPage = loadedPage,
+                totalPages = totalPages,
+                isBusy = _state.value.isLoading || _state.value.isLoadingMore,
+            )
+        ) {
+            return
+        }
+        loadItems(reset = false)
+    }
+
     private fun loadCategories() {
         viewModelScope.launch {
             try {
@@ -92,9 +107,16 @@ class ItensViewModel : ZeraViewModel() {
         }
     }
 
-    private fun loadItems() {
-        loadJob?.cancel()
-        _state.value = _state.value.copy(isLoading = true, errorMessage = null)
+    private fun loadItems(reset: Boolean = true) {
+        if (reset) {
+            loadJob?.cancel()
+            loadedPage = -1
+            totalPages = 0
+            _state.value = _state.value.copy(isLoading = true, isLoadingMore = false, errorMessage = null)
+        } else {
+            _state.value = _state.value.copy(isLoadingMore = true, errorMessage = null)
+        }
+        val pageIndex = if (reset) 0 else loadedPage + 1
         loadJob = viewModelScope.launch {
             try {
                 val query = queryFor(
@@ -102,38 +124,61 @@ class ItensViewModel : ZeraViewModel() {
                     searchQuery = _state.value.searchQuery,
                     categories = categories,
                 )
-                val page = if (query.extraStatuses.isEmpty()) {
-                    getItems.execute(
-                        status = query.status,
-                        categoryId = query.categoryId,
-                        q = query.q,
-                    )
+                val page = fetchPage(query, pageIndex)
+                loadedPage = page.page
+                totalPages = page.totalPages
+                val items = if (reset) {
+                    page.content.map(::productFrom)
                 } else {
-                    val first = getItems.execute(
-                        status = query.status,
-                        q = query.q,
-                    )
-                    val second = getItems.execute(
-                        status = query.extraStatuses.first(),
-                        q = query.q,
-                    )
-                    mergePages(first, second)
+                    appendProducts(_state.value.items, page.content)
                 }
                 _state.value = _state.value.copy(
                     totalItemsLabel = totalItemsLabel(page.totalElements),
-                    items = page.content.map(::productFrom),
+                    items = items,
                     isLoading = false,
+                    isLoadingMore = false,
                     errorMessage = null,
                 )
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                _state.value = _state.value.copy(isLoading = false, errorMessage = e.message)
+                _state.value = _state.value.copy(
+                    isLoading = false,
+                    isLoadingMore = false,
+                    errorMessage = e.message,
+                )
             }
         }
     }
 
+    private suspend fun fetchPage(query: ItemsQuery, pageIndex: Int): PagedItemsDTO {
+        return if (query.extraStatuses.isEmpty()) {
+            getItems.execute(
+                status = query.status,
+                categoryId = query.categoryId,
+                q = query.q,
+                page = pageIndex,
+                size = PAGE_SIZE,
+            )
+        } else {
+            val first = getItems.execute(
+                status = query.status,
+                q = query.q,
+                page = pageIndex,
+                size = PAGE_SIZE,
+            )
+            val second = getItems.execute(
+                status = query.extraStatuses.first(),
+                q = query.q,
+                page = pageIndex,
+                size = PAGE_SIZE,
+            )
+            mergePages(first, second)
+        }
+    }
+
     companion object {
+        internal const val PAGE_SIZE = 20
         private val ptBr = Locale.forLanguageTag("pt-BR")
 
         internal fun productFrom(item: ItemResponseDTO): ProductItem {
@@ -187,11 +232,24 @@ class ItensViewModel : ZeraViewModel() {
             val content = (first.content + second.content).filter { seen.add(it.id) }
             return PagedItemsDTO(
                 content = content,
-                page = 0,
-                size = content.size,
+                page = first.page,
+                size = PAGE_SIZE,
                 totalElements = first.totalElements + second.totalElements,
-                totalPages = 1,
+                totalPages = maxOf(first.totalPages, second.totalPages),
             )
+        }
+
+        internal fun canLoadMore(loadedPage: Int, totalPages: Int, isBusy: Boolean): Boolean {
+            if (isBusy) return false
+            return loadedPage + 1 < totalPages
+        }
+
+        internal fun appendProducts(
+            current: List<ProductItem>,
+            incoming: List<ItemResponseDTO>,
+        ): List<ProductItem> {
+            val seen = current.map { it.id }.toMutableSet()
+            return current + incoming.map(::productFrom).filter { seen.add(it.id) }
         }
     }
 }

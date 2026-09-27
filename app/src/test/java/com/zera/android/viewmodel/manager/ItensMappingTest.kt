@@ -103,16 +103,63 @@ class ItensMappingTest {
     fun mergesPendingPages() {
         val pending = PagedItemsDTO(
             content = listOf(ItemResponseDTO(id = "a", name = "A", status = "PENDING_APPROVAL")),
+            page = 0,
+            size = 20,
             totalElements = 1,
+            totalPages = 1,
         )
         val awaiting = PagedItemsDTO(
             content = listOf(ItemResponseDTO(id = "b", name = "B", status = "AWAITING_EVALUATION")),
+            page = 0,
+            size = 20,
             totalElements = 2,
+            totalPages = 3,
         )
 
         val merged = ItensViewModel.mergePages(pending, awaiting)
 
         assertEquals(listOf("a", "b"), merged.content.map { it.id })
         assertEquals(3L, merged.totalElements)
+        assertEquals(3, merged.totalPages)
+        assertEquals(0, merged.page)
+    }
+
+    @Test
+    fun canLoadMoreWhenNextPageExists() {
+        assertEquals(
+            true,
+            ItensViewModel.canLoadMore(loadedPage = 0, totalPages = 62, isBusy = false),
+        )
+    }
+
+    @Test
+    fun cannotLoadMoreOnLastPage() {
+        assertEquals(
+            false,
+            ItensViewModel.canLoadMore(loadedPage = 61, totalPages = 62, isBusy = false),
+        )
+    }
+
+    @Test
+    fun cannotLoadMoreWhileBusy() {
+        assertEquals(
+            false,
+            ItensViewModel.canLoadMore(loadedPage = 0, totalPages = 2, isBusy = true),
+        )
+    }
+
+    @Test
+    fun appendsNextPageWithoutDuplicates() {
+        val current = listOf(
+            ItensViewModel.productFrom(ItemResponseDTO(id = "a", name = "A", status = "IN_STOCK")),
+        )
+        val incoming = listOf(
+            ItemResponseDTO(id = "a", name = "A", status = "IN_STOCK"),
+            ItemResponseDTO(id = "b", name = "B", status = "IN_STOCK"),
+        )
+
+        val appended = ItensViewModel.appendProducts(current, incoming)
+
+        assertEquals(listOf("a", "b"), appended.map { it.id })
     }
 }

@@ -53,6 +53,8 @@ fun ItensScreen(
             },
             contentPadding = PaddingValues(vertical = Spacing.small),
             modifier = Modifier.weight(1f),
+            onEndReached = viewModel::loadNextPage,
+            isLoadingMore = state.isLoadingMore,
         )
     }
 }
