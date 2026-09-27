@@ -34,7 +34,7 @@ Caching por `ETag` / `If-None-Match` está no contrato e **não** está implemen
 
 ## Inventário (InventoryClient)
 
-Fonte de verdade do contrato: [contrato-ms-inventory/contrato-inventory-dashboard.md](contrato-ms-inventory/contrato-inventory-dashboard.md). Como o app usa hoje: [contrato-ms-inventory/contexto.md](contrato-ms-inventory/contexto.md).
+Fonte de verdade do dashboard: [contrato-ms-inventory/contrato-inventory-dashboard.md](contrato-ms-inventory/contrato-inventory-dashboard.md) ([contexto](contrato-ms-inventory/contexto.md)). Catálogo e PDI: [contrato-pdi/contrato-detalhes-itens.md](contrato-pdi/contrato-detalhes-itens.md) ([contexto](contrato-pdi/contexto.md)).
 
 `model/remote/client/InventoryClient.kt` é um `object` Retrofit **separado** (URL própria do boot). Interface: `InventoryService`.
 
@@ -49,8 +49,11 @@ Fonte de verdade do contrato: [contrato-ms-inventory/contrato-inventory-dashboar
 |---|---|---|---|---|
 | `GET` | `api/v1/dashboard/home` | `page` (default 0), `size` (default 5) | `DashboardHomeResponseDTO` | `GetManagerHome.execute()` (`ManagerHomeViewModel`) |
 | `GET` | `api/v1/dashboard/indicators` | `from`/`to` opcionais (`yyyy-MM-dd`) | `IndicatorsResponseDTO` | `GetIndicators.execute()` (`IndexesViewModel`) |
+| `GET` | `api/v1/items` | `status`, `categoryId`, `q`, `page`, `size` (default 20) | `PagedItemsDTO` | `GetItems.execute()` (`ItensViewModel`) |
+| `GET` | `api/v1/items/{id}` | path `id` | `ItemResponseDTO` | `GetItemDetails.execute()` (`ItemDetailsViewModel`) |
+| `GET` | `api/v1/categories` | — | `List<CategoryResponseDTO>` | `GetCategories.execute()` (`ItensViewModel`) |
 
-`GET /api/v1/dashboard/work-center` existe no contrato e **não** tem método no `InventoryService`.
+`GET /api/v1/dashboard/work-center`, `POST .../items/{id}/approve` e `PATCH .../items/{id}` existem no contrato e **não** têm método no `InventoryService`.
 
 ## Autenticação (AuthService)
 
