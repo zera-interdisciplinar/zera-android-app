@@ -13,7 +13,10 @@ import okhttp3.Request
 import retrofit2.Retrofit
 
 object InventoryClient {
-    private val json = Json { ignoreUnknownKeys = true }
+    private val json = Json {
+        ignoreUnknownKeys = true
+        encodeDefaults = false
+    }
 
     private lateinit var retrofit: Retrofit
 

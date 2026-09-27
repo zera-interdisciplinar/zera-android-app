@@ -36,7 +36,7 @@ com.zera.android
 │   ├── remote/
 │   │   ├── client/        ApiClient, ScrapyClient e InventoryClient (Retrofit + OkHttp, singletons)
 │   │   └── service/       interfaces Retrofit (AuthService, SelfUserService, InvitationService, InventoryService, ScrapyService, ...)
-│   └── usecase/           regra de negócio de acesso a dados, por domínio (auth/SingIn, config/Boot, inventory/GetManagerHome, ...)
+│   └── usecase/           regra de negócio de acesso a dados, por domínio (auth/SingIn, config/Boot, inventory/GetManagerHome, GetItems, GetItemDetails, ...)
 ├── viewmodel/             um ViewModel por tela/feature, por domínio (auth/, manager/, shared/, ...)
 └── view
     ├── screens/           telas Compose, por domínio (auth/, manager/, employee/, shared/) + telas soltas (SplashScreen)

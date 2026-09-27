@@ -32,6 +32,22 @@ enum class ItemStatus(val label: String, val colorFamily: ZeraColorFamily) {
 
     /** Descartado. */
     Disposed(label = "Descartado", colorFamily = ZeraColorFamily.Red),
+    ;
+
+    companion object {
+        fun fromBackend(value: String?): ItemStatus? {
+            val normalized = value?.trim()?.uppercase()?.replace(' ', '_') ?: return null
+            return when (normalized) {
+                "PENDING_APPROVAL", "PENDING" -> PendingApproval
+                "REJECTED" -> Rejected
+                "IN_STOCK", "APPROVED" -> InStock
+                "IN_MAINTENANCE" -> InMaintenance
+                "AWAITING_EVALUATION" -> AwaitingEvaluation
+                "DISPOSED" -> Disposed
+                else -> null
+            }
+        }
+    }
 }
 
 /** [Tag] pré-preenchida com o [ItemStatus.label] e [ItemStatus.colorFamily] de [status]. */

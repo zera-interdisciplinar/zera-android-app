@@ -10,30 +10,30 @@ data class ItemApprovedState(
     val itemId: String = "",
     val itemName: String = "",
     val itemSubtitle: String = "",
-    val status: ItemStatus = ItemStatus.PendingApproval,
+    val status: ItemStatus = ItemStatus.InStock,
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
 )
 
 class ItemApprovedViewModel : ZeraViewModel() {
-    // TODO: substituir os dados de exemplo pelo item recebido por parâmetro de
-    // navegação assim que essa tela for alcançada a partir de um fluxo real de aprovação
-    private val _state = mutableStateOf(
-        ItemApprovedState(
-            itemId = "265964",
-            itemName = "Placa de vídeo",
-            itemSubtitle = "Notebook Mac",
-            status = ItemStatus.PendingApproval,
-        )
-    )
+    private val _state = mutableStateOf(ItemApprovedState())
     val state = _state
+
+    fun setItem(itemId: String, itemName: String, itemSubtitle: String) {
+        _state.value = ItemApprovedState(
+            itemId = itemId,
+            itemName = itemName,
+            itemSubtitle = itemSubtitle,
+            status = ItemStatus.InStock,
+        )
+    }
 
     fun onCloseClick() {
         ZeraNavigator.goBack()
     }
 
     fun onViewPendingItemsClick() {
-        // TODO: navegar para a lista de itens filtrada por "Pendentes" (ainda não há rota para ItensScreen)
+        ZeraNavigator.push(Route.Itens)
     }
 
     fun onBackToHomeClick() {

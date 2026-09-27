@@ -31,15 +31,17 @@ Pacote `model/dto/user/`. Constantes de papel em `model/entity/user/UserRole` (`
 
 ## DTOs de inventário (dashboard)
 
-Pacote `model/dto/inventory/`. Só os campos que as telas usam; o restante do JSON do contrato é ignorado (`ignoreUnknownKeys`). Contrato: [contrato-ms-inventory/contrato-inventory-dashboard.md](contrato-ms-inventory/contrato-inventory-dashboard.md).
+Pacote `model/dto/inventory/`. Só os campos que as telas usam; o restante do JSON do contrato é ignorado (`ignoreUnknownKeys`). Contratos: [contrato-ms-inventory/contrato-inventory-dashboard.md](contrato-ms-inventory/contrato-inventory-dashboard.md), [contrato-pdi/contrato-detalhes-itens.md](contrato-pdi/contrato-detalhes-itens.md).
 
 - **`DashboardHomeResponseDTO`** — `GET /api/v1/dashboard/home`: `activeItems`, `activeItemsChangePercent?`, `occupancyPercent?`, `pendingApproval`, `inMaintenance`, `awaitingEvaluation`, `recentItems`.
-- **`PagedItemsDTO(content)`** / **`ItemResponseDTO(id, name)`** — página dos itens recentes.
+- **`PagedItemsDTO(content, page, size, totalElements, totalPages)`** — envelope de `recentItems` e de `GET /api/v1/items`.
+- **`ItemResponseDTO`** — lista e PDI: `id`, `name`, `displayCode?`, `status?` (aliases JSON `itemStatus`/`approvalStatus`), `condition?`, `createdByName?`, `createdAt?`, `model?`.
+- **`ModelResponseDTO`** / **`MaterialResponseDTO`** / **`CategoryResponseDTO`** — modelo aninhado no item; categorias também vêm de `GET /api/v1/categories` (`id`, `name`, metadados opcionais).
 - **`IndicatorsResponseDTO`** — `GET /api/v1/dashboard/indicators`: `recyclingRatePercent`, `recyclingRateChangePoints?`, `monthlyWeightKg`, `weightByMaterial`.
 - **`MonthlyWeightDTO(month, weightKg)`** — `month` no formato `yyyy-MM`.
 - **`WeightByMaterialDTO(material, percent)`** — `material` é código (`PLASTIC`, `METAL`, ...).
 
-Campos do contrato **não** modelados no app: `stockCapacity`, `disposalsInWindow`, `windowDays`, barcode/status/condition dos itens, payload de work-center.
+Campos do contrato **não** modelados no app: `stockCapacity`, `disposalsInWindow`, `windowDays`, barcode/damages/serial da listagem, payload de work-center.
 
 ## Config dinâmica (Scrapy)
 
@@ -70,6 +72,8 @@ Não existe uma camada `toDomain()`. Os `ViewModels` mapeiam DTO → campos de U
 - **Auth:** `SelfUserResponseDTO` é transiente (rota de destino, `unitId` na sessão).
 - **Home do gestor:** `DashboardHomeResponseDTO` → `ManagerHomeState` (ocupação, totais, alertas, `ProductItem`). Regras em [05-regras-de-negocio/inventory-dashboard.md](05-regras-de-negocio/inventory-dashboard.md).
 - **Indicadores:** `IndicatorsResponseDTO` → `IndexesState` (`CircularGraph`, `VerticalBarGraphItem`, `BarGraphItem`).
+- **Listagem de itens:** `PagedItemsDTO` / `ItemResponseDTO` → `ProductItem` (`ItensViewModel.productFrom`). Regras em [05-regras-de-negocio/itens.md](05-regras-de-negocio/itens.md).
+- **PDI:** `ItemResponseDTO` → `ItemDetailsState` (`ItemDetailsViewModel.stateFrom`).
 - **Funcionários na home:** sem DTO — o contrato não traz esse número.
 
 ## Modelo de dados esperado (backlog, ainda não implementado)

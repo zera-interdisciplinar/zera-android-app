@@ -115,8 +115,13 @@ fun ZeraNavHost() {
                         EmployeesScreen()
                     }
                 }
-                composable<Route.ItemApproved> {
-                    ItemApprovedScreen()
+                composable<Route.ItemApproved> { backStackEntry ->
+                    val route = backStackEntry.toRoute<Route.ItemApproved>()
+                    ItemApprovedScreen(
+                        itemId = route.itemId,
+                        itemName = route.itemName,
+                        itemSubtitle = route.itemSubtitle,
+                    )
                 }
                 composable<Route.Indexes> {
                     CompositionLocalProvider(LocalAnimatedVisibilityScope provides this) {

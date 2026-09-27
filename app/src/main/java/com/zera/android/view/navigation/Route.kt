@@ -27,7 +27,11 @@ sealed interface Route{
     data object Employees : Route
 
     @Serializable
-    data object ItemApproved : Route
+    data class ItemApproved(
+        val itemId: String,
+        val itemName: String,
+        val itemSubtitle: String,
+    ) : Route
 
     @Serializable
     data object Indexes : Route

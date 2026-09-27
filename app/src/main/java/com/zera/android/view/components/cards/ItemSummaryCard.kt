@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import com.zera.android.view.components.containers.ZeraBox
 import com.zera.android.view.components.outros.ItemStatus
 import com.zera.android.view.components.outros.ItemStatusTag
+import com.zera.android.view.components.outros.Tag
 import com.zera.android.view.components.texts.BodyText
 import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.components.texts.TitleText
@@ -39,7 +40,9 @@ private val ThumbnailSize = 72.dp
  * @param itemId ID do item, exibido como "ID {itemId}".
  * @param itemName nome do item, em destaque.
  * @param itemSubtitle subtítulo complementar (ex.: o modelo do item).
- * @param status status do item, exibido como [ItemStatusTag].
+ * @param status status de workflow do item (`PENDING_APPROVAL`, `IN_STOCK`, …),
+ *   exibido como [ItemStatusTag]. Independente da [condition].
+ * @param condition condição física do item (ex.: "Usado"), exibida como [Tag] no card.
  * @param modifier modificador externo opcional. O card já ocupa toda a largura
  *   disponível por padrão ([Modifier.fillMaxWidth]).
  * @param icon ícone do catálogo [ZeraIcon] exibido na miniatura. Quando `null`
@@ -50,7 +53,8 @@ fun ItemSummaryCard(
     itemId: String,
     itemName: String,
     itemSubtitle: String,
-    status: ItemStatus,
+    status: ItemStatus? = null,
+    condition: String = "",
     modifier: Modifier = Modifier,
     icon: ZeraIcon? = null,
 ) {
@@ -82,10 +86,23 @@ fun ItemSummaryCard(
                     TitleText(text = itemName, bold = true, color = LocalContentColor.current)
                     BodyText(text = itemSubtitle, color = LocalContentColor.current)
                 }
-                ItemStatusTag(status = status)
+                if (condition.isNotBlank() || status != null) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(Spacing.small)) {
+                        if (condition.isNotBlank()) {
+                            Tag(text = condition, style = conditionTagStyle(condition))
+                        }
+                        status?.let { ItemStatusTag(status = it) }
+                    }
+                }
             }
         }
     }
+}
+
+private fun conditionTagStyle(condition: String): ZeraColorFamily = when (condition) {
+    "Novo" -> ZeraColorFamily.Green
+    "Danificado" -> ZeraColorFamily.Red
+    else -> ZeraColorFamily.Yellow
 }
 
 @Preview(showBackground = true)
@@ -97,6 +114,7 @@ private fun ItemSummaryCardPreview() {
             itemName = "Placa de vídeo",
             itemSubtitle = "Notebook Mac",
             status = ItemStatus.PendingApproval,
+            condition = "Usado",
             modifier = Modifier.padding(Spacing.medium),
         )
     }
