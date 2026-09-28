@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -59,6 +60,11 @@ fun ZeraSearchInput(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
             .then(widthModifier)
+            // Altura travada em 48dp (alvo mínimo de toque do IconButton de
+            // limpar) — sem isso, a caixa encolhe quando `value` está vazio
+            // e o IconButton some. O campo é singleLine, então o texto nunca
+            // aumenta essa altura: ao ultrapassar a largura, rola horizontalmente.
+            .height(48.dp)
             .border(
                 width = 1.dp,
                 color = MaterialTheme.colorScheme.outline,
@@ -81,7 +87,11 @@ fun ZeraSearchInput(
                 .padding(horizontal = Spacing.small),
         ) {
             if (value.isEmpty()) {
-                BodyText(text = placeholder, alpha = 0.5f)
+                BodyText(
+                    text = placeholder,
+                    alpha = 0.5f,
+                    maxLines = 1
+                )
             }
             BasicTextField(
                 value = value,
@@ -125,9 +135,15 @@ private fun ZeraSearchInputPreview() {
                 onSearch = {}
             )
             ZeraSearchInput(
-                value = "Placa de vídeo",
+                value = "Placa de vídeo 2800 rtx super quality ultra processator bla bla bla fart phonk aura 67",
                 onValueChange = {},
                 onSearch = {}
+            )
+            ZeraSearchInput(
+                value = "",
+                onValueChange = {},
+                onSearch = {},
+                placeholder = "..."
             )
         }
     }
