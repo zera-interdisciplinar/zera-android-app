@@ -91,7 +91,7 @@ fun ProductListItem(
                 verticalArrangement = Arrangement.spacedBy(Spacing.micro),
             ) {
                 BodyText(text = itemName, bold = true)
-                CaptionText(text = "ID $itemId")
+                CaptionText(text = "ID ${itemId.substring(0,7)}")
             }
             if (statusText != null) {
                 Tag(text = statusText, style = statusStyle)
@@ -117,32 +117,32 @@ private fun ProductListItemPreview() {
         ) {
             ProductListItem(
                 itemName = "Placa de vídeo",
-                itemId = "265964",
+                itemId = "FA069700DA28B1E41A603E314D30CC7774AE0A730B5D03ADDCF701D67CBDC9C668A100210B5809F6C9F560447C9B0E61403B24ED785CE05A104658EF70F52244",
                 onClick = {},
             )
             ProductListItem(
                 itemName = "Teclado mecânico",
-                itemId = "118203",
+                itemId = "1182036",
                 icon = ZeraIcon.Box,
                 onClick = {},
             )
             ProductListItem(
                 itemName = "Placa de vídeo",
-                itemId = "265964",
+                itemId = "2659646",
                 statusText = "Pendente",
                 statusStyle = ZeraColorFamily.Yellow,
                 onClick = {},
             )
             ProductListItem(
                 itemName = "Placa de vídeo",
-                itemId = "265965",
+                itemId = "2659656",
                 statusText = "Reprovado",
                 statusStyle = ZeraColorFamily.Red,
                 onClick = {},
             )
             ProductListItem(
                 itemName = "Placa de vídeo",
-                itemId = "265966",
+                itemId = "2659666",
                 statusText = "Aprovada",
                 statusStyle = ZeraColorFamily.Green,
                 onClick = {},
