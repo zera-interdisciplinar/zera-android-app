@@ -3,6 +3,7 @@ package com.zera.android.view.components.buttons
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -14,6 +15,7 @@ enum class ZeraButtonType {
     Primary,
     Secondary,
     Tertiary,
+    Base
 }
 
 /**
@@ -32,6 +34,7 @@ internal fun buttonColorPair(
         ZeraButtonType.Primary -> palette.base to palette.onBase
         ZeraButtonType.Secondary -> palette.container to palette.onContainer
         ZeraButtonType.Tertiary -> Color.Transparent to palette.base
+        ZeraButtonType.Base -> Color.White to palette.base
     }
 }
 
@@ -51,6 +54,7 @@ internal fun buttonBorder(
 ): BorderStroke? {
     return when (type) {
         ZeraButtonType.Secondary -> BorderStroke(2.dp, style.palette().base.copy(alpha = 0.5f))
+        ZeraButtonType.Base -> BorderStroke(2.dp, MaterialTheme.colorScheme.outline)
         else -> null
     }
 }
