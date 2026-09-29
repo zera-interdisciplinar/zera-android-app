@@ -6,12 +6,14 @@ import com.zera.android.model.dto.inventory.DashboardHomeResponseDTO
 import com.zera.android.model.entity.user.UserRole
 import com.zera.android.model.usecase.auth.GetSelfUser
 import com.zera.android.model.usecase.inventory.GetManagerHome
+import com.zera.android.model.usecase.team.CountActiveEmployees
 import com.zera.android.view.components.lists.NotificationItem
 import com.zera.android.view.components.lists.ProductItem
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.viewmodel.ZeraViewModel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.Locale
@@ -35,6 +37,7 @@ data class ManagerHomeState(
 class ManagerHomeViewModel : ZeraViewModel() {
     private val getSelfUser = GetSelfUser()
     private val getManagerHome = GetManagerHome()
+    private val countActiveEmployees = CountActiveEmployees()
 
     private val _state = mutableStateOf(ManagerHomeState())
     val state = _state
@@ -45,27 +48,9 @@ class ManagerHomeViewModel : ZeraViewModel() {
 
     private fun loadDashboard() {
         _state.value = _state.value.copy(errorMessage = null)
-        viewModelScope.launch {
-            try {
-                loadLoggedUser()
-                val home = getManagerHome.execute()
-                _state.value = _state.value.copy(
-                    stockItemCount = home.activeItems.toInt(),
-                    stockOccupation = occupationFrom(home),
-                    totalItems = formatCount(home.activeItems),
-                    itemsChangeLabel = formatChangePercent(home.activeItemsChangePercent).orEmpty(),
-                    itemsChangePositive = home.activeItemsChangePercent?.let { it >= 0.0 } ?: true,
-                    notifications = alertsFrom(home),
-                    latestProducts = home.recentItems.content.map { item ->
-                        ProductItem(id = item.id, name = item.name)
-                    },
-                    // TODO: total de funcionários não faz parte do contrato Inventory Dashboard
-                    errorMessage = null,
-                )
-            } catch (e: Exception) {
-                _state.value = _state.value.copy(errorMessage = e.message)
-            }
-        }
+        viewModelScope.launch { loadLoggedUser() }
+        viewModelScope.launch { loadInventoryHome() }
+        viewModelScope.launch { loadEmployeeCount() }
     }
 
     private suspend fun loadLoggedUser() {
@@ -75,8 +60,43 @@ class ManagerHomeViewModel : ZeraViewModel() {
                 userName = user.name,
                 userRole = roleLabel(user.role),
             )
+        } catch (e: CancellationException) {
+            throw e
         } catch (_: Exception) {
-            // A home ainda pode ser preenchida sem o nome; o interceptor já tem o token/unidade.
+            // A home ainda pode ser preenchida sem o nome; o interceptor já tem o token/unidade. (okHttp já colocou os dados no header)
+        }
+    }
+
+    private suspend fun loadInventoryHome() {
+        try {
+            val home = getManagerHome.execute()
+            _state.value = _state.value.copy(
+                stockItemCount = home.activeItems.toInt(),
+                stockOccupation = occupationFrom(home),
+                totalItems = formatCount(home.activeItems),
+                itemsChangeLabel = formatChangePercent(home.activeItemsChangePercent).orEmpty(),
+                itemsChangePositive = home.activeItemsChangePercent?.let { it >= 0.0 } ?: true,
+                notifications = alertsFrom(home),
+                latestProducts = home.recentItems.content.map { item ->
+                    ProductItem(id = item.id, name = item.name)
+                },
+                errorMessage = null,
+            )
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            _state.value = _state.value.copy(errorMessage = e.message)
+        }
+    }
+
+    private suspend fun loadEmployeeCount() {
+        try {
+            val count = countActiveEmployees.execute()
+            _state.value = _state.value.copy(totalEmployees = formatCount(count.toLong()))
+        } catch (e: CancellationException) {
+            throw e
+        } catch (_: Exception) {
+            // O card de itens ainda pode aparecer se a contagem de time falhar.
         }
     }
 
