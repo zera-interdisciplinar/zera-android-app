@@ -92,6 +92,12 @@ private fun IconButtonPreview() {
                 type = ZeraButtonType.Secondary,
                 style = ZeraColorFamily.Yellow,
             )
+            IconButton(
+                icon = ZeraIcon.Filter,
+                onClick = {},
+                contentDescription = "blablabla",
+                type = ZeraButtonType.Base
+            )
         }
     }
 }
