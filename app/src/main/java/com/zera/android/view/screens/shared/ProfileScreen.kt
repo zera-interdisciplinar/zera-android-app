@@ -57,7 +57,11 @@ fun ProfileScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(Spacing.medium),
         ) {
-            Avatar(initials = state.initials, photoUrl = state.photoUrl)
+            Avatar(
+                initials = state.initials,
+                photoUrl = state.photoUrl,
+                onClick = viewModel::onChangePhotoClick,
+            )
 
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -67,12 +71,6 @@ fun ProfileScreen(
                 CaptionText(text = "${state.role} · ${state.company}")
             }
 
-            ZeraButton(
-                text = "Alterar foto",
-                onClick = viewModel::onChangePhotoClick,
-                style = ZeraColorFamily.Yellow,
-                type = ZeraButtonType.Secondary,
-            )
             ZeraButton(
                 text = "Configurações",
                 onClick = viewModel::onSettingsClick,
