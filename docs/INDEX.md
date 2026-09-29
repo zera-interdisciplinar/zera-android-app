@@ -19,6 +19,8 @@ Esta pasta é a fonte de verdade técnica do app Android do Zera, seguindo prát
 | [contrato-ms-inventory/contexto.md](contrato-ms-inventory/contexto.md) | Como o app Android integra o dashboard do `ms-inventory` (`InventoryClient`, `GetManagerHome`, `GetIndicators`). |
 | [contrato-pdi/contrato-detalhes-itens.md](contrato-pdi/contrato-detalhes-itens.md) | Contrato de `GET /api/v1/items`, `GET /api/v1/items/{id}` e `GET /api/v1/categories`. |
 | [contrato-pdi/contexto.md](contrato-pdi/contexto.md) | O que o app já implementa na listagem e na PDI (`GetItems`, `GetItemDetails`, `GetCategories`) e por quê. |
+| [contrato-adm-core-membros/contrato-team-management.md](contrato-adm-core-membros/contrato-team-management.md) | Contrato de `GET /api/v1/users`, `count-by-manager` e convites (`/invitations`). |
+| [contrato-adm-core-membros/contexto.md](contrato-adm-core-membros/contexto.md) | O que o app já implementa no time do gestor (`CountActiveEmployees`, lista, pendentes, criar convite) e por quê. |
 | [07-especificacoes/](07-especificacoes/) | Um arquivo por feature/user story no formato Given/When/Then (`manager-home-dashboard.md`, `indexes.md`, `itens.md`, `item-details.md`, `login.md`, ...), com `template-spec.md` como modelo padrão. |
 | [08-decisoes-arquiteturais/](08-decisoes-arquiteturais/) | ADRs curtos: decisão, alternativas consideradas e motivo da escolha. |
 | [09-stack-e-dependencias.md](09-stack-e-dependencias.md) | Bibliotecas usadas, versões e motivo da escolha (inclui nota sobre Firebase configurado mas não utilizado). |

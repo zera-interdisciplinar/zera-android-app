@@ -5,20 +5,24 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zera.android.view.components.buttons.ZeraButton
 import com.zera.android.view.components.cards.InviteCard
 import com.zera.android.view.components.containers.ZeraBox
+import com.zera.android.view.components.forms.CreateInviteForm
 import com.zera.android.view.components.lists.EmployeeList
+import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.components.texts.HeadlineText
 import com.zera.android.view.components.texts.LabelText
 import com.zera.android.view.components.texts.TitleText
@@ -34,6 +38,7 @@ fun EmployeesScreen(
     viewModel: EmployeesViewModel = viewModel(),
 ) {
     val state by viewModel.state
+    val clipboardManager = LocalClipboardManager.current
 
     ManagerScaffold(
         title = "Colaboradores",
@@ -68,22 +73,39 @@ fun EmployeesScreen(
             }
         }
 
-        if (state.hasPendingInvites) {
+        state.errorMessage?.let { message ->
+            CaptionText(text = message, color = MaterialTheme.colorScheme.error)
+        }
+
+        if (state.showCreateInvite) {
+            CreateInviteForm(
+                inviteeName = state.inviteeName,
+                onInviteeNameChange = viewModel::onInviteeNameChange,
+                onSubmit = viewModel::onSubmitCreateInvite,
+                onCancel = viewModel::onCancelCreateInvite,
+                isSubmitting = state.isCreatingInvite,
+                errorMessage = state.inviteErrorMessage,
+            )
+        }
+
+        if (state.pendingInvites.isNotEmpty()) {
             TitleText(
                 text = "Convites pendentes",
                 bold = true,
                 color = MaterialTheme.colorScheme.onSurface,
             )
-            InviteCard(
-                code = state.pendingInviteCode,
-                name = state.pendingInviteOperatorName,
-                expireTime = state.pendingInviteExpiresIn,
-                onCopyCodeClick = viewModel::onCopyInviteCodeClick,
-            )
+            state.pendingInvites.forEach { invite ->
+                InviteCard(
+                    code = invite.code,
+                    name = invite.inviteeName,
+                    expireTime = invite.expiresInHours,
+                    onCopyCodeClick = {
+                        clipboardManager.setText(AnnotatedString(invite.code))
+                    },
+                )
+            }
         }
 
-        // TODO: EmployeeList é uma LazyColumn com scroll próprio (limitada por heightIn)
-        // dentro da Column rolável do ManagerScaffold — revisar essa dupla rolagem depois.
         EmployeeList(
             employees = state.employees,
             onItemClick = viewModel::onEmployeeClick,
