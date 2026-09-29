@@ -55,7 +55,9 @@ enum class ZeraIcon(@DrawableRes val resId: Int) {
     Wrench(R.drawable.wrench),
     Menu(R.drawable.menu),
 
-    BriefCase(R.drawable.brief_case);
+    BriefCase(R.drawable.brief_case),
+
+    Filter(R.drawable.filter);
 
     /** `Painter` do ícone, para composables que pedem `painter` em vez de aceitar [ZeraIcon]. */
     @Composable

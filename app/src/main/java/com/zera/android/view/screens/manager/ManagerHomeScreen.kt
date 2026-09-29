@@ -121,7 +121,7 @@ fun ManagerHomeScreen(
                 ZeraNavigator.push(Route.ItemDetails(itemId = product.id))
             },
             contentPadding = PaddingValues(Spacing.none),
-            modifier = Modifier.heightIn(max = 400.dp),
+            modifier = Modifier.heightIn(max = 600.dp),
         )
     }
 }
