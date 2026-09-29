@@ -6,6 +6,7 @@ import com.zera.android.model.local.SharedPreferencesManager
 import com.zera.android.model.remote.service.AuthService
 import com.zera.android.model.remote.service.InvitationService
 import com.zera.android.model.remote.service.SelfUserService
+import com.zera.android.model.remote.service.UsersService
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -45,4 +46,6 @@ object ApiClient {
     val selfUserService: SelfUserService by lazy { retrofit.create(SelfUserService::class.java) }
 
     val invitationService: InvitationService by lazy { retrofit.create(InvitationService::class.java) }
+
+    val usersService: UsersService by lazy { retrofit.create(UsersService::class.java) }
 }
