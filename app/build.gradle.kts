@@ -37,6 +37,10 @@ android {
 
         buildConfigField("String", "SCRAPY_API_URL", "\"${localProperty("scrapy.api.url")}\"")
         buildConfigField("String", "SCRAPY_API_KEY", "\"${localProperty("scrapy.api.key")}\"")
+
+        // Fica vazia até a key ser adicionada em local.properties (maps.api.key=...).
+        // Com a key vazia o app compila e roda normalmente, só os tiles do mapa não carregam.
+        manifestPlaceholders["mapsApiKey"] = localProperty("maps.api.key")
     }
 
     buildTypes {
