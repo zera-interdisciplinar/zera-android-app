@@ -36,8 +36,8 @@ class ManagerBottomNavBarViewModel : ZeraViewModel() {
         navigate(currentRoute, Route.Employees)
     }
 
-    fun onRecyclingClick() {
-        // TODO: ainda não existe uma tela de Reciclagem
+    fun onRecyclingClick(currentRoute: Route) {
+        navigate(currentRoute, Route.Recycling)
     }
 
     fun onItensClick(currentRoute: Route) {
