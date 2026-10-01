@@ -11,6 +11,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -24,6 +25,7 @@ import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
 import com.zera.android.view.theme.icons.ZeraIcon
+import com.zera.android.view.transition.ScreenAnimation
 import androidx.compose.material3.IconButton as Material3IconButton
 
 /**
@@ -110,16 +112,16 @@ fun UpperNavBar(
                             )
                             TopBarIconButton(
                                 icon = ZeraIcon.Profile,
-                                onClick = { ZeraNavigator.push(Route.Profile) },
+                                onClick = { ZeraNavigator.push(Route.Profile, animation = ScreenAnimation.SlideHorizontal) },
                                 contentDescription = "Perfil",
-                                type = ZeraButtonType.Primary,
+                                type = if(!backgroundVariant) ZeraButtonType.Primary else ZeraButtonType.Base,
                                 backgroundVariant = backgroundVariant,
                             )
                             TopBarIconButton(
                                 icon = ZeraIcon.Menu,
                                 onClick = {},
                                 contentDescription = "Menu",
-                                type = ZeraButtonType.Tertiary,
+                                type = if(!backgroundVariant) ZeraButtonType.Tertiary else ZeraButtonType.Primary,
                                 backgroundVariant = backgroundVariant,
                             )
                         }
@@ -155,23 +157,13 @@ private fun TopBarIconButton(
     backgroundVariant: Boolean,
     size: Dp = 34.dp,
 ) {
-    if (backgroundVariant) {
-        Material3IconButton(onClick = onClick, modifier = Modifier.size(size)) {
-            ZeraIcon(
-                icon = icon,
-                contentDescription = contentDescription,
-                tint = MaterialTheme.colorScheme.onPrimary,
-            )
-        }
-    } else {
-        IconButton(
-            icon = icon,
-            onClick = onClick,
-            contentDescription = contentDescription,
-            type = type,
-            size = size,
-        )
-    }
+    IconButton(
+        icon = icon,
+        onClick = onClick,
+        contentDescription = contentDescription,
+        type = type,
+        size = size,
+    )
 }
 
 
@@ -183,11 +175,11 @@ private fun UpperNavBarWithBackPreview() {
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, backgroundColor = 1)
 @Composable
 private fun UpperNavBarWithoutBackPreview() {
     ZeraTheme {
-        UpperNavBar(title = "Modelos")
+        UpperNavBar(title = "Modelos", backgroundVariant = true)
     }
 }
 
