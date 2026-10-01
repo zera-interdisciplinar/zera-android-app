@@ -69,6 +69,7 @@ Como Gestor, quero buscar e filtrar os itens da minha unidade, para abrir o deta
 - [x] Erro de rede visível
 - [ ] Busca pelo UUID interno `id` (a API cobre `displayCode` e nomes)
 - [ ] Filtro “Pendentes” numa única request (`statusIn` não existe)
+- [ ] Botão de filtro (`IconButton` `ZeraIcon.Filter`, tipo `Base`) ao lado da busca: já está na tela, mas ainda sem ação (`onClick` vazio)
 
 ## Edge cases considerados
 
