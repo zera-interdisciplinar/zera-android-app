@@ -57,11 +57,13 @@ private val FallbackLatLng = LatLng(-23.5505, -46.6333)
  * @param onLocationAvailabilityChanged chamado sempre que muda se dá ou não pra usar a
  *   localização atual (permissão concedida E serviço de localização ligado) — pra quem
  *   estiver por fora do componente (ex.: a tela) decidir o que mostrar.
+ * @param topOverlay conteúdo (ex.: barra de pesquisa) sobreposto ao topo do mapa.
  */
 @Composable
 fun CurrentLocationMap(
     modifier: Modifier = Modifier,
     onLocationAvailabilityChanged: (Boolean) -> Unit = {},
+    topOverlay: @Composable () -> Unit = {},
 ) {
     val context = LocalContext.current
     var hasLocationPermission by remember { mutableStateOf(context.hasLocationPermission()) }
@@ -116,8 +118,17 @@ fun CurrentLocationMap(
             modifier = Modifier.fillMaxSize(),
             cameraPositionState = cameraPositionState,
             properties = MapProperties(isMyLocationEnabled = canUseCurrentLocation),
-            uiSettings = MapUiSettings(myLocationButtonEnabled = canUseCurrentLocation),
+            uiSettings = MapUiSettings(myLocationButtonEnabled = false),
         )
+
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .fillMaxWidth()
+                .padding(Spacing.medium),
+        ) {
+            topOverlay()
+        }
 
         if (!canUseCurrentLocation) {
             ZeraButton(
