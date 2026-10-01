@@ -6,4 +6,6 @@ data class ProfileUser(
     val email: String,
     val role: String,
     val imageUrl: String?,
+    val telephoneId: String? = null,
+    val phone: String = "",
 )

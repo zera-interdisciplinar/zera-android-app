@@ -91,25 +91,32 @@ fun ProfileScreen(
             EditableFieldRow(
                 label = "Nome",
                 value = state.fullName,
-                onEditClick = viewModel::onEditNameClick,
+                onEditClick = if (state.canEditName) ({}) else null,
+                validate = { name ->
+                    if (name.trim().isNotEmpty()) null else "Nome inválido"
+                },
+                onConfirm = viewModel::onNameConfirm,
             )
             EditableFieldRow(
                 label = "E-mail",
                 value = state.email,
                 inputType = ZeraInputType.Email,
-                onEditClick = viewModel::onEditEmailClick,
+                onEditClick = if (state.canEditEmail) ({}) else null,
                 validate = { email ->
                     if (email.contains("@")) null else "E-mail inválido"
                 },
+                onConfirm = viewModel::onEmailConfirm,
             )
             EditableFieldRow(
                 label = "Telefone",
                 value = state.phone,
                 inputType = ZeraInputType.Phone,
-                onEditClick = viewModel::onEditPhoneClick,
+                onEditClick = if (state.canEditPhone) ({}) else null,
                 validate = { phone ->
-                    if (phone.count(Char::isDigit) >= 10) null else "Telefone inválido"
+                    val digits = phone.count(Char::isDigit)
+                    if (digits in 10..11) null else "Telefone inválido"
                 },
+                onConfirm = viewModel::onPhoneConfirm,
             )
             EditableFieldRow(label = "Cargo", value = state.position)
         }
