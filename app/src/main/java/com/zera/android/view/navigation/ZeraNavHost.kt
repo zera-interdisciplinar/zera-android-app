@@ -23,6 +23,10 @@ import com.zera.android.view.screens.manager.ItemApprovedScreen
 import com.zera.android.view.screens.manager.ItemDetailsScreen
 import com.zera.android.view.screens.manager.ItensScreen
 import com.zera.android.view.screens.manager.ManagerHomeScreen
+import com.zera.android.view.screens.manager.recycling.ItensSelectionScreen
+import com.zera.android.view.screens.manager.recycling.RecyclingResumeScreen
+import com.zera.android.view.screens.manager.recycling.RecyclingScreen
+import com.zera.android.view.screens.manager.recycling.SchedulingSuccessScreen
 import com.zera.android.view.screens.shared.ProfileScreen
 import com.zera.android.view.transition.LocalAnimatedVisibilityScope
 import com.zera.android.view.transition.LocalSharedTransitionScope
@@ -132,6 +136,20 @@ fun ZeraNavHost() {
                     CompositionLocalProvider(LocalAnimatedVisibilityScope provides this) {
                         ItensScreen()
                     }
+                }
+                composable<Route.Recycling> {
+                    CompositionLocalProvider(LocalAnimatedVisibilityScope provides this) {
+                        RecyclingScreen()
+                    }
+                }
+                composable<Route.ItensSelection> {
+                    ItensSelectionScreen()
+                }
+                composable<Route.RecyclingResume> {
+                    RecyclingResumeScreen()
+                }
+                composable<Route.SchedulingSuccess> {
+                    SchedulingSuccessScreen()
                 }
                 composable<Route.EmployeeHome> {
                     EmployeeHomeScreen()
