@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -27,6 +28,7 @@ import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.view.theme.ZeraTheme
 import com.zera.android.viewmodel.shared.ProfileViewModel
+import com.zera.android.viewmodel.shared.ProfileViewModel.Companion.roleCaption
 
 @Composable
 fun ProfileScreen(
@@ -57,6 +59,14 @@ fun ProfileScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(Spacing.medium),
         ) {
+            if (state.isLoading) {
+                CircularProgressIndicator()
+            }
+
+            state.errorMessage?.let { message ->
+                CaptionText(text = message, color = MaterialTheme.colorScheme.error)
+            }
+
             Avatar(
                 initials = state.initials,
                 photoUrl = state.photoUrl,
@@ -68,7 +78,7 @@ fun ProfileScreen(
                 verticalArrangement = Arrangement.spacedBy(Spacing.micro),
             ) {
                 HeadlineText(text = state.displayName, bold = true)
-                CaptionText(text = "${state.role} · ${state.company}")
+                CaptionText(text = roleCaption(state.role, state.company))
             }
 
             ZeraButton(

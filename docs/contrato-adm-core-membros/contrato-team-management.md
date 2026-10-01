@@ -57,12 +57,15 @@ curl -X GET "https://<host>/api/v1/users?role=EMPLOYEE&status=ACTIVE&managerId=3
     "unitId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     "createdAt": "2026-07-01T09:00:00",
     "updatedAt": "2026-08-01T10:00:00",
-    "managerId": "aa11bb22-0000-0000-0000-000000000009"
+    "managerId": "aa11bb22-0000-0000-0000-000000000009",
+    "imageUrl": "https://cdn.example.com/avatars/joao.png"
   }
 ]
 ```
 
-`email` serializa como string (value object com `@JsonValue`). `managerId` só vem preenchido quando o usuário é `EMPLOYEE`; gestor tem `managerId: null`.
+`email` serializa como string (value object com `@JsonValue`). `managerId` só vem preenchido quando o usuário é `EMPLOYEE`; gestor tem `managerId: null`. `imageUrl` é URL absoluta do avatar ou `null` quando não há foto — usar na lista de funcionários; o upload em si fica fora deste serviço (app envia só a URL via `PATCH /users/{id}/image`).
+
+O mesmo shape de `UserOutput` vale para `GET /api/v1/users/{id}` (detalhe de um usuário; exige `SELF_OR_MANAGER`, não só gestor).
 
 `role` na API é `MANAGER`/`EMPLOYEE`; o rótulo de UI (ex. "Operador") é mapeamento do app, não vem do backend.
 
@@ -75,10 +78,24 @@ curl -X GET "https://<host>/api/v1/users?role=EMPLOYEE&status=ACTIVE&managerId=3
 
 Duas opções — escolher uma e manter as duas telas consistentes:
 
-- `GET /api/v1/users?role=EMPLOYEE&status=ACTIVE&managerId={managerId}` e usar `content.length` (se a lista puder passar de uma página, subir `size`; não há `totalElements`).
+- `GET /api/v1/users?role=EMPLOYEE&status=ACTIVE&managerId={managerId}` e usar o tamanho do array JSON (se a lista puder passar de uma página, subir `size`; não há `totalElements`).
 - `GET /api/v1/users/count-by-manager` e pegar `count` da linha cujo `managerId` é o do gestor logado. Esta rota **já conta só `EMPLOYEE` `ACTIVE`**.
 
 Para contagem exata sem depender de `page`/`size`, prefira `count-by-manager`.
+
+### 1.1 `PATCH /api/v1/users/{id}/image` — avatar na equipe (opcional)
+
+Atualiza a URL da foto de perfil de um funcionário (ou do próprio gestor). Exige `SELF_OR_MANAGER` (gestor pode alterar avatar de funcionário da equipe).
+
+```json
+{ "imageUrl": "https://cdn.example.com/avatar.png" }
+```
+
+| Campo | Tipo | Obrigatório | Descrição |
+|---|---|---|---|
+| `imageUrl` | string | Não | Nova URL. Body `{}` ou campo omitido limpa o avatar (`imageUrl` passa a `null`). |
+
+Resposta: `204 No Content`. Usuário inexistente: `400` (`User not found`).
 
 ---
 
@@ -246,6 +263,7 @@ Não devolve `unitId` nem `status` neste payload (`status` do usuário criado é
 |---|---|
 | Contagem de funcionários ativos para o card da home | `GET /users/count-by-manager` (só ativos) ou `GET /users?role=EMPLOYEE&status=ACTIVE&managerId=` |
 | Lista de funcionários (`EmployeesScreen`) | `GET /users?role=EMPLOYEE&managerId=` (adicionar `status=ACTIVE` se a tela for só ativos) |
+| Avatar na lista / perfil do funcionário | Ler `imageUrl` em `GET /users` ou `GET /users/{id}`; gravar com `PATCH /users/{id}/image` |
 | Convites pendentes (`InviteCard`) | `GET /invitations/pending?managerId=` |
 | Criar convite | `POST /invitations` com `managerId` + `inviteeName` |
 | Cadastro do funcionário via código | `POST /invitations/redeem` |
