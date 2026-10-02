@@ -104,7 +104,13 @@ fun RecyclingResumeScreen(
                     OpeningHoursCard(items = state.openingHours)
                 }
 
-                // TODO: listar os itens selecionados para descarte (vêm da seleção em ItensSelection)
+                Column(verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
+                    ZeraButton(
+                        text = "Visualizar Itens selecionados",
+                        onClick = viewModel::onViewItemsClick,
+                        fillMaxWidth = true
+                    )
+                }
 
                 state.errorMessage?.let { message ->
                     CaptionText(text = message, color = MaterialTheme.colorScheme.error)
@@ -115,6 +121,7 @@ fun RecyclingResumeScreen(
                 text = "Confirmar descarte",
                 onClick = viewModel::onConfirmClick,
                 fillMaxWidth = true,
+                style = ZeraColorFamily.Green
             )
         }
     }

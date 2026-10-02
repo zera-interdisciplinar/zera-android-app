@@ -37,6 +37,9 @@ class RecyclingResumeViewModel : ZeraViewModel() {
         ZeraNavigator.pushAndPop(Route.SchedulingSuccess, animation = ScreenAnimation.SlideHorizontal)
     }
 
+    fun onViewItemsClick(){
+        ZeraNavigator.push(Route.ItensResume, animation = ScreenAnimation.SlideHorizontal)
+    }
     private fun loadResume() {
         // TODO: trocar o mock pela recicladora (nome, materiais, endereço, distância, aberto agora,
         //  sobre o local e horários) e pelos itens selecionados — contrato ainda não definido
