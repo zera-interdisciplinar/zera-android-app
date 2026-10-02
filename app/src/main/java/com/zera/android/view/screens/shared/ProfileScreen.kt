@@ -1,5 +1,8 @@
 package com.zera.android.view.screens.shared
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,10 +13,16 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zera.android.view.components.buttons.ZeraButton
@@ -27,6 +36,7 @@ import com.zera.android.view.components.texts.HeadlineText
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.view.theme.ZeraTheme
+import com.zera.android.view.theme.palette
 import com.zera.android.viewmodel.shared.ProfileViewModel
 import com.zera.android.viewmodel.shared.ProfileViewModel.Companion.roleCaption
 
@@ -35,6 +45,27 @@ fun ProfileScreen(
     viewModel: ProfileViewModel = viewModel()
 ) {
     val state by viewModel.state
+    val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
+    val errorPalette = ZeraColorFamily.Red.palette()
+    val successPalette = ZeraColorFamily.Green.palette()
+
+    LaunchedEffect(state.snackbarMessage) {
+        val message = state.snackbarMessage ?: return@LaunchedEffect
+        snackbarHostState.showSnackbar(message)
+        viewModel.onSnackbarShown()
+    }
+
+    val photoPicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+    ) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        val mime = context.contentResolver.getType(uri) ?: "image/jpeg"
+        val bytes = context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
+        if (bytes != null) {
+            viewModel.onPhotoPicked(bytes, mime)
+        }
+    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -48,6 +79,16 @@ fun ProfileScreen(
                     .statusBarsPadding()
                     .padding(horizontal = Spacing.small),
             )
+        },
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState) { data ->
+                val palette = if (state.snackbarIsError) errorPalette else successPalette
+                Snackbar(
+                    snackbarData = data,
+                    containerColor = palette.base,
+                    contentColor = palette.onBase,
+                )
+            }
         },
     ) { innerPadding ->
         Column(
@@ -70,7 +111,14 @@ fun ProfileScreen(
             Avatar(
                 initials = state.initials,
                 photoUrl = state.photoUrl,
-                onClick = viewModel::onChangePhotoClick,
+                isLoading = state.isUploadingPhoto,
+                onClick = {
+                    if (!state.isSaving && !state.isUploadingPhoto) {
+                        photoPicker.launch(
+                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
+                        )
+                    }
+                },
             )
 
             Column(

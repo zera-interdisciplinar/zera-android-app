@@ -16,4 +16,13 @@ data class Environments(
 
     @SerialName("ms-inventory-api-key")
     val inventoryApiKey: String = "",
+
+    @SerialName("supabase-url")
+    val supabaseUrl: String = "",
+
+    @SerialName("supabase-anon-key")
+    val supabaseAnonKey: String = "",
+
+    @SerialName("supabase-avatars-bucket")
+    val supabaseAvatarsBucket: String = "",
 )

@@ -71,6 +71,32 @@ class ProfileMappingTest {
     }
 
     @Test
+    fun photoValidationRejectsWrongMimeAndEmptyBytes() {
+        assertEquals(
+            "Use uma foto JPEG, PNG ou WebP.",
+            ProfileViewModel.photoValidationError(byteArrayOf(1), "application/pdf"),
+        )
+        assertEquals(
+            "A foto deve ter no máximo 5 MB.",
+            ProfileViewModel.photoValidationError(byteArrayOf(), "image/jpeg"),
+        )
+    }
+
+    @Test
+    fun photoWriteErrorHidesTechnicalStorageDetails() {
+        assertEquals(
+            "Este tipo de arquivo não é permitido. Use JPEG, PNG ou WebP.",
+            ProfileViewModel.photoWriteError(Exception("Não foi possível enviar a foto (400): InvalidMimeType")),
+        )
+        assertEquals(
+            "Sem permissão para enviar a foto. Confira a política do Storage.",
+            ProfileViewModel.photoWriteError(
+                Exception("Não foi possível enviar a foto (400): new row violates row-level security policy"),
+            ),
+        )
+    }
+
+    @Test
     fun saveTelephoneUsesCreateWhenThereIsNoId() {
         assertTrue(ProfileViewModel.saveTelephoneUsesCreate(null))
         assertTrue(ProfileViewModel.saveTelephoneUsesCreate(""))

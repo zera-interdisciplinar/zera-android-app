@@ -9,6 +9,8 @@ import com.zera.android.model.usecase.telephone.SaveTelephone
 import com.zera.android.model.usecase.user.GetProfile
 import com.zera.android.model.usecase.user.RenameUser
 import com.zera.android.model.usecase.user.UpdateUserEmail
+import com.zera.android.model.usecase.user.UpdateUserImage
+import com.zera.android.model.usecase.user.UploadAvatar
 import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.viewmodel.ZeraViewModel
 import kotlinx.coroutines.CancellationException
@@ -30,7 +32,10 @@ data class ProfileState(
     val canEditPhone: Boolean = false,
     val isLoading: Boolean = false,
     val isSaving: Boolean = false,
+    val isUploadingPhoto: Boolean = false,
     val errorMessage: String? = null,
+    val snackbarMessage: String? = null,
+    val snackbarIsError: Boolean = true,
 )
 
 class ProfileViewModel(
@@ -39,6 +44,8 @@ class ProfileViewModel(
     private val renameUser: RenameUser = RenameUser(),
     private val updateUserEmail: UpdateUserEmail = UpdateUserEmail(),
     private val saveTelephone: SaveTelephone = SaveTelephone(),
+    private val uploadAvatar: UploadAvatar = UploadAvatar(),
+    private val updateUserImage: UpdateUserImage = UpdateUserImage(),
 ) : ZeraViewModel() {
     private val _state = mutableStateOf(ProfileState(isLoading = true))
     val state = _state
@@ -90,19 +97,63 @@ class ProfileViewModel(
         ZeraNavigator.goBack()
     }
 
-    fun onChangePhotoClick() {
-        // TODO: fluxo de troca de foto ainda não definido (regra de negócio pendente)
-    }
-
     fun onSettingsClick() {
         // TODO: navegar para a tela de configurações (ainda não existe)
+    }
+
+    fun onSnackbarShown() {
+        _state.value = _state.value.copy(snackbarMessage = null)
+    }
+
+    private fun showSnackbar(message: String, isError: Boolean, isSaving: Boolean? = null) {
+        _state.value = _state.value.copy(
+            isSaving = isSaving ?: _state.value.isSaving,
+            snackbarMessage = message,
+            snackbarIsError = isError,
+        )
+    }
+
+    fun onPhotoPicked(bytes: ByteArray, mimeType: String) {
+        if (_state.value.isSaving) return
+        val error = photoValidationError(bytes, mimeType)
+        if (error != null) {
+            showSnackbar(error, isError = true)
+            return
+        }
+        viewModelScope.launch {
+            _state.value = _state.value.copy(
+                isSaving = true,
+                isUploadingPhoto = true,
+                errorMessage = null,
+            )
+            try {
+                val imageUrl = uploadAvatar.execute(bytes, mimeType)
+                updateUserImage.execute(imageUrl)
+                _state.value = _state.value.copy(
+                    photoUrl = cacheBust(imageUrl),
+                    isSaving = false,
+                    isUploadingPhoto = false,
+                    snackbarMessage = "Foto atualizada.",
+                    snackbarIsError = false,
+                )
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(
+                    isSaving = false,
+                    isUploadingPhoto = false,
+                    snackbarMessage = photoWriteError(e),
+                    snackbarIsError = true,
+                )
+            }
+        }
     }
 
     fun onNameConfirm(name: String) {
         if (!canEditName(apiRole) || _state.value.isSaving) return
         val error = nameValidationError(name)
         if (error != null) {
-            _state.value = _state.value.copy(errorMessage = error)
+            showSnackbar(error, isError = true)
             return
         }
         val trimmed = name.trim()
@@ -115,11 +166,13 @@ class ProfileViewModel(
                     fullName = trimmed,
                     initials = initialsFrom(trimmed),
                     isSaving = false,
+                    snackbarMessage = "Nome atualizado.",
+                    snackbarIsError = false,
                 )
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                _state.value = _state.value.copy(isSaving = false, errorMessage = profileWriteError(e))
+                showSnackbar(profileWriteError(e), isError = true, isSaving = false)
             }
         }
     }
@@ -128,7 +181,7 @@ class ProfileViewModel(
         if (!canEditEmail() || _state.value.isSaving) return
         val error = emailValidationError(email)
         if (error != null) {
-            _state.value = _state.value.copy(errorMessage = error)
+            showSnackbar(error, isError = true)
             return
         }
         val trimmed = email.trim()
@@ -136,11 +189,16 @@ class ProfileViewModel(
             _state.value = _state.value.copy(isSaving = true, errorMessage = null)
             try {
                 updateUserEmail.execute(trimmed)
-                _state.value = _state.value.copy(email = trimmed, isSaving = false)
+                _state.value = _state.value.copy(
+                    email = trimmed,
+                    isSaving = false,
+                    snackbarMessage = "E-mail atualizado.",
+                    snackbarIsError = false,
+                )
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                _state.value = _state.value.copy(isSaving = false, errorMessage = emailWriteError(e))
+                showSnackbar(emailWriteError(e), isError = true, isSaving = false)
             }
         }
     }
@@ -149,7 +207,7 @@ class ProfileViewModel(
         if (!canEditPhone(apiRole) || _state.value.isSaving) return
         val error = phoneValidationError(phone)
         if (error != null) {
-            _state.value = _state.value.copy(errorMessage = error)
+            showSnackbar(error, isError = true)
             return
         }
         viewModelScope.launch {
@@ -160,16 +218,26 @@ class ProfileViewModel(
                 _state.value = _state.value.copy(
                     phone = saved.number,
                     isSaving = false,
+                    snackbarMessage = "Telefone atualizado.",
+                    snackbarIsError = false,
                 )
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                _state.value = _state.value.copy(isSaving = false, errorMessage = profileWriteError(e))
+                showSnackbar(profileWriteError(e), isError = true, isSaving = false)
             }
         }
     }
 
     companion object {
+        internal const val MaxPhotoBytes = 5 * 1024 * 1024
+        private val AllowedPhotoMimes = setOf(
+            "image/jpeg",
+            "image/jpg",
+            "image/png",
+            "image/webp",
+        )
+
         internal fun stateFrom(profile: ProfileUser, role: String = profile.role): ProfileState {
             val roleLabel = roleLabel(role)
             return ProfileState(
@@ -222,7 +290,41 @@ class ProfileViewModel(
             return if (digits in 10..11) null else "Telefone inválido"
         }
 
+        internal fun photoValidationError(bytes: ByteArray, mimeType: String): String? {
+            if (mimeType.lowercase() !in AllowedPhotoMimes) {
+                return "Use uma foto JPEG, PNG ou WebP."
+            }
+            if (bytes.isEmpty() || bytes.size > MaxPhotoBytes) {
+                return "A foto deve ter no máximo 5 MB."
+            }
+            return null
+        }
+
+        internal fun photoWriteError(error: Exception): String {
+            val raw = error.message.orEmpty().lowercase()
+            return when {
+                "não configurado" in raw -> "O envio de foto ainda não está disponível."
+                "invalidmimetype" in raw || "mime type" in raw ->
+                    "Este tipo de arquivo não é permitido. Use JPEG, PNG ou WebP."
+                "row-level security" in raw || "accessdenied" in raw ->
+                    "Sem permissão para enviar a foto. Confira a política do Storage."
+                "bucket" in raw -> "Não foi possível enviar a foto. Tente novamente."
+                "jwt" in raw || "apikey" in raw || "unauthorized" in raw ->
+                    "Não foi possível enviar a foto. Tente novamente."
+                error is HttpException && error.code() == 400 ->
+                    "Não foi possível salvar a foto no perfil."
+                error is HttpException && error.code() in listOf(401, 403) ->
+                    "Sem permissão para alterar a foto."
+                else -> "Não foi possível enviar a foto. Tente novamente."
+            }
+        }
+
         internal fun saveTelephoneUsesCreate(telephoneId: String?): Boolean = telephoneId.isNullOrBlank()
+
+        internal fun cacheBust(url: String): String {
+            val separator = if (url.contains("?")) "&" else "?"
+            return "$url${separator}t=${System.currentTimeMillis()}"
+        }
 
         internal fun profileWriteError(error: Exception): String {
             if (error is HttpException) {

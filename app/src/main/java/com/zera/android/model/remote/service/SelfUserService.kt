@@ -3,6 +3,7 @@ package com.zera.android.model.remote.service
 import com.zera.android.model.dto.user.RenameUserRequestDTO
 import com.zera.android.model.dto.user.SelfUserResponseDTO
 import com.zera.android.model.dto.user.UpdateEmailRequestDTO
+import com.zera.android.model.dto.user.UpdateImageRequestDTO
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -23,5 +24,11 @@ interface SelfUserService {
     suspend fun updateEmail(
         @Path("id") id: String,
         @Body body: UpdateEmailRequestDTO,
+    ): Response<Void>
+
+    @PATCH("users/{id}/image")
+    suspend fun updateImage(
+        @Path("id") id: String,
+        @Body body: UpdateImageRequestDTO,
     ): Response<Void>
 }

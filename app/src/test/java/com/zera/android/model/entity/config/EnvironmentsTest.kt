@@ -39,5 +39,26 @@ class EnvironmentsTest {
         val environments = json.decodeFromString<Environments>(payload)
 
         assertEquals("inv-key", environments.inventoryApiKey)
+        assertEquals("", environments.supabaseUrl)
+    }
+
+    @Test
+    fun parsesSupabaseFieldsWhenPresent() {
+        val payload = """
+            {
+              "ms-adm-core-url": "https://adm.example.com",
+              "ms-adm-core-api-key": "adm-key",
+              "ms-inventory-url": "https://inventory.example.com",
+              "supabase-url": "https://abc.supabase.co",
+              "supabase-anon-key": "anon-key",
+              "supabase-avatars-bucket": "avatars"
+            }
+        """.trimIndent()
+
+        val environments = json.decodeFromString<Environments>(payload)
+
+        assertEquals("https://abc.supabase.co", environments.supabaseUrl)
+        assertEquals("anon-key", environments.supabaseAnonKey)
+        assertEquals("avatars", environments.supabaseAvatarsBucket)
     }
 }

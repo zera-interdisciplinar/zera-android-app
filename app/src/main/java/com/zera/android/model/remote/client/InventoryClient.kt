@@ -33,6 +33,7 @@ object InventoryClient {
                     )
                 )
             }
+            .addInterceptor(httpLoggingInterceptor())
             .build()
 
         retrofit = Retrofit.Builder()

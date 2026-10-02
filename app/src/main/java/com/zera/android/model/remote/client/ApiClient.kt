@@ -34,6 +34,7 @@ object ApiClient {
 
                 chain.proceed(requestBuilder.build())
             }
+            .addInterceptor(httpLoggingInterceptor())
             .build()
         retrofit = Retrofit.Builder()
             .baseUrl(baseUrl)
