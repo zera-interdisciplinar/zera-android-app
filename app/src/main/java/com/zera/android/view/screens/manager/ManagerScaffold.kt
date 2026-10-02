@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.zera.android.view.components.buttons.IconButton
 import com.zera.android.view.components.containers.ZeraGradientBox
@@ -63,6 +64,16 @@ private val BottomFadeHeight = 25.dp
  *   `false` quando [content] já tiver seu próprio elemento rolável (ex.: uma lista longa
  *   em [com.zera.android.view.components.lists.ProductList] com `Modifier.weight(1f)`) —
  *   caso contrário, um `LazyColumn` dentro de uma `Column` rolável quebra em tempo de execução.
+ * @param backgroundVariant quando `true`, troca o fundo do Scaffold (corpo, gradientes e
+ *   título/ícones da [UpperNavBar]) para [MaterialTheme.colorScheme.primary]/`onPrimary`,
+ *   em vez do fundo neutro padrão. Não afeta a [ManagerBottomNavBar], que mantém sempre
+ *   o mesmo estilo em qualquer tela.
+ * @param edgeFade quando `true` (padrão), mostra o gradiente de fade no topo/fim do
+ *   conteúdo. Com [scrollable] `true`, ele só aparece enquanto houver mais conteúdo a
+ *   rolar naquela direção; com [scrollable] `false`, fica sempre visível — use nesse caso
+ *   apenas quando [content] tiver seu próprio elemento rolável (ex.: uma lista com
+ *   `Modifier.weight(1f)`). Passe `false` para desligar o fade por completo (ex.: telas
+ *   sem nenhum scroll, como um mapa).
  * @param content conteúdo da tela, desenhado dentro da [Column] do Scaffold.
  */
 @Composable
@@ -75,16 +86,26 @@ fun ManagerScaffold(
     fabIcon: ZeraIcon? = ZeraIcon.Chatbot,
     onFabClick: () -> Unit = {},
     scrollable: Boolean = true,
+    contentPadding: Dp = Spacing.medium,
+    backgroundVariant: Boolean = false,
+    edgeFade: Boolean = true,
     content: @Composable ColumnScope.() -> Unit,
 ) {
+    val backgroundColor = if (backgroundVariant) {
+        MaterialTheme.colorScheme.primary
+    } else {
+        MaterialTheme.colorScheme.background
+    }
+
     Scaffold(
         modifier = modifier,
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = backgroundColor,
         topBar = {
             UpperNavBar(
                 title = title,
                 goBack = goBack,
                 onBackClick = onBackClick,
+                backgroundVariant = backgroundVariant,
                 modifier = Modifier
                     .statusBarsPadding()
                     .padding(horizontal = Spacing.small),
@@ -122,14 +143,14 @@ fun ManagerScaffold(
                     .fillMaxSize()
                     .padding(innerPadding)
                     .then(if (scrollable) Modifier.verticalScroll(scrollState) else Modifier)
-                    .padding(horizontal = Spacing.medium, vertical = Spacing.small)
-                    .background(color = MaterialTheme.colorScheme.background),
+                    .padding(horizontal = contentPadding, vertical = Spacing.small)
+                    .background(color = backgroundColor),
                 verticalArrangement = Arrangement.spacedBy(Spacing.medium),
                 content = content,
             )
             ZeraGradientBox(
                 brush = Brush.verticalGradient(
-                    colors = listOf(MaterialTheme.colorScheme.background, NoColor)
+                    colors = listOf(backgroundColor, NoColor)
                 ),
                 modifier = Modifier
                     .align(Alignment.TopStart)
@@ -137,13 +158,17 @@ fun ManagerScaffold(
                     .fillMaxWidth()
                     .height(TopFadeHeight)
                     .graphicsLayer {
-                        // Sem scroll próprio (scrollable = false) o gradiente fica sempre visível.
-                        alpha = if (scrollable) (scrollState.value / topFadePx).coerceIn(0f, 1f) else 1f
+                        alpha = when {
+                            !edgeFade -> 0f
+                            // Sem scroll próprio (scrollable = false) o gradiente fica sempre visível.
+                            !scrollable -> 1f
+                            else -> (scrollState.value / topFadePx).coerceIn(0f, 1f)
+                        }
                     }
             ){}
             ZeraGradientBox(
                 brush = Brush.verticalGradient(
-                    colors = listOf(NoColor, MaterialTheme.colorScheme.background)
+                    colors = listOf(NoColor, backgroundColor)
                 ),
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
@@ -151,11 +176,11 @@ fun ManagerScaffold(
                     .fillMaxWidth()
                     .height(BottomFadeHeight)
                     .graphicsLayer {
-                        alpha = if (scrollable) {
-                            ((scrollState.maxValue - scrollState.value) / bottomFadePx).coerceIn(0f, 1f)
-                        } else {
-                            1f
-                        }   
+                        alpha = when {
+                            !edgeFade -> 0f
+                            !scrollable -> 1f
+                            else -> ((scrollState.maxValue - scrollState.value) / bottomFadePx).coerceIn(0f, 1f)
+                        }
                     }
             ){}
         }
