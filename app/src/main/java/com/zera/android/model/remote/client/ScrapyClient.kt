@@ -24,7 +24,6 @@ object ScrapyClient {
                 .build()
             chain.proceed(request)
         }
-        .addInterceptor(httpLoggingInterceptor())
         .build()
 
     private val scrapyService: ScrapyService by lazy {

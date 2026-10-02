@@ -1,7 +1,7 @@
 package com.zera.android.model.usecase.user
 
 import com.zera.android.model.config.AppConfig
-import com.zera.android.model.local.SharedPreferencesManager
+import com.zera.android.model.local.SqliteManager
 import com.zera.android.model.remote.client.SupabaseStorage
 
 class UploadAvatar {
@@ -10,7 +10,7 @@ class UploadAvatar {
         if (!SupabaseStorage.isConfigured(environments)) {
             error("Upload de foto não configurado")
         }
-        val userId = SharedPreferencesManager.getUserId()
+        val userId = SqliteManager.getUserId()
             ?: error("Não há usuário logado")
         val mime = SupabaseStorage.canonicalMime(mimeType)
         val objectPath = SupabaseStorage.objectPath(userId, mime)

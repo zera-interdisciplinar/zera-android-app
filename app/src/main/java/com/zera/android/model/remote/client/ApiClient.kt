@@ -2,7 +2,7 @@ package com.zera.android.model.remote.client
 
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.zera.android.model.entity.config.Environments
-import com.zera.android.model.local.SharedPreferencesManager
+import com.zera.android.model.local.SqliteManager
 import com.zera.android.model.remote.service.AuthService
 import com.zera.android.model.remote.service.InvitationService
 import com.zera.android.model.remote.service.SelfUserService
@@ -27,14 +27,13 @@ object ApiClient {
                 val requestBuilder = chain.request().newBuilder()
                     .header("apiKey", environments.admCoreApiKey)
 
-                val accessToken = SharedPreferencesManager.getAccessToken()
+                val accessToken = SqliteManager.getAccessToken()
                 if (!accessToken.isNullOrBlank()) {
                     requestBuilder.header("Authorization", "Bearer $accessToken")
                 }
 
                 chain.proceed(requestBuilder.build())
             }
-            .addInterceptor(httpLoggingInterceptor())
             .build()
         retrofit = Retrofit.Builder()
             .baseUrl(baseUrl)
