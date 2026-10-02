@@ -23,6 +23,7 @@ import com.zera.android.view.screens.manager.ItemApprovedScreen
 import com.zera.android.view.screens.manager.ItemDetailsScreen
 import com.zera.android.view.screens.manager.ItensScreen
 import com.zera.android.view.screens.manager.ManagerHomeScreen
+import com.zera.android.view.screens.manager.recycling.ItensResumeScreen
 import com.zera.android.view.screens.manager.recycling.ItensSelectionScreen
 import com.zera.android.view.screens.manager.recycling.RecyclingResumeScreen
 import com.zera.android.view.screens.manager.recycling.RecyclingScreen
@@ -150,6 +151,9 @@ fun ZeraNavHost() {
                 }
                 composable<Route.SchedulingSuccess> {
                     SchedulingSuccessScreen()
+                }
+                composable<Route.ItensResume> {
+                    ItensResumeScreen()
                 }
                 composable<Route.EmployeeHome> {
                     EmployeeHomeScreen()
