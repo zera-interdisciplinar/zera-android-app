@@ -68,9 +68,9 @@ fun ManagerBottomNavBar(
             modifier = Modifier.weight(1f),
             label = "Reciclagem",
             contentDescription = "Botão para Reciclagem",
-            onClick = viewModel::onRecyclingClick,
+            onClick = { viewModel.onRecyclingClick(currentRoute) },
             icon = ZeraIcon.Recycle,
-            selected = false, // TODO: ainda não existe uma Route de Reciclagem para comparar
+            selected = currentRoute == Route.Recycling,
         )
         ShortCutButton(
             modifier = Modifier.weight(1f),

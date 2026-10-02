@@ -54,6 +54,7 @@ fun ProductListItem(
     itemName: String,
     itemId: String,
     onClick: () -> Unit,
+    onClickDisabled: Boolean = false,
     modifier: Modifier = Modifier,
     icon: ZeraIcon? = null,
     statusText: String? = null,
@@ -93,15 +94,17 @@ fun ProductListItem(
                 BodyText(text = itemName, bold = true)
                 CaptionText(text = "ID ${itemId.substring(0,7)}")
             }
-            if (statusText != null) {
-                Tag(text = statusText, style = statusStyle)
-            } else {
-                ZeraIcon(
-                    icon = ZeraIcon.ProceedArrow,
-                    contentDescription = null,
-                    size = Spacing.medium,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+            if(!onClickDisabled){
+                if (statusText != null) {
+                    Tag(text = statusText, style = statusStyle)
+                } else {
+                    ZeraIcon(
+                        icon = ZeraIcon.ProceedArrow,
+                        contentDescription = null,
+                        size = Spacing.medium,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
         }
     }

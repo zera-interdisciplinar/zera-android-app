@@ -21,7 +21,6 @@ import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.view.theme.ZeraTheme
 import com.zera.android.view.theme.icons.ZeraIcon
 import kotlinx.coroutines.flow.distinctUntilChanged
-
 /**
  * Dado de um produto exibido em [ProductList].
  *
@@ -62,7 +61,7 @@ data class ProductItem(
 @Composable
 fun ProductList(
     products: List<ProductItem>,
-    onItemClick: (ProductItem) -> Unit,
+    onItemClick: ((ProductItem) -> Unit)? = null,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(Spacing.medium),
     emptyContent: @Composable () -> Unit = { BodyText(text = "Nenhum produto encontrado") },
@@ -109,7 +108,8 @@ fun ProductList(
                 icon = product.icon,
                 statusText = product.statusText,
                 statusStyle = product.statusStyle,
-                onClick = { onItemClick(product) },
+                onClick = { onItemClick?.invoke(product) },
+                onClickDisabled = onItemClick == null
             )
         }
         if (isLoadingMore) {
