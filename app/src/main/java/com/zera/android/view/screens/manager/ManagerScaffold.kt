@@ -1,10 +1,19 @@
 package com.zera.android.view.screens.manager
 
+import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -12,15 +21,23 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -28,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import com.zera.android.view.components.buttons.IconButton
 import com.zera.android.view.components.containers.ZeraGradientBox
 import com.zera.android.view.components.navigation.ManagerBottomNavBar
+import com.zera.android.view.components.navigation.ManagerSideBar
 import com.zera.android.view.components.navigation.UpperNavBar
 import com.zera.android.view.components.texts.BodyText
 import com.zera.android.view.navigation.Route
@@ -41,6 +59,7 @@ import com.zera.android.view.transition.sharedTransition
 
 private val TopFadeHeight = 15.dp
 private val BottomFadeHeight = 25.dp
+private val SideBarWidth = 280.dp
 
 /**
  * Casca (Scaffold) compartilhada pelas telas da área do gestor.
@@ -75,6 +94,9 @@ private val BottomFadeHeight = 25.dp
  *   `Modifier.weight(1f)`). Passe `false` para desligar o fade por completo (ex.: telas
  *   sem nenhum scroll, como um mapa).
  * @param content conteúdo da tela, desenhado dentro da [Column] do Scaffold.
+ *
+ * O botão de menu da [UpperNavBar] abre a [ManagerSideBar] por cima da tela (com scrim). Ela
+ * fecha ao tocar fora dela ou no botão voltar do sistema.
  */
 @Composable
 fun ManagerScaffold(
@@ -97,92 +119,133 @@ fun ManagerScaffold(
         MaterialTheme.colorScheme.background
     }
 
-    Scaffold(
-        modifier = modifier,
-        containerColor = backgroundColor,
-        topBar = {
-            UpperNavBar(
-                title = title,
-                goBack = goBack,
-                onBackClick = onBackClick,
-                backgroundVariant = backgroundVariant,
-                modifier = Modifier
-                    .statusBarsPadding()
-                    .padding(horizontal = Spacing.small),
-            )
-        },
-        bottomBar = {
-            ManagerBottomNavBar(
-                currentRoute = currentRoute,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .navigationBarsPadding()
-                    .padding(horizontal = Spacing.medium, vertical = Spacing.small)
-                    .sharedTransition(SharedElementKeys.ManagerBottomNavBar),
-            )
-        },
-        floatingActionButton = {
-            if (fabIcon != null) {
-                IconButton(
-                    icon = fabIcon,
-                    onClick = onFabClick,
-                    contentDescription = "Assistente virtual",
-                    size = 56.dp,
-                )
-            }
-        },
-    ) { innerPadding ->
-        val scrollState = rememberScrollState()
-        val density = LocalDensity.current
-        val topFadePx = with(density) { TopFadeHeight.toPx() }
-        val bottomFadePx = with(density) { BottomFadeHeight.toPx() }
+    var showSideBar by rememberSaveable { mutableStateOf(false) }
 
-        Box {
-            Column(
+    BackHandler(enabled = showSideBar) { showSideBar = false }
+
+    Box(modifier = modifier) {
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            containerColor = backgroundColor,
+            topBar = {
+                UpperNavBar(
+                    title = title,
+                    goBack = goBack,
+                    onBackClick = onBackClick,
+                    backgroundVariant = backgroundVariant,
+                    onSideBarClick = { showSideBar = true },
+                    modifier = Modifier
+                        .statusBarsPadding()
+                        .padding(horizontal = Spacing.small),
+                )
+            },
+            bottomBar = {
+                ManagerBottomNavBar(
+                    currentRoute = currentRoute,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .navigationBarsPadding()
+                        .padding(horizontal = Spacing.medium, vertical = Spacing.small)
+                        .sharedTransition(SharedElementKeys.ManagerBottomNavBar),
+                )
+            },
+            floatingActionButton = {
+                if (fabIcon != null) {
+                    IconButton(
+                        icon = fabIcon,
+                        onClick = onFabClick,
+                        contentDescription = "Assistente virtual",
+                        size = 56.dp,
+                    )
+                }
+            },
+        ) { innerPadding ->
+            val scrollState = rememberScrollState()
+            val density = LocalDensity.current
+            val topFadePx = with(density) { TopFadeHeight.toPx() }
+            val bottomFadePx = with(density) { BottomFadeHeight.toPx() }
+
+            Box {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding)
+                        .then(if (scrollable) Modifier.verticalScroll(scrollState) else Modifier)
+                        .padding(horizontal = contentPadding, vertical = Spacing.small)
+                        .background(color = backgroundColor),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.medium),
+                    content = content,
+                )
+                ZeraGradientBox(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(backgroundColor, NoColor)
+                    ),
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(innerPadding)
+                        .fillMaxWidth()
+                        .height(TopFadeHeight)
+                        .graphicsLayer {
+                            alpha = when {
+                                !edgeFade -> 0f
+                                // Sem scroll próprio (scrollable = false) o gradiente fica sempre visível.
+                                !scrollable -> 1f
+                                else -> (scrollState.value / topFadePx).coerceIn(0f, 1f)
+                            }
+                        }
+                ){}
+                ZeraGradientBox(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(NoColor, backgroundColor)
+                    ),
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(innerPadding)
+                        .fillMaxWidth()
+                        .height(BottomFadeHeight)
+                        .graphicsLayer {
+                            alpha = when {
+                                !edgeFade -> 0f
+                                !scrollable -> 1f
+                                else -> ((scrollState.maxValue - scrollState.value) / bottomFadePx).coerceIn(0f, 1f)
+                            }
+                        }
+                ){}
+            }
+        }
+
+        AnimatedVisibility(
+            visible = showSideBar,
+            enter = fadeIn(),
+            exit = fadeOut(),
+        ) {
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(innerPadding)
-                    .then(if (scrollable) Modifier.verticalScroll(scrollState) else Modifier)
-                    .padding(horizontal = contentPadding, vertical = Spacing.small)
-                    .background(color = backgroundColor),
-                verticalArrangement = Arrangement.spacedBy(Spacing.medium),
-                content = content,
+                    .background(Color.Black.copy(alpha = 0.5f))
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = { showSideBar = false },
+                    ),
             )
-            ZeraGradientBox(
-                brush = Brush.verticalGradient(
-                    colors = listOf(backgroundColor, NoColor)
-                ),
+        }
+
+        AnimatedVisibility(
+            visible = showSideBar,
+            modifier = Modifier.align(Alignment.CenterEnd),
+            enter = slideInHorizontally(initialOffsetX = { it }),
+            exit = slideOutHorizontally(targetOffsetX = { it }),
+        ) {
+            ManagerSideBar(
+                currentRoute = currentRoute,
                 modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .padding(innerPadding)
-                    .fillMaxWidth()
-                    .height(TopFadeHeight)
-                    .graphicsLayer {
-                        alpha = when {
-                            !edgeFade -> 0f
-                            // Sem scroll próprio (scrollable = false) o gradiente fica sempre visível.
-                            !scrollable -> 1f
-                            else -> (scrollState.value / topFadePx).coerceIn(0f, 1f)
-                        }
-                    }
-            ){}
-            ZeraGradientBox(
-                brush = Brush.verticalGradient(
-                    colors = listOf(NoColor, backgroundColor)
-                ),
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(innerPadding)
-                    .fillMaxWidth()
-                    .height(BottomFadeHeight)
-                    .graphicsLayer {
-                        alpha = when {
-                            !edgeFade -> 0f
-                            !scrollable -> 1f
-                            else -> ((scrollState.maxValue - scrollState.value) / bottomFadePx).coerceIn(0f, 1f)
-                        }
-                    }
-            ){}
+                    .width(SideBarWidth)
+                    // Absorve toques na área da sidebar para não vazarem até o scrim e fecharem o menu.
+                    .pointerInput(Unit) {}
+                    .statusBarsPadding()
+                    .navigationBarsPadding(),
+            )
         }
     }
 }
