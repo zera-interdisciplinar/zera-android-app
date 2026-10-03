@@ -59,11 +59,10 @@ fun Avatar(
     val palette = style.palette()
     Box(
         modifier = modifier
-            .size(size)
-            .let { if (onClick != null) it.clickable(onClick = onClick) else it },
+            .size(size),
     ) {
         Surface(
-            modifier = Modifier.matchParentSize(),
+            modifier = Modifier.matchParentSize().let { if (onClick != null) it.clickable(onClick = onClick) else it },
             shape = CircleShape,
             color = palette.container,
             contentColor = palette.onContainer,
