@@ -1,6 +1,6 @@
-# Contrato de API — Gestão de equipe (`/api/v1/users`, `/api/v1/invitations`)
+# Contrato de API — Gestão de equipe (`/api/v1/users`, `/api/v1/invitations`, `/api/v1/telephone`)
 
-Documentação de contrato das rotas do `ms-administrative-core` para as telas do app mobile: card "Funcionários" na home do gestor, lista de funcionários, e convites pendentes.
+Documentação de contrato das rotas do `ms-administrative-core` para as telas do app mobile: card "Funcionários" na home do gestor, lista de funcionários, convites pendentes e **edição de perfil do funcionário** (nome, e-mail, telefone, imagem).
 
 ## Autenticação e headers comuns
 
@@ -9,7 +9,17 @@ Documentação de contrato das rotas do `ms-administrative-core` para as telas d
 | `Authorization` | Sim (exceto resgate) | `Bearer <access_token>` — JWT emitido no login (`POST /api/v1/auth/login`). `sub` = `userId`. Claim `role` vira `ROLE_*`. |
 | `X-Unit-Id` | Não | A unidade **não** vem de header: gestores usam o `unitId` do usuário autenticado no token/DB. |
 
-Rotas de gestão (`GET/POST` de usuários e convites, exceto resgate) exigem papel `MANAGER`. Token ausente/inválido: `401`. Ator autenticado sem `MANAGER`: `403`.
+Token ausente/inválido: `401`.
+
+**Papel por tipo de rota** (não existe um único “endpoint de atualizar usuário” — cada campo tem `PATCH` próprio):
+
+| Autorização | Rotas (neste contrato) |
+|---|---|
+| `MANAGER` | `GET /users`, `GET /users/count-by-manager`, `POST /invitations`, `GET /invitations/pending`, `PATCH /users/{id}/rename`, telefone (`POST/PATCH/DELETE` em `/telephone`) |
+| `SELF_OR_MANAGER` | `GET /users/{id}`, `PATCH /users/{id}/email`, `PATCH /users/{id}/image` — gestor edita funcionário; funcionário edita a própria conta se `id` = `sub` do JWT |
+| Autenticado (qualquer role) | `GET /telephone/user?userId=` (leitura) |
+
+Ator autenticado sem permissão na rota: `403`.
 
 `POST /api/v1/invitations/redeem` é público neste serviço (`permitAll`): o funcionário ainda não tem conta.
 
@@ -57,12 +67,15 @@ curl -X GET "https://<host>/api/v1/users?role=EMPLOYEE&status=ACTIVE&managerId=3
     "unitId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     "createdAt": "2026-07-01T09:00:00",
     "updatedAt": "2026-08-01T10:00:00",
-    "managerId": "aa11bb22-0000-0000-0000-000000000009"
+    "managerId": "aa11bb22-0000-0000-0000-000000000009",
+    "imageUrl": "https://cdn.example.com/avatars/joao.png"
   }
 ]
 ```
 
-`email` serializa como string (value object com `@JsonValue`). `managerId` só vem preenchido quando o usuário é `EMPLOYEE`; gestor tem `managerId: null`.
+`email` serializa como string (value object com `@JsonValue`). `managerId` só vem preenchido quando o usuário é `EMPLOYEE`; gestor tem `managerId: null`. `imageUrl` é URL absoluta do avatar ou `null` — ver **§4** para gravar. **Telefone não vem em `UserOutput`**: buscar à parte com `GET /api/v1/telephone/user?userId=`.
+
+O mesmo shape de `UserOutput` vale para `GET /api/v1/users/{id}` (detalhe; `SELF_OR_MANAGER`).
 
 `role` na API é `MANAGER`/`EMPLOYEE`; o rótulo de UI (ex. "Operador") é mapeamento do app, não vem do backend.
 
@@ -75,7 +88,7 @@ curl -X GET "https://<host>/api/v1/users?role=EMPLOYEE&status=ACTIVE&managerId=3
 
 Duas opções — escolher uma e manter as duas telas consistentes:
 
-- `GET /api/v1/users?role=EMPLOYEE&status=ACTIVE&managerId={managerId}` e usar `content.length` (se a lista puder passar de uma página, subir `size`; não há `totalElements`).
+- `GET /api/v1/users?role=EMPLOYEE&status=ACTIVE&managerId={managerId}` e usar o tamanho do array JSON (se a lista puder passar de uma página, subir `size`; não há `totalElements`).
 - `GET /api/v1/users/count-by-manager` e pegar `count` da linha cujo `managerId` é o do gestor logado. Esta rota **já conta só `EMPLOYEE` `ACTIVE`**.
 
 Para contagem exata sem depender de `page`/`size`, prefira `count-by-manager`.
@@ -234,6 +247,130 @@ Não devolve `unitId` nem `status` neste payload (`status` do usuário criado é
 
 ---
 
+## 4. Atualização de perfil do funcionário (nome, e-mail, telefone, imagem)
+
+**Não há** `PUT` nem `PATCH /api/v1/users/{id}` com body único. O backend expõe **sub-recursos** em `/users` e telefone em **`/api/v1/telephone`**.
+
+### Visão rápida (tela de editar funcionário)
+
+| Campo na UI | Ler | Escrever |
+|---|---|---|
+| Nome | `name` em `GET /users` ou `GET /users/{id}` | `PATCH /users/{id}/rename` — **só `MANAGER`** |
+| E-mail | `email` em `GET /users` ou `GET /users/{id}` | `PATCH /users/{id}/email` — **`SELF_OR_MANAGER`** |
+| Imagem | `imageUrl` em `GET /users` ou `GET /users/{id}` | `PATCH /users/{id}/image` — **`SELF_OR_MANAGER`** (URL; upload fica fora deste MS) |
+| Telefone | `GET /telephone/user?userId={id}` | `POST /telephone/user` (1º cadastro) ou `PATCH /telephone/{telephoneId}/number` — **só `MANAGER`** |
+
+Todas as escritas acima respondem **`204 No Content`** em sucesso (exceto `POST /telephone/user`, que é **`201 Created`**).
+
+### 4.1 `PATCH /api/v1/users/{id}/rename`
+
+Gestor altera o nome exibido do funcionário (ou de outro usuário).
+
+```json
+{ "name": "João Silva" }
+```
+
+| Campo | Tipo | Obrigatório | Descrição |
+|---|---|---|---|
+| `name` | string | Sim | Não pode ser em branco. |
+
+Auth: **`MANAGER`**. Usuário inexistente: `400` (`User not found`).
+
+### 4.2 `PATCH /api/v1/users/{id}/email`
+
+Altera o e-mail de login. Gestor pode alterar o do funcionário; funcionário pode alterar o próprio (`id` = `userId` do token).
+
+```json
+{ "email": "joao.novo@empresa.com" }
+```
+
+| Campo | Tipo | Obrigatório | Descrição |
+|---|---|---|---|
+| `email` | string | Sim | Formato válido (`@Email`). |
+
+Auth: **`SELF_OR_MANAGER`**. E-mail já usado por outra conta: `400` (`Email already in use`). Mesmo e-mail atual: no-op (`204`).
+
+### 4.3 `PATCH /api/v1/users/{id}/image`
+
+```json
+{ "imageUrl": "https://cdn.example.com/avatar.png" }
+```
+
+| Campo | Tipo | Obrigatório | Descrição |
+|---|---|---|---|
+| `imageUrl` | string | Não | Nova URL. Body `{}` ou campo omitido limpa o avatar (`imageUrl` → `null`). |
+
+Auth: **`SELF_OR_MANAGER`**. Usuário inexistente: `400` (`User not found`).
+
+### 4.4 Telefone — `/api/v1/telephone`
+
+Telefone é **entidade separada** (no máximo **um** por usuário hoje). Número: **10 ou 11 dígitos** (somente números após normalização; pode enviar com máscara).
+
+#### `GET /api/v1/telephone/user?userId={userId}`
+
+Auth: qualquer usuário autenticado.
+
+Response `200`:
+
+```json
+{
+  "telephoneId": "bb22cc33-0000-0000-0000-000000000001",
+  "number": "11987654321",
+  "userId": "9c858901-8a57-4791-81fe-4c455b099bc9",
+  "organizationId": null,
+  "unitId": null,
+  "recyclingBusinessId": null,
+  "createdAt": "2026-07-01T09:00:00",
+  "updatedAt": "2026-07-01T09:00:00"
+}
+```
+
+Sem telefone cadastrado: **`404`**.
+
+#### `POST /api/v1/telephone/user` — primeiro telefone do usuário
+
+Auth: **`MANAGER`**.
+
+```json
+{
+  "userId": "9c858901-8a57-4791-81fe-4c455b099bc9",
+  "number": "(11) 98765-4321"
+}
+```
+
+Response **`201 Created`** + header `Location: .../api/v1/telephone/{telephoneId}`:
+
+```json
+{
+  "telephoneId": "bb22cc33-0000-0000-0000-000000000001",
+  "number": "11987654321"
+}
+```
+
+| Status | Quando |
+|---|---|
+| `404` | `userId` inexistente |
+| `409` | Usuário já tem telefone — usar `PATCH .../number` |
+| `400` | Número inválido |
+
+#### `PATCH /api/v1/telephone/{telephoneId}/number` — trocar número
+
+Auth: **`MANAGER`**.
+
+```json
+{ "number": "21999887766" }
+```
+
+Response: **`204`**. Telefone inexistente: **`404`**.
+
+#### `DELETE /api/v1/telephone/{telephoneId}`
+
+Auth: **`MANAGER`**. Response: **`204`**.
+
+Fluxo típico na UI: ao abrir o perfil, `GET /users/{id}` + `GET /telephone/user?userId=` (tratar `404` como “sem telefone”). Ao salvar telefone novo → `POST /telephone/user`; se já existir `telephoneId` → `PATCH /telephone/{telephoneId}/number`.
+
+---
+
 ## Enums usados
 
 - **`Role`**: `MANAGER`, `EMPLOYEE`.
@@ -246,6 +383,10 @@ Não devolve `unitId` nem `status` neste payload (`status` do usuário criado é
 |---|---|
 | Contagem de funcionários ativos para o card da home | `GET /users/count-by-manager` (só ativos) ou `GET /users?role=EMPLOYEE&status=ACTIVE&managerId=` |
 | Lista de funcionários (`EmployeesScreen`) | `GET /users?role=EMPLOYEE&managerId=` (adicionar `status=ACTIVE` se a tela for só ativos) |
+| Editar nome do funcionário | `PATCH /users/{id}/rename` (`MANAGER`) |
+| Editar e-mail | `PATCH /users/{id}/email` (`SELF_OR_MANAGER`) |
+| Avatar / foto | Ler `imageUrl` em `GET /users` ou `GET /users/{id}`; gravar `PATCH /users/{id}/image` |
+| Telefone | Ler `GET /telephone/user?userId=`; criar `POST /telephone/user`; alterar `PATCH /telephone/{id}/number` (`MANAGER` nas escritas) |
 | Convites pendentes (`InviteCard`) | `GET /invitations/pending?managerId=` |
 | Criar convite | `POST /invitations` com `managerId` + `inviteeName` |
 | Cadastro do funcionário via código | `POST /invitations/redeem` |

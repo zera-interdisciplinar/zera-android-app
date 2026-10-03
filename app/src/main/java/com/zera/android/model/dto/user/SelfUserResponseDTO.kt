@@ -13,4 +13,5 @@ data class SelfUserResponseDTO(
     var createdAt: String,
     var updatedAt: String,
     var managerId: String? = null,
+    var imageUrl: String? = null,
 )

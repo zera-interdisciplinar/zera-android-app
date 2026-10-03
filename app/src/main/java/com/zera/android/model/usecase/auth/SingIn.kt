@@ -2,7 +2,7 @@ package com.zera.android.model.usecase.auth
 
 import com.zera.android.model.dto.auth.SingInRequestDTO
 import com.zera.android.model.dto.user.SelfUserResponseDTO
-import com.zera.android.model.local.SharedPreferencesManager
+import com.zera.android.model.local.SqliteManager
 import com.zera.android.model.remote.client.ApiClient
 import com.zera.android.model.usecase.config.LoadFlags
 
@@ -14,7 +14,7 @@ class SingIn {
         val signInRequest = SingInRequestDTO(email, password)
         val response = ApiClient.authService.signIn(signInRequest)
 
-        SharedPreferencesManager.saveSession(
+        SqliteManager.saveSession(
             accessToken = response.accessToken,
             refreshToken = response.refreshToken,
             userId = response.userId,
@@ -23,13 +23,13 @@ class SingIn {
         )
 
         val selfUser = getSelfUser.execute(response.userId)
-        SharedPreferencesManager.saveUnitId(selfUser.unitId)
+        SqliteManager.saveUnitId(selfUser.unitId)
         loadFlags.execute(selfUser)
         return selfUser
     }
 
     fun clearSession() {
-        SharedPreferencesManager.clearSession()
+        SqliteManager.clearSession()
         loadFlags.clear()
     }
 }
