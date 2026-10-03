@@ -69,50 +69,55 @@ fun Avatar(
     val palette = style.palette()
     var isImageLoading by remember(photoUrl) { mutableStateOf(!photoUrl.isNullOrBlank()) }
     Box(
-        modifier = modifier
-            .size(size),
-    ) {
-        Surface(
-            modifier = Modifier.matchParentSize().let { if (onClick != null) it.clickable(onClick = onClick) else it },
-            shape = CircleShape,
-            color = palette.container,
-            contentColor = palette.onContainer,
+    ){
+        Box(
+            modifier = modifier
+                .size(size)
+                .clip(CircleShape),
         ) {
-            Box(contentAlignment = Alignment.Center) {
-                if (photoUrl != null) {
-                    AsyncImage(
-                        model = photoUrl,
-                        contentDescription = initials,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clip(CircleShape),
-                        contentScale = ContentScale.Crop,
-                        onState = { imageState ->
-                            isImageLoading = imageState is AsyncImagePainter.State.Loading
-                        },
+            Surface(
+                modifier = Modifier
+                    .matchParentSize()
+                    .let { if (onClick != null) it.clickable(onClick = onClick) else it },
+                shape = CircleShape,
+                color = palette.container,
+                contentColor = palette.onContainer,
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    if (photoUrl != null) {
+                        AsyncImage(
+                            model = photoUrl,
+                            contentDescription = initials,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(CircleShape),
+                            contentScale = ContentScale.Crop,
+                            onState = { imageState ->
+                                isImageLoading = imageState is AsyncImagePainter.State.Loading
+                            },
+                        )
+                    } else {
+                        HeadlineText(text = initials, bold = true, color = palette.onContainer)
+                    }
+                }
+            }
+
+            if (isLoading || isImageLoading) {
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .clip(CircleShape)
+                        .background(Color.Black.copy(alpha = 0.45f)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(size * 0.32f),
+                        color = Color.White,
+                        strokeWidth = 3.dp,
                     )
-                } else {
-                    HeadlineText(text = initials, bold = true, color = palette.onContainer)
                 }
             }
         }
-
-        if (isLoading || isImageLoading) {
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .clip(CircleShape)
-                    .background(Color.Black.copy(alpha = 0.45f)),
-                contentAlignment = Alignment.Center,
-            ) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(size * 0.32f),
-                    color = Color.White,
-                    strokeWidth = 3.dp,
-                )
-            }
-        }
-
         if (onClick != null) {
             Box(
                 modifier = Modifier
@@ -131,6 +136,7 @@ fun Avatar(
             }
         }
     }
+
 }
 
 @Preview(showBackground = true)
