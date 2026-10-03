@@ -109,6 +109,8 @@ Arquivo: `view/components/lists/`.
 - **`NotificationItem(id, label, text, style)`** + **`NotificationList(notifications, modifier, onItemClick, contentPadding, emptyContent)`** — lista rolável de `Notification`; ocupa só a altura do conteúdo (use `Modifier.heightIn(max = ...)` dentro de um container que já rola).
 - **`ProductItem(id, name, icon)`** + **`ProductList(products, onItemClick, modifier, contentPadding, emptyContent, onEndReached, isLoadingMore)`** — lista rolável de `ProductListItem`. `onEndReached` dispara perto do fim da lista (paginação); `isLoadingMore` mostra um indicador no rodapé.
 - **`ProductListItem(itemName, itemId, onClick, modifier, icon)`** — item individual (ícone + nome + ID + seta); reutilizável fora de `ProductList`. O ID é exibido truncado nos 7 primeiros caracteres (`itemId.substring(0, 7)`), então `itemId` precisa ter ao menos 7 caracteres (UUID/`displayCode` cumprem; IDs curtos quebram).
+- **`OptionItem(description, name, icon)`** + **`OptionList(options, onItemClick, modifier, contentPadding, emptyContent, onEndReached, isLoadingMore)`** — lista rolável de opções, adequada a domínios em que o texto de descrição é exibido no lugar de um ID. Mantém os estados vazio e carregamento/paginação de `ProductList`.
+- **`OptionListItem(itemName, description, onClick, modifier, icon)`** — item individual (ícone + nome + descrição + seta); reutilizável fora de `OptionList`. A descrição é exibida integralmente abaixo do nome, sem formatação ou truncamento de ID.
 - **`EditableFieldRow(label, value, modifier, onEditClick)`** — linha de detalhe de campo (rótulo + valor em negrito + lápis de editar opcional à direita); usada em telas de detalhe (ex.: "Detalhes do Item"), diferente de `ProductListItem` (que representa um item de lista de produtos). `onEditClick = null` (padrão) esconde o lápis.
 - **`EmployeeItem(id, name, role, isPending)`** + **`EmployeeList(employees, onItemClick, modifier, contentPadding, emptyContent)`** — lista rolável de `EmployeeListItem`.
 - **`EmployeeListItem(name, role, isPending, onClick, modifier)`** — item individual (avatar circular + nome + "cargo · status" + seta); reutilizável fora de `EmployeeList`. `isPending = true` mostra "Pendente" em laranja (`ZeraColorFamily.Yellow`) em vez de "Ativo" em cinza, no texto e no avatar. Ainda não recebe foto de perfil — o avatar é só um círculo colorido.
@@ -116,6 +118,7 @@ Arquivo: `view/components/lists/`.
 ```kotlin
 NotificationList(notifications = state.notifications, onItemClick = { /* abrir alerta */ }, modifier = Modifier.heightIn(max = 400.dp))
 ProductList(products = state.latestProducts, onItemClick = { /* abrir item */ })
+OptionList(options = state.models, onItemClick = { /* abrir modelo */ })
 EditableFieldRow(label = "Categoria", value = state.category, onEditClick = { viewModel.onEditClick() })
 EmployeeList(employees = state.employees, onItemClick = { /* abrir colaborador */ }, modifier = Modifier.weight(1f))
 ```
