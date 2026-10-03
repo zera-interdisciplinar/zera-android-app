@@ -1,12 +1,12 @@
 package com.zera.android.model.usecase.team
 
 import com.zera.android.model.dto.user.ManagerEmployeeCountDTO
-import com.zera.android.model.local.SharedPreferencesManager
+import com.zera.android.model.local.SqliteManager
 import com.zera.android.model.remote.client.ApiClient
 
 class CountActiveEmployees {
     suspend fun execute(): Int {
-        val managerId = SharedPreferencesManager.getUserId()
+        val managerId = SqliteManager.getUserId()
             ?: error("Não há usuário logado")
         val counts = ApiClient.usersService.countByManager()
         return countFor(managerId, counts)

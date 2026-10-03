@@ -2,7 +2,7 @@ package com.zera.android.model.remote.client
 
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.zera.android.model.entity.config.Environments
-import com.zera.android.model.local.SharedPreferencesManager
+import com.zera.android.model.local.SqliteManager
 import com.zera.android.model.remote.service.InventoryService
 import kotlinx.serialization.json.Json
 import okhttp3.HttpUrl
@@ -28,8 +28,8 @@ object InventoryClient {
                     authenticatedRequest(
                         original = chain.request(),
                         apiKey = apiKey,
-                        accessToken = SharedPreferencesManager.getAccessToken(),
-                        unitId = SharedPreferencesManager.getUnitId(),
+                        accessToken = SqliteManager.getAccessToken(),
+                        unitId = SqliteManager.getUnitId(),
                     )
                 )
             }

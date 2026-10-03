@@ -3,16 +3,26 @@ package com.zera.android.view.components.outros
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
+import coil.compose.AsyncImagePainter
 import com.zera.android.view.components.texts.HeadlineText
 import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.view.theme.ZeraTheme
@@ -37,15 +47,14 @@ private val EditBadgeIconSize = 16.dp
  *   não deste componente. Também usada como descrição de acessibilidade da foto.
  * @param modifier modificador externo opcional.
  * @param photoUrl URL da foto de perfil. Quando `null` (padrão), mostra [initials].
- *   **Ainda não carrega a foto de fato** — não há biblioteca de carregamento de
- *   imagem (ex.: Coil) no projeto; por enquanto só troca as iniciais por um ícone
- *   de placeholder. `TODO`: renderizar a foto de verdade quando essa lib for adicionada.
  * @param size diâmetro do círculo.
  * @param style família de cor do avatar. Ver [ZeraColorFamily].
  * @param onClick chamado ao tocar no avatar (ex.: para alterar a foto). Quando `null`
  *   (padrão), o avatar não é clicável e não exibe o selo de edição. Quando informado,
  *   um selo com ícone de lápis aparece no canto inferior direito, indicando que o
  *   avatar pode ser editado.
+ * @param isLoading quando `true`, cobre o avatar com um indicador de progresso
+ *   (upload da foto em andamento).
  */
 @Composable
 fun Avatar(
@@ -55,8 +64,10 @@ fun Avatar(
     size: Dp = DefaultAvatarSize,
     style: ZeraColorFamily = ZeraColorFamily.Blue,
     onClick: (() -> Unit)? = null,
+    isLoading: Boolean = false,
 ) {
     val palette = style.palette()
+    var isImageLoading by remember(photoUrl) { mutableStateOf(!photoUrl.isNullOrBlank()) }
     Box(
         modifier = modifier
             .size(size),
@@ -69,16 +80,36 @@ fun Avatar(
         ) {
             Box(contentAlignment = Alignment.Center) {
                 if (photoUrl != null) {
-                    // TODO: trocar por um AsyncImage (ou equivalente) apontando para photoUrl
-                    // assim que uma lib de carregamento de imagem for adicionada ao projeto.
-                    ZeraIcon(
-                        icon = ZeraIcon.Placeholder,
+                    AsyncImage(
+                        model = photoUrl,
                         contentDescription = initials,
-                        tint = palette.onContainer,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(CircleShape),
+                        contentScale = ContentScale.Crop,
+                        onState = { imageState ->
+                            isImageLoading = imageState is AsyncImagePainter.State.Loading
+                        },
                     )
                 } else {
                     HeadlineText(text = initials, bold = true, color = palette.onContainer)
                 }
+            }
+        }
+
+        if (isLoading || isImageLoading) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .clip(CircleShape)
+                    .background(Color.Black.copy(alpha = 0.45f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(size * 0.32f),
+                    color = Color.White,
+                    strokeWidth = 3.dp,
+                )
             }
         }
 
@@ -123,5 +154,13 @@ private fun AvatarPhotoPreview() {
 private fun AvatarEditablePreview() {
     ZeraTheme {
         Avatar(initials = "KM", onClick = {})
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun AvatarLoadingPreview() {
+    ZeraTheme {
+        Avatar(initials = "KM", onClick = {}, isLoading = true)
     }
 }

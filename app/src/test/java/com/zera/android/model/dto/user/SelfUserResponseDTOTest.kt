@@ -28,5 +28,29 @@ class SelfUserResponseDTOTest {
 
         assertEquals("MANAGER", user.role)
         assertNull(user.managerId)
+        assertNull(user.imageUrl)
+    }
+
+    @Test
+    fun parsesImageUrlWhenPresent() {
+        val payload = """
+            {
+              "userId": "9c858901-8a57-4791-81fe-4c455b099bc9",
+              "name": "João Silva",
+              "email": "joao@empresa.com",
+              "role": "EMPLOYEE",
+              "status": "ACTIVE",
+              "unitId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+              "createdAt": "2026-07-01T09:00:00",
+              "updatedAt": "2026-08-01T10:00:00",
+              "managerId": "aa11bb22-0000-0000-0000-000000000009",
+              "imageUrl": "https://cdn.example.com/avatars/joao.png"
+            }
+        """.trimIndent()
+
+        val user = json.decodeFromString<SelfUserResponseDTO>(payload)
+
+        assertEquals("https://cdn.example.com/avatars/joao.png", user.imageUrl)
+        assertEquals("aa11bb22-0000-0000-0000-000000000009", user.managerId)
     }
 }
