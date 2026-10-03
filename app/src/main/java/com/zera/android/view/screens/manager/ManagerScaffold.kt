@@ -239,6 +239,7 @@ fun ManagerScaffold(
         ) {
             ManagerSideBar(
                 currentRoute = currentRoute,
+                onButtonClicked = { showSideBar = false },
                 modifier = Modifier
                     .width(SideBarWidth)
                     // Absorve toques na área da sidebar para não vazarem até o scrim e fecharem o menu.

@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -24,6 +26,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zera.android.view.components.logo.Logo
 import com.zera.android.view.components.texts.LabelText
 import com.zera.android.view.navigation.Route
+import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.view.theme.Radius
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
@@ -45,6 +48,7 @@ import com.zera.android.viewmodel.navigation.ManagerSideBarViewModel
 fun ManagerSideBar(
     modifier: Modifier = Modifier,
     currentRoute: Route,
+    onButtonClicked: () -> Unit = {},
     viewModel: ManagerSideBarViewModel = viewModel(),
 ) {
     Column(
@@ -59,7 +63,8 @@ fun ManagerSideBar(
     ) {
         Box(
             Modifier.fillMaxWidth(),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
+
         ){
             Logo(
                 modifier = Modifier
@@ -69,73 +74,85 @@ fun ManagerSideBar(
             )
         }
 
-        // TODO: trocar `selected = false` por `currentRoute == Route.X` quando as rotas forem definidas.
-        SideBarButton(
-            label = "Perfil",
-            contentDescription = "Botão para Perfil",
-            onClick = { viewModel.onProfileClick(currentRoute) },
-            selected = false,
-        )
-        SideBarButton(
-            label = "Colaboradores",
-            contentDescription = "Botão para Colaboradores",
-            onClick = { viewModel.onEmployeesClick(currentRoute) },
-            selected = false,
-        )
-        SideBarButton(
-            label = "Alertas",
-            contentDescription = "Botão para Alertas",
-            onClick = { viewModel.onAlertsClick(currentRoute) },
-            selected = false,
-        )
-        SideBarButton(
-            label = "Modelos",
-            contentDescription = "Botão para Modelos",
-            onClick = { viewModel.onModelsClick(currentRoute) },
-            selected = false,
-        )
-        SideBarButton(
-            label = "Itens",
-            contentDescription = "Botão para Itens",
-            onClick = { viewModel.onItensClick(currentRoute) },
-            selected = false,
-        )
-        SideBarButton(
-            label = "Itens em Manutenção",
-            contentDescription = "Botão para Itens em Manutenção",
-            onClick = { viewModel.onMaintenanceItensClick(currentRoute) },
-            selected = false,
-        )
-        SideBarButton(
-            label = "Descartes Agendados",
-            contentDescription = "Botão para Descartes Agendados",
-            onClick = { viewModel.onScheduledDisposalsClick(currentRoute) },
-            selected = false,
-        )
-        SideBarButton(
-            label = "Guia de Descarte",
-            contentDescription = "Botão para Guia de Descarte",
-            onClick = { viewModel.onDisposalGuideClick(currentRoute) },
-            selected = false,
-        )
-        SideBarButton(
-            label = "Central de Ajuda",
-            contentDescription = "Botão para Central de Ajuda",
-            onClick = { viewModel.onHelpCenterClick(currentRoute) },
-            selected = false,
-        )
-        SideBarButton(
-            label = "Fale com o Zé",
-            contentDescription = "Botão para Fale com o Zé",
-            onClick = { viewModel.onAskZeClick(currentRoute) },
-            selected = false,
-        )
-        SideBarButton(
-            label = "Configurações",
-            contentDescription = "Botão para Configurações",
-            onClick = { viewModel.onSettingsClick(currentRoute) },
-            selected = false,
-        )
+        // TODO: terminar de definir todas as telas, para ai conectar aqui
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .verticalScroll(rememberScrollState()),
+        ) {
+            SideBarButton(
+                label = "Perfil",
+                contentDescription = "Botão para Perfil",
+                currentRoute = currentRoute,
+                onButtonClicked = onButtonClicked,
+                icon = ZeraIcon.Profile,
+                route = Route.Profile,
+            )
+            SideBarButton(
+                label = "Colaboradores",
+                contentDescription = "Botão para Colaboradores",
+                currentRoute = currentRoute,
+                onButtonClicked = onButtonClicked,
+                icon = ZeraIcon.Group,
+                route = Route.Employees,
+            )
+            SideBarButton(
+                label = "Alertas",
+                contentDescription = "Botão para Alertas",
+                currentRoute = currentRoute,
+                onButtonClicked = onButtonClicked,
+                icon = ZeraIcon.Bell,
+                route = Route.EmployeeHome,
+            )
+            SideBarButton(
+                label = "Modelos",
+                contentDescription = "Botão para Modelos",
+                currentRoute = currentRoute,
+                onButtonClicked = onButtonClicked,
+                icon = ZeraIcon.Crate,
+                route = Route.Models,
+            )
+            SideBarButton(
+                label = "Itens",
+                contentDescription = "Botão para Itens",
+                currentRoute = currentRoute,
+                onButtonClicked = onButtonClicked,
+                icon = ZeraIcon.Box,
+                route = Route.Itens,
+            )
+            SideBarButton(
+                label = "Itens em Manutenção",
+                contentDescription = "Botão para Itens em Manutenção",
+                currentRoute = currentRoute,
+                onButtonClicked = onButtonClicked,
+                icon = ZeraIcon.Wrench,
+                route = Route.Itens,
+            )
+        }
+        Column() {
+            SideBarButton(
+                label = "Central de Ajuda",
+                contentDescription = "Botão para Central de Ajuda",
+                currentRoute = currentRoute,
+                onButtonClicked = onButtonClicked,
+                icon = ZeraIcon.InfoCircle,
+                route = Route.EmployeeHome,
+            )
+            SideBarButton(
+                label = "Fale com o Zé",
+                contentDescription = "Botão para Fale com o Zé",
+                currentRoute = currentRoute,
+                onButtonClicked = onButtonClicked,
+                route = Route.EmployeeHome,
+            )
+            SideBarButton(
+                label = "Configurações",
+                contentDescription = "Botão para Configurações",
+                currentRoute = currentRoute,
+                onButtonClicked = onButtonClicked,
+                route = Route.EmployeeHome,
+            )
+        }
     }
 }
 
@@ -147,17 +164,24 @@ fun ManagerSideBar(
 private fun SideBarButton(
     label: String,
     contentDescription: String,
-    onClick: () -> Unit,
+    route: Route,
+    currentRoute: Route,
+    onButtonClicked: () -> Unit = {},
     modifier: Modifier = Modifier,
-    selected: Boolean = false,
     icon: ZeraIcon = ZeraIcon.Placeholder,
 ) {
+    val selected = currentRoute == route
     val contentColor =
         if (selected) MaterialTheme.colorScheme.primary
         else MaterialTheme.colorScheme.onPrimary
 
     Button(
-        onClick = onClick,
+        onClick = {
+            if(route!=currentRoute){
+                ZeraNavigator.push(route)
+            }
+            onButtonClicked()
+        },
         modifier = modifier.fillMaxWidth(),
         enabled = !selected,
         contentPadding = PaddingValues(horizontal = Spacing.small, vertical = Spacing.small),
@@ -187,6 +211,6 @@ private fun SideBarButton(
 @Preview(heightDp = 900)
 fun ManagerSideBarPreview() {
     ZeraTheme {
-        ManagerSideBar(currentRoute = Route.ManagerHome)
+        ManagerSideBar(currentRoute = Route.Profile)
     }
 }
