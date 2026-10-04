@@ -10,6 +10,7 @@ data class ModelsState(
     val models: List<OptionItem> = emptyList(),
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
+    val isModelUsageSheetVisible: Boolean = true,
 )
 
 class ModelsViewModel : ZeraViewModel() {
@@ -34,5 +35,9 @@ class ModelsViewModel : ZeraViewModel() {
 
     fun onModelClick(model: OptionItem) {
         // TODO: navegar para os detalhes do modelo.
+    }
+
+    fun setModelUsageSheetVisible(isVisible: Boolean) {
+        _state.value = _state.value.copy(isModelUsageSheetVisible = isVisible)
     }
 }
