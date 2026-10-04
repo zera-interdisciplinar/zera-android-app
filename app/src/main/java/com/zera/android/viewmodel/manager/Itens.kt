@@ -19,31 +19,21 @@ import java.util.Locale
 
 data class ItemsQuery(
     val status: String? = null,
-    val extraStatuses: List<String> = emptyList(),
     val categoryId: String? = null,
     val q: String? = null,
 )
 
 data class ItensState(
     val searchQuery: String = "",
-    val filterOptions: List<String> = listOf(
-        FILTER_ALL,
-        FILTER_PENDING,
-        FILTER_CATEGORY,
-    ),
-    val selectedFilter: String = FILTER_ALL,
+    val categoryOptions: List<String> = emptyList(),
+    val selectedStatuses: List<String> = emptyList(),
+    val selectedCategories: List<String> = emptyList(),
     val totalItemsLabel: String = "",
     val items: List<ProductItem> = emptyList(),
     val isLoading: Boolean = false,
     val isLoadingMore: Boolean = false,
     val errorMessage: String? = null,
-) {
-    companion object {
-        const val FILTER_ALL = "Todos"
-        const val FILTER_PENDING = "Pendentes"
-        const val FILTER_CATEGORY = "Categoria"
-    }
-}
+)
 
 class ItensViewModel : ZeraViewModel() {
     private val getItems = GetItems()
@@ -74,9 +64,20 @@ class ItensViewModel : ZeraViewModel() {
         loadItems()
     }
 
-    fun onFilterChange(filter: String) {
-        _state.value = _state.value.copy(selectedFilter = filter)
+    fun applyFilters(statuses: List<String>, categories: List<String>) {
+        _state.value = _state.value.copy(
+            selectedStatuses = statuses,
+            selectedCategories = categories,
+        )
         loadItems()
+    }
+
+    fun onAppliedFilterChipsChange(filters: List<String>) {
+        val statusLabels = STATUS_API_VALUES.keys
+        applyFilters(
+            statuses = filters.filter { it in statusLabels },
+            categories = filters.filter { it in _state.value.categoryOptions },
+        )
     }
 
     fun loadNextPage() {
@@ -95,11 +96,8 @@ class ItensViewModel : ZeraViewModel() {
         viewModelScope.launch {
             try {
                 categories = getCategories.execute()
-                val options = filterOptionsFor(categories)
-                val selected = _state.value.selectedFilter
                 _state.value = _state.value.copy(
-                    filterOptions = options,
-                    selectedFilter = if (selected in options) selected else ItensState.FILTER_ALL,
+                    categoryOptions = categories.map { it.name },
                 )
             } catch (_: Exception) {
                 // A listagem ainda funciona sem o chip de categoria populado.
@@ -119,12 +117,34 @@ class ItensViewModel : ZeraViewModel() {
         val pageIndex = if (reset) 0 else loadedPage + 1
         loadJob = viewModelScope.launch {
             try {
-                val query = queryFor(
-                    selectedFilter = _state.value.selectedFilter,
+                val queries = queriesFor(
+                    selectedStatuses = _state.value.selectedStatuses,
+                    selectedCategories = _state.value.selectedCategories,
                     searchQuery = _state.value.searchQuery,
                     categories = categories,
                 )
-                val page = fetchPage(query, pageIndex)
+                if (queries.isEmpty()) {
+                    loadedPage = -1
+                    totalPages = 0
+                    _state.value = _state.value.copy(
+                        totalItemsLabel = totalItemsLabel(0),
+                        items = emptyList(),
+                        isLoading = false,
+                        isLoadingMore = false,
+                        errorMessage = null,
+                    )
+                    return@launch
+                }
+                val pages = queries.map { query ->
+                    getItems.execute(
+                        status = query.status,
+                        categoryId = query.categoryId,
+                        q = query.q,
+                        page = pageIndex,
+                        size = PAGE_SIZE,
+                    )
+                }
+                val page = mergePages(pages)
                 loadedPage = page.page
                 totalPages = page.totalPages
                 val items = if (reset) {
@@ -151,35 +171,17 @@ class ItensViewModel : ZeraViewModel() {
         }
     }
 
-    private suspend fun fetchPage(query: ItemsQuery, pageIndex: Int): PagedItemsDTO {
-        return if (query.extraStatuses.isEmpty()) {
-            getItems.execute(
-                status = query.status,
-                categoryId = query.categoryId,
-                q = query.q,
-                page = pageIndex,
-                size = PAGE_SIZE,
-            )
-        } else {
-            val first = getItems.execute(
-                status = query.status,
-                q = query.q,
-                page = pageIndex,
-                size = PAGE_SIZE,
-            )
-            val second = getItems.execute(
-                status = query.extraStatuses.first(),
-                q = query.q,
-                page = pageIndex,
-                size = PAGE_SIZE,
-            )
-            mergePages(first, second)
-        }
-    }
-
     companion object {
         internal const val PAGE_SIZE = 20
         private val ptBr = Locale.forLanguageTag("pt-BR")
+        private val STATUS_API_VALUES = linkedMapOf(
+            "Pendente" to "PENDING_APPROVAL",
+            "Recusado" to "REJECTED",
+            "Aprovado" to "IN_STOCK",
+            "Em manutenção" to "IN_MAINTENANCE",
+            "Em aprovação" to "AWAITING_EVALUATION",
+            "Descartado" to "DISPOSED",
+        )
 
         internal fun productFrom(item: ItemResponseDTO): ProductItem {
             val status = ItemStatus.fromBackend(item.status)
@@ -196,46 +198,43 @@ class ItensViewModel : ZeraViewModel() {
             return if (total == 1L) "$formatted Item" else "$formatted Itens"
         }
 
-        internal fun queryFor(
-            selectedFilter: String,
+        internal fun queriesFor(
+            selectedStatuses: List<String>,
+            selectedCategories: List<String>,
             searchQuery: String,
             categories: List<CategoryResponseDTO>,
-        ): ItemsQuery {
+        ): List<ItemsQuery> {
             val q = searchQuery.trim().takeIf { it.isNotEmpty() }
-            return when (selectedFilter) {
-                ItensState.FILTER_ALL -> ItemsQuery(q = q)
-                ItensState.FILTER_PENDING -> ItemsQuery(
-                    status = "PENDING_APPROVAL",
-                    extraStatuses = listOf("AWAITING_EVALUATION"),
-                    q = q,
-                )
-                else -> ItemsQuery(
-                    categoryId = categories.find { it.name == selectedFilter }?.id,
-                    q = q,
-                )
+            val statusValues = if (selectedStatuses.isEmpty()) {
+                listOf(null)
+            } else {
+                selectedStatuses.mapNotNull(STATUS_API_VALUES::get)
+            }
+            val categoryIds = if (selectedCategories.isEmpty()) {
+                listOf(null)
+            } else {
+                selectedCategories.mapNotNull { selected ->
+                    categories.find { it.name == selected }?.id
+                }
+            }
+            if (statusValues.isEmpty() || categoryIds.isEmpty()) return emptyList()
+
+            return statusValues.flatMap { status ->
+                categoryIds.map { categoryId ->
+                    ItemsQuery(status = status, categoryId = categoryId, q = q)
+                }
             }
         }
 
-        internal fun filterOptionsFor(categories: List<CategoryResponseDTO>): List<String> {
-            if (categories.isEmpty()) {
-                return listOf(
-                    ItensState.FILTER_ALL,
-                    ItensState.FILTER_PENDING,
-                    ItensState.FILTER_CATEGORY,
-                )
-            }
-            return listOf(ItensState.FILTER_ALL, ItensState.FILTER_PENDING) + categories.map { it.name }
-        }
-
-        internal fun mergePages(first: PagedItemsDTO, second: PagedItemsDTO): PagedItemsDTO {
+        internal fun mergePages(pages: List<PagedItemsDTO>): PagedItemsDTO {
             val seen = mutableSetOf<String>()
-            val content = (first.content + second.content).filter { seen.add(it.id) }
+            val content = pages.flatMap { it.content }.filter { seen.add(it.id) }
             return PagedItemsDTO(
                 content = content,
-                page = first.page,
+                page = pages.first().page,
                 size = PAGE_SIZE,
-                totalElements = first.totalElements + second.totalElements,
-                totalPages = maxOf(first.totalPages, second.totalPages),
+                totalElements = pages.sumOf { it.totalElements },
+                totalPages = pages.maxOf { it.totalPages },
             )
         }
 
