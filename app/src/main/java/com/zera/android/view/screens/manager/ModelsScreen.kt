@@ -52,24 +52,12 @@ fun ModelsScreen(
         scrollable = false,
         onFabClick = { /* TODO: abrir chatbot */ },
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(Spacing.small),
-        ) {
-            ZeraSearchInput(
-                value = state.searchQuery,
-                onValueChange = viewModel::onSearchQueryChange,
-                placeholder = "Pesquisar por descrição, nome ou material...",
-                onSearch = viewModel::onSearch,
-                modifier = Modifier.weight(1f),
-            )
-            IconButton(
-                icon = ZeraIcon.Filter,
-                onClick = viewModel::onFilterClick,
-                contentDescription = "Filtros",
-                type = ZeraButtonType.Base,
-            )
-        }
+        ZeraSearchInput(
+            value = state.searchQuery,
+            onValueChange = viewModel::onSearchQueryChange,
+            placeholder = "Pesquisar por descrição, nome ou material...",
+            onSearch = viewModel::onSearch,
+        )
 
         ZeraButton(
             text = "Adicionar novo modelo",

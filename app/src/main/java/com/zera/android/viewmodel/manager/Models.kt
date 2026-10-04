@@ -12,7 +12,7 @@ data class ModelsState(
     val models: List<OptionItem> = emptyList(),
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
-    val isModelUsageSheetVisible: Boolean = true,
+    val isModelUsageSheetVisible: Boolean = false,
 )
 
 class ModelsViewModel : ZeraViewModel() {
@@ -25,10 +25,6 @@ class ModelsViewModel : ZeraViewModel() {
 
     fun onSearch() {
         // TODO: buscar modelos pelo termo em state.searchQuery.
-    }
-
-    fun onFilterClick() {
-        // TODO: abrir filtros.
     }
 
     fun onAddModelClick() {
