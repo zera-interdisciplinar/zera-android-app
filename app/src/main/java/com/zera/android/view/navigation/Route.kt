@@ -57,6 +57,9 @@ sealed interface Route{
     @Serializable
     data object Models : Route
 
+    @Serializable
+    data object ModelCreation : Route
+
     // ROTAS DE OPERARIO
     @Serializable
     data object EmployeeHome : Route

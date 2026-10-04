@@ -2,6 +2,8 @@ package com.zera.android.viewmodel.manager
 
 import androidx.compose.runtime.mutableStateOf
 import com.zera.android.view.components.lists.OptionItem
+import com.zera.android.view.navigation.Route
+import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.viewmodel.ZeraViewModel
 
 data class ModelsState(
@@ -30,7 +32,7 @@ class ModelsViewModel : ZeraViewModel() {
     }
 
     fun onAddModelClick() {
-        // TODO: navegar para a criação de um novo modelo.
+        ZeraNavigator.push(Route.ModelCreation)
     }
 
     fun onModelClick(model: OptionItem) {
