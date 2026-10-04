@@ -9,12 +9,14 @@ data class ModelCreationState(
     val material: String = "",
     val brand: String = "",
     val notes: String = "",
-    val materialOptions: List<String> = emptyList(),
+//    val materialOptions: List<String> = emptyList(),
+    val materialOptions: List<String> = listOf<String>("Plastico", "Ferro", "Aço", "Seila") //TODO: Este é um placeholder, devemos puxar a lista de materiais disponiveis do back, ou definir.
 )
 
 class ModelCreationViewModel : ZeraViewModel() {
     private val _state = mutableStateOf(ModelCreationState())
     val state = _state
+
 
     fun onModelNameChange(value: String) {
         _state.value = _state.value.copy(modelName = value)

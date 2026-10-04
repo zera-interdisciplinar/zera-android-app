@@ -19,7 +19,6 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.zera.android.view.components.buttons.IconButton
 import com.zera.android.view.components.buttons.ZeraButton
 import com.zera.android.view.components.buttons.ZeraButtonType
 import com.zera.android.view.components.inputs.ZeraDropdownInput
@@ -28,7 +27,6 @@ import com.zera.android.view.components.navigation.UpperNavBar
 import com.zera.android.view.components.texts.BodyText
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
-import com.zera.android.view.theme.icons.ZeraIcon
 import com.zera.android.viewmodel.manager.ModelCreationViewModel
 
 @Composable
