@@ -11,7 +11,7 @@ Esta pasta é a fonte de verdade técnica do app Android do Zera, seguindo prát
 | [02-padroes-e-convencoes.md](02-padroes-e-convencoes.md) | Convenções de nomenclatura, organização de pastas, estilo de código Compose/Kotlin, inconsistências conhecidas. |
 | [03-catalogo-componentes.md](03-catalogo-componentes.md) | Design System (tokens, textos, botões, containers, inputs, cards, listas, navegação, ícones) e componentes de domínio reutilizáveis. |
 | [04-modelo-de-dados.md](04-modelo-de-dados.md) | DTOs, persistência local (SharedPreferences) e mapeamentos entre camadas. |
-| [05-regras-de-negocio/](05-regras-de-negocio/) | Um arquivo por domínio de negócio (`inventory-dashboard.md` para home/indicadores, `itens.md` para catálogo/PDI), com `template-regra-negocio.md` como modelo padrão. |
+| [05-regras-de-negocio/](05-regras-de-negocio/) | Um arquivo por domínio de negócio (`inventory-dashboard.md` para home/indicadores, `itens.md` para catálogo/PDI, `modelos.md` para cadastro de modelos), com `template-regra-negocio.md` como modelo padrão. |
 | [06-contratos-api.md](06-contratos-api.md) | Endpoints consumidos, payloads, autenticação e tratamento de erros (adm-core, Scrapy e ms-inventory: dashboard + itens). |
 | [contrato-scrapy/contrato-scrapy-api.md](contrato-scrapy/contrato-scrapy-api.md) | Contrato da API mobile Scrapy (`POST /v1/boot`, `POST /v1/flags`, header `apikey`, prefixo Kong). |
 | [contrato-scrapy/contexto.md](contrato-scrapy/contexto.md) | Como o app Android integra a Scrapy (`ScrapyClient`, `Boot`, `LoadFlags`, `AppConfig`). |
@@ -21,7 +21,7 @@ Esta pasta é a fonte de verdade técnica do app Android do Zera, seguindo prát
 | [contrato-pdi/contexto.md](contrato-pdi/contexto.md) | O que o app já implementa na listagem e na PDI (`GetItems`, `GetItemDetails`, `GetCategories`) e por quê. |
 | [contrato-adm-core-membros/contrato-team-management.md](contrato-adm-core-membros/contrato-team-management.md) | Contrato de `GET /api/v1/users`, `count-by-manager` e convites (`/invitations`). |
 | [contrato-adm-core-membros/contexto.md](contrato-adm-core-membros/contexto.md) | O que o app já implementa no time do gestor (`CountActiveEmployees`, lista, pendentes, criar convite) e por quê. |
-| [07-especificacoes/](07-especificacoes/) | Um arquivo por feature/user story no formato Given/When/Then (`manager-home-dashboard.md`, `indexes.md`, `itens.md`, `item-details.md`, `login.md`, ...), com `template-spec.md` como modelo padrão. |
+| [07-especificacoes/](07-especificacoes/) | Um arquivo por feature/user story no formato Given/When/Then (`manager-home-dashboard.md`, `indexes.md`, `itens.md`, `item-details.md`, `modelos.md`, `login.md`, ...), com `template-spec.md` como modelo padrão. |
 | [08-decisoes-arquiteturais/](08-decisoes-arquiteturais/) | ADRs curtos: decisão, alternativas consideradas e motivo da escolha. |
 | [09-stack-e-dependencias.md](09-stack-e-dependencias.md) | Bibliotecas usadas, versões e motivo da escolha (inclui nota sobre Firebase configurado mas não utilizado). |
 | [10-fluxos-de-trabalho.md](10-fluxos-de-trabalho.md) | Checklist por tipo de tarefa: o que checar no código, o que checar nos docs, e quando parar e envolver o usuário. |

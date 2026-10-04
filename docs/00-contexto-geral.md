@@ -29,6 +29,7 @@ Implementados no app hoje:
 1. **Onboarding/login** — splash (`POST /v1/boot` na Scrapy, header `apikey`) → tela de boas-vindas → login ou primeiro acesso (cadastro via código de convite) → `POST /v1/flags` → redirecionamento por perfil (Gestor ou Funcionário).
 2. **Visão geral do Gestor** — dashboard com ocupação de estoque, atalhos (itens/funcionários), alertas e últimos itens cadastrados, alimentado por `GET /api/v1/dashboard/home` (`ms-inventory`). A tela de indicadores (`Route.Indexes`) usa `GET /api/v1/dashboard/indicators`. O atalho de funcionários ainda não tem fonte nessa API.
 3. **Catálogo e detalhe de itens (Gestor)** — `Route.Itens` lista o inventário da unidade (`GET /api/v1/items` + categorias); tocar um item abre a PDI (`GET /api/v1/items/{id}`). Editar/aprovar ainda não chamam API.
+4. **Modelos (Gestor, interface em progresso)** — `ModelsScreen` apresenta a lista e a orientação de uso; `ModelCreationScreen` coleta nome, material, marca e observação, seguida de `ModelCreationSuccessScreen`. A criação e a aprovação ainda não persistem na API; as opções de material são placeholders.
 
 Visão futura (resumo do escopo de produto para Gestor e Funcionário; cada item ganhará spec própria em [07-especificacoes/](07-especificacoes/) quando entrar em desenvolvimento):
 

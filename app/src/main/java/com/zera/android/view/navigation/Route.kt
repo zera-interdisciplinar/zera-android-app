@@ -54,6 +54,20 @@ sealed interface Route{
     @Serializable
     data object ItensResume : Route
 
+    @Serializable
+    data object Models : Route
+
+    @Serializable
+    data object ModelCreation : Route
+
+    @Serializable
+    data class ModelCreationSuccess(
+        val modelName: String,
+        val material: String,
+        val brand: String,
+        val notes: String,
+    ) : Route
+
     // ROTAS DE OPERARIO
     @Serializable
     data object EmployeeHome : Route
