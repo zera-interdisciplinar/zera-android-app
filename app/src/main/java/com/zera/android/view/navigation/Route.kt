@@ -43,7 +43,12 @@ sealed interface Route{
     data object Recycling : Route
 
     @Serializable
-    data object ItensSelection : Route
+    data class ItensSelection(
+        val placeId: String,
+        val placeName: String,
+        val placeAddress: String,
+        val distanceMeters: Long,
+    ) : Route
 
     @Serializable
     data object RecyclingResume : Route

@@ -22,9 +22,13 @@ import com.zera.android.view.components.texts.SubtitleText
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
 import com.zera.android.viewmodel.manager.ItensSelectionViewModel
+import com.zera.android.viewmodel.manager.formatDistanceMeters
 
 @Composable
 fun ItensSelectionScreen(
+    placeName: String,
+    placeAddress: String,
+    distanceMeters: Long,
     viewModel: ItensSelectionViewModel = viewModel(),
 ) {
     val state by viewModel.state
@@ -49,6 +53,12 @@ fun ItensSelectionScreen(
                 .padding(horizontal = Spacing.medium, vertical = Spacing.small),
             verticalArrangement = Arrangement.spacedBy(Spacing.medium),
         ) {
+            SubtitleText(text = placeName.ifBlank { "Recicladora" })
+            CaptionText(
+                text = listOf(placeAddress, formatDistanceMeters(distanceMeters))
+                    .filter { it.isNotBlank() }
+                    .joinToString(" · "),
+            )
             SubtitleText(text = "Quais produtos serão descartados?")
             ZeraSearchInput(
                 value = state.searchQuery,
@@ -84,6 +94,10 @@ fun ItensSelectionScreen(
 @Preview(heightDp = 800)
 private fun ItensSelectionScreenPreview() {
     ZeraTheme {
-        ItensSelectionScreen()
+        ItensSelectionScreen(
+            placeName = "Cooperativa Recicla SP",
+            placeAddress = "Rua X, 123",
+            distanceMeters = 1240,
+        )
     }
 }

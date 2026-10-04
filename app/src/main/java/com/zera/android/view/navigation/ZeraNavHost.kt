@@ -143,8 +143,13 @@ fun ZeraNavHost() {
                         RecyclingScreen()
                     }
                 }
-                composable<Route.ItensSelection> {
-                    ItensSelectionScreen()
+                composable<Route.ItensSelection> { backStackEntry ->
+                    val route = backStackEntry.toRoute<Route.ItensSelection>()
+                    ItensSelectionScreen(
+                        placeName = route.placeName,
+                        placeAddress = route.placeAddress,
+                        distanceMeters = route.distanceMeters,
+                    )
                 }
                 composable<Route.RecyclingResume> {
                     RecyclingResumeScreen()

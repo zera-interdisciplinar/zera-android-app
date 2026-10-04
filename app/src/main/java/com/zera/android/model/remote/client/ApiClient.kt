@@ -6,6 +6,7 @@ import com.zera.android.model.local.SqliteManager
 import com.zera.android.model.remote.service.AuthService
 import com.zera.android.model.remote.service.InvitationService
 import com.zera.android.model.remote.service.SelfUserService
+import com.zera.android.model.remote.service.RecyclingPlacesService
 import com.zera.android.model.remote.service.TelephoneService
 import com.zera.android.model.remote.service.UsersService
 import kotlinx.serialization.json.Json
@@ -51,4 +52,8 @@ object ApiClient {
     val usersService: UsersService by lazy { retrofit.create(UsersService::class.java) }
 
     val telephoneService: TelephoneService by lazy { retrofit.create(TelephoneService::class.java) }
+
+    val recyclingPlacesService: RecyclingPlacesService by lazy {
+        retrofit.create(RecyclingPlacesService::class.java)
+    }
 }
