@@ -17,6 +17,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -25,11 +26,13 @@ import com.zera.android.view.theme.Radius
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.view.theme.ZeraTheme
+import com.zera.android.view.theme.icons.ZeraIcon
 import com.zera.android.view.theme.palette
 
 /**
- * Grupo de chips de seleção única: cada string de [options] vira um chip e, ao
- * tocar num deles, [onSelectedChange] é chamado com aquele texto.
+ * Grupo de chips: cada string de [options] vira um chip. Por padrão, tocar num
+ * deles chama [onSelectedChange]; com [selectMany], alterna a seleção na lista
+ * [selectedValues] e chama [onSelectedValuesChange].
  *
  * Assim como [ZeraTextInput], é um componente controlado — não guarda a seleção
  * internamente, apenas reporta o toque. Cabe ao chamador manter [selected] e
@@ -38,6 +41,11 @@ import com.zera.android.view.theme.palette
  * @param options textos exibidos, um chip por item.
  * @param selected texto do chip atualmente selecionado, ou `null` quando nenhum está.
  * @param onSelectedChange chamado com o texto do chip tocado.
+ * @param selectMany quando `true`, permite selecionar mais de um chip.
+ * @param selectedValues valores atualmente selecionados no modo múltiplo.
+ * @param onSelectedValuesChange chamado com a lista atualizada no modo múltiplo.
+ * @param showX quando `true`, mostra um X ao lado da label dos chips selecionados.
+ *   Também é ativado automaticamente quando [selectMany] for `true`.
  * @param modifier modificador externo opcional.
  * @param label rótulo exibido acima do grupo. Omitido quando vazio.
  * @param style família de cor usada para destacar o chip selecionado. Ver [ZeraColorFamily].
@@ -49,13 +57,19 @@ import com.zera.android.view.theme.palette
 @Composable
 fun ZeraChipsGroup(
     options: List<String>,
-    selected: String?,
-    onSelectedChange: (String) -> Unit,
+    selected: String? = null,
+    onSelectedChange: (String) -> Unit = {},
     modifier: Modifier = Modifier,
     label: String = "",
     style: ZeraColorFamily = ZeraColorFamily.Yellow,
     stacked: Boolean = false,
+    selectMany: Boolean = false,
+    selectedValues: List<String> = emptyList(),
+    onSelectedValuesChange: (List<String>) -> Unit = {},
+    showX: Boolean = false,
 ) {
+    val showSelectedX = showX || selectMany
+
     Column(modifier = modifier) {
         if (label.isNotEmpty()) {
             LabelText(
@@ -72,9 +86,21 @@ fun ZeraChipsGroup(
                 options.forEach { option ->
                     ZeraChip(
                         text = option,
-                        selected = option == selected,
+                        selected = if (selectMany) option in selectedValues else option == selected,
                         style = style,
-                        onClick = { onSelectedChange(option) },
+                        showX = showSelectedX,
+                        onClick = {
+                            if (selectMany) {
+                                val updatedValues = if (option in selectedValues) {
+                                    selectedValues - option
+                                } else {
+                                    selectedValues + option
+                                }
+                                onSelectedValuesChange(updatedValues)
+                            } else {
+                                onSelectedChange(option)
+                            }
+                        },
                     )
                 }
             }
@@ -86,9 +112,21 @@ fun ZeraChipsGroup(
                 options.forEach { option ->
                     ZeraChip(
                         text = option,
-                        selected = option == selected,
+                        selected = if (selectMany) option in selectedValues else option == selected,
                         style = style,
-                        onClick = { onSelectedChange(option) },
+                        showX = showSelectedX,
+                        onClick = {
+                            if (selectMany) {
+                                val updatedValues = if (option in selectedValues) {
+                                    selectedValues - option
+                                } else {
+                                    selectedValues + option
+                                }
+                                onSelectedValuesChange(updatedValues)
+                            } else {
+                                onSelectedChange(option)
+                            }
+                        },
                     )
                 }
             }
@@ -107,6 +145,7 @@ private fun ZeraChip(
     text: String,
     selected: Boolean,
     style: ZeraColorFamily,
+    showX: Boolean,
     onClick: () -> Unit,
 ) {
     val palette = style.palette()
@@ -121,12 +160,25 @@ private fun ZeraChip(
         contentColor = contentColor,
         border = BorderStroke(if (selected) 2.dp else 1.dp, borderColor),
     ) {
-        LabelText(
-            text = text,
-            bold = selected,
-            color = contentColor,
+        Row(
             modifier = Modifier.padding(horizontal = Spacing.medium, vertical = Spacing.small),
-        )
+            horizontalArrangement = Arrangement.spacedBy(Spacing.small),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            LabelText(
+                text = text,
+                bold = selected,
+                color = contentColor,
+            )
+            if (showX && selected) {
+                ZeraIcon(
+                    icon = ZeraIcon.Close,
+                    contentDescription = null,
+                    size = Spacing.small,
+                    tint = contentColor,
+                )
+            }
+        }
     }
 }
 
