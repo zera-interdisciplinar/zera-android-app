@@ -4,11 +4,11 @@
 
 - **Domínio:** Inventário (listagem e PDI)
 - **Perfil(is) envolvido(s):** Gestor
-- **Última atualização:** 2026-09-26
+- **Última atualização:** 2026-10-03
 
 ## Visão geral
 
-Como o app traduz `GET /api/v1/items`, `GET /api/v1/items/{id}` e `GET /api/v1/categories` para chips, lista e card de detalhe. O backend filtra por unidade (`X-Unit-Id`); o app não mistura unidades no cliente.
+Como o app traduz `GET /api/v1/items`, `GET /api/v1/items/{id}` e `GET /api/v1/categories` para filtros, lista e detalhe. O backend filtra por unidade (`X-Unit-Id`); o app não mistura unidades no cliente.
 
 ## Regras
 
@@ -20,13 +20,13 @@ Catálogo = `GET /api/v1/items`. Não usar `dashboard/home.recentItems` nem `das
 
 `q` só vai na request se o texto trimado não for vazio. Casa `displayCode`, nome, modelo e material. Não casa UUID `id`.
 
-### Chips → query
+### Filtros do catálogo
 
-| Chip | Query |
-|---|---|
-| Todos | sem `status`, sem `categoryId` |
-| Pendentes | duas requests: `PENDING_APPROVAL` e `AWAITING_EVALUATION`; merge por `id`; `totalElements` somado |
-| Nome de categoria | `categoryId` = UUID da categoria; sem `status` |
+Os filtros são escolhidos no BottomSheet aberto pelo botão de filtro. Status e Categoria permitem seleção múltipla. Os chips exibidos abaixo da busca representam somente filtros aplicados; tocar em um chip remove aquele valor e recarrega a lista. Abrir e fechar o BottomSheet sem aplicar descarta o rascunho de seleção.
+
+Seleções dentro do mesmo grupo usam OR; Status e Categoria combinados usam AND. Como `GET /api/v1/items` aceita um `status` e um `categoryId` por chamada, o app consulta cada combinação do produto cartesiano entre os valores escolhidos e mescla as páginas por `id`. Sem seleção em um grupo, esse parâmetro fica ausente. Sem nenhum filtro, é feita uma consulta sem `status` e sem `categoryId`.
+
+O grupo Status usa os valores visíveis de `ItemStatus`: Pendente, Recusado, Aprovado, Em manutenção, Em aprovação e Descartado. O grupo Categoria usa os nomes obtidos por `GET /api/v1/categories`, convertidos para seus UUIDs em `categoryId`. A seção Situação ainda não tem opções nem regra e não aparece no filtro ativo.
 
 ### Status na UI
 
