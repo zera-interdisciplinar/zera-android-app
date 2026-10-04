@@ -42,61 +42,50 @@ class ItensMappingTest {
     }
 
     @Test
-    fun todosOmitsStatusAndCategory() {
-        val query = ItensViewModel.queryFor(
-            selectedFilter = ItensState.FILTER_ALL,
+    fun noSelectedFiltersRequestsAllItems() {
+        val queries = ItensViewModel.queriesFor(
+            selectedStatuses = emptyList(),
+            selectedCategories = emptyList(),
             searchQuery = "",
             categories = emptyList(),
         )
 
-        assertNull(query.status)
-        assertEquals(emptyList<String>(), query.extraStatuses)
-        assertNull(query.categoryId)
-        assertNull(query.q)
+        assertEquals(listOf(ItemsQuery()), queries)
     }
 
     @Test
-    fun pendentesRequestsBothStatuses() {
-        val query = ItensViewModel.queryFor(
-            selectedFilter = ItensState.FILTER_PENDING,
+    fun statusAndCategorySelectionsCreateCombinedQueries() {
+        val queries = ItensViewModel.queriesFor(
+            selectedStatuses = listOf("Pendente", "Recusado"),
+            selectedCategories = listOf("Informática", "Móveis"),
             searchQuery = "notebook",
-            categories = emptyList(),
+            categories = listOf(
+                CategoryResponseDTO(id = "c1", name = "Informática"),
+                CategoryResponseDTO(id = "c2", name = "Móveis"),
+            ),
         )
 
-        assertEquals("PENDING_APPROVAL", query.status)
-        assertEquals(listOf("AWAITING_EVALUATION"), query.extraStatuses)
-        assertNull(query.categoryId)
-        assertEquals("notebook", query.q)
+        assertEquals(
+            listOf(
+                ItemsQuery("PENDING_APPROVAL", "c1", "notebook"),
+                ItemsQuery("PENDING_APPROVAL", "c2", "notebook"),
+                ItemsQuery("REJECTED", "c1", "notebook"),
+                ItemsQuery("REJECTED", "c2", "notebook"),
+            ),
+            queries,
+        )
     }
 
     @Test
-    fun categoryChipSendsCategoryId() {
-        val query = ItensViewModel.queryFor(
-            selectedFilter = "Informática",
+    fun categorySelectionSendsCategoryId() {
+        val queries = ItensViewModel.queriesFor(
+            selectedStatuses = emptyList(),
+            selectedCategories = listOf("Informática"),
             searchQuery = "  ",
             categories = listOf(CategoryResponseDTO(id = "c1", name = "Informática")),
         )
 
-        assertNull(query.status)
-        assertEquals("c1", query.categoryId)
-        assertNull(query.q)
-    }
-
-    @Test
-    fun buildsFilterChipsWithCategoryNames() {
-        val options = ItensViewModel.filterOptionsFor(
-            listOf(CategoryResponseDTO(id = "c1", name = "Informática")),
-        )
-
-        assertEquals(listOf("Todos", "Pendentes", "Informática"), options)
-    }
-
-    @Test
-    fun keepsCategoriaPlaceholderWhenCategoriesAreEmpty() {
-        assertEquals(
-            listOf("Todos", "Pendentes", "Categoria"),
-            ItensViewModel.filterOptionsFor(emptyList()),
-        )
+        assertEquals(listOf(ItemsQuery(categoryId = "c1")), queries)
     }
 
     @Test
@@ -116,7 +105,7 @@ class ItensMappingTest {
             totalPages = 3,
         )
 
-        val merged = ItensViewModel.mergePages(pending, awaiting)
+        val merged = ItensViewModel.mergePages(listOf(pending, awaiting))
 
         assertEquals(listOf("a", "b"), merged.content.map { it.id })
         assertEquals(3L, merged.totalElements)
