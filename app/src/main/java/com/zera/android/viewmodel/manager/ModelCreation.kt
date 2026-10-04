@@ -1,6 +1,7 @@
 package com.zera.android.viewmodel.manager
 
 import androidx.compose.runtime.mutableStateOf
+import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.viewmodel.ZeraViewModel
 
@@ -39,7 +40,15 @@ class ModelCreationViewModel : ZeraViewModel() {
     }
 
     fun onCreateClick() {
-        // TODO: validar e persistir o modelo.
+        val form = _state.value
+        ZeraNavigator.push(
+            Route.ModelCreationSuccess(
+                modelName = form.modelName,
+                material = form.material,
+                brand = form.brand,
+                notes = form.notes,
+            ),
+        )
     }
 
     fun onCancelClick() {
