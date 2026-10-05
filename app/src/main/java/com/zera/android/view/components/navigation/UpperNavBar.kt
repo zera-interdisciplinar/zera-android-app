@@ -45,8 +45,9 @@ import com.zera.android.view.transition.ScreenAnimation
  * @param backgroundVariant quando `true`, adapta título, "Voltar" e ícones para
  *   [MaterialTheme.colorScheme.onPrimary] — use quando a barra estiver sobre um fundo
  *   [MaterialTheme.colorScheme.primary] (ver [com.zera.android.view.screens.manager.ManagerScaffold]).
- * @param onSideBarClick ação do botão de menu (abre a [ManagerSideBar] no
- *   [com.zera.android.view.screens.manager.ManagerScaffold]).
+ * @param onSideBarClick ação do botão de menu (abre a [SideBar] no
+ *   [com.zera.android.view.screens.manager.ManagerScaffold] e no
+ *   [com.zera.android.view.screens.employee.EmployeeScaffold]).
  */
 @Composable
 fun UpperNavBar(

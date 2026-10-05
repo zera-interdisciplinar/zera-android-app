@@ -16,6 +16,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -27,6 +31,8 @@ import androidx.compose.ui.unit.dp
 import com.zera.android.view.components.buttons.IconButton
 import com.zera.android.view.components.containers.ZeraGradientBox
 import com.zera.android.view.components.navigation.EmployeeBottomNavBar
+import com.zera.android.view.components.navigation.EmployeeSideBarItems
+import com.zera.android.view.components.navigation.SideBarOverlay
 import com.zera.android.view.components.navigation.UpperNavBar
 import com.zera.android.view.components.texts.BodyText
 import com.zera.android.view.navigation.Route
@@ -48,10 +54,14 @@ private val BottomFadeHeight = 25.dp
  * flutuante de assistente virtual, com os insets de status bar / navigation bar já
  * aplicados. O [content] é desenhado dentro de uma [Column] rolável.
  *
+ * O botão de menu da [UpperNavBar] abre a [com.zera.android.view.components.navigation.SideBar]
+ * (com os atalhos do operário) por cima da tela, com scrim. Ela fecha ao tocar fora dela ou
+ * no botão voltar do sistema.
+ *
  * @param title título exibido na [UpperNavBar].
- * @param currentRoute rota da própria tela, repassada ao [EmployeeBottomNavBar] para
- *   destacar o atalho da tela atual.
- * @param modifier modificador externo opcional, aplicado ao [Scaffold].
+ * @param currentRoute rota da própria tela, repassada ao [EmployeeBottomNavBar] e à sidebar
+ *   para destacar o atalho da tela atual.
+ * @param modifier modificador externo opcional, aplicado ao [Box] que envolve o [Scaffold].
  * @param goBack quando `true`, exibe o botão "Voltar" na [UpperNavBar].
  * @param onBackClick ação do botão "Voltar". Só é usada quando [goBack] é `true`.
  * @param showActions quando `true` (padrão), exibe os atalhos de notificações/perfil/menu
@@ -81,90 +91,100 @@ fun EmployeeScaffold(
 ) {
     val backgroundColor = MaterialTheme.colorScheme.background
 
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        containerColor = backgroundColor,
-        topBar = {
-            UpperNavBar(
-                title = title,
-                goBack = goBack,
-                onBackClick = onBackClick,
-                showActions = showActions,
-                // TODO: abrir menu lateral do operário quando ele existir
-                onSideBarClick = {},
-                modifier = Modifier
-                    .statusBarsPadding()
-                    .padding(horizontal = Spacing.small),
-            )
-        },
-        bottomBar = {
-            EmployeeBottomNavBar(
-                currentRoute = currentRoute,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .navigationBarsPadding()
-                    .padding(horizontal = Spacing.medium, vertical = Spacing.small)
-                    .sharedTransition(SharedElementKeys.EmployeeBottomNavBar),
-            )
-        },
-        floatingActionButton = {
-            if (fabIcon != null) {
-                IconButton(
-                    icon = fabIcon,
-                    onClick = onFabClick,
-                    contentDescription = "Assistente virtual",
-                    size = 56.dp,
-                )
-            }
-        },
-    ) { innerPadding ->
-        val scrollState = rememberScrollState()
-        val density = LocalDensity.current
-        val topFadePx = with(density) { TopFadeHeight.toPx() }
-        val bottomFadePx = with(density) { BottomFadeHeight.toPx() }
+    var showSideBar by rememberSaveable { mutableStateOf(false) }
 
-        Box {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .then(if (scrollable) Modifier.verticalScroll(scrollState) else Modifier)
-                    .padding(horizontal = contentPadding, vertical = Spacing.small)
-                    .background(color = backgroundColor),
-                verticalArrangement = Arrangement.spacedBy(Spacing.medium),
-                content = content,
-            )
-            ZeraGradientBox(
-                brush = Brush.verticalGradient(colors = listOf(backgroundColor, NoColor)),
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .padding(innerPadding)
-                    .fillMaxWidth()
-                    .height(TopFadeHeight)
-                    .graphicsLayer {
-                        alpha = when {
-                            !edgeFade -> 0f
-                            !scrollable -> 1f
-                            else -> (scrollState.value / topFadePx).coerceIn(0f, 1f)
-                        }
-                    },
-            ) {}
-            ZeraGradientBox(
-                brush = Brush.verticalGradient(colors = listOf(NoColor, backgroundColor)),
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(innerPadding)
-                    .fillMaxWidth()
-                    .height(BottomFadeHeight)
-                    .graphicsLayer {
-                        alpha = when {
-                            !edgeFade -> 0f
-                            !scrollable -> 1f
-                            else -> ((scrollState.maxValue - scrollState.value) / bottomFadePx).coerceIn(0f, 1f)
-                        }
-                    },
-            ) {}
+    Box(modifier = modifier) {
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            containerColor = backgroundColor,
+            topBar = {
+                UpperNavBar(
+                    title = title,
+                    goBack = goBack,
+                    onBackClick = onBackClick,
+                    showActions = showActions,
+                    onSideBarClick = { showSideBar = true },
+                    modifier = Modifier
+                        .statusBarsPadding()
+                        .padding(horizontal = Spacing.small),
+                )
+            },
+            bottomBar = {
+                EmployeeBottomNavBar(
+                    currentRoute = currentRoute,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .navigationBarsPadding()
+                        .padding(horizontal = Spacing.medium, vertical = Spacing.small)
+                        .sharedTransition(SharedElementKeys.EmployeeBottomNavBar),
+                )
+            },
+            floatingActionButton = {
+                if (fabIcon != null) {
+                    IconButton(
+                        icon = fabIcon,
+                        onClick = onFabClick,
+                        contentDescription = "Assistente virtual",
+                        size = 56.dp,
+                    )
+                }
+            },
+        ) { innerPadding ->
+            val scrollState = rememberScrollState()
+            val density = LocalDensity.current
+            val topFadePx = with(density) { TopFadeHeight.toPx() }
+            val bottomFadePx = with(density) { BottomFadeHeight.toPx() }
+
+            Box {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding)
+                        .then(if (scrollable) Modifier.verticalScroll(scrollState) else Modifier)
+                        .padding(horizontal = contentPadding, vertical = Spacing.small)
+                        .background(color = backgroundColor),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.medium),
+                    content = content,
+                )
+                ZeraGradientBox(
+                    brush = Brush.verticalGradient(colors = listOf(backgroundColor, NoColor)),
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(innerPadding)
+                        .fillMaxWidth()
+                        .height(TopFadeHeight)
+                        .graphicsLayer {
+                            alpha = when {
+                                !edgeFade -> 0f
+                                !scrollable -> 1f
+                                else -> (scrollState.value / topFadePx).coerceIn(0f, 1f)
+                            }
+                        },
+                ) {}
+                ZeraGradientBox(
+                    brush = Brush.verticalGradient(colors = listOf(NoColor, backgroundColor)),
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(innerPadding)
+                        .fillMaxWidth()
+                        .height(BottomFadeHeight)
+                        .graphicsLayer {
+                            alpha = when {
+                                !edgeFade -> 0f
+                                !scrollable -> 1f
+                                else -> ((scrollState.maxValue - scrollState.value) / bottomFadePx).coerceIn(0f, 1f)
+                            }
+                        },
+                ) {}
+            }
         }
+
+        SideBarOverlay(
+            visible = showSideBar,
+            onDismiss = { showSideBar = false },
+            items = EmployeeSideBarItems,
+            currentRoute = currentRoute,
+        )
     }
 }
 

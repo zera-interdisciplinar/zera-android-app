@@ -1,14 +1,6 @@
 package com.zera.android.view.screens.manager
 
-import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,7 +13,6 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
@@ -29,15 +20,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -45,7 +33,8 @@ import androidx.compose.ui.unit.dp
 import com.zera.android.view.components.buttons.IconButton
 import com.zera.android.view.components.containers.ZeraGradientBox
 import com.zera.android.view.components.navigation.ManagerBottomNavBar
-import com.zera.android.view.components.navigation.ManagerSideBar
+import com.zera.android.view.components.navigation.ManagerSideBarItems
+import com.zera.android.view.components.navigation.SideBarOverlay
 import com.zera.android.view.components.navigation.UpperNavBar
 import com.zera.android.view.components.texts.BodyText
 import com.zera.android.view.navigation.Route
@@ -59,7 +48,6 @@ import com.zera.android.view.transition.sharedTransition
 
 private val TopFadeHeight = 15.dp
 private val BottomFadeHeight = 25.dp
-private val SideBarWidth = 280.dp
 
 /**
  * Casca (Scaffold) compartilhada pelas telas da área do gestor.
@@ -95,8 +83,9 @@ private val SideBarWidth = 280.dp
  *   sem nenhum scroll, como um mapa).
  * @param content conteúdo da tela, desenhado dentro da [Column] do Scaffold.
  *
- * O botão de menu da [UpperNavBar] abre a [ManagerSideBar] por cima da tela (com scrim). Ela
- * fecha ao tocar fora dela ou no botão voltar do sistema.
+ * O botão de menu da [UpperNavBar] abre a [com.zera.android.view.components.navigation.SideBar]
+ * (com os atalhos do gestor) por cima da tela, com scrim. Ela fecha ao tocar fora dela ou no
+ * botão voltar do sistema.
  */
 @Composable
 fun ManagerScaffold(
@@ -120,8 +109,6 @@ fun ManagerScaffold(
     }
 
     var showSideBar by rememberSaveable { mutableStateOf(false) }
-
-    BackHandler(enabled = showSideBar) { showSideBar = false }
 
     Box(modifier = modifier) {
         Scaffold(
@@ -214,40 +201,12 @@ fun ManagerScaffold(
             }
         }
 
-        AnimatedVisibility(
+        SideBarOverlay(
             visible = showSideBar,
-            enter = fadeIn(),
-            exit = fadeOut(),
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.5f))
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null,
-                        onClick = { showSideBar = false },
-                    ),
-            )
-        }
-
-        AnimatedVisibility(
-            visible = showSideBar,
-            modifier = Modifier.align(Alignment.CenterEnd),
-            enter = slideInHorizontally(initialOffsetX = { it }),
-            exit = slideOutHorizontally(targetOffsetX = { it }),
-        ) {
-            ManagerSideBar(
-                currentRoute = currentRoute,
-                onButtonClicked = { showSideBar = false },
-                modifier = Modifier
-                    .width(SideBarWidth)
-                    // Absorve toques na área da sidebar para não vazarem até o scrim e fecharem o menu.
-                    .pointerInput(Unit) {}
-                    .statusBarsPadding()
-                    .navigationBarsPadding(),
-            )
-        }
+            onDismiss = { showSideBar = false },
+            items = ManagerSideBarItems,
+            currentRoute = currentRoute,
+        )
     }
 }
 
