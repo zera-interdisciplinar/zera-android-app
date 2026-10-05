@@ -54,6 +54,8 @@ private val BottomFadeHeight = 25.dp
  * @param modifier modificador externo opcional, aplicado ao [Scaffold].
  * @param goBack quando `true`, exibe o botão "Voltar" na [UpperNavBar].
  * @param onBackClick ação do botão "Voltar". Só é usada quando [goBack] é `true`.
+ * @param showActions quando `true` (padrão), exibe os atalhos de notificações/perfil/menu
+ *   na [UpperNavBar]. Use `false` em telas que só precisam do "Voltar" (ex.: "Scanear item").
  * @param fabIcon ícone do botão flutuante. Quando `null`, nenhum FAB é exibido.
  * @param onFabClick ação do botão flutuante. Só é usada quando [fabIcon] não for `null`.
  * @param scrollable quando `true` (padrão), a [Column] do conteúdo rola inteira. Use
@@ -69,6 +71,7 @@ fun EmployeeScaffold(
     modifier: Modifier = Modifier,
     goBack: Boolean = false,
     onBackClick: () -> Unit = { ZeraNavigator.goBack() },
+    showActions: Boolean = true,
     fabIcon: ZeraIcon? = ZeraIcon.Chatbot,
     onFabClick: () -> Unit = {},
     scrollable: Boolean = true,
@@ -86,6 +89,7 @@ fun EmployeeScaffold(
                 title = title,
                 goBack = goBack,
                 onBackClick = onBackClick,
+                showActions = showActions,
                 // TODO: abrir menu lateral do operário quando ele existir
                 onSideBarClick = {},
                 modifier = Modifier

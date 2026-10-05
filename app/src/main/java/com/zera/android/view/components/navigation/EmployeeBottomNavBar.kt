@@ -13,10 +13,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zera.android.view.components.buttons.IconButton
 import com.zera.android.view.navigation.Route
+import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.view.theme.Radius
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
 import com.zera.android.view.theme.icons.ZeraIcon
+import com.zera.android.view.transition.ScreenAnimation
 
 @Composable
 fun EmployeeBottomNavBar(
@@ -37,7 +39,7 @@ fun EmployeeBottomNavBar(
             modifier = Modifier.weight(1f),
             label = "Início",
             contentDescription = "Botão para Home",
-            onClick = {}, // TODO: fluxo de navegação do Operário ainda não existe
+            onClick = { navigateTo(currentRoute, Route.EmployeeHome) },
             icon = ZeraIcon.Home,
             selected = if (currentRoute == Route.ManagerHome || currentRoute == Route.EmployeeHome) true else false,
         )
@@ -51,7 +53,7 @@ fun EmployeeBottomNavBar(
         )
         IconButton(
             icon = ZeraIcon.QrCode,
-            onClick = {},
+            onClick = { navigateTo(currentRoute,Route.Scan) },
             contentDescription = "Escanear item",
             size = 64.dp
         )
@@ -67,10 +69,27 @@ fun EmployeeBottomNavBar(
             modifier = Modifier.weight(1f),
             label = "Itens",
             contentDescription = "Botão para Itens",
-            onClick = {}, // TODO: fluxo de navegação do Operário ainda não existe
+            onClick = { navigateTo(currentRoute, Route.EmployeeItems) },
             icon = ZeraIcon.Crate,
-            selected = false,
+            selected = currentRoute == Route.EmployeeItems,
         )
+    }
+}
+
+/**
+ * Navega para a aba [target] sem empilhar telas de aba umas sobre as outras (mesma regra da
+ * `ManagerBottomNavBarViewModel`): a partir da Home empilha normalmente; de outra tela
+ * substitui o topo da pilha; e ao voltar para a Home remove a tela atual e a Home que já
+ * estava por baixo dela, restando uma só Home na pilha.
+ */
+private fun navigateTo(currentRoute: Route, target: Route) {
+    when {
+        currentRoute == target -> Unit
+        currentRoute == Route.EmployeeHome ->
+            ZeraNavigator.push(target, animation = ScreenAnimation.None)
+        target == Route.EmployeeHome ->
+            ZeraNavigator.pushAndPop(target, popCount = 2, animation = ScreenAnimation.None)
+        else -> ZeraNavigator.pushAndPop(target, animation = ScreenAnimation.None)
     }
 }
 
