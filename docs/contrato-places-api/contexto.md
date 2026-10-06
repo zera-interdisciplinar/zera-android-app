@@ -1,34 +1,92 @@
-# Recicladoras próximas no mapa
+# Recicladoras próximas e fluxo de descarte (gestor)
 
-O fluxo de reciclagem mostra a localização do usuário e as cooperativas próximas vindas do `ms-administrative-core`. O contrato de campos está em [contrato-places-api.md](contrato-places-api.md).
+O mapa e o contato da parceira usam o **ms-administrative-core**. O registro do lote é o **ms-inventory**. O PDF é o **ms-artificial-intelligence-core**. O app **não** chama Google Places: GPS → `GET /api/v1/recycling-places?lat=&lng=` no nosso backend → pins. A chave Places fica no servidor. `maps.api.key` só desenha o mapa.
 
-O `ApiClient` já usa um base URL que termina em `api/v1/`, então o Retrofit declara só `recycling-places`. Prefixar `api/v1/` no path gerava `404` com a URL duplicada `api/v1/api/v1/recycling-places`.
+Contratos HTTP: [contrato-places-api.md](contrato-places-api.md) (adm-core: pin, ficha, telefone) e [contrato-descarte.md](contrato-descarte.md) (`POST /disposals` + `POST /reports`). Catálogo `IN_STOCK` na seleção: [contrato-pdi](../contrato-pdi/contrato-detalhes-itens.md).
+
+O `ApiClient` já usa base URL com `api/v1/`. O Retrofit declara só `recycling-places` (sem prefixo duplicado).
+
+Não há endpoint faltando. `disposal_report` no adm-core continua sem HTTP. O app não chama Google Places.
+
+---
+
+## Fluxo (UI)
+
+Registro de um descarte **já feito**. O sistema não agenda: `disposedAt` não pode ser futuro. O inventory grava `destination`, `placeId` e `placeName`. A ficha da parceira (e-mail, telefone) fica no adm-core, ligada ao pin.
+
+Dados entre telas vão no **bundle** (`Route` serializable), não em nova chamada de inventário. Só o gestor. A IA só gera o PDF; sem chat neste fluxo.
+
+```
+Recycling
+  → ItensSelection(placeId, placeName, placeAddress, distanceMeters)
+  → RecyclingResume(+ itemIds, itemNames)
+  → ItensResume(itemIds, itemNames)          // voltar = editar na seleção
+  → SchedulingSuccess(recycler, data, materiais, email, phone, itemNames, disposalId)
+  → ManagerHome (fechar / “voltar para o início”)
+```
+
+1. `RecyclingScreen` carrega o mapa. O gestor escolhe um pin.
+2. `ItensSelectionScreen` lista itens `IN_STOCK`. Confirmar leva pin + itens no bundle.
+3. `RecyclingResumeScreen` mostra o resumo. Horário, “aberto agora” e descrição vêm do pin (`isOpen`, `openingHours`, `description`). “Visualizar itens” abre `ItensResumeScreen` (somente leitura, só bundle).
+4. “Confirmar descarte” chama `POST /api/v1/disposals` com `destination=RECYCLING`, `placeId`, `placeName` e `itemIds`. O `id` da resposta segue no bundle.
+5. `SchedulingSuccessScreen` (nome de tela legado):
+   - E-mail e WhatsApp usam `email` do pin e o telefone de `GET /telephone/recyclings?recyclingBusinessId=`. Sem vínculo, os botões ficam sem contato — não casar pelo nome.
+   - “Gerar relatório” chama `POST /api/v1/reports` com o `id` do inventory.
+   - “Voltar” vai para a home do gestor.
+
+| Passo | O que o app faz hoje |
+|---|---|
+| Mapa | `GetNearbyRecyclingPlaces`. Pin selecionado habilita “selecionar itens”. |
+| Seleção | `GetItems` (`IN_STOCK`). Confirmar empurra pin + itens no bundle. |
+| Resumo | Preenche nome/endereço/distância/itens e `isOpen` / `description` / `openingHours` do pin (bundle). E-mail vem do pin; telefone só se houver `recyclingBusinessId` (`GET /telephone/recyclings`). Sem vínculo, contato fica vazio. Confirmar chama `POST /api/v1/disposals` e navega com o `id` devolvido. |
+| Itens read-only | Só o bundle. Sem clique para editar. |
+| Sucesso | E-mail → `mailto:`. Telefone → WhatsApp `wa.me`. Relatório → `POST /api/v1/reports` (`AiClient`) e abre `report_url`. Home via `pushAndPopAll`. |
+
+---
 
 ## Camadas
 
+### Mapa
+
 | Peça | Onde |
 |---|---|
-| DTO da lista | `model/dto/places/RecyclingPlaceResponseDTO` (`placeId`, `name`, `address`, `lat`, `lng`, `distanceMeters`) |
-| Erro RFC 7807 | `model/dto/places/ProblemDetailDTO` (`detail`), lido em `problemDetailMessage` |
-| Entidade | `model/entity/places/RecyclingPlace` |
-| Service | `RecyclingPlacesService.getNearby(lat, lng, radiusMeters)` registrado em `ApiClient.recyclingPlacesService` |
-| Use case | `GetNearbyRecyclingPlaces` mapeia o DTO e, em `HttpException`, lança `NearbyRecyclingPlacesException` com o `detail` |
-| View model | `NearbyRecyclingPlacesViewModel` na tela de reciclagem |
-| Rota seguinte | `Route.ItensSelection(placeId, placeName, placeAddress, distanceMeters)` |
+| DTO da lista | `RecyclingPlaceResponseDTO` — pin + `isOpen`, `description`, `openingHours`, `recyclingBusinessId`, `email` |
+| Erro RFC 7807 | `ProblemDetailDTO` (`detail`) |
+| Entidade | `RecyclingPlace` |
+| Service | `RecyclingPlacesService.getNearby` em `ApiClient` |
+| Use case | `GetNearbyRecyclingPlaces` |
+| View model | `NearbyRecyclingPlacesViewModel` |
 
-## Mapa e seleção
+- Busca só com GPS (`onUserLocation`). Sem permissão, nada é chamado.
+- Marcadores em `lat`/`lng`. POI e trânsito do mapa base desligados.
+- Card do pin: nome, endereço, distância. Sem lista no fundo azul.
+- `200 []` → “Nenhuma recicladora encontrada por aqui.” `503`/5xx → `detail` + retry. Não misturar os dois.
+- Distância: `< 1000` em metros; senão `1,2 km` (pt-BR).
+- Raio enviado: `radiusMeters=20000` (teto do contrato). Logs `TEMP_PLACES` ainda no mapa — remover depois.
 
-- A busca só dispara quando o GPS devolve coordenada (`onUserLocation`). Sem permissão, nada é chamado.
-- Cada item vira um marcador em `lat`/`lng`. O mapa esconde pontos de interesse e trânsito do Google (`poi` e `transit` com `visibility: off`); restaurantes e lojas do mapa base não aparecem.
-- Toque no marcador seleciona a cooperativa e abre um card claro (nome, endereço, distância). Não há lista de lugares no fundo da tela: nesse fundo azul o texto ficava ilegível.
-- **Selecionar itens para descarte** só habilita com uma cooperativa selecionada e leva nome, endereço, `placeId` e distância para `ItensSelectionScreen`, que mostra esses dados no topo.
-- `200` com lista vazia: “Nenhuma recicladora encontrada por aqui.” `503` (ou outro 5xx): mensagem do `detail` e “Tentar de novo”. Falha não usa a mesma mensagem de lista vazia.
-- Distância: abaixo de 1000 m fica em metros; senão, quilômetros com uma casa (`1240` → `1,2 km`).
+### Resto do descarte
 
-## Debug temporário (remover depois)
+| Peça | Onde |
+|---|---|
+| Contato parceira | `GetRecyclingContact`: e-mail do pin + `TelephoneService.getByRecyclingBusiness` quando `recyclingBusinessId` vem preenchido. Sem id, não chama a lista de fichas. |
+| Relatório IA | `AiClient` + `ReportsService` + `GenerateDisposalReport`. Boot: `ms-ai-url` / `ms-ai-api-key` em `Environments` (default vazio; se vazio, falha clara). |
+| Confirmar descarte | `CreateDisposal` → `InventoryService.createDisposal`. Body: `destination=RECYCLING`, `placeId`, `placeName`, `itemIds`. Sem `disposedAt` (o backend usa hoje; data futura é inválida). O `id` da resposta vai para `SchedulingSuccess` e para `GenerateDisposalReport`. |
 
-Tag de log `TEMP_PLACES` (`Log.i`) em `RecyclingScreen`, `CurrentLocationMap` e `NearbyRecyclingPlacesViewModel`. O raio enviado hoje é `radiusMeters=20000`, o teto do contrato (sem o parâmetro o servidor usava 5000).
+### Testes
 
-## Testes
+Mapa: `RecyclingPlaceResponseDTOTest`, `ProblemDetailMessageTest`, `NearbyRecyclingPlacesMappingTest`.
 
-`RecyclingPlaceResponseDTOTest`, `ProblemDetailMessageTest` e `NearbyRecyclingPlacesMappingTest` (lista vazia vs erro, seleção e formatação de distância).
+Descarte: `ItensSelectionMappingTest`, `RecyclingResumeMappingTest`, `ItensResumeMappingTest`, `SchedulingSuccessContactTest`, `AiClientAuthTest`, parse de `ms-ai-url` em `EnvironmentsTest`.
+
+---
+
+## Contrato vs app
+
+| # | Contrato | App |
+|---|---|---|
+| 1 | Pin traz `isOpen`, `description`, `openingHours` | Mapeados no DTO e no bundle até o resumo. Bloco vazio continua oculto. |
+| 2 | Pin traz `recyclingBusinessId` e `email`; telefone é `GET /telephone/recyclings` | E-mail do pin; telefone só com vínculo. Sem ficha, botões avisam que o contato não está cadastrado. |
+| 3 | `POST /disposals` devolve o `id` e marca `DISPOSED`. Não agenda | Já usado em `onConfirmClick`. Título e card falam em descarte registrado. O nome da rota `SchedulingSuccess` continua legado. Não manda `disposedAt`. |
+| 4 | `ms-ai-url` no boot Scrapy | `AiClient` lê `Environments`; sem a URL no boot o relatório falha com mensagem clara |
+
+Não fazer no app: client Google Places, detalhe de lugar via Maps SDK, gravar `disposal_report` no adm-core.

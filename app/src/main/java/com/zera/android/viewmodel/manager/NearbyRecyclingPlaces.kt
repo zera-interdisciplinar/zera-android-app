@@ -74,6 +74,12 @@ class NearbyRecyclingPlacesViewModel : ZeraViewModel() {
                 placeName = place.name,
                 placeAddress = place.address,
                 distanceMeters = place.distanceMeters,
+                isOpen = place.isOpen,
+                description = place.description,
+                openingDays = place.openingHours.map { it.days },
+                openingHourLabels = place.openingHours.map { it.hours },
+                recyclingBusinessId = place.recyclingBusinessId,
+                contactEmail = place.email,
             ),
             ScreenAnimation.SlideHorizontal,
         )

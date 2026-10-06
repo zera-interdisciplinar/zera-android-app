@@ -50,4 +50,17 @@ class ItensSelectionMappingTest {
         assertEquals(listOf("1", "2"), result.map { it.value })
         assertEquals("A", result.first().name)
     }
+
+    @Test
+    fun selectedItemsKeepsOnlyCheckedOptions() {
+        val options = listOf(
+            SelectOption(name = "A", value = "1"),
+            SelectOption(name = "B", value = "2"),
+            SelectOption(name = "C", value = "3"),
+        )
+
+        val selected = ItensSelectionViewModel.selectedItems(options, setOf("2", "3"))
+
+        assertEquals(listOf("B", "C"), selected.map { it.name })
+    }
 }

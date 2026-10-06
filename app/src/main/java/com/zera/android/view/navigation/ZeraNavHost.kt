@@ -146,19 +146,53 @@ fun ZeraNavHost() {
                 composable<Route.ItensSelection> { backStackEntry ->
                     val route = backStackEntry.toRoute<Route.ItensSelection>()
                     ItensSelectionScreen(
+                        placeId = route.placeId,
                         placeName = route.placeName,
                         placeAddress = route.placeAddress,
                         distanceMeters = route.distanceMeters,
+                        isOpen = route.isOpen,
+                        description = route.description,
+                        openingDays = route.openingDays,
+                        openingHourLabels = route.openingHourLabels,
+                        recyclingBusinessId = route.recyclingBusinessId,
+                        contactEmail = route.contactEmail,
                     )
                 }
-                composable<Route.RecyclingResume> {
-                    RecyclingResumeScreen()
+                composable<Route.RecyclingResume> { backStackEntry ->
+                    val route = backStackEntry.toRoute<Route.RecyclingResume>()
+                    RecyclingResumeScreen(
+                        placeId = route.placeId,
+                        placeName = route.placeName,
+                        placeAddress = route.placeAddress,
+                        distanceMeters = route.distanceMeters,
+                        itemIds = route.itemIds,
+                        itemNames = route.itemNames,
+                        isOpen = route.isOpen,
+                        description = route.description,
+                        openingDays = route.openingDays,
+                        openingHourLabels = route.openingHourLabels,
+                        recyclingBusinessId = route.recyclingBusinessId,
+                        contactEmail = route.contactEmail,
+                    )
                 }
-                composable<Route.SchedulingSuccess> {
-                    SchedulingSuccessScreen()
+                composable<Route.SchedulingSuccess> { backStackEntry ->
+                    val route = backStackEntry.toRoute<Route.SchedulingSuccess>()
+                    SchedulingSuccessScreen(
+                        recyclerName = route.recyclerName,
+                        scheduledAt = route.scheduledAt,
+                        materials = route.materials,
+                        contactEmail = route.contactEmail,
+                        contactPhone = route.contactPhone,
+                        itemNames = route.itemNames,
+                        disposalId = route.disposalId,
+                    )
                 }
-                composable<Route.ItensResume> {
-                    ItensResumeScreen()
+                composable<Route.ItensResume> { backStackEntry ->
+                    val route = backStackEntry.toRoute<Route.ItensResume>()
+                    ItensResumeScreen(
+                        itemIds = route.itemIds,
+                        itemNames = route.itemNames,
+                    )
                 }
                 composable<Route.EmployeeHome> {
                     EmployeeHomeScreen()

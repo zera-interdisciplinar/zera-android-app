@@ -2,6 +2,7 @@ package com.zera.android.model.usecase.places
 
 import com.zera.android.model.dto.places.ProblemDetailDTO
 import com.zera.android.model.dto.places.RecyclingPlaceResponseDTO
+import com.zera.android.model.entity.places.OpeningHour
 import com.zera.android.model.entity.places.RecyclingPlace
 import com.zera.android.model.remote.client.ApiClient
 import kotlinx.serialization.json.Json
@@ -39,6 +40,11 @@ private fun RecyclingPlaceResponseDTO.toEntity() = RecyclingPlace(
     latitude = lat,
     longitude = lng,
     distanceMeters = distanceMeters,
+    isOpen = isOpen,
+    description = description.orEmpty(),
+    openingHours = openingHours.map { OpeningHour(days = it.days, hours = it.hours) },
+    recyclingBusinessId = recyclingBusinessId.orEmpty(),
+    email = email.orEmpty(),
 )
 
 private val problemJson = Json { ignoreUnknownKeys = true }

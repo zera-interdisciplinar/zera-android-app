@@ -31,12 +31,46 @@ class ItensSelectionViewModel : ZeraViewModel() {
     private val _state = mutableStateOf(ItensSelectionState())
     val state = _state
 
+    private var placeId: String = ""
+    private var placeName: String = ""
+    private var placeAddress: String = ""
+    private var distanceMeters: Long = 0
+    private var isOpen: Boolean? = null
+    private var description: String = ""
+    private var openingDays: List<String> = emptyList()
+    private var openingHourLabels: List<String> = emptyList()
+    private var recyclingBusinessId: String = ""
+    private var contactEmail: String = ""
     private var loadJob: Job? = null
     private var loadedPage: Int = -1
     private var totalPages: Int = 0
 
     init {
         loadOptions()
+    }
+
+    fun bindPlace(
+        placeId: String,
+        placeName: String,
+        placeAddress: String,
+        distanceMeters: Long,
+        isOpen: Boolean? = null,
+        description: String = "",
+        openingDays: List<String> = emptyList(),
+        openingHourLabels: List<String> = emptyList(),
+        recyclingBusinessId: String = "",
+        contactEmail: String = "",
+    ) {
+        this.placeId = placeId
+        this.placeName = placeName
+        this.placeAddress = placeAddress
+        this.distanceMeters = distanceMeters
+        this.isOpen = isOpen
+        this.description = description
+        this.openingDays = openingDays
+        this.openingHourLabels = openingHourLabels
+        this.recyclingBusinessId = recyclingBusinessId
+        this.contactEmail = contactEmail
     }
 
     fun onSearchQueryChange(value: String) {
@@ -69,8 +103,25 @@ class ItensSelectionViewModel : ZeraViewModel() {
     }
 
     fun onChooseDateClick() {
-        // TODO: levar os itens selecionados (selectedValues) e a escolha de data para o resumo
-        ZeraNavigator.push(Route.RecyclingResume, ScreenAnimation.SlideHorizontal)
+        val selected = selectedItems(_state.value.options, _state.value.selectedValues)
+        if (selected.isEmpty()) return
+        ZeraNavigator.push(
+            Route.RecyclingResume(
+                placeId = placeId,
+                placeName = placeName,
+                placeAddress = placeAddress,
+                distanceMeters = distanceMeters,
+                itemIds = selected.map { it.value },
+                itemNames = selected.map { it.name },
+                isOpen = isOpen,
+                description = description,
+                openingDays = openingDays,
+                openingHourLabels = openingHourLabels,
+                recyclingBusinessId = recyclingBusinessId,
+                contactEmail = contactEmail,
+            ),
+            ScreenAnimation.SlideHorizontal,
+        )
     }
 
     private fun loadOptions(reset: Boolean = true) {
@@ -140,5 +191,10 @@ class ItensSelectionViewModel : ZeraViewModel() {
             val seen = current.map { it.value }.toMutableSet()
             return current + incoming.map(::optionFrom).filter { seen.add(it.value) }
         }
+
+        internal fun selectedItems(
+            options: List<SelectOption>,
+            selectedValues: Set<String>,
+        ): List<SelectOption> = options.filter { it.value in selectedValues }
     }
 }

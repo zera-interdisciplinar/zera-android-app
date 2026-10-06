@@ -48,16 +48,46 @@ sealed interface Route{
         val placeName: String,
         val placeAddress: String,
         val distanceMeters: Long,
+        val isOpen: Boolean? = null,
+        val description: String = "",
+        val openingDays: List<String> = emptyList(),
+        val openingHourLabels: List<String> = emptyList(),
+        val recyclingBusinessId: String = "",
+        val contactEmail: String = "",
     ) : Route
 
     @Serializable
-    data object RecyclingResume : Route
+    data class RecyclingResume(
+        val placeId: String,
+        val placeName: String,
+        val placeAddress: String,
+        val distanceMeters: Long,
+        val itemIds: List<String>,
+        val itemNames: List<String>,
+        val isOpen: Boolean? = null,
+        val description: String = "",
+        val openingDays: List<String> = emptyList(),
+        val openingHourLabels: List<String> = emptyList(),
+        val recyclingBusinessId: String = "",
+        val contactEmail: String = "",
+    ) : Route
 
     @Serializable
-    data object SchedulingSuccess : Route
+    data class SchedulingSuccess(
+        val recyclerName: String,
+        val scheduledAt: String,
+        val materials: String,
+        val contactEmail: String,
+        val contactPhone: String,
+        val itemNames: List<String>,
+        val disposalId: String,
+    ) : Route
 
     @Serializable
-    data object ItensResume : Route
+    data class ItensResume(
+        val itemIds: List<String>,
+        val itemNames: List<String>,
+    ) : Route
 
     // ROTAS DE OPERARIO
     @Serializable
