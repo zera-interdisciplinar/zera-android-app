@@ -47,9 +47,9 @@ fun EmployeeBottomNavBar(
             modifier = Modifier.weight(1f),
             label = "Central",
             contentDescription = "Botão para Central",
-            onClick = {}, // TODO: fluxo de navegação do Operário ainda não existe
+            onClick = { navigateTo(currentRoute, Route.WorkingCentral) },
             icon = ZeraIcon.BriefCase,
-            selected = false,
+            selected = currentRoute == Route.WorkingCentral,
         )
         IconButton(
             icon = ZeraIcon.QrCode,

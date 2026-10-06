@@ -78,6 +78,9 @@ sealed interface Route{
     @Serializable
     data object EmployeeItems : Route
 
+    @Serializable
+    data object WorkingCentral : Route
+
     // ROTAS COMPARTILHADAS
     @Serializable
     data object Profile : Route
