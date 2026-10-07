@@ -121,6 +121,14 @@ fun ManagerSideBar(
                 route = Route.Itens,
             )
             SideBarButton(
+                label = "Descartes agendados",
+                contentDescription = "Botão para Descartes agendados",
+                currentRoute = currentRoute,
+                onButtonClicked = onButtonClicked,
+                icon = ZeraIcon.Truck,
+                route = Route.ScheduledDisposals,
+            )
+            SideBarButton(
                 label = "Itens em Manutenção",
                 contentDescription = "Botão para Itens em Manutenção",
                 currentRoute = currentRoute,

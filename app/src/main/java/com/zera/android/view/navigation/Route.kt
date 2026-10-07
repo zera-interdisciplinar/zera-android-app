@@ -55,6 +55,9 @@ sealed interface Route{
     data object ItensResume : Route
 
     @Serializable
+    data object ScheduledDisposals : Route
+
+    @Serializable
     data object Models : Route
 
     @Serializable
