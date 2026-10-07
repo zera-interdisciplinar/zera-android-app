@@ -15,6 +15,11 @@ interface TelephoneService {
     @GET("telephone/user")
     suspend fun getByUser(@Query("userId") userId: String): TelephoneResponseDTO
 
+    @GET("telephone/recyclings")
+    suspend fun getByRecyclingBusiness(
+        @Query("recyclingBusinessId") recyclingBusinessId: String,
+    ): TelephoneResponseDTO
+
     @POST("telephone/user")
     suspend fun createForUser(@Body request: CreateTelephoneRequestDTO): TelephoneResponseDTO
 

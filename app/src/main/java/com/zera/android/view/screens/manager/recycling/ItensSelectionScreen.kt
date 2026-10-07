@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -22,12 +23,30 @@ import com.zera.android.view.components.texts.SubtitleText
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
 import com.zera.android.viewmodel.manager.ItensSelectionViewModel
+import com.zera.android.viewmodel.manager.formatDistanceMeters
 
 @Composable
 fun ItensSelectionScreen(
+    placeId: String,
+    placeName: String,
+    placeAddress: String,
+    distanceMeters: Long,
+    isOpen: Boolean? = null,
+    description: String = "",
+    openingDays: List<String> = emptyList(),
+    openingHourLabels: List<String> = emptyList(),
+    recyclingBusinessId: String = "",
+    contactEmail: String = "",
     viewModel: ItensSelectionViewModel = viewModel(),
 ) {
     val state by viewModel.state
+
+    LaunchedEffect(placeId, placeName, placeAddress, distanceMeters, recyclingBusinessId) {
+        viewModel.bindPlace(
+            placeId, placeName, placeAddress, distanceMeters,
+            isOpen, description, openingDays, openingHourLabels, recyclingBusinessId, contactEmail,
+        )
+    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -49,6 +68,12 @@ fun ItensSelectionScreen(
                 .padding(horizontal = Spacing.medium, vertical = Spacing.small),
             verticalArrangement = Arrangement.spacedBy(Spacing.medium),
         ) {
+            SubtitleText(text = placeName.ifBlank { "Recicladora" })
+            CaptionText(
+                text = listOf(placeAddress, formatDistanceMeters(distanceMeters))
+                    .filter { it.isNotBlank() }
+                    .joinToString(" · "),
+            )
             SubtitleText(text = "Quais produtos serão descartados?")
             ZeraSearchInput(
                 value = state.searchQuery,
@@ -71,7 +96,7 @@ fun ItensSelectionScreen(
                     .weight(1f),
             )
             ZeraButton(
-                text = "Escolher data",
+                text = "Continuar",
                 onClick = viewModel::onChooseDateClick,
                 enabled = state.canChooseDate,
                 fillMaxWidth = true,
@@ -84,6 +109,11 @@ fun ItensSelectionScreen(
 @Preview(heightDp = 800)
 private fun ItensSelectionScreenPreview() {
     ZeraTheme {
-        ItensSelectionScreen()
+        ItensSelectionScreen(
+            placeId = "places/ChIJ",
+            placeName = "Cooperativa Recicla SP",
+            placeAddress = "Rua X, 123",
+            distanceMeters = 1240,
+        )
     }
 }

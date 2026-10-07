@@ -18,10 +18,10 @@ import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
 
 /**
- * Card branco com o resumo de um agendamento de descarte: nome da recicladora como
- * sobretítulo, data e horário em destaque e os materiais a descartar como legenda.
+ * Card branco com o resumo de um descarte já registrado: nome da recicladora como
+ * sobretítulo, data e horário em destaque e os materiais descartados como legenda.
  *
- * Usado na tela de confirmação de agendamento
+ * Usado na tela de descarte registrado
  * ([com.zera.android.view.screens.manager.recycling.SchedulingSuccessScreen]). Diferente
  * do [ApprovedItemCard], não é específico de item: não tem tag de status.
  *

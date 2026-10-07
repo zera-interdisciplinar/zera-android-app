@@ -21,6 +21,9 @@ Esta pasta é a fonte de verdade técnica do app Android do Zera, seguindo prát
 | [contrato-pdi/contexto.md](contrato-pdi/contexto.md) | O que o app já implementa na listagem e na PDI (`GetItems`, `GetItemDetails`, `GetCategories`) e por quê. |
 | [contrato-adm-core-membros/contrato-team-management.md](contrato-adm-core-membros/contrato-team-management.md) | Contrato de `GET /api/v1/users`, `count-by-manager` e convites (`/invitations`). |
 | [contrato-adm-core-membros/contexto.md](contrato-adm-core-membros/contexto.md) | O que o app já implementa no time do gestor (`CountActiveEmployees`, lista, pendentes, criar convite) e por quê. |
+| [contrato-places-api/contexto.md](contrato-places-api/contexto.md) | Mapa e descarte do gestor: o que o app já pluga (bundle, contato, `POST /disposals`, PDF) e o que ainda é legado na UI. |
+| [contrato-places-api/contrato-places-api.md](contrato-places-api/contrato-places-api.md) | Contrato adm-core: `GET /recycling-places`, fichas `/recyclings`, telefone. |
+| [contrato-places-api/contrato-descarte.md](contrato-places-api/contrato-descarte.md) | Contrato inventory `POST /disposals` + IA `POST /reports` (e chat do mesmo MS). |
 | [07-especificacoes/](07-especificacoes/) | Um arquivo por feature/user story no formato Given/When/Then (`manager-home-dashboard.md`, `employee-home.md`, `descartes-agendados.md`, `indexes.md`, `itens.md`, `item-details.md`, `modelos.md`, `login.md`, ...), com `template-spec.md` como modelo padrão. |
 | [08-decisoes-arquiteturais/](08-decisoes-arquiteturais/) | ADRs curtos: decisão, alternativas consideradas e motivo da escolha. |
 | [09-stack-e-dependencias.md](09-stack-e-dependencias.md) | Bibliotecas usadas, versões e motivo da escolha (inclui nota sobre Firebase configurado mas não utilizado). |

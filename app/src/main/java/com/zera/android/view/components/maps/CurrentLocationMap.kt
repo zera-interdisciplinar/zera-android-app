@@ -1,6 +1,7 @@
 package com.zera.android.view.components.maps
 
 import android.Manifest
+import android.util.Log
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -31,9 +32,12 @@ import androidx.lifecycle.LifecycleEventObserver
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.zera.android.view.components.buttons.ZeraButton
 import com.zera.android.view.theme.Spacing
@@ -42,8 +46,25 @@ import com.zera.android.view.theme.ZeraTheme
 
 private const val DEFAULT_ZOOM = 16f
 
+// TEMP: remover após debug.
+private const val TEMP_LOG_TAG = "TEMP_PLACES"
+
 // São Paulo, usado como centro enquanto a localização do usuário ainda não chegou.
 private val FallbackLatLng = LatLng(-23.5505, -46.6333)
+
+private const val HIDE_POINTS_OF_INTEREST = """
+[
+  { "featureType": "poi", "stylers": [ { "visibility": "off" } ] },
+  { "featureType": "transit", "stylers": [ { "visibility": "off" } ] }
+]
+"""
+
+data class MapPoint(
+    val id: String,
+    val latitude: Double,
+    val longitude: Double,
+    val title: String,
+)
 
 /**
  * Mapa que centraliza a câmera na localização atual do usuário.
@@ -57,12 +78,16 @@ private val FallbackLatLng = LatLng(-23.5505, -46.6333)
  * @param onLocationAvailabilityChanged chamado sempre que muda se dá ou não pra usar a
  *   localização atual (permissão concedida E serviço de localização ligado) — pra quem
  *   estiver por fora do componente (ex.: a tela) decidir o que mostrar.
+ * @param onUserLocation chamado com a última coordenada conhecida do aparelho.
  * @param topOverlay conteúdo (ex.: barra de pesquisa) sobreposto ao topo do mapa.
  */
 @Composable
 fun CurrentLocationMap(
     modifier: Modifier = Modifier,
     onLocationAvailabilityChanged: (Boolean) -> Unit = {},
+    onUserLocation: (latitude: Double, longitude: Double) -> Unit = { _, _ -> },
+    points: List<MapPoint> = emptyList(),
+    onPointClick: (String) -> Unit = {},
     topOverlay: @Composable () -> Unit = {},
 ) {
     val context = LocalContext.current
@@ -96,19 +121,31 @@ fun CurrentLocationMap(
     val canUseCurrentLocation = hasLocationPermission && isLocationServiceEnabled
 
     LaunchedEffect(canUseCurrentLocation) {
+        Log.i(
+            TEMP_LOG_TAG,
+            "mapa permissao=$hasLocationPermission servico=$isLocationServiceEnabled",
+        )
         onLocationAvailabilityChanged(canUseCurrentLocation)
         if (!canUseCurrentLocation) return@LaunchedEffect
         try {
             LocationServices.getFusedLocationProviderClient(context).lastLocation
                 .addOnSuccessListener { location ->
                     if (location != null) {
+                        Log.i(TEMP_LOG_TAG, "gps lat=${location.latitude} lng=${location.longitude}")
+                        onUserLocation(location.latitude, location.longitude)
                         cameraPositionState.position = CameraPosition.fromLatLngZoom(
                             LatLng(location.latitude, location.longitude),
                             DEFAULT_ZOOM,
                         )
+                    } else {
+                        Log.i(TEMP_LOG_TAG, "gps lastLocation nulo")
                     }
                 }
+                .addOnFailureListener { error ->
+                    Log.i(TEMP_LOG_TAG, "gps falhou ${error.message}")
+                }
         } catch (_: SecurityException) {
+            Log.i(TEMP_LOG_TAG, "gps SecurityException")
             // Permissão pode ter sido revogada entre a checagem e a chamada; mapa segue no fallback.
         }
     }
@@ -117,9 +154,28 @@ fun CurrentLocationMap(
         GoogleMap(
             modifier = Modifier.fillMaxSize(),
             cameraPositionState = cameraPositionState,
-            properties = MapProperties(isMyLocationEnabled = canUseCurrentLocation),
-            uiSettings = MapUiSettings(myLocationButtonEnabled = false, zoomControlsEnabled = false, compassEnabled = false),
-        )
+            properties = MapProperties(
+                isMyLocationEnabled = canUseCurrentLocation,
+                mapStyleOptions = MapStyleOptions(HIDE_POINTS_OF_INTEREST),
+            ),
+            uiSettings = MapUiSettings(
+                myLocationButtonEnabled = false,
+                zoomControlsEnabled = false,
+                compassEnabled = false,
+            ),
+        ) {
+            Log.i(TEMP_LOG_TAG, "plotando markers=${points.size}")
+            points.forEach { point ->
+                Marker(
+                    state = MarkerState(position = LatLng(point.latitude, point.longitude)),
+                    title = point.title,
+                    onClick = {
+                        onPointClick(point.id)
+                        false
+                    },
+                )
+            }
+        }
 
         Box(
             modifier = Modifier

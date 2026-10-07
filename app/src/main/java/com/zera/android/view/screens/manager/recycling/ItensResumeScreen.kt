@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -19,20 +20,22 @@ import com.zera.android.viewmodel.manager.ItensResumeViewModel
 
 @Composable
 fun ItensResumeScreen(
+    itemIds: List<String>,
+    itemNames: List<String>,
     viewModel: ItensResumeViewModel = viewModel(),
 ) {
     val state by viewModel.state
 
-    ItensResumeContent(
-        items = state.items,
-        onItemClick = viewModel::onItemClick,
-    )
+    LaunchedEffect(itemIds, itemNames) {
+        viewModel.bind(itemIds, itemNames)
+    }
+
+    ItensResumeContent(items = state.items)
 }
 
 @Composable
 private fun ItensResumeContent(
     items: List<ProductItem>,
-    onItemClick: (ProductItem) -> Unit,
 ) {
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -71,9 +74,6 @@ private fun ItensResumeScreenPreview() {
     }
 
     ZeraTheme {
-        ItensResumeContent(
-            items = items,
-            onItemClick = {},
-        )
+        ItensResumeContent(items = items)
     }
 }

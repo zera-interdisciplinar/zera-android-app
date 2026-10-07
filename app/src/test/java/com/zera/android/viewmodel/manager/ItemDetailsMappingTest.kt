@@ -12,6 +12,7 @@ import org.junit.Test
 class ItemDetailsMappingTest {
     @Test
     fun mapsBackendStatusToChip() {
+        assertEquals(ItemStatus.Draft, ItemDetailsViewModel.statusFrom("DRAFT"))
         assertEquals(ItemStatus.PendingApproval, ItemDetailsViewModel.statusFrom("PENDING_APPROVAL"))
         assertEquals(ItemStatus.Rejected, ItemDetailsViewModel.statusFrom("REJECTED"))
         assertEquals(ItemStatus.InStock, ItemDetailsViewModel.statusFrom("IN_STOCK"))
@@ -155,6 +156,7 @@ class ItemDetailsMappingTest {
         assertEquals(true, ItemDetailsViewModel.canReview(ItemStatus.AwaitingEvaluation))
         assertEquals(false, ItemDetailsViewModel.canReview(ItemStatus.InStock))
         assertEquals(false, ItemDetailsViewModel.canReview(ItemStatus.Rejected))
+        assertEquals(false, ItemDetailsViewModel.canReview(ItemStatus.Draft))
         assertEquals(false, ItemDetailsViewModel.canReview(null))
     }
 
