@@ -23,7 +23,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.content.ContextCompat
 import androidx.core.location.LocationManagerCompat
@@ -158,7 +158,11 @@ fun CurrentLocationMap(
                 isMyLocationEnabled = canUseCurrentLocation,
                 mapStyleOptions = MapStyleOptions(HIDE_POINTS_OF_INTEREST),
             ),
-            uiSettings = MapUiSettings(myLocationButtonEnabled = false),
+            uiSettings = MapUiSettings(
+                myLocationButtonEnabled = false,
+                zoomControlsEnabled = false,
+                compassEnabled = false,
+            ),
         ) {
             Log.i(TEMP_LOG_TAG, "plotando markers=${points.size}")
             points.forEach { point ->

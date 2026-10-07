@@ -51,10 +51,11 @@ O PATCH é parcial: a PDI edita `name`, `condition`, `serialNumber` e `notes`. A
 
 - **Use case `GetItems` + `InventoryService.getItems`.** Uma chamada por filtro simples, com `page`/`size` (20). Substitui o mock da tela e o atalho da home (que não é catálogo).
 - **Busca `q`.** Só dispara em `onSearch` (e quando o campo é limpo). Evita um request a cada tecla. O placeholder ainda diz “ID ou Nome”; a API casa `displayCode`, nome do item, modelo e material — **não** o UUID `id`.
-- **Chip “Todos”.** Omite `status` e `categoryId` (catálogo da unidade).
-- **Chip “Pendentes”.** A API aceita **um** `status` por request. O app faz duas chamadas (`PENDING_APPROVAL` e `AWAITING_EVALUATION`), mescla por `id` e soma `totalElements`. É o workaround do contrato; não existe `statusIn`.
-- **Chip “Categoria”.** `GetCategories` troca o rótulo genérico pelos `name` da unidade; o filtro manda `categoryId` (UUID), não o nome. Se categorias falharem, a lista ainda carrega — só o chip fica genérico.
-- **Título “N Itens”.** Vem de `totalElements` da página (formato `pt-BR`). No chip “Pendentes” o total é a soma das duas páginas (pode superestimar se o backend paginar de forma independente).
+- **BottomSheet de filtros.** O botão de filtro abre grupos multi-seleção para status e categorias. “Aplicar filtros” confirma o rascunho; fechar sem aplicar descarta as mudanças. A seção “Situação” ainda não tem valores e não é exibida.
+- **Chips aplicados.** Abaixo da busca aparecem somente os filtros ativos. Tocar em um chip remove aquele valor e recarrega a lista.
+- **Combinação dos filtros.** Valores dentro de Status são OR; valores dentro de Categoria são OR; entre grupos é AND. Como a API aceita um `status` e um `categoryId` por request, o app envia uma chamada por combinação, mescla itens por `id` e soma `totalElements`.
+- **Opções reais.** Status usa `ItemStatus` (sem `DRAFT`/`REMOVED`); categorias vêm de `GetCategories` e o filtro envia o UUID por `categoryId`, nunca o nome. Se a carga de categorias falhar, o restante da listagem continua disponível.
+- **Título “N Itens”.** Vem do total agregado das consultas (formato `pt-BR`).
 - **Paginação infinita.** `ProductList.onEndReached` → `loadNextPage`. Dedup por `id` ao concatenar. `isLoadingMore` no rodapé.
 - **Linha da lista.** Só `id`, `name` e chip de status (`ItemStatus.fromBackend`). Demais campos do JSON são ignorados (`ignoreUnknownKeys`).
 - **Toque no item.** `ZeraNavigator.push(Route.ItemDetails(itemId = product.id))` — UUID, não `displayCode`.

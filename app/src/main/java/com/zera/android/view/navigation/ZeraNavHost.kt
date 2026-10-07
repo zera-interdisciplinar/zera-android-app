@@ -23,6 +23,9 @@ import com.zera.android.view.screens.manager.ItemApprovedScreen
 import com.zera.android.view.screens.manager.ItemDetailsScreen
 import com.zera.android.view.screens.manager.ItensScreen
 import com.zera.android.view.screens.manager.ManagerHomeScreen
+import com.zera.android.view.screens.manager.ModelCreationScreen
+import com.zera.android.view.screens.manager.ModelCreationSuccessScreen
+import com.zera.android.view.screens.manager.ModelsScreen
 import com.zera.android.view.screens.manager.recycling.ItensResumeScreen
 import com.zera.android.view.screens.manager.recycling.ItensSelectionScreen
 import com.zera.android.view.screens.manager.recycling.RecyclingResumeScreen
@@ -192,6 +195,21 @@ fun ZeraNavHost() {
                     ItensResumeScreen(
                         itemIds = route.itemIds,
                         itemNames = route.itemNames,
+                    )
+                }
+                composable<Route.Models> {
+                    ModelsScreen()
+                }
+                composable<Route.ModelCreation> {
+                    ModelCreationScreen()
+                }
+                composable<Route.ModelCreationSuccess> { backStackEntry ->
+                    val route = backStackEntry.toRoute<Route.ModelCreationSuccess>()
+                    ModelCreationSuccessScreen(
+                        modelName = route.modelName,
+                        material = route.material,
+                        brand = route.brand,
+                        notes = route.notes,
                     )
                 }
                 composable<Route.EmployeeHome> {

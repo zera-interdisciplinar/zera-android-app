@@ -73,13 +73,16 @@ ZeraBox(style = ZeraColorFamily.Blue, shape = CircleShape, contentPadding = Padd
 Arquivo: `view/components/inputs/`.
 
 - **`ZeraTextInput(onValueChange, modifier, value, label, placeholder, type: ZeraInputType, imeAction, enabled, isError, errorMessage, width)`** — campo de texto controlado; `ZeraInputType` (`Text/Email/Password/Phone/Number/Decimal`) define teclado, capitalização e mascaramento (`Password` mostra um toggle "Mostrar/Ocultar").
+- **`ZeraDropdownInput(values, onValueChange, modifier, value, label, placeholder, enabled, isError, errorMessage, width)`** — seletor controlado de uma opção textual; a lista é fornecida pelo chamador e o componente usa `ExposedDropdownMenuBox` com a mesma borda, fundo e rótulo visual de `ZeraTextInput`.
 - **`ZeraTokenInput(value, onValueChange, modifier, size=6, label, enabled, isError, errorMessage, onFilled)`** — campo de código/OTP: um único `BasicTextField` invisível desenhando `size` células via `decorationBox`; chama `onFilled` quando atinge `size` dígitos.
-- **`ZeraChipsGroup(options, selected, onSelectedChange, modifier, label, style, stacked)`** — grupo de chips de seleção única; `stacked = true` quebra linha (`FlowRow`), `false` (padrão) rola horizontalmente.
+- **`ZeraChipsGroup(options, selected, onSelectedChange, modifier, label, style, stacked, selectMany, selectedValues, onSelectedValuesChange, showX)`** — grupo controlado de chips. `selectMany = false` mantém seleção única; com `true`, o chamador fornece/recebe a lista `selectedValues` por `onSelectedValuesChange`. `showX` mostra X nos selecionados e é ativado automaticamente em seleção múltipla. `stacked = true` quebra linha (`FlowRow`); `false` (padrão) rola horizontalmente.
 
 ```kotlin
 ZeraTextInput(label = "Email", placeholder = "Seu email", value = state.email, onValueChange = viewModel::onEmailChange, type = ZeraInputType.Email)
+ZeraDropdownInput(label = "Material", values = state.materialOptions, value = state.material, onValueChange = viewModel::onMaterialChange, placeholder = "Selecione uma categoria")
 ZeraTokenInput(value = state.token, onValueChange = viewModel::onTokenChange, label = "Código de convite", onFilled = {})
 ZeraChipsGroup(label = "Possui danos?", options = listOf("Tela quebrada", "Não liga"), selected = selecionado, onSelectedChange = { selecionado = it }, stacked = true)
+ZeraChipsGroup(options = options, selectedValues = selecionados, onSelectedValuesChange = { selecionados = it }, selectMany = true)
 ```
 
 ## Cards
@@ -109,6 +112,8 @@ Arquivo: `view/components/lists/`.
 - **`NotificationItem(id, label, text, style)`** + **`NotificationList(notifications, modifier, onItemClick, contentPadding, emptyContent)`** — lista rolável de `Notification`; ocupa só a altura do conteúdo (use `Modifier.heightIn(max = ...)` dentro de um container que já rola).
 - **`ProductItem(id, name, icon)`** + **`ProductList(products, onItemClick, modifier, contentPadding, emptyContent, onEndReached, isLoadingMore)`** — lista rolável de `ProductListItem`. `onEndReached` dispara perto do fim da lista (paginação); `isLoadingMore` mostra um indicador no rodapé.
 - **`ProductListItem(itemName, itemId, onClick, modifier, icon)`** — item individual (ícone + nome + ID + seta); reutilizável fora de `ProductList`. O ID é exibido truncado nos 7 primeiros caracteres (`itemId.substring(0, 7)`), então `itemId` precisa ter ao menos 7 caracteres (UUID/`displayCode` cumprem; IDs curtos quebram).
+- **`OptionItem(description, name, icon)`** + **`OptionList(options, onItemClick, modifier, contentPadding, emptyContent, onEndReached, isLoadingMore)`** — lista rolável de opções, adequada a domínios em que o texto de descrição é exibido no lugar de um ID. Mantém os estados vazio e carregamento/paginação de `ProductList`.
+- **`OptionListItem(itemName, description, onClick, modifier, icon)`** — item individual (ícone + nome + descrição + seta); reutilizável fora de `OptionList`. A descrição é exibida integralmente abaixo do nome, sem formatação ou truncamento de ID.
 - **`EditableFieldRow(label, value, modifier, onEditClick)`** — linha de detalhe de campo (rótulo + valor em negrito + lápis de editar opcional à direita); usada em telas de detalhe (ex.: "Detalhes do Item"), diferente de `ProductListItem` (que representa um item de lista de produtos). `onEditClick = null` (padrão) esconde o lápis.
 - **`EmployeeItem(id, name, role, isPending)`** + **`EmployeeList(employees, onItemClick, modifier, contentPadding, emptyContent)`** — lista rolável de `EmployeeListItem`.
 - **`EmployeeListItem(name, role, isPending, onClick, modifier)`** — item individual (avatar circular + nome + "cargo · status" + seta); reutilizável fora de `EmployeeList`. `isPending = true` mostra "Pendente" em laranja (`ZeraColorFamily.Yellow`) em vez de "Ativo" em cinza, no texto e no avatar. Ainda não recebe foto de perfil — o avatar é só um círculo colorido.
@@ -116,17 +121,19 @@ Arquivo: `view/components/lists/`.
 ```kotlin
 NotificationList(notifications = state.notifications, onItemClick = { /* abrir alerta */ }, modifier = Modifier.heightIn(max = 400.dp))
 ProductList(products = state.latestProducts, onItemClick = { /* abrir item */ })
+OptionList(options = state.models, onItemClick = { /* abrir modelo */ })
 EditableFieldRow(label = "Categoria", value = state.category, onEditClick = { viewModel.onEditClick() })
 EmployeeList(employees = state.employees, onItemClick = { /* abrir colaborador */ }, modifier = Modifier.weight(1f))
 ```
 
 ## Navegação (componentes visuais)
 
-Arquivo: `view/components/navigation/`. Estes componentes são **apenas visuais** — não conhecem `Route` nem `ZeraNavigator` diretamente (exceção: `ManagerBottomNavBar`/`EmployeeBottomNavBar`, que já recebem `Route` para destacar o item ativo, mas ainda não disparam navegação real — ver "Inconsistências conhecidas" em [02-padroes-e-convencoes.md](02-padroes-e-convencoes.md)).
+Arquivo: `view/components/navigation/`. A maioria dos componentes é visual; `ManagerSideBar` também dispara navegação para os destinos escolhidos. `ManagerBottomNavBar`/`EmployeeBottomNavBar` recebem `Route` para destacar o item ativo, mas ainda não disparam navegação real (ver "Inconsistências conhecidas" em [02-padroes-e-convencoes.md](02-padroes-e-convencoes.md)).
 
 - **`UpperNavBar(title, modifier, goBack, onBackClick, showActions)`** — barra superior com título, (opcional) botão "Voltar" e os atalhos de notificações/perfil/menu à direita (perfil e menu ainda sem ação real, só visuais). `showActions = false` esconde os três atalhos à direita — use em telas que só precisam do "Voltar" (ex.: "Perfil").
 - **`ManagerBottomNavBar(modifier, currentRoute)`** — barra inferior do fluxo de Gestor: atalhos "Início"/"Indicadores"/"Reciclagem"/"Itens" + botão central de adicionar item (`ZeraIcon.Plus`); usa `ShortCutButton` internamente. Não aplica shared element por si só: é o `ManagerScaffold` que o marca com `SharedElementKeys.ManagerBottomNavBar`, para a barra ficar parada enquanto o conteúdo das telas do Gestor anima.
 - **`EmployeeBottomNavBar(modifier, currentRoute)`** — barra inferior do fluxo de Operário: atalhos "Início"/"Central"/"Reciclagem"/"Itens" + botão central de escanear (`ZeraIcon.QrCode`); mesmo `ShortCutButton` interno de `ManagerBottomNavBar`.
+- **`ManagerSideBar(modifier, currentRoute, onButtonClicked)`** — menu lateral do Gestor. O `ManagerScaffold` fornece `onButtonClicked` para fechar o menu após escolher um item; a lista central rola quando necessário, enquanto o grupo inferior fica ancorado abaixo.
 - **`ManagerScaffold(title, currentRoute, modifier, goBack, onBackClick, fabIcon, onFabClick, scrollable, content: @Composable ColumnScope.() -> Unit)`** (em `view/screens/manager/ManagerScaffold.kt`, não em `view/components/` — é específico das telas do Gestor) — casca compartilhada com `UpperNavBar` + `Column` (rolável quando `scrollable = true`, padrão) + `ManagerBottomNavBar` (recebe a `currentRoute` da tela, para destacar e desabilitar o atalho atual) + FAB de assistente virtual. A `ManagerBottomNavBar` é um shared element (`SharedElementKeys.ManagerBottomNavBar`): fica parada durante as transições entre as telas que usam o scaffold, desde que o `composable<>` da tela forneça `LocalAnimatedVisibilityScope` em `ZeraNavHost`. `goBack = true` exibe o botão "Voltar" na `UpperNavBar` — use em telas acessadas por navegação (ex.: "Colaboradores", aberta a partir de um atalho do Home), diferente das telas raiz do `ManagerBottomNavBar` (ex.: `ManagerHomeScreen`).
 
 ```kotlin

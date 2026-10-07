@@ -6,12 +6,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -26,7 +24,6 @@ import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
 import com.zera.android.view.theme.icons.ZeraIcon
 import com.zera.android.view.transition.ScreenAnimation
-import androidx.compose.material3.IconButton as Material3IconButton
 
 /**
  * Barra superior das telas internas do app.
@@ -48,6 +45,8 @@ import androidx.compose.material3.IconButton as Material3IconButton
  * @param backgroundVariant quando `true`, adapta título, "Voltar" e ícones para
  *   [MaterialTheme.colorScheme.onPrimary] — use quando a barra estiver sobre um fundo
  *   [MaterialTheme.colorScheme.primary] (ver [com.zera.android.view.screens.manager.ManagerScaffold]).
+ * @param onSideBarClick ação do botão de menu (abre a [ManagerSideBar] no
+ *   [com.zera.android.view.screens.manager.ManagerScaffold]).
  */
 @Composable
 fun UpperNavBar(
@@ -57,6 +56,7 @@ fun UpperNavBar(
     onBackClick: () -> Unit = { ZeraNavigator.goBack() },
     showActions: Boolean = true,
     backgroundVariant: Boolean = false,
+    onSideBarClick: () -> Unit = {}
 ) {
     val contentColor = if (backgroundVariant) {
         MaterialTheme.colorScheme.onPrimary
@@ -119,7 +119,7 @@ fun UpperNavBar(
                             )
                             TopBarIconButton(
                                 icon = ZeraIcon.Menu,
-                                onClick = {},
+                                onClick = onSideBarClick,
                                 contentDescription = "Menu",
                                 type = if(!backgroundVariant) ZeraButtonType.Tertiary else ZeraButtonType.Primary,
                                 backgroundVariant = backgroundVariant,
