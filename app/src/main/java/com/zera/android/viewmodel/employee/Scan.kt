@@ -1,6 +1,8 @@
 package com.zera.android.viewmodel.employee
 
 import androidx.compose.runtime.mutableStateOf
+import com.zera.android.view.navigation.Route
+import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.viewmodel.ZeraViewModel
 
 data class ScanState(
@@ -22,7 +24,7 @@ class ScanViewModel : ZeraViewModel() {
     }
 
     fun onRegisterWithoutLabelClick() {
-        // TODO: navegar para o cadastro de item sem etiqueta
+        ZeraNavigator.push(Route.ManualRegister)
     }
 
     fun onRegisterModelClick() {

@@ -18,6 +18,7 @@ import com.zera.android.view.screens.SplashScreen
 import com.zera.android.view.screens.auth.WelcomeScreen
 import com.zera.android.view.screens.employee.EmployeeHomeScreen
 import com.zera.android.view.screens.employee.EmployeeItemsScreen
+import com.zera.android.view.screens.employee.ManualRegisterScreen
 import com.zera.android.view.screens.employee.ScanScreen
 import com.zera.android.view.screens.employee.WorkingCentralScreen
 import com.zera.android.view.screens.manager.EmployeesScreen
@@ -187,6 +188,9 @@ fun ZeraNavHost() {
                 }
                 composable<Route.WorkingCentral> {
                     WorkingCentralScreen()
+                }
+                composable<Route.ManualRegister> {
+                    ManualRegisterScreen()
                 }
                 composable<Route.Profile> {
                     ProfileScreen()
