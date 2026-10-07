@@ -2,6 +2,9 @@ package com.zera.android.viewmodel.manager
 
 import androidx.compose.runtime.mutableStateOf
 import com.zera.android.view.components.lists.OptionItem
+import com.zera.android.view.navigation.Route
+import com.zera.android.view.navigation.ZeraNavigator
+import com.zera.android.view.transition.ScreenAnimation
 import com.zera.android.viewmodel.ZeraViewModel
 
 data class ScheduledDisposalsState(
@@ -29,7 +32,8 @@ class ScheduledDisposalsViewModel : ZeraViewModel() {
     }
 
     fun onDisposalClick(disposal: OptionItem) {
-        // TODO: navegar para os detalhes do descarte agendado
+        // TODO: passar o id do descarte quando Route.SchedulingDetails receber parâmetro
+        ZeraNavigator.push(Route.SchedulingDetails, animation = ScreenAnimation.SlideHorizontal)
     }
 
     private fun loadDisposals() {
