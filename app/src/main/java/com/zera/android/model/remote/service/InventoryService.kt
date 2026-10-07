@@ -1,7 +1,9 @@
 package com.zera.android.model.remote.service
 
 import com.zera.android.model.dto.inventory.CategoryResponseDTO
+import com.zera.android.model.dto.inventory.CreateDisposalRequestDTO
 import com.zera.android.model.dto.inventory.DashboardHomeResponseDTO
+import com.zera.android.model.dto.inventory.DisposalResponseDTO
 import com.zera.android.model.dto.inventory.IndicatorsResponseDTO
 import com.zera.android.model.dto.inventory.ItemResponseDTO
 import com.zera.android.model.dto.inventory.PagedItemsDTO
@@ -60,4 +62,9 @@ interface InventoryService {
         @Path("id") id: String,
         @Body body: UpdateItemRequestDTO,
     ): ItemResponseDTO
+
+    @POST("api/v1/disposals")
+    suspend fun createDisposal(
+        @Body body: CreateDisposalRequestDTO,
+    ): DisposalResponseDTO
 }

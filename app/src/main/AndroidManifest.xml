@@ -12,6 +12,18 @@
         android:name="android.hardware.camera"
         android:required="false" />
 
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="https" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="mailto" />
+        </intent>
+        <package android:name="com.whatsapp" />
+    </queries>
+
     <application
         android:usesCleartextTraffic="true"
         android:allowBackup="true"

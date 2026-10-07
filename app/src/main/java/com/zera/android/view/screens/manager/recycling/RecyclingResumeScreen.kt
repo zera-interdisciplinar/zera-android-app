@@ -12,6 +12,7 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -33,9 +34,28 @@ import com.zera.android.viewmodel.manager.RecyclingResumeViewModel
 
 @Composable
 fun RecyclingResumeScreen(
+    placeId: String,
+    placeName: String,
+    placeAddress: String,
+    distanceMeters: Long,
+    itemIds: List<String>,
+    itemNames: List<String>,
+    isOpen: Boolean? = null,
+    description: String = "",
+    openingDays: List<String> = emptyList(),
+    openingHourLabels: List<String> = emptyList(),
+    recyclingBusinessId: String = "",
+    contactEmail: String = "",
     viewModel: RecyclingResumeViewModel = viewModel(),
 ) {
     val state by viewModel.state
+
+    LaunchedEffect(placeId, placeName, placeAddress, distanceMeters, itemIds, itemNames, recyclingBusinessId) {
+        viewModel.bind(
+            placeId, placeName, placeAddress, distanceMeters, itemIds, itemNames,
+            isOpen, description, openingDays, openingHourLabels, recyclingBusinessId, contactEmail,
+        )
+    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -91,17 +111,21 @@ fun RecyclingResumeScreen(
                     }
                 }
 
-                Column(verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
-                    TitleText(text = "Sobre o local", bold = true)
-                    BodyText(
-                        text = state.description,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+                if (state.description.isNotBlank()) {
+                    Column(verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
+                        TitleText(text = "Sobre o local", bold = true)
+                        BodyText(
+                            text = state.description,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                 }
 
-                Column(verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
-                    TitleText(text = "Horários", bold = true)
-                    OpeningHoursCard(items = state.openingHours)
+                if (state.openingHours.isNotEmpty()) {
+                    Column(verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
+                        TitleText(text = "Horários", bold = true)
+                        OpeningHoursCard(items = state.openingHours)
+                    }
                 }
 
                 Column(verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
@@ -118,10 +142,11 @@ fun RecyclingResumeScreen(
             }
 
             ZeraButton(
-                text = "Confirmar descarte",
+                text = if (state.isConfirming) "Registrando…" else "Confirmar descarte",
                 onClick = viewModel::onConfirmClick,
                 fillMaxWidth = true,
-                style = ZeraColorFamily.Green
+                style = ZeraColorFamily.Green,
+                enabled = !state.isConfirming && state.itemIds.isNotEmpty(),
             )
         }
     }
@@ -131,6 +156,13 @@ fun RecyclingResumeScreen(
 @Preview(heightDp = 800)
 private fun RecyclingResumeScreenPreview() {
     ZeraTheme {
-        RecyclingResumeScreen()
+        RecyclingResumeScreen(
+            placeId = "places/ChIJ",
+            placeName = "Recicla Tech Moema",
+            placeAddress = "Av. Pavão, 620",
+            distanceMeters = 2800,
+            itemIds = listOf("1", "2"),
+            itemNames = listOf("Notebook", "Bateria"),
+        )
     }
 }

@@ -10,11 +10,12 @@ import com.zera.android.view.theme.ZeraColorFamily
  * só precisa passar o [ItemStatus] (ver [ItemStatusTag]), sem duplicar texto/cor
  * soltos em cada tela.
  *
- * O backend também tem `DRAFT` e `REMOVED`, que ainda não têm chip definido — por
- * isso não estão modelados aqui. Adicione quando esses estados também precisarem
- * aparecer em algum chip.
+ * `REMOVED` ainda não tem chip: some das listagens normais.
  */
 enum class ItemStatus(val label: String, val colorFamily: ZeraColorFamily) {
+    /** Cadastro incompleto; ainda não entrou na fila de aprovação. */
+    Draft(label = "Rascunho", colorFamily = ZeraColorFamily.Blue),
+
     /** Aguardando o gestor aprovar o cadastro feito pelo operário. */
     PendingApproval(label = "Pendente", colorFamily = ZeraColorFamily.Yellow),
 
@@ -38,6 +39,7 @@ enum class ItemStatus(val label: String, val colorFamily: ZeraColorFamily) {
         fun fromBackend(value: String?): ItemStatus? {
             val normalized = value?.trim()?.uppercase()?.replace(' ', '_') ?: return null
             return when (normalized) {
+                "DRAFT" -> Draft
                 "PENDING_APPROVAL", "PENDING" -> PendingApproval
                 "REJECTED" -> Rejected
                 "IN_STOCK", "APPROVED" -> InStock

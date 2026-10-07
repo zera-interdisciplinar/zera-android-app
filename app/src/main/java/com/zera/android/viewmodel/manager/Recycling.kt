@@ -34,6 +34,15 @@ class RecyclingViewModel : ZeraViewModel() {
 
     fun onSelectItemsForDisposalClick() {
         // TODO: levar a recicladora escolhida (selectedRecyclingPointId) para a seleção de itens
-        ZeraNavigator.push(Route.ItensSelection, ScreenAnimation.SlideHorizontal)
+        val placeId = _state.value.selectedRecyclingPointId ?: return
+        ZeraNavigator.push(
+            Route.ItensSelection(
+                placeId = placeId,
+                placeName = "",
+                placeAddress = "",
+                distanceMeters = 0,
+            ),
+            ScreenAnimation.SlideHorizontal,
+        )
     }
 }

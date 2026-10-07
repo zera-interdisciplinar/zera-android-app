@@ -14,9 +14,16 @@ class ItensResumeViewModel : ZeraViewModel() {
     private val _state = mutableStateOf(ItensResumeState())
     val state = _state
 
-    fun onItemClick(item: ProductItem) {
-        // TODO: definir a ação ao tocar em um item da lista
+    fun bind(itemIds: List<String>, itemNames: List<String>) {
+        _state.value = ItensResumeState(items = zipSelectedItems(itemIds, itemNames))
     }
 
-    // TODO: Decidir se os dados devem ser passados por API, ou localmente na hora da navegação
+    companion object {
+        internal fun zipSelectedItems(itemIds: List<String>, itemNames: List<String>): List<ProductItem> {
+            val count = minOf(itemIds.size, itemNames.size)
+            return List(count) { index ->
+                ProductItem(id = itemIds[index], name = itemNames[index])
+            }
+        }
+    }
 }
