@@ -46,6 +46,8 @@ private val IconBoxSize = 48.dp
  *   `null` (padrão), usa [ZeraIcon.Placeholder].
  * @param statusText texto curto de status. Quando não `null`, substitui a seta.
  * @param statusStyle família de cor da [Tag] de status. Só tem efeito quando [statusText] não é `null`.
+ * @param hasIcon quando `false`, oculta o quadrado de ícone e só o nome e a descrição são
+ *   exibidos. A [description] também é omitida quando estiver em branco.
  */
 @Composable
 fun OptionListItem(
@@ -57,6 +59,7 @@ fun OptionListItem(
     icon: ZeraIcon? = null,
     statusText: String? = null,
     statusStyle: ZeraColorFamily = ZeraColorFamily.Yellow,
+    hasIcon: Boolean = true,
 ) {
     Surface(
         onClick = onClick,
@@ -70,19 +73,21 @@ fun OptionListItem(
             horizontalArrangement = Arrangement.spacedBy(Spacing.medium),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            val iconPalette = ZeraColorFamily.Blue.palette()
-            Surface(
-                modifier = Modifier.size(IconBoxSize),
-                shape = RoundedCornerShape(Radius.large),
-                color = iconPalette.container,
-                contentColor = iconPalette.onContainer,
-            ) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    ZeraIcon(
-                        icon = icon ?: ZeraIcon.Placeholder,
-                        contentDescription = null,
-                        tint = iconPalette.onContainer,
-                    )
+            if (hasIcon) {
+                val iconPalette = ZeraColorFamily.Blue.palette()
+                Surface(
+                    modifier = Modifier.size(IconBoxSize),
+                    shape = RoundedCornerShape(Radius.large),
+                    color = iconPalette.container,
+                    contentColor = iconPalette.onContainer,
+                ) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        ZeraIcon(
+                            icon = icon ?: ZeraIcon.Placeholder,
+                            contentDescription = null,
+                            tint = iconPalette.onContainer,
+                        )
+                    }
                 }
             }
             Column(
@@ -90,7 +95,9 @@ fun OptionListItem(
                 verticalArrangement = Arrangement.spacedBy(Spacing.micro),
             ) {
                 BodyText(text = itemName, bold = true)
-                CaptionText(text = description)
+                if (description.isNotBlank()) {
+                    CaptionText(text = description)
+                }
             }
             if (!onClickDisabled) {
                 if (statusText != null) {
