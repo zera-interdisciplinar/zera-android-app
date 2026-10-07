@@ -56,6 +56,7 @@ data class OptionItem(
  * @param emptyContent conteúdo exibido quando [options] está vazio.
  * @param onEndReached chamado ao chegar perto do fim da lista, para carregar a próxima página.
  * @param isLoadingMore quando verdadeiro, exibe um indicador no rodapé da lista.
+ * @param hasIcon quando `false`, os itens não exibem o quadrado de ícone (só nome e descrição).
  */
 @Composable
 fun OptionList(
@@ -66,6 +67,7 @@ fun OptionList(
     emptyContent: @Composable () -> Unit = { BodyText(text = "Nenhuma opção encontrada") },
     onEndReached: () -> Unit = {},
     isLoadingMore: Boolean = false,
+    hasIcon: Boolean = true,
 ) {
     if (options.isEmpty()) {
         Box(
@@ -107,6 +109,7 @@ fun OptionList(
                 icon = option.icon,
                 statusText = option.statusText,
                 statusStyle = option.statusStyle,
+                hasIcon = hasIcon,
                 onClick = { onItemClick?.invoke(option) },
                 onClickDisabled = onItemClick == null,
             )

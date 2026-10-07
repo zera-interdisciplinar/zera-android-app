@@ -84,10 +84,16 @@ sealed interface Route{
     ) : Route
 
     @Serializable
+    data object SchedulingDetails : Route
+
+    @Serializable
     data class ItensResume(
         val itemIds: List<String>,
         val itemNames: List<String>,
     ) : Route
+
+    @Serializable
+    data object ScheduledDisposals : Route
 
     @Serializable
     data object Models : Route

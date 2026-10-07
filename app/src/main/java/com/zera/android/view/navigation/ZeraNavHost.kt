@@ -30,6 +30,8 @@ import com.zera.android.view.screens.manager.recycling.ItensResumeScreen
 import com.zera.android.view.screens.manager.recycling.ItensSelectionScreen
 import com.zera.android.view.screens.manager.recycling.RecyclingResumeScreen
 import com.zera.android.view.screens.manager.recycling.RecyclingScreen
+import com.zera.android.view.screens.manager.recycling.ScheduledDisposalsScreen
+import com.zera.android.view.screens.manager.recycling.SchedulingDetailsScreen
 import com.zera.android.view.screens.manager.recycling.SchedulingSuccessScreen
 import com.zera.android.view.screens.shared.ProfileScreen
 import com.zera.android.view.transition.LocalAnimatedVisibilityScope
@@ -190,12 +192,18 @@ fun ZeraNavHost() {
                         disposalId = route.disposalId,
                     )
                 }
+                composable<Route.SchedulingDetails> {
+                    SchedulingDetailsScreen()
+                }
                 composable<Route.ItensResume> { backStackEntry ->
                     val route = backStackEntry.toRoute<Route.ItensResume>()
                     ItensResumeScreen(
                         itemIds = route.itemIds,
                         itemNames = route.itemNames,
                     )
+                }
+                composable<Route.ScheduledDisposals> {
+                    ScheduledDisposalsScreen()
                 }
                 composable<Route.Models> {
                     ModelsScreen()
