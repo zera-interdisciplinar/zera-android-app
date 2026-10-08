@@ -8,22 +8,26 @@ data class ManualRegisterState(
     val serialNumber: String = "",
     val itemName: String = "",
     val model: String = "",
-    val brand: String = "",
+    val manufacturingYear: String = "",
+    val acquisitionDate: String = "",
     val condition: String = "",
-    val hasDamage: String = "",
+    val hasDamage: Boolean = false,
+    val damageType: String = "",
+    val usageIntensity: Int = 1,
     val notes: String = "",
     val modelOptions: List<String> = emptyList(),
     val conditionOptions: List<String> = emptyList(),
-    val hasDamageOptions: List<String> = emptyList(),
+    val damageTypeOptions: List<String> = emptyList(),
 ) {
-    /** Só a observação é opcional. */
+    /** Só a observação é opcional. Tipo de dano só é exigido quando há dano. */
     val canSubmit: Boolean
         get() = serialNumber.isNotBlank() &&
             itemName.isNotBlank() &&
             model.isNotEmpty() &&
-            brand.isNotBlank() &&
+            manufacturingYear.isNotBlank() &&
+            acquisitionDate.isNotBlank() &&
             condition.isNotEmpty() &&
-            hasDamage.isNotEmpty()
+            (!hasDamage || damageType.isNotEmpty())
 }
 
 /**
@@ -37,7 +41,7 @@ class ManualRegisterViewModel : ZeraViewModel() {
             // TODO: puxar os modelos cadastrados do back
             modelOptions = listOf("Teclado mecânico", "Mouse sem fio", "Chip controlador", "Placa de circuito"),
             conditionOptions = listOf("Novo", "Usado", "Danificado"),
-            hasDamageOptions = listOf("Sim", "Não"),
+            damageTypeOptions = listOf("Tela quebrada", "Peça faltando", "Não liga", "Enferrujado", "Outro"),
         )
     )
     val state = _state
@@ -54,16 +58,32 @@ class ManualRegisterViewModel : ZeraViewModel() {
         _state.value = _state.value.copy(model = value)
     }
 
-    fun onBrandChange(value: String) {
-        _state.value = _state.value.copy(brand = value)
+    fun onManufacturingYearChange(value: String) {
+        _state.value = _state.value.copy(manufacturingYear = value)
+    }
+
+    fun onAcquisitionDateChange(value: String) {
+        _state.value = _state.value.copy(acquisitionDate = value)
     }
 
     fun onConditionChange(value: String) {
         _state.value = _state.value.copy(condition = value)
     }
 
-    fun onHasDamageChange(value: String) {
-        _state.value = _state.value.copy(hasDamage = value)
+    fun onHasDamageChange(selected: Boolean) {
+        val hasDamage = !selected
+        _state.value = _state.value.copy(
+            hasDamage = hasDamage,
+            damageType = if (hasDamage) _state.value.damageType else "",
+        )
+    }
+
+    fun onDamageTypeChange(value: String) {
+        _state.value = _state.value.copy(damageType = value)
+    }
+
+    fun onUsageIntensityChange(value: Int) {
+        _state.value = _state.value.copy(usageIntensity = value)
     }
 
     fun onNotesChange(value: String) {

@@ -21,7 +21,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zera.android.view.components.buttons.ZeraButton
 import com.zera.android.view.components.buttons.ZeraButtonType
+import com.zera.android.view.components.inputs.ZeraDateInput
 import com.zera.android.view.components.inputs.ZeraDropdownInput
+import com.zera.android.view.components.inputs.ZeraInputType
+import com.zera.android.view.components.inputs.ZeraRadioButton
+import com.zera.android.view.components.inputs.ZeraSliderInput
 import com.zera.android.view.components.inputs.ZeraTextInput
 import com.zera.android.view.components.navigation.UpperNavBar
 import com.zera.android.view.components.texts.BodyText
@@ -112,11 +116,18 @@ fun ManualRegisterScreen(
                 placeholder = "Selecione uma categoria",
             )
             ZeraTextInput(
-                value = state.brand,
-                onValueChange = viewModel::onBrandChange,
-                label = "Marca",
-                placeholder = "Ex: Eletrônico, mecânico, chip",
+                value = state.manufacturingYear,
+                onValueChange = viewModel::onManufacturingYearChange,
+                label = "Ano de fabricação",
+                placeholder = "Ex.: 2022",
+                type = ZeraInputType.Number,
                 imeAction = ImeAction.Next,
+            )
+            ZeraDateInput(
+                value = state.acquisitionDate,
+                onValueChange = viewModel::onAcquisitionDateChange,
+                label = "Data de aquisição",
+                placeholder = "DD/MM/AAAA",
             )
             ZeraDropdownInput(
                 value = state.condition,
@@ -125,13 +136,25 @@ fun ManualRegisterScreen(
                 label = "Condição",
                 placeholder = "Novo, usado ou danificado",
             )
-            ZeraDropdownInput(
-                value = state.hasDamage,
-                values = state.hasDamageOptions,
-                onValueChange = viewModel::onHasDamageChange,
-                label = "Possui danos?",
-                placeholder = "Selecione",
+            ZeraSliderInput(
+                value = state.usageIntensity,
+                onValueChange = viewModel::onUsageIntensityChange,
+                label = "Intensidade de uso",
             )
+            ZeraRadioButton(
+                selected = state.hasDamage,
+                onClick = { viewModel.onHasDamageChange(state.hasDamage) },
+                label = "Possui danos?",
+            )
+            if (state.hasDamage) {
+                ZeraDropdownInput(
+                    value = state.damageType,
+                    values = state.damageTypeOptions,
+                    onValueChange = viewModel::onDamageTypeChange,
+                    label = "Tipo de Dano",
+                    placeholder = "Selecione o tipo de dano",
+                )
+            }
             ZeraTextInput(
                 value = state.notes,
                 onValueChange = viewModel::onNotesChange,
