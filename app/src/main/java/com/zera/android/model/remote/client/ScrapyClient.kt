@@ -24,6 +24,7 @@ object ScrapyClient {
                 .build()
             chain.proceed(request)
         }
+        .zeraTimeouts()
         .build()
 
     private val scrapyService: ScrapyService by lazy {

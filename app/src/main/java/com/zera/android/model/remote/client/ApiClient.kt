@@ -14,6 +14,7 @@ import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
+import java.util.concurrent.TimeUnit
 
 object ApiClient {
     private val json = Json { ignoreUnknownKeys = true }
@@ -35,6 +36,7 @@ object ApiClient {
                         .build(),
                 )
             }
+            .zeraTimeouts()
             .build()
         refreshAuthService = Retrofit.Builder()
             .baseUrl(baseUrl)
@@ -58,6 +60,7 @@ object ApiClient {
                 chain.proceed(requestBuilder.build())
             }
             .authenticator(SessionRefresh.authenticator)
+            .zeraTimeouts()
             .build()
         retrofit = Retrofit.Builder()
             .baseUrl(baseUrl)
@@ -84,6 +87,11 @@ object ApiClient {
         retrofit.create(RecyclingsService::class.java)
     }
 }
+
+internal fun OkHttpClient.Builder.zeraTimeouts(): OkHttpClient.Builder =
+    connectTimeout(15, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
 
 internal fun shouldSendAccessToken(encodedPath: String): Boolean {
     val path = encodedPath.trimEnd('/')

@@ -15,7 +15,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 
 object SupabaseStorage {
     private val json = Json { ignoreUnknownKeys = true }
-    private val http = OkHttpClient()
+    private val http = OkHttpClient.Builder().zeraTimeouts().build()
 
     fun isConfigured(environments: Environments = AppConfig.environments): Boolean =
         environments.supabaseUrl.isNotBlank() &&

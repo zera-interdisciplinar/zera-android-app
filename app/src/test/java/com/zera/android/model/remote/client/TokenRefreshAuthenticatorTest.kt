@@ -7,6 +7,7 @@ import com.zera.android.model.usecase.auth.chooseRestore
 import com.zera.android.model.usecase.auth.refreshSession
 import kotlinx.coroutines.runBlocking
 import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
 import okhttp3.Protocol
 import okhttp3.Request
 import okhttp3.Response
@@ -206,6 +207,15 @@ class TokenRefreshAuthenticatorTest {
         assertEquals(false, shouldSendAccessToken("/api/v1/auth/logout"))
         assertEquals(false, shouldSendAccessToken("/api/v1/invitations/redeem"))
         assertEquals(true, shouldSendAccessToken("/api/v1/users/1"))
+    }
+
+    @Test
+    fun httpClientWaitsLongerThanTheOkHttpDefault() {
+        val client = OkHttpClient.Builder().zeraTimeouts().build()
+
+        assertEquals(15_000, client.connectTimeoutMillis)
+        assertEquals(30_000, client.readTimeoutMillis)
+        assertEquals(30_000, client.writeTimeoutMillis)
     }
 
     private fun authenticator(
