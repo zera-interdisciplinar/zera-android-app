@@ -1,0 +1,155 @@
+package com.zera.android.view.screens.manager
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.zera.android.view.components.buttons.IconButton
+import com.zera.android.view.components.buttons.ZeraButton
+import com.zera.android.view.components.buttons.ZeraButtonType
+import com.zera.android.view.components.inputs.ZeraChipsGroup
+import com.zera.android.view.components.inputs.ZeraSearchInput
+import com.zera.android.view.components.lists.ProductList
+import com.zera.android.view.components.outros.ItemStatus
+import com.zera.android.view.components.overlays.BottomSheet
+import com.zera.android.view.components.texts.CaptionText
+import com.zera.android.view.components.texts.TitleText
+import com.zera.android.view.navigation.Route
+import com.zera.android.view.navigation.ZeraNavigator
+import com.zera.android.view.theme.Spacing
+import com.zera.android.view.theme.ZeraColorFamily
+import com.zera.android.view.theme.ZeraTheme
+import com.zera.android.view.theme.icons.ZeraIcon
+import com.zera.android.viewmodel.manager.ModelItemsViewModel
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ModelItemsScreen(
+    modelId: String,
+    modelName: String,
+    viewModel: ModelItemsViewModel = viewModel(key = "model-items-$modelId") {
+        ModelItemsViewModel(modelId)
+    },
+) {
+    val state by viewModel.state
+    var showFiltersSheet by rememberSaveable { mutableStateOf(false) }
+    var draftStatuses by rememberSaveable { mutableStateOf(emptyList<String>()) }
+
+    ManagerScaffold(
+        title = "Itens do Modelo",
+        currentRoute = Route.Itens,
+        goBack = true,
+        scrollable = false,
+        onFabClick = { /* TODO: abrir chatbot */ },
+    ) {
+        ZeraButton(
+            text = "Adicionar novo item",
+            onClick = { /* TODO: abrir cadastro de item com o modelo selecionado */ },
+            fillMaxWidth = true,
+            style = ZeraColorFamily.Blue,
+            icon = ZeraIcon.Plus,
+        )
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Spacing.small),
+        ) {
+            ZeraSearchInput(
+                value = state.searchQuery,
+                onValueChange = viewModel::onSearchQueryChange,
+                placeholder = "Pesquisar por ID, Nome ou Material...",
+                onSearch = viewModel::onSearch,
+                modifier = Modifier.weight(1f),
+            )
+            IconButton(
+                icon = ZeraIcon.Filter,
+                onClick = {
+                    draftStatuses = state.selectedStatuses
+                    showFiltersSheet = true
+                },
+                contentDescription = "Filtros",
+                type = ZeraButtonType.Base,
+            )
+        }
+
+        if (state.selectedStatuses.isNotEmpty()) {
+            ZeraChipsGroup(
+                options = state.selectedStatuses,
+                selectedValues = state.selectedStatuses,
+                onSelectedValuesChange = viewModel::onAppliedFilterChipsChange,
+                selectMany = true,
+            )
+        }
+        state.errorMessage?.let { message ->
+            CaptionText(text = message, color = MaterialTheme.colorScheme.error)
+        }
+        TitleText(text = state.totalItemsLabel, bold = true)
+        ProductList(
+            products = state.items,
+            onItemClick = { product ->
+                ZeraNavigator.push(Route.ItemDetails(itemId = product.id))
+            },
+            contentPadding = PaddingValues(vertical = Spacing.small),
+            modifier = Modifier.weight(1f),
+            onEndReached = viewModel::loadNextPage,
+            isLoadingMore = state.isLoadingMore,
+        )
+    }
+
+    if (showFiltersSheet) {
+        BottomSheet(
+            onDismissRequest = { showFiltersSheet = false },
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        ) {
+            TitleText(
+                text = "Escolha quais filtros deseja aplicar nos itens do modelo $modelName",
+                bold = true,
+            )
+            Column(verticalArrangement = Arrangement.spacedBy(Spacing.large)) {
+                ZeraChipsGroup(
+                    label = "Status",
+                    options = ItemStatus.entries.map { it.label },
+                    selectedValues = draftStatuses,
+                    onSelectedValuesChange = { draftStatuses = it },
+                    selectMany = true,
+                    stacked = true,
+                )
+            }
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                ZeraButton(
+                    text = "Aplicar filtros",
+                    onClick = {
+                        viewModel.applyFilters(draftStatuses)
+                        showFiltersSheet = false
+                    },
+                    fillMaxWidth = true,
+                    style = ZeraColorFamily.Blue,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+@Preview(heightDp = 900)
+fun ModelItemsScreenPreview() {
+    ZeraTheme {
+        ModelItemsScreen(modelId = "1", modelName = "Dell Latitude 5420")
+    }
+}

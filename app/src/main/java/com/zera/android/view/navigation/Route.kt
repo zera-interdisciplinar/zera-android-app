@@ -99,6 +99,12 @@ sealed interface Route{
     data object Models : Route
 
     @Serializable
+    data class ModelItems(
+        val modelId: String,
+        val modelName: String,
+    ) : Route
+
+    @Serializable
     data object ModelCreation : Route
 
     @Serializable
