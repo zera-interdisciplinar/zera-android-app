@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zera.android.view.components.buttons.IconButton
 import com.zera.android.view.components.buttons.ZeraButton
@@ -44,6 +45,11 @@ fun ModelsScreen(
     viewModel: ModelsViewModel = viewModel(),
 ) {
     val state by viewModel.state
+
+    LifecycleResumeEffect(Unit) {
+        viewModel.refresh()
+        onPauseOrDispose { }
+    }
 
     ManagerScaffold(
         title = "Modelos",
@@ -76,6 +82,8 @@ fun ModelsScreen(
             contentPadding = PaddingValues(vertical = Spacing.small),
             modifier = Modifier.weight(1f),
             emptyContent = { BodyText(text = "Nenhum modelo encontrado") },
+            onEndReached = viewModel::loadNextPage,
+            isLoadingMore = state.isLoadingMore,
         )
     }
 
