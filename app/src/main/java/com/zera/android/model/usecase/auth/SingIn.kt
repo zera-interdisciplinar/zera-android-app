@@ -22,7 +22,11 @@ class SingIn {
             password = password,
         )
 
-        val selfUser = getSelfUser.execute(response.userId)
+        return loadSignedInUser(response.userId)
+    }
+
+    suspend fun loadSignedInUser(userId: String): SelfUserResponseDTO {
+        val selfUser = getSelfUser.execute(userId)
         SqliteManager.saveUnitId(selfUser.unitId)
         loadFlags.execute(selfUser)
         return selfUser

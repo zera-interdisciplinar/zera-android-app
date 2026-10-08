@@ -33,6 +33,7 @@ object AiClient {
                     )
                 )
             }
+            .authenticator(SessionRefresh.authenticator)
             .build()
 
         retrofit = Retrofit.Builder()

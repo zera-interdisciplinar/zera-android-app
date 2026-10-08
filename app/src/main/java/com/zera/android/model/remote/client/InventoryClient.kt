@@ -33,6 +33,7 @@ object InventoryClient {
                     )
                 )
             }
+            .authenticator(SessionRefresh.authenticator)
             .build()
 
         retrofit = Retrofit.Builder()

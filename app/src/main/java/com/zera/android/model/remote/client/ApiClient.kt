@@ -19,11 +19,30 @@ object ApiClient {
     private val json = Json { ignoreUnknownKeys = true }
 
     private lateinit var retrofit: Retrofit
+    lateinit var refreshAuthService: AuthService
+        private set
 
     fun init(environments: Environments) {
         val baseUrl = environments.admCoreApiUrl.let { url ->
             if (url.endsWith("/")) url else "$url/"
         }
+        val converter = json.asConverterFactory("application/json".toMediaType())
+        val refreshClient = OkHttpClient.Builder()
+            .addInterceptor { chain ->
+                chain.proceed(
+                    chain.request().newBuilder()
+                        .header("apiKey", environments.admCoreApiKey)
+                        .build(),
+                )
+            }
+            .build()
+        refreshAuthService = Retrofit.Builder()
+            .baseUrl(baseUrl)
+            .client(refreshClient)
+            .addConverterFactory(converter)
+            .build()
+            .create(AuthService::class.java)
+
         val okHttpClient = OkHttpClient.Builder()
             .addInterceptor { chain ->
                 val requestBuilder = chain.request().newBuilder()
@@ -36,11 +55,12 @@ object ApiClient {
 
                 chain.proceed(requestBuilder.build())
             }
+            .authenticator(SessionRefresh.authenticator)
             .build()
         retrofit = Retrofit.Builder()
             .baseUrl(baseUrl)
             .client(okHttpClient)
-            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+            .addConverterFactory(converter)
             .build()
     }
 
