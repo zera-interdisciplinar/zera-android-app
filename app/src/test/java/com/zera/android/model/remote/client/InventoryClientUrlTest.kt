@@ -7,7 +7,7 @@ import org.junit.Test
 class InventoryClientUrlTest {
     @Test
     fun kongPrefixResolvesToDashboardHome() {
-        val base = InventoryClient.apiBaseUrl("https://34.95.129.59/qa/inventory/")
+        val base = serviceBaseUrl("https://34.95.129.59/qa/inventory/", stripApiV1 = true)
         val home = base.toHttpUrl().resolve("api/v1/dashboard/home")!!.toString()
 
         assertEquals("https://34.95.129.59/qa/inventory/", base)
@@ -16,7 +16,7 @@ class InventoryClientUrlTest {
 
     @Test
     fun apiUrlWithApiV1DoesNotDuplicateTheVersionSegment() {
-        val base = InventoryClient.apiBaseUrl("http://34.95.129.59/qa/inventory/api/v1")
+        val base = serviceBaseUrl("http://34.95.129.59/qa/inventory/api/v1", stripApiV1 = true)
         val home = base.toHttpUrl().resolve("api/v1/dashboard/home")!!.toString()
 
         assertEquals("http://34.95.129.59/qa/inventory/", base)
@@ -25,7 +25,7 @@ class InventoryClientUrlTest {
 
     @Test
     fun directHostResolvesToDashboardHome() {
-        val base = InventoryClient.apiBaseUrl("https://inventory.example.com")
+        val base = serviceBaseUrl("https://inventory.example.com", stripApiV1 = true)
         val home = base.toHttpUrl().resolve("api/v1/dashboard/home")!!.toString()
 
         assertEquals("https://inventory.example.com/", base)

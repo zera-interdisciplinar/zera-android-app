@@ -3,7 +3,7 @@ package com.zera.android.model.usecase.auth
 import com.zera.android.model.dto.auth.RefreshRequestDTO
 import com.zera.android.model.dto.auth.SingInResponseDTO
 import com.zera.android.model.local.SqliteManager
-import com.zera.android.model.remote.client.ApiClient
+import com.zera.android.model.remote.client.AdmCoreClient
 import kotlinx.coroutines.CancellationException
 import retrofit2.HttpException
 
@@ -16,7 +16,7 @@ sealed class RefreshOutcome {
 class RefreshSession {
     suspend fun execute(): RefreshOutcome = refreshSession(
         refreshToken = SqliteManager.getRefreshToken(),
-        call = { token -> ApiClient.refreshAuthService.refresh(RefreshRequestDTO(token)) },
+        call = { token -> AdmCoreClient.refreshAuthService.refresh(RefreshRequestDTO(token)) },
         save = SqliteManager::updateTokens,
     )
 }

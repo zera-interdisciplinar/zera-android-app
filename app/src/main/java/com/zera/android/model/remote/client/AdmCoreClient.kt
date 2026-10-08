@@ -5,18 +5,17 @@ import com.zera.android.model.entity.config.Environments
 import com.zera.android.model.local.SqliteManager
 import com.zera.android.model.remote.service.AuthService
 import com.zera.android.model.remote.service.InvitationService
-import com.zera.android.model.remote.service.SelfUserService
 import com.zera.android.model.remote.service.RecyclingPlacesService
 import com.zera.android.model.remote.service.RecyclingsService
+import com.zera.android.model.remote.service.SelfUserService
 import com.zera.android.model.remote.service.TelephoneService
 import com.zera.android.model.remote.service.UsersService
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
-import java.util.concurrent.TimeUnit
 
-object ApiClient {
+object AdmCoreClient {
     private val json = Json { ignoreUnknownKeys = true }
 
     private lateinit var retrofit: Retrofit
@@ -87,11 +86,6 @@ object ApiClient {
         retrofit.create(RecyclingsService::class.java)
     }
 }
-
-internal fun OkHttpClient.Builder.zeraTimeouts(): OkHttpClient.Builder =
-    connectTimeout(15, TimeUnit.SECONDS)
-        .readTimeout(30, TimeUnit.SECONDS)
-        .writeTimeout(30, TimeUnit.SECONDS)
 
 internal fun shouldSendAccessToken(encodedPath: String): Boolean {
     val path = encodedPath.trimEnd('/')

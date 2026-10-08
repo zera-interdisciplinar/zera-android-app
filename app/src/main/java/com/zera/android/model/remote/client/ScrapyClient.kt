@@ -8,8 +8,6 @@ import com.zera.android.model.remote.service.ScrapyService
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
-import okhttp3.HttpUrl
-import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -29,7 +27,7 @@ object ScrapyClient {
 
     private val scrapyService: ScrapyService by lazy {
         val retrofit = Retrofit.Builder()
-            .baseUrl(apiBaseUrl(BuildConfig.SCRAPY_API_URL))
+            .baseUrl(serviceBaseUrl(BuildConfig.SCRAPY_API_URL, stripApiV1 = false))
             .client(okHttpClient)
             .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .build()
@@ -40,21 +38,4 @@ object ScrapyClient {
 
     suspend fun flags(attrs: Map<String, JsonElement> = emptyMap()): JsonObject =
         scrapyService.flags(FlagsRequest(attrs))
-
-    internal fun apiBaseUrl(raw: String): String {
-        val url = raw.trim().toHttpUrl()
-        val segments = url.pathSegments.filter { it.isNotEmpty() }.toMutableList()
-        if (segments.lastOrNull() == "v1") {
-            segments.removeAt(segments.lastIndex)
-        }
-        val builder = url.newBuilder().encodedPath("/")
-        segments.forEach { builder.addPathSegment(it) }
-        return trailingSlash(builder.build()).toString()
-    }
-
-    private fun trailingSlash(url: HttpUrl): HttpUrl {
-        val path = url.encodedPath
-        if (path.endsWith("/")) return url
-        return url.newBuilder().encodedPath("$path/").build()
-    }
 }

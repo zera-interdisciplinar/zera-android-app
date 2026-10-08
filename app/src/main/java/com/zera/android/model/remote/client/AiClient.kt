@@ -38,7 +38,7 @@ object AiClient {
             .build()
 
         retrofit = Retrofit.Builder()
-            .baseUrl(InventoryClient.apiBaseUrl(url))
+            .baseUrl(serviceBaseUrl(url, stripApiV1 = true))
             .client(okHttpClient)
             .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .build()

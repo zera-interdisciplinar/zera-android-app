@@ -3,13 +3,13 @@ package com.zera.android.model.usecase.team
 import com.zera.android.model.dto.invitation.CreateInvitationRequestDTO
 import com.zera.android.model.dto.invitation.CreateInvitationResponseDTO
 import com.zera.android.model.local.SqliteManager
-import com.zera.android.model.remote.client.ApiClient
+import com.zera.android.model.remote.client.AdmCoreClient
 
 class CreateInvitation {
     suspend fun execute(inviteeName: String): CreateInvitationResponseDTO {
         val managerId = SqliteManager.getUserId()
             ?: error("Não há usuário logado")
-        return ApiClient.invitationService.create(
+        return AdmCoreClient.invitationService.create(
             CreateInvitationRequestDTO(
                 managerId = managerId,
                 inviteeName = inviteeName.trim(),
