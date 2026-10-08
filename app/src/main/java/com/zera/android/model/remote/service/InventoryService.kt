@@ -1,6 +1,7 @@
 package com.zera.android.model.remote.service
 
 import com.zera.android.model.dto.inventory.CategoryResponseDTO
+import com.zera.android.model.dto.inventory.CreateCategoryRequestDTO
 import com.zera.android.model.dto.inventory.CreateDisposalRequestDTO
 import com.zera.android.model.dto.inventory.CreateModelRequestDTO
 import com.zera.android.model.dto.inventory.DashboardHomeResponseDTO
@@ -49,6 +50,11 @@ interface InventoryService {
 
     @GET("api/v1/categories")
     suspend fun getCategories(): List<CategoryResponseDTO>
+
+    @POST("api/v1/categories")
+    suspend fun createCategory(
+        @Body body: CreateCategoryRequestDTO,
+    ): CategoryResponseDTO
 
     @GET("api/v1/models")
     suspend fun getModels(
