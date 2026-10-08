@@ -1,5 +1,6 @@
 package com.zera.android.model.remote.client
 
+import com.zera.android.model.local.SqliteManager
 import com.zera.android.model.usecase.auth.RefreshOutcome
 import com.zera.android.model.usecase.auth.RefreshSession
 import com.zera.android.model.usecase.auth.SingIn
@@ -16,6 +17,7 @@ import okhttp3.Response
 import okhttp3.Route as OkHttpRoute
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
+import java.io.IOException
 
 class TokenRefreshAuthenticator(
     private val refresh: suspend () -> RefreshOutcome,
@@ -24,9 +26,11 @@ class TokenRefreshAuthenticator(
     private val mutex = Mutex()
     private var inFlight: CompletableDeferred<RefreshOutcome>? = null
     private val expired = AtomicBoolean(false)
+    private val recovering = AtomicBoolean(false)
     internal val arrivals = AtomicInteger(0)
 
     override fun authenticate(route: OkHttpRoute?, response: Response): Request? {
+        if (recovering.get()) return null
         val request = response.request
         if (request.header("Authorization").isNullOrBlank()) return null
         if (isCredentialRequest(request)) return null
@@ -44,8 +48,19 @@ class TokenRefreshAuthenticator(
                     .build()
             }
             RefreshOutcome.Unauthorized -> {
-                expire()
-                null
+                when (val recovered = loginAgain()) {
+                    is Relogin.Token -> {
+                        expired.set(false)
+                        request.newBuilder()
+                            .header("Authorization", "Bearer ${recovered.accessToken}")
+                            .build()
+                    }
+                    Relogin.KeepSession -> null
+                    Relogin.GiveUp -> {
+                        expire()
+                        null
+                    }
+                }
             }
             RefreshOutcome.Unavailable -> null
         }
@@ -53,6 +68,26 @@ class TokenRefreshAuthenticator(
 
     private fun expire() {
         if (expired.compareAndSet(false, true)) onSessionExpired()
+    }
+
+    private fun loginAgain(): Relogin {
+        if (!recovering.compareAndSet(false, true)) return Relogin.KeepSession
+        return try {
+            runBlocking {
+                val email = SqliteManager.getEmail()
+                val password = SqliteManager.getPassword()
+                if (email.isNullOrBlank() || password.isNullOrBlank()) return@runBlocking Relogin.GiveUp
+                SingIn().execute(email, password)
+                val access = SqliteManager.getAccessToken()
+                if (access.isNullOrBlank()) Relogin.GiveUp else Relogin.Token(access)
+            }
+        } catch (_: IOException) {
+            Relogin.KeepSession
+        } catch (_: Exception) {
+            Relogin.GiveUp
+        } finally {
+            recovering.set(false)
+        }
     }
 
     private suspend fun coalesce(): RefreshOutcome {
@@ -114,4 +149,10 @@ object SessionRefresh {
             ZeraNavigator.pushAndPop(Route.Welcome)
         },
     )
+}
+
+private sealed class Relogin {
+    data class Token(val accessToken: String) : Relogin()
+    data object KeepSession : Relogin()
+    data object GiveUp : Relogin()
 }

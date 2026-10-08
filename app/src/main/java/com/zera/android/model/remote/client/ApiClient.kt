@@ -49,7 +49,9 @@ object ApiClient {
                     .header("apiKey", environments.admCoreApiKey)
 
                 val accessToken = SqliteManager.getAccessToken()
-                if (!accessToken.isNullOrBlank()) {
+                if (shouldSendAccessToken(chain.request().url.encodedPath) &&
+                    !accessToken.isNullOrBlank()
+                ) {
                     requestBuilder.header("Authorization", "Bearer $accessToken")
                 }
 
@@ -81,4 +83,12 @@ object ApiClient {
     val recyclingsService: RecyclingsService by lazy {
         retrofit.create(RecyclingsService::class.java)
     }
+}
+
+internal fun shouldSendAccessToken(encodedPath: String): Boolean {
+    val path = encodedPath.trimEnd('/')
+    return !path.endsWith("/auth/login") &&
+        !path.endsWith("/auth/refresh") &&
+        !path.endsWith("/auth/logout") &&
+        !path.endsWith("/invitations/redeem")
 }

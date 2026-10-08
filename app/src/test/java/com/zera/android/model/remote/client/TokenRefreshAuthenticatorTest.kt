@@ -199,6 +199,15 @@ class TokenRefreshAuthenticatorTest {
         )
     }
 
+    @Test
+    fun publicAuthRoutesDoNotSendTheAccessToken() {
+        assertEquals(false, shouldSendAccessToken("/qa/administrative/api/v1/auth/login"))
+        assertEquals(false, shouldSendAccessToken("/api/v1/auth/refresh"))
+        assertEquals(false, shouldSendAccessToken("/api/v1/auth/logout"))
+        assertEquals(false, shouldSendAccessToken("/api/v1/invitations/redeem"))
+        assertEquals(true, shouldSendAccessToken("/api/v1/users/1"))
+    }
+
     private fun authenticator(
         refresh: suspend () -> RefreshOutcome,
         onSessionExpired: () -> Unit = { error("sessão não deveria expirar") },

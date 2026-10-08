@@ -52,12 +52,19 @@ class RestoreSession {
                 val userId = SqliteManager.getUserId() ?: error("Não há usuário logado")
                 signIn.loadSignedInUser(userId)
             }
-            RefreshOutcome.Unauthorized -> {
-                clearSession()
-                throw unauthorized()
-            }
+            RefreshOutcome.Unauthorized -> loginWithSavedPassword()
             RefreshOutcome.Unavailable -> throw IOException("Não foi possível renovar a sessão")
         }
+    }
+
+    private suspend fun loginWithSavedPassword(): SelfUserResponseDTO {
+        val email = SqliteManager.getEmail()
+        val password = SqliteManager.getPassword()
+        if (email.isNullOrBlank() || password.isNullOrBlank()) {
+            clearSession()
+            throw unauthorized()
+        }
+        return signIn.execute(email, password)
     }
 
     private fun unauthorized(): HttpException {
