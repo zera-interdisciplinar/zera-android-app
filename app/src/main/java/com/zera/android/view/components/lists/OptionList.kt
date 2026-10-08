@@ -39,6 +39,7 @@ data class OptionItem(
     val icon: ZeraIcon? = null,
     val statusText: String? = null,
     val statusStyle: ZeraColorFamily = ZeraColorFamily.Yellow,
+    val id: String? = null,
 )
 
 /**
