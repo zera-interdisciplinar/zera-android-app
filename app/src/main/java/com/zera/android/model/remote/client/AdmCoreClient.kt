@@ -5,6 +5,7 @@ import com.zera.android.model.entity.config.Environments
 import com.zera.android.model.local.SqliteManager
 import com.zera.android.model.remote.service.AuthService
 import com.zera.android.model.remote.service.InvitationService
+import com.zera.android.model.remote.service.NotificationsService
 import com.zera.android.model.remote.service.RecyclingPlacesService
 import com.zera.android.model.remote.service.RecyclingsService
 import com.zera.android.model.remote.service.SelfUserService
@@ -75,6 +76,10 @@ object AdmCoreClient {
     val invitationService: InvitationService by lazy { retrofit.create(InvitationService::class.java) }
 
     val usersService: UsersService by lazy { retrofit.create(UsersService::class.java) }
+
+    val notificationsService: NotificationsService by lazy {
+        retrofit.create(NotificationsService::class.java)
+    }
 
     val telephoneService: TelephoneService by lazy { retrofit.create(TelephoneService::class.java) }
 
