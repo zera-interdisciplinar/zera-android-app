@@ -4,13 +4,13 @@ import com.zera.android.model.entity.team.TeamEmployee
 import com.zera.android.model.entity.user.UserRole
 import com.zera.android.model.entity.user.UserStatus
 import com.zera.android.model.local.SqliteManager
-import com.zera.android.model.remote.client.ApiClient
+import com.zera.android.model.remote.client.AdmCoreClient
 
 class ListTeamEmployees {
     suspend fun execute(): List<TeamEmployee> {
         val managerId = SqliteManager.getUserId()
             ?: error("Não há usuário logado")
-        return ApiClient.usersService.listUsers(
+        return AdmCoreClient.usersService.listUsers(
             role = UserRole.EMPLOYEE,
             status = UserStatus.ACTIVE,
             managerId = managerId,

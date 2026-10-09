@@ -2,7 +2,7 @@ package com.zera.android.model.usecase.auth
 
 import com.zera.android.model.dto.invitation.RedeemRequestDTO
 import com.zera.android.model.dto.invitation.RedeemResponseDTO
-import com.zera.android.model.remote.client.ApiClient
+import com.zera.android.model.remote.client.AdmCoreClient
 
 class InvitationUseCase {
     suspend fun execute(
@@ -12,6 +12,6 @@ class InvitationUseCase {
         password: String,
     ): RedeemResponseDTO {
         val redeemRequest = RedeemRequestDTO(token, name, email, password)
-        return ApiClient.invitationService.redeem(redeemRequest)
+        return AdmCoreClient.invitationService.redeem(redeemRequest)
     }
 }

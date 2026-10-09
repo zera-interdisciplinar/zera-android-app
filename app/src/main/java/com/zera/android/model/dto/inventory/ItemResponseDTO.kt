@@ -27,10 +27,13 @@ data class ModelResponseDTO(
     val manufacturer: String? = null,
     val materials: List<MaterialResponseDTO> = emptyList(),
     val category: CategoryResponseDTO? = null,
+    val notes: String? = null,
+    val approvalStatus: String? = null,
 )
 
 @Serializable
 data class MaterialResponseDTO(
     val id: String? = null,
-    val name: String,
+    val code: String? = null,
+    val name: String = "",
 )

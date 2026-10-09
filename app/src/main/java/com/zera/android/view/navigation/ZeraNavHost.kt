@@ -17,6 +17,9 @@ import com.zera.android.view.screens.auth.SignUpScreen
 import com.zera.android.view.screens.SplashScreen
 import com.zera.android.view.screens.auth.WelcomeScreen
 import com.zera.android.view.screens.employee.EmployeeHomeScreen
+import com.zera.android.view.screens.manager.CategoriesScreen
+import com.zera.android.view.screens.manager.CategoryCreationScreen
+import com.zera.android.view.screens.manager.CategoryCreationSuccessScreen
 import com.zera.android.view.screens.manager.EmployeesScreen
 import com.zera.android.view.screens.manager.IndexesScreen
 import com.zera.android.view.screens.manager.ItemApprovedScreen
@@ -204,6 +207,19 @@ fun ZeraNavHost() {
                 }
                 composable<Route.ScheduledDisposals> {
                     ScheduledDisposalsScreen()
+                }
+                composable<Route.Categories> {
+                    CategoriesScreen()
+                }
+                composable<Route.CategoryCreation> {
+                    CategoryCreationScreen()
+                }
+                composable<Route.CategoryCreationSuccess> { backStackEntry ->
+                    val route = backStackEntry.toRoute<Route.CategoryCreationSuccess>()
+                    CategoryCreationSuccessScreen(
+                        name = route.name,
+                        description = route.description,
+                    )
                 }
                 composable<Route.Models> {
                     ModelsScreen()

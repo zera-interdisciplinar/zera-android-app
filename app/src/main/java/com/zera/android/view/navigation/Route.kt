@@ -96,6 +96,18 @@ sealed interface Route{
     data object ScheduledDisposals : Route
 
     @Serializable
+    data object Categories : Route
+
+    @Serializable
+    data object CategoryCreation : Route
+
+    @Serializable
+    data class CategoryCreationSuccess(
+        val name: String,
+        val description: String,
+    ) : Route
+
+    @Serializable
     data object Models : Route
 
     @Serializable

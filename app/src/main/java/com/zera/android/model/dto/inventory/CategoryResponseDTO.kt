@@ -11,3 +11,9 @@ data class CategoryResponseDTO(
     val createdAt: String? = null,
     val updatedAt: String? = null,
 )
+
+@Serializable
+data class CreateCategoryRequestDTO(
+    val name: String,
+    val description: String? = null,
+)

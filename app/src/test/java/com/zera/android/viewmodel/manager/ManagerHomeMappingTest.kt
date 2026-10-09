@@ -1,7 +1,9 @@
 package com.zera.android.viewmodel.manager
 
 import com.zera.android.model.dto.inventory.DashboardHomeResponseDTO
+import com.zera.android.model.dto.notification.AlertResponseDTO
 import com.zera.android.model.entity.user.UserRole
+import com.zera.android.view.theme.ZeraColorFamily
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -31,17 +33,33 @@ class ManagerHomeMappingTest {
     }
 
     @Test
-    fun alertsSkipZeroCounters() {
-        val home = DashboardHomeResponseDTO(
-            activeItems = 1,
-            pendingApproval = 3,
-            inMaintenance = 0,
-            awaitingEvaluation = 1,
+    fun alertsUseApiDescriptionInListOrder() {
+        val alerts = ManagerHomeViewModel.alertsFrom(
+            listOf(
+                alert(alertId = "first", description = "Estoque alto", severity = "HIGH"),
+                alert(alertId = "second", description = "Item aprovado", severity = "LOW"),
+            ),
         )
-        val alerts = ManagerHomeViewModel.alertsFrom(home)
         assertEquals(2, alerts.size)
-        assertEquals("pending-approval", alerts[0].id)
-        assertEquals("awaiting-evaluation", alerts[1].id)
+        assertEquals("first", alerts[0].id)
+        assertEquals("Estoque alto", alerts[0].label)
+        assertEquals(ZeraColorFamily.Red, alerts[0].style)
+        assertEquals("second", alerts[1].id)
+        assertEquals("Item aprovado", alerts[1].label)
+        assertEquals(ZeraColorFamily.Green, alerts[1].style)
+    }
+
+    @Test
+    fun alertsAreEmptyWhenApiReturnsNone() {
+        assertTrue(ManagerHomeViewModel.alertsFrom(emptyList()).isEmpty())
+    }
+
+    @Test
+    fun severityMapsToColorFamily() {
+        assertEquals(ZeraColorFamily.Red, ManagerHomeViewModel.colorFamilyForSeverity("HIGH"))
+        assertEquals(ZeraColorFamily.Yellow, ManagerHomeViewModel.colorFamilyForSeverity("MEDIUM"))
+        assertEquals(ZeraColorFamily.Green, ManagerHomeViewModel.colorFamilyForSeverity("LOW"))
+        assertEquals(ZeraColorFamily.Yellow, ManagerHomeViewModel.colorFamilyForSeverity("UNKNOWN"))
     }
 
     @Test
@@ -49,4 +67,20 @@ class ManagerHomeMappingTest {
         assertEquals("Gestor", ManagerHomeViewModel.roleLabel(UserRole.MANAGER))
         assertEquals("Operário", ManagerHomeViewModel.roleLabel(UserRole.EMPLOYEE))
     }
+
+    private fun alert(
+        alertId: String,
+        description: String,
+        severity: String,
+    ) = AlertResponseDTO(
+        alertId = alertId,
+        kind = "STOCK_QUANTITY_LIMIT",
+        severity = severity,
+        status = "OPEN",
+        description = description,
+        unitId = "unit",
+        occurredAt = "2026-09-20T03:15:00",
+        createdAt = "2026-09-20T03:15:01",
+        updatedAt = "2026-09-20T03:15:01",
+    )
 }

@@ -5,8 +5,6 @@ import com.zera.android.model.entity.config.Environments
 import com.zera.android.model.local.SqliteManager
 import com.zera.android.model.remote.service.InventoryService
 import kotlinx.serialization.json.Json
-import okhttp3.HttpUrl
-import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -33,10 +31,12 @@ object InventoryClient {
                     )
                 )
             }
+            .authenticator(SessionRefresh.authenticator)
+            .zeraTimeouts()
             .build()
 
         retrofit = Retrofit.Builder()
-            .baseUrl(apiBaseUrl(environments.inventoryApiUrl))
+            .baseUrl(serviceBaseUrl(environments.inventoryApiUrl, stripApiV1 = true))
             .client(okHttpClient)
             .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .build()
@@ -65,23 +65,5 @@ object InventoryClient {
         }
 
         return requestBuilder.build()
-    }
-
-    internal fun apiBaseUrl(raw: String): String {
-        val url = raw.trim().toHttpUrl()
-        val segments = url.pathSegments.filter { it.isNotEmpty() }.toMutableList()
-        if (segments.takeLast(2) == listOf("api", "v1")) {
-            segments.removeAt(segments.lastIndex)
-            segments.removeAt(segments.lastIndex)
-        }
-        val builder = url.newBuilder().encodedPath("/")
-        segments.forEach { builder.addPathSegment(it) }
-        return trailingSlash(builder.build()).toString()
-    }
-
-    private fun trailingSlash(url: HttpUrl): HttpUrl {
-        val path = url.encodedPath
-        if (path.endsWith("/")) return url
-        return url.newBuilder().encodedPath("$path/").build()
     }
 }

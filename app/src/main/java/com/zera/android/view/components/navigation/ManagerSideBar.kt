@@ -105,6 +105,14 @@ fun ManagerSideBar(
                 route = Route.EmployeeHome,
             )
             SideBarButton(
+                label = "Categorias",
+                contentDescription = "Botão para Categorias",
+                currentRoute = currentRoute,
+                onButtonClicked = onButtonClicked,
+                icon = ZeraIcon.Filter,
+                route = Route.Categories,
+            )
+            SideBarButton(
                 label = "Modelos",
                 contentDescription = "Botão para Modelos",
                 currentRoute = currentRoute,
