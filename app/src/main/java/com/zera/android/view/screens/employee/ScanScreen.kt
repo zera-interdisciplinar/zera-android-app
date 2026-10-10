@@ -15,7 +15,9 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
@@ -35,7 +37,9 @@ import com.zera.android.viewmodel.employee.ScanViewModel
  * Tela de escanear item do operário.
  *
  * O quadrado escuro no centro é a [ScanArea]: com permissão de câmera, mostra a câmera do
- * usuário; sem ela, mostra o botão "Permitir câmera", que faz o pedido.
+ * usuário; sem ela, mostra o botão "Permitir câmera", que faz o pedido. Cada código lido vai
+ * para o [ScanViewModel]; quando a leitura é aceita, o aparelho vibra e o código aparece no
+ * texto de status da área.
  */
 @Composable
 fun ScanScreen(
@@ -43,6 +47,7 @@ fun ScanScreen(
 ) {
     val state by viewModel.state
     val context = LocalContext.current
+    val haptic = LocalHapticFeedback.current
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
@@ -83,8 +88,13 @@ fun ScanScreen(
         ScanArea(
             hasCameraPermission = state.hasCameraPermission,
             onRequestPermission = { permissionLauncher.launch(Manifest.permission.CAMERA) },
-            // TODO: repassar para o ScanViewModel (tratamento da leitura ainda não existe)
-            onBarcodeDetected = {},
+            onBarcodeDetected = { code ->
+                if (viewModel.onBarcodeDetected(code)) {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                }
+            },
+            statusText = state.scannedCode?.let { "Código lido: $it" }
+                ?: "Leitura automática ativada",
         )
 
         Spacer(modifier = Modifier.weight(1f))
