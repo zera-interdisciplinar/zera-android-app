@@ -15,9 +15,13 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -38,9 +42,22 @@ import com.zera.android.viewmodel.manager.SchedulingDetailsViewModel
 
 @Composable
 fun SchedulingDetailsScreen(
+    scheduleId: String = "",
     viewModel: SchedulingDetailsViewModel = viewModel(),
 ) {
     val state by viewModel.state
+    val context = LocalContext.current
+
+    LaunchedEffect(scheduleId) {
+        viewModel.load(scheduleId)
+    }
+
+    LaunchedEffect(state.pendingUri) {
+        val uri = state.pendingUri ?: return@LaunchedEffect
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(uri)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        runCatching { context.startActivity(intent) }
+        viewModel.consumePendingUri()
+    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -79,7 +96,7 @@ fun SchedulingDetailsScreen(
                         color = LocalContentColor.current,
                     )
                     LabelText(
-                        text = state.recyclerName,
+                        text = state.placeName.ifBlank { state.recyclerName },
                         color = LocalContentColor.current,
                     )
                 }
@@ -136,6 +153,7 @@ fun SchedulingDetailsScreen(
             ZeraButton(
                 text = "Cancelar agendamento",
                 onClick = viewModel::onCancelSchedulingClick,
+                enabled = !state.isCancelling,
                 style = ZeraColorFamily.Red,
                 type = ZeraButtonType.Secondary,
                 fillMaxWidth = true,

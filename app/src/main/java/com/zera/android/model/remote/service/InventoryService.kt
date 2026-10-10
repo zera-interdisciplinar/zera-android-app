@@ -14,7 +14,10 @@ import com.zera.android.model.dto.inventory.PagedItemsDTO
 import com.zera.android.model.dto.inventory.PagedModelsDTO
 import com.zera.android.model.dto.inventory.RejectItemRequestDTO
 import com.zera.android.model.dto.inventory.UpdateItemRequestDTO
+import com.zera.android.model.dto.inventory.DisposalScheduleDetailDTO
+import com.zera.android.model.dto.inventory.PagedDisposalSchedulesDTO
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.PATCH
 import retrofit2.http.POST
@@ -92,4 +95,21 @@ interface InventoryService {
     suspend fun createDisposal(
         @Body body: CreateDisposalRequestDTO,
     ): DisposalResponseDTO
+
+    @GET("api/v1/disposals/schedules")
+    suspend fun getDisposalSchedules(
+        @Query("from") from: String,
+        @Query("page") page: Int = 0,
+        @Query("size") size: Int = 100,
+    ): PagedDisposalSchedulesDTO
+
+    @GET("api/v1/disposals/schedules/{id}")
+    suspend fun getDisposalSchedule(
+        @Path("id") id: String,
+    ): DisposalScheduleDetailDTO
+
+    @DELETE("api/v1/disposals/schedules/{id}")
+    suspend fun deleteDisposalSchedule(
+        @Path("id") id: String,
+    )
 }

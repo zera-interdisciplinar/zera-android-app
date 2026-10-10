@@ -1,58 +1,122 @@
 package com.zera.android.viewmodel.manager
 
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.viewModelScope
+import com.zera.android.model.dto.inventory.DisposalScheduleDetailDTO
+import com.zera.android.model.usecase.inventory.CancelDisposalSchedule
+import com.zera.android.model.usecase.inventory.GetDisposalSchedule
 import com.zera.android.view.components.lists.OptionItem
+import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.viewmodel.ZeraViewModel
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.launch
 
 data class SchedulingDetailsState(
     val recyclerName: String = "",
     val scheduledAt: String = "",
+    val placeName: String = "",
+    val itemsLabel: String = "",
     val options: List<OptionItem> = emptyList(),
     val contactEmail: String = "",
     val contactPhone: String = "",
-    val contactButtonsEnabled: Boolean = true,
+    val contactButtonsEnabled: Boolean = false,
+    val pendingUri: String? = null,
+    val isCancelling: Boolean = false,
     val errorMessage: String? = null,
 )
 
 class SchedulingDetailsViewModel : ZeraViewModel() {
+    private val getDisposalSchedule = GetDisposalSchedule()
+    private val cancelDisposalSchedule = CancelDisposalSchedule()
     private val _state = mutableStateOf(SchedulingDetailsState())
     val state = _state
+    private var scheduleId: String = ""
 
-    init {
-        loadScheduling()
-    }
-
-    fun onGenerateReportClick() {
-        // TODO: criar o processo para gerar relatório
+    fun load(scheduleId: String) {
+        if (scheduleId.isBlank() || scheduleId == this.scheduleId) return
+        this.scheduleId = scheduleId
+        _state.value = _state.value.copy(errorMessage = null)
+        viewModelScope.launch {
+            try {
+                apply(getDisposalSchedule.execute(scheduleId))
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(errorMessage = e.message)
+            }
+        }
     }
 
     fun onOptionClick(option: OptionItem) {
-        // TODO: navegar para alterar data/horário ou editar produtos do agendamento
+        _state.value = _state.value.copy(
+            errorMessage = when (option.name) {
+                "Alterar data ou horário" -> "A alteração de data ainda não tem tela."
+                else -> "A edição de produtos ainda não tem tela."
+            },
+        )
+    }
+
+    fun onGenerateReportClick() {
+        _state.value = _state.value.copy(
+            errorMessage = "O relatório só existe depois que o descarte for registrado.",
+        )
     }
 
     fun onEmailClick() {
-        // TODO: abrir o app de e-mail para contactEmail (exige Context)
+        val email = _state.value.contactEmail
+        if (email.isBlank()) return
+        _state.value = _state.value.copy(pendingUri = "mailto:$email")
     }
 
     fun onPhoneClick() {
-        // TODO: abrir o discador para contactPhone (exige Context)
+        val phone = _state.value.contactPhone.filter { it.isDigit() || it == '+' }
+        if (phone.isBlank()) return
+        _state.value = _state.value.copy(pendingUri = "tel:$phone")
+    }
+
+    fun consumePendingUri() {
+        _state.value = _state.value.copy(pendingUri = null)
     }
 
     fun onCancelSchedulingClick() {
-        // TODO: confirmar e cancelar o agendamento — contrato ainda não definido
+        val id = scheduleId
+        if (id.isBlank() || _state.value.isCancelling) return
+        _state.value = _state.value.copy(isCancelling = true, errorMessage = null)
+        viewModelScope.launch {
+            try {
+                cancelDisposalSchedule.execute(id)
+                ZeraNavigator.goBack()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(isCancelling = false, errorMessage = e.message)
+            }
+        }
     }
 
-    private fun loadScheduling() {
-        // TODO: trocar o mock pelo agendamento real — contrato ainda não definido
+    private fun apply(detail: DisposalScheduleDetailDTO) {
+        val email = detail.contact?.email.orEmpty()
+        val phone = detail.contact?.phone.orEmpty()
+        val names = detail.items.map { it.name.ifBlank { it.displayCode } }.filter { it.isNotBlank() }
         _state.value = _state.value.copy(
-            recyclerName = "Recicla Tech Moema",
-            scheduledAt = "21 ago · 08:00",
+            recyclerName = detail.placeName,
+            scheduledAt = ScheduledDisposalsViewModel.formatSchedule(detail.scheduledAt),
+            placeName = detail.placeName,
+            itemsLabel = names.joinToString(", "),
             options = listOf(
-                OptionItem(name = "Alterar data ou horário", description = ""),
-                OptionItem(name = "Adicionar ou remover produtos", description = ""),
+                OptionItem(
+                    name = "Alterar data ou horário",
+                    description = ScheduledDisposalsViewModel.formatSchedule(detail.scheduledAt),
+                ),
+                OptionItem(
+                    name = "Adicionar ou remover produtos",
+                    description = names.joinToString(", ").ifBlank { "Nenhum produto" },
+                ),
             ),
-            contactEmail = "contato@reciclatech.com.br",
-            contactPhone = "(11) 4002-8922",
+            contactEmail = email,
+            contactPhone = phone,
+            contactButtonsEnabled = email.isNotBlank() || phone.isNotBlank(),
+            errorMessage = null,
         )
     }
 }

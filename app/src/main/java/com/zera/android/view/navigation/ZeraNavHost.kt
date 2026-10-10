@@ -195,8 +195,9 @@ fun ZeraNavHost() {
                         disposalId = route.disposalId,
                     )
                 }
-                composable<Route.SchedulingDetails> {
-                    SchedulingDetailsScreen()
+                composable<Route.SchedulingDetails> { backStackEntry ->
+                    val route = backStackEntry.toRoute<Route.SchedulingDetails>()
+                    SchedulingDetailsScreen(scheduleId = route.scheduleId)
                 }
                 composable<Route.ItensResume> { backStackEntry ->
                     val route = backStackEntry.toRoute<Route.ItensResume>()
