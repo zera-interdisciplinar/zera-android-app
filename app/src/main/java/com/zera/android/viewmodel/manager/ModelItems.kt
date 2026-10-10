@@ -5,6 +5,8 @@ import com.zera.android.view.components.lists.ProductItem
 import com.zera.android.viewmodel.ZeraViewModel
 
 data class ModelItemsState(
+    // TODO: preencher com o cargo do usuário (validação a ser aplicada por outra pessoa).
+    val isEmployee: Boolean = false,
     val searchQuery: String = "",
     val selectedStatuses: List<String> = emptyList(),
     val totalItemsLabel: String = "",

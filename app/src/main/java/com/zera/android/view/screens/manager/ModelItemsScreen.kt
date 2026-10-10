@@ -2,6 +2,7 @@ package com.zera.android.view.screens.manager
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -29,10 +30,12 @@ import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.components.texts.TitleText
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
+import com.zera.android.view.screens.employee.EmployeeScaffold
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.view.theme.ZeraTheme
 import com.zera.android.view.theme.icons.ZeraIcon
+import com.zera.android.viewmodel.manager.ModelItemsState
 import com.zera.android.viewmodel.manager.ModelItemsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -48,65 +51,41 @@ fun ModelItemsScreen(
     var showFiltersSheet by rememberSaveable { mutableStateOf(false) }
     var draftStatuses by rememberSaveable { mutableStateOf(emptyList<String>()) }
 
-    ManagerScaffold(
-        title = "Itens do Modelo",
-        currentRoute = Route.Itens,
-        goBack = true,
-        scrollable = false,
-        onFabClick = { /* TODO: abrir chatbot */ },
-    ) {
-        ZeraButton(
-            text = "Adicionar novo item",
-            onClick = { /* TODO: abrir cadastro de item com o modelo selecionado */ },
-            fillMaxWidth = true,
-            style = ZeraColorFamily.Blue,
-            icon = ZeraIcon.Plus,
-        )
+    val openFilters = {
+        draftStatuses = state.selectedStatuses
+        showFiltersSheet = true
+    }
 
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(Spacing.small),
+    if (state.isEmployee) {
+        EmployeeScaffold(
+            title = "Itens do Modelo",
+            currentRoute = Route.EmployeeItems,
+            goBack = true,
+            scrollable = false,
+            onFabClick = { /* TODO: abrir chatbot */ },
         ) {
-            ZeraSearchInput(
-                value = state.searchQuery,
-                onValueChange = viewModel::onSearchQueryChange,
-                placeholder = "Pesquisar por ID, Nome ou Material...",
-                onSearch = viewModel::onSearch,
-                modifier = Modifier.weight(1f),
-            )
-            IconButton(
-                icon = ZeraIcon.Filter,
-                onClick = {
-                    draftStatuses = state.selectedStatuses
-                    showFiltersSheet = true
-                },
-                contentDescription = "Filtros",
-                type = ZeraButtonType.Base,
+            ModelItemsContent(
+                state = state,
+                viewModel = viewModel,
+                modelName = modelName,
+                onFiltersClick = openFilters,
             )
         }
-
-        if (state.selectedStatuses.isNotEmpty()) {
-            ZeraChipsGroup(
-                options = state.selectedStatuses,
-                selectedValues = state.selectedStatuses,
-                onSelectedValuesChange = viewModel::onAppliedFilterChipsChange,
-                selectMany = true,
+    } else {
+        ManagerScaffold(
+            title = "Itens do Modelo",
+            currentRoute = Route.Itens,
+            goBack = true,
+            scrollable = false,
+            onFabClick = { /* TODO: abrir chatbot */ },
+        ) {
+            ModelItemsContent(
+                state = state,
+                viewModel = viewModel,
+                modelName = modelName,
+                onFiltersClick = openFilters,
             )
         }
-        state.errorMessage?.let { message ->
-            CaptionText(text = message, color = MaterialTheme.colorScheme.error)
-        }
-        TitleText(text = state.totalItemsLabel, bold = true)
-        ProductList(
-            products = state.items,
-            onItemClick = { product ->
-                ZeraNavigator.push(Route.ItemDetails(itemId = product.id))
-            },
-            contentPadding = PaddingValues(vertical = Spacing.small),
-            modifier = Modifier.weight(1f),
-            onEndReached = viewModel::loadNextPage,
-            isLoadingMore = state.isLoadingMore,
-        )
     }
 
     if (showFiltersSheet) {
@@ -144,6 +123,66 @@ fun ModelItemsScreen(
             }
         }
     }
+}
+
+@Composable
+private fun ColumnScope.ModelItemsContent(
+    state: ModelItemsState,
+    viewModel: ModelItemsViewModel,
+    modelName: String,
+    onFiltersClick: () -> Unit,
+) {
+    if (state.isEmployee) {
+        ZeraButton(
+            text = "Adicionar novo item",
+            onClick = { ZeraNavigator.push(Route.ManualRegister(modelName = modelName)) },
+            fillMaxWidth = true,
+            style = ZeraColorFamily.Blue,
+            icon = ZeraIcon.Plus,
+        )
+    }
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Spacing.small),
+    ) {
+        ZeraSearchInput(
+            value = state.searchQuery,
+            onValueChange = viewModel::onSearchQueryChange,
+            placeholder = "Pesquisar por ID, Nome ou Material...",
+            onSearch = viewModel::onSearch,
+            modifier = Modifier.weight(1f),
+        )
+        IconButton(
+            icon = ZeraIcon.Filter,
+            onClick = onFiltersClick,
+            contentDescription = "Filtros",
+            type = ZeraButtonType.Base,
+        )
+    }
+
+    if (state.selectedStatuses.isNotEmpty()) {
+        ZeraChipsGroup(
+            options = state.selectedStatuses,
+            selectedValues = state.selectedStatuses,
+            onSelectedValuesChange = viewModel::onAppliedFilterChipsChange,
+            selectMany = true,
+        )
+    }
+    state.errorMessage?.let { message ->
+        CaptionText(text = message, color = MaterialTheme.colorScheme.error)
+    }
+    TitleText(text = state.totalItemsLabel, bold = true)
+    ProductList(
+        products = state.items,
+        onItemClick = { product ->
+            ZeraNavigator.push(Route.ItemDetails(itemId = product.id))
+        },
+        contentPadding = PaddingValues(vertical = Spacing.small),
+        modifier = Modifier.weight(1f),
+        onEndReached = viewModel::loadNextPage,
+        isLoadingMore = state.isLoadingMore,
+    )
 }
 
 @Composable
