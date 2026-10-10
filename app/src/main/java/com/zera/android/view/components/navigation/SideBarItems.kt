@@ -24,8 +24,8 @@ val EmployeeSideBarItems = listOf(
     SideBarItem(label = "Perfil", icon = ZeraIcon.Profile, route = Route.Profile),
     SideBarItem(label = "Alertas", icon = ZeraIcon.Bell), // TODO: rota de Alertas do operário
     SideBarItem(label = "Central de Trabalho", icon = ZeraIcon.BriefCase, route = Route.WorkingCentral),
-    SideBarItem(label = "Modelos", icon = ZeraIcon.Crate), // TODO: rota de Modelos do operário
+    SideBarItem(label = "Modelos", icon = ZeraIcon.Crate, route = Route.Models),
     SideBarItem(label = "Itens", icon = ZeraIcon.Box, route = Route.EmployeeItems),
     SideBarItem(label = "Itens em Manutenção", icon = ZeraIcon.Wrench), // TODO: rota de manutenção
-    SideBarItem(label = "Descartes Agendados", icon = ZeraIcon.Recycle), // TODO: rota de descartes
+    SideBarItem(label = "Descartes Agendados", icon = ZeraIcon.Recycle, route = Route.Recycling),
 )
