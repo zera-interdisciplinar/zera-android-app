@@ -111,6 +111,12 @@ sealed interface Route{
     data object Models : Route
 
     @Serializable
+    data class ModelItems(
+        val modelId: String,
+        val modelName: String,
+    ) : Route
+
+    @Serializable
     data object ModelCreation : Route
 
     @Serializable
@@ -124,6 +130,18 @@ sealed interface Route{
     // ROTAS DE OPERARIO
     @Serializable
     data object EmployeeHome : Route
+
+    @Serializable
+    data object Scan : Route
+
+    @Serializable
+    data object EmployeeItems : Route
+
+    @Serializable
+    data object WorkingCentral : Route
+
+    @Serializable
+    data class ManualRegister(val modelName: String? = null) : Route
 
     // ROTAS COMPARTILHADAS
     @Serializable

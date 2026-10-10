@@ -92,7 +92,7 @@ fun ProductListItem(
                 verticalArrangement = Arrangement.spacedBy(Spacing.micro),
             ) {
                 BodyText(text = itemName, bold = true)
-                CaptionText(text = "ID ${itemId.substring(0,7)}")
+                CaptionText(text = "ID ${itemId.take(7)}")
             }
             if(!onClickDisabled){
                 if (statusText != null) {

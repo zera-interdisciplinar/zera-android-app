@@ -1,17 +1,15 @@
-package com.zera.android.view.screens.manager
+package com.zera.android.view.screens.employee
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -32,8 +30,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.zera.android.view.components.buttons.IconButton
 import com.zera.android.view.components.containers.ZeraGradientBox
-import com.zera.android.view.components.navigation.ManagerBottomNavBar
-import com.zera.android.view.components.navigation.ManagerSideBarItems
+import com.zera.android.view.components.navigation.EmployeeBottomNavBar
+import com.zera.android.view.components.navigation.EmployeeSideBarItems
 import com.zera.android.view.components.navigation.SideBarOverlay
 import com.zera.android.view.components.navigation.UpperNavBar
 import com.zera.android.view.components.texts.BodyText
@@ -50,63 +48,48 @@ private val TopFadeHeight = 15.dp
 private val BottomFadeHeight = 25.dp
 
 /**
- * Casca (Scaffold) compartilhada pelas telas da área do gestor.
+ * Casca (Scaffold) compartilhada pelas telas da área do operário.
  *
- * Já monta a [UpperNavBar] (com o [title] da tela), o [ManagerBottomNavBar] e o botão
- * flutuante de assistente virtual — com os insets de status bar / navigation bar já
- * aplicados. Cada tela só precisa passar o [title], a própria [currentRoute] e o
- * [content], que é desenhado dentro de uma [Column] rolável.
+ * Monta a [UpperNavBar] (com o [title] da tela), o [EmployeeBottomNavBar] e o botão
+ * flutuante de assistente virtual, com os insets de status bar / navigation bar já
+ * aplicados. O [content] é desenhado dentro de uma [Column] rolável.
+ *
+ * O botão de menu da [UpperNavBar] abre a [com.zera.android.view.components.navigation.SideBar]
+ * (com os atalhos do operário) por cima da tela, com scrim. Ela fecha ao tocar fora dela ou
+ * no botão voltar do sistema.
  *
  * @param title título exibido na [UpperNavBar].
- * @param currentRoute rota da própria tela, repassada ao [ManagerBottomNavBar] para
- *   destacar e desabilitar o atalho que levaria para a tela atual.
- * @param modifier modificador externo opcional, aplicado ao [Scaffold].
- * @param goBack quando `true`, exibe o botão "Voltar" na [UpperNavBar] — use em telas
- *   acessadas por navegação (ex.: um atalho do Home), diferente das telas raiz do
- *   [ManagerBottomNavBar] (ex.: [ManagerHomeScreen]).
+ * @param currentRoute rota da própria tela, repassada ao [EmployeeBottomNavBar] e à sidebar
+ *   para destacar o atalho da tela atual.
+ * @param modifier modificador externo opcional, aplicado ao [Box] que envolve o [Scaffold].
+ * @param goBack quando `true`, exibe o botão "Voltar" na [UpperNavBar].
  * @param onBackClick ação do botão "Voltar". Só é usada quando [goBack] é `true`.
+ * @param showActions quando `true` (padrão), exibe os atalhos de notificações/perfil/menu
+ *   na [UpperNavBar]. Use `false` em telas que só precisam do "Voltar" (ex.: "Scanear item").
  * @param fabIcon ícone do botão flutuante. Quando `null`, nenhum FAB é exibido.
  * @param onFabClick ação do botão flutuante. Só é usada quando [fabIcon] não for `null`.
  * @param scrollable quando `true` (padrão), a [Column] do conteúdo rola inteira. Use
- *   `false` quando [content] já tiver seu próprio elemento rolável (ex.: uma lista longa
- *   em [com.zera.android.view.components.lists.ProductList] com `Modifier.weight(1f)`) —
- *   caso contrário, um `LazyColumn` dentro de uma `Column` rolável quebra em tempo de execução.
- * @param backgroundVariant quando `true`, troca o fundo do Scaffold (corpo, gradientes e
- *   título/ícones da [UpperNavBar]) para [MaterialTheme.colorScheme.primary]/`onPrimary`,
- *   em vez do fundo neutro padrão. Não afeta a [ManagerBottomNavBar], que mantém sempre
- *   o mesmo estilo em qualquer tela.
- * @param edgeFade quando `true` (padrão), mostra o gradiente de fade no topo/fim do
- *   conteúdo. Com [scrollable] `true`, ele só aparece enquanto houver mais conteúdo a
- *   rolar naquela direção; com [scrollable] `false`, fica sempre visível — use nesse caso
- *   apenas quando [content] tiver seu próprio elemento rolável (ex.: uma lista com
- *   `Modifier.weight(1f)`). Passe `false` para desligar o fade por completo (ex.: telas
- *   sem nenhum scroll, como um mapa).
+ *   `false` quando [content] já tiver seu próprio elemento rolável.
+ * @param contentPadding espaçamento horizontal do conteúdo.
+ * @param edgeFade quando `true` (padrão), mostra o gradiente de fade no topo/fim do conteúdo.
  * @param content conteúdo da tela, desenhado dentro da [Column] do Scaffold.
- *
- * O botão de menu da [UpperNavBar] abre a [com.zera.android.view.components.navigation.SideBar]
- * (com os atalhos do gestor) por cima da tela, com scrim. Ela fecha ao tocar fora dela ou no
- * botão voltar do sistema.
  */
 @Composable
-fun ManagerScaffold(
+fun EmployeeScaffold(
     title: String,
     currentRoute: Route,
     modifier: Modifier = Modifier,
     goBack: Boolean = false,
     onBackClick: () -> Unit = { ZeraNavigator.goBack() },
+    showActions: Boolean = true,
     fabIcon: ZeraIcon? = ZeraIcon.Chatbot,
     onFabClick: () -> Unit = {},
     scrollable: Boolean = true,
     contentPadding: Dp = Spacing.medium,
-    backgroundVariant: Boolean = false,
     edgeFade: Boolean = true,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    val backgroundColor = if (backgroundVariant) {
-        MaterialTheme.colorScheme.primary
-    } else {
-        MaterialTheme.colorScheme.background
-    }
+    val backgroundColor = MaterialTheme.colorScheme.background
 
     var showSideBar by rememberSaveable { mutableStateOf(false) }
 
@@ -119,7 +102,7 @@ fun ManagerScaffold(
                     title = title,
                     goBack = goBack,
                     onBackClick = onBackClick,
-                    backgroundVariant = backgroundVariant,
+                    showActions = showActions,
                     onSideBarClick = { showSideBar = true },
                     modifier = Modifier
                         .statusBarsPadding()
@@ -127,13 +110,13 @@ fun ManagerScaffold(
                 )
             },
             bottomBar = {
-                ManagerBottomNavBar(
+                EmployeeBottomNavBar(
                     currentRoute = currentRoute,
                     modifier = Modifier
                         .fillMaxWidth()
                         .navigationBarsPadding()
                         .padding(horizontal = Spacing.medium, vertical = Spacing.small)
-                        .sharedTransition(SharedElementKeys.ManagerBottomNavBar),
+                        .sharedTransition(SharedElementKeys.EmployeeBottomNavBar),
                 )
             },
             floatingActionButton = {
@@ -164,9 +147,7 @@ fun ManagerScaffold(
                     content = content,
                 )
                 ZeraGradientBox(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(backgroundColor, NoColor)
-                    ),
+                    brush = Brush.verticalGradient(colors = listOf(backgroundColor, NoColor)),
                     modifier = Modifier
                         .align(Alignment.TopStart)
                         .padding(innerPadding)
@@ -175,16 +156,13 @@ fun ManagerScaffold(
                         .graphicsLayer {
                             alpha = when {
                                 !edgeFade -> 0f
-                                // Sem scroll próprio (scrollable = false) o gradiente fica sempre visível.
                                 !scrollable -> 1f
                                 else -> (scrollState.value / topFadePx).coerceIn(0f, 1f)
                             }
-                        }
-                ){}
+                        },
+                ) {}
                 ZeraGradientBox(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(NoColor, backgroundColor)
-                    ),
+                    brush = Brush.verticalGradient(colors = listOf(NoColor, backgroundColor)),
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .padding(innerPadding)
@@ -196,15 +174,15 @@ fun ManagerScaffold(
                                 !scrollable -> 1f
                                 else -> ((scrollState.maxValue - scrollState.value) / bottomFadePx).coerceIn(0f, 1f)
                             }
-                        }
-                ){}
+                        },
+                ) {}
             }
         }
 
         SideBarOverlay(
             visible = showSideBar,
             onDismiss = { showSideBar = false },
-            items = ManagerSideBarItems,
+            items = EmployeeSideBarItems,
             currentRoute = currentRoute,
         )
     }
@@ -212,9 +190,9 @@ fun ManagerScaffold(
 
 @Preview(heightDp = 600)
 @Composable
-private fun ManagerScaffoldPreview() {
+private fun EmployeeScaffoldPreview() {
     ZeraTheme {
-        ManagerScaffold(title = "Visão geral", currentRoute = Route.ManagerHome) {
+        EmployeeScaffold(title = "Visão geral", currentRoute = Route.EmployeeHome) {
             BodyText(text = "Conteúdo da tela")
         }
     }

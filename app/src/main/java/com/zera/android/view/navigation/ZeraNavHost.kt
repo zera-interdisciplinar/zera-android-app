@@ -17,6 +17,10 @@ import com.zera.android.view.screens.auth.SignUpScreen
 import com.zera.android.view.screens.SplashScreen
 import com.zera.android.view.screens.auth.WelcomeScreen
 import com.zera.android.view.screens.employee.EmployeeHomeScreen
+import com.zera.android.view.screens.employee.EmployeeItemsScreen
+import com.zera.android.view.screens.employee.ManualRegisterScreen
+import com.zera.android.view.screens.employee.ScanScreen
+import com.zera.android.view.screens.employee.WorkingCentralScreen
 import com.zera.android.view.screens.manager.CategoriesScreen
 import com.zera.android.view.screens.manager.CategoryCreationScreen
 import com.zera.android.view.screens.manager.CategoryCreationSuccessScreen
@@ -28,6 +32,7 @@ import com.zera.android.view.screens.manager.ItensScreen
 import com.zera.android.view.screens.manager.ManagerHomeScreen
 import com.zera.android.view.screens.manager.ModelCreationScreen
 import com.zera.android.view.screens.manager.ModelCreationSuccessScreen
+import com.zera.android.view.screens.manager.ModelItemsScreen
 import com.zera.android.view.screens.manager.ModelsScreen
 import com.zera.android.view.screens.manager.recycling.ItensResumeScreen
 import com.zera.android.view.screens.manager.recycling.ItensSelectionScreen
@@ -224,6 +229,13 @@ fun ZeraNavHost() {
                 composable<Route.Models> {
                     ModelsScreen()
                 }
+                composable<Route.ModelItems> { backStackEntry ->
+                    val route = backStackEntry.toRoute<Route.ModelItems>()
+                    ModelItemsScreen(
+                        modelId = route.modelId,
+                        modelName = route.modelName,
+                    )
+                }
                 composable<Route.ModelCreation> {
                     ModelCreationScreen()
                 }
@@ -238,6 +250,19 @@ fun ZeraNavHost() {
                 }
                 composable<Route.EmployeeHome> {
                     EmployeeHomeScreen()
+                }
+                composable<Route.Scan> {
+                    ScanScreen()
+                }
+                composable<Route.EmployeeItems> {
+                    EmployeeItemsScreen()
+                }
+                composable<Route.WorkingCentral> {
+                    WorkingCentralScreen()
+                }
+                composable<Route.ManualRegister> { backStackEntry ->
+                    val route = backStackEntry.toRoute<Route.ManualRegister>()
+                    ManualRegisterScreen(modelName = route.modelName)
                 }
                 composable<Route.Profile> {
                     ProfileScreen()
