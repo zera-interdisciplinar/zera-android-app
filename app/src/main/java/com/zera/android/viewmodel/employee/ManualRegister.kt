@@ -34,12 +34,19 @@ data class ManualRegisterState(
  * ViewModel da tela de cadastro manual de item (sem etiqueta) do operário.
  *
  * As opções dos dropdowns ainda são fixas (mock) até o back expor modelos e condições.
+ *
+ * @param initialModel modelo já escolhido (ex.: vindo da tela de itens de um modelo). Quando
+ *   informado, o campo de modelo já abre preenchido.
  */
-class ManualRegisterViewModel : ZeraViewModel() {
+class ManualRegisterViewModel(
+    initialModel: String? = null,
+) : ZeraViewModel() {
     private val _state = mutableStateOf(
         ManualRegisterState(
+            model = initialModel.orEmpty(),
             // TODO: puxar os modelos cadastrados do back
-            modelOptions = listOf("Teclado mecânico", "Mouse sem fio", "Chip controlador", "Placa de circuito"),
+            modelOptions = listOf("Teclado mecânico", "Mouse sem fio", "Chip controlador", "Placa de circuito")
+                .let { options -> if (initialModel.isNullOrEmpty() || initialModel in options) options else options + initialModel },
             conditionOptions = listOf("Novo", "Usado", "Danificado"),
             damageTypeOptions = listOf("Tela quebrada", "Peça faltando", "Não liga", "Enferrujado", "Outro"),
         )

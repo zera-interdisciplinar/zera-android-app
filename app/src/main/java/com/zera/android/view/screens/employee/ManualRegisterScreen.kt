@@ -37,10 +37,15 @@ import com.zera.android.viewmodel.employee.ManualRegisterViewModel
  * Cadastro manual de item do operário (item sem etiqueta para escanear).
  *
  * Modelo, condição e "possui danos?" são dropdowns; só a observação é opcional.
+ *
+ * @param modelName modelo opcional. Quando informado, o campo de modelo já vem preenchido.
  */
 @Composable
 fun ManualRegisterScreen(
-    viewModel: ManualRegisterViewModel = viewModel(),
+    modelName: String? = null,
+    viewModel: ManualRegisterViewModel = viewModel(key = "manual-register-$modelName") {
+        ManualRegisterViewModel(modelName)
+    },
 ) {
     val state by viewModel.state
     val keyboardController = LocalSoftwareKeyboardController.current
