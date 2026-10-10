@@ -1,6 +1,7 @@
 package com.zera.android.view.components.outros
 
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
@@ -19,7 +20,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,6 +40,7 @@ import com.zera.android.view.theme.Radius
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.view.theme.ZeraTheme
+import java.util.concurrent.Executors
 
 private val ScanAreaAspectRatio = 328f / 248f
 private val ScanFrameHeight = 84.dp
@@ -45,7 +49,9 @@ private val ScanFrameHeight = 84.dp
  * Área de escaneamento: um quadrado escuro com duas aparências.
  *
  * - Com [hasCameraPermission] `true`: mostra a imagem da câmera traseira (CameraX), a
- *   moldura onde a etiqueta deve ser posicionada e o [statusText] embaixo.
+ *   moldura onde a etiqueta deve ser posicionada e o [statusText] embaixo. Os frames da
+ *   câmera passam pelo [BarcodeAnalyzer], e cada QR code / Code 128 lido chega em
+ *   [onBarcodeDetected].
  * - Com `false`: mostra o aviso "Sem acesso à câmera" e o botão "Permitir câmera", que
  *   chama [onRequestPermission].
  *
@@ -54,6 +60,8 @@ private val ScanFrameHeight = 84.dp
  *
  * @param hasCameraPermission se o app já tem a permissão `CAMERA`.
  * @param onRequestPermission ação do botão "Permitir câmera" (deve pedir a permissão).
+ * @param onBarcodeDetected recebe o valor de cada código lido. Dispara a cada frame em que o
+ *   código aparece, então quem recebe deve ignorar leituras repetidas.
  * @param modifier modificador externo opcional.
  * @param statusText texto exibido na parte de baixo da área quando a câmera está ligada.
  */
@@ -61,6 +69,7 @@ private val ScanFrameHeight = 84.dp
 fun ScanArea(
     hasCameraPermission: Boolean,
     onRequestPermission: () -> Unit,
+    onBarcodeDetected: (String) -> Unit,
     modifier: Modifier = Modifier,
     statusText: String = "Leitura automática ativada",
 ) {
@@ -72,7 +81,10 @@ fun ScanArea(
             .background(MaterialTheme.colorScheme.onSurface),
     ) {
         if (hasCameraPermission) {
-            CameraPreview(modifier = Modifier.fillMaxSize())
+            CameraPreview(
+                onBarcodeDetected = onBarcodeDetected,
+                modifier = Modifier.fillMaxSize(),
+            )
             Box(
                 modifier = Modifier
                     .align(Alignment.Center)
@@ -136,24 +148,33 @@ private fun NoCameraAccess(
 
 /**
  * Imagem ao vivo da câmera traseira, ligada ao ciclo de vida da tela: abre quando entra
- * na composição e é desligada quando sai (ou quando o lifecycle para).
+ * na composição e é desligada quando sai (ou quando o lifecycle para). Junto do preview,
+ * um [ImageAnalysis] manda os frames para o [BarcodeAnalyzer].
  *
  * No preview do Android Studio ([LocalInspectionMode]) não existe câmera nem CameraX, então
  * nada é desenhado — a área fica só com o fundo escuro.
  */
 @Composable
-private fun CameraPreview(modifier: Modifier = Modifier) {
+private fun CameraPreview(
+    onBarcodeDetected: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     if (LocalInspectionMode.current) {
         Box(modifier)
     } else {
-        LiveCameraPreview(modifier)
+        LiveCameraPreview(onBarcodeDetected, modifier)
     }
 }
 
 @Composable
-private fun LiveCameraPreview(modifier: Modifier = Modifier) {
+private fun LiveCameraPreview(
+    onBarcodeDetected: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
+    // A câmera só é religada quando o lifecycle muda; o callback mais recente é lido daqui.
+    val currentOnBarcodeDetected by rememberUpdatedState(onBarcodeDetected)
     // COMPATIBLE usa TextureView, que respeita o clip de cantos arredondados do pai.
     val previewView = remember {
         PreviewView(context).apply {
@@ -165,6 +186,13 @@ private fun LiveCameraPreview(modifier: Modifier = Modifier) {
     DisposableEffect(lifecycleOwner) {
         val providerFuture = ProcessCameraProvider.getInstance(context)
         val preview = Preview.Builder().build()
+        val analysisExecutor = Executors.newSingleThreadExecutor()
+        val barcodeAnalyzer = BarcodeAnalyzer { currentOnBarcodeDetected(it) }
+        // KEEP_ONLY_LATEST descarta os frames que chegam enquanto o anterior é analisado.
+        val imageAnalysis = ImageAnalysis.Builder()
+            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+            .build()
+            .also { it.setAnalyzer(analysisExecutor, barcodeAnalyzer) }
         var cameraProvider: ProcessCameraProvider? = null
 
         providerFuture.addListener({
@@ -172,14 +200,24 @@ private fun LiveCameraPreview(modifier: Modifier = Modifier) {
                 val provider = providerFuture.get()
                 cameraProvider = provider
                 preview.surfaceProvider = previewView.surfaceProvider
-                provider.unbind(preview)
-                provider.bindToLifecycle(lifecycleOwner, CameraSelector.DEFAULT_BACK_CAMERA, preview)
+                provider.unbind(preview, imageAnalysis)
+                provider.bindToLifecycle(
+                    lifecycleOwner,
+                    CameraSelector.DEFAULT_BACK_CAMERA,
+                    preview,
+                    imageAnalysis,
+                )
             } catch (_: Exception) {
                 // Sem câmera disponível (ou em uso por outro app): a área segue só com o fundo escuro.
             }
         }, ContextCompat.getMainExecutor(context))
 
-        onDispose { cameraProvider?.unbind(preview) }
+        onDispose {
+            cameraProvider?.unbind(preview, imageAnalysis)
+            imageAnalysis.clearAnalyzer()
+            barcodeAnalyzer.close()
+            analysisExecutor.shutdown()
+        }
     }
 
     AndroidView(factory = { previewView }, modifier = modifier)
@@ -192,6 +230,7 @@ private fun ScanAreaNoPermissionPreview() {
         ScanArea(
             hasCameraPermission = false,
             onRequestPermission = {},
+            onBarcodeDetected = {},
             modifier = Modifier.padding(Spacing.medium),
         )
     }

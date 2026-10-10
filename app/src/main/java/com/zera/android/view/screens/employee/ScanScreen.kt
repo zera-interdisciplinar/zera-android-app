@@ -83,6 +83,8 @@ fun ScanScreen(
         ScanArea(
             hasCameraPermission = state.hasCameraPermission,
             onRequestPermission = { permissionLauncher.launch(Manifest.permission.CAMERA) },
+            // TODO: repassar para o ScanViewModel (tratamento da leitura ainda não existe)
+            onBarcodeDetected = {},
         )
 
         Spacer(modifier = Modifier.weight(1f))
