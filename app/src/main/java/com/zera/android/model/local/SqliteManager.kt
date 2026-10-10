@@ -51,6 +51,19 @@ object SqliteManager {
 
     fun getRefreshToken(): String? = get(KEY_REFRESH_TOKEN)
 
+    @Synchronized
+    fun updateTokens(accessToken: String, refreshToken: String) {
+        val db = helper.writableDatabase
+        db.beginTransaction()
+        try {
+            put(db, KEY_ACCESS_TOKEN, accessToken)
+            put(db, KEY_REFRESH_TOKEN, refreshToken)
+            db.setTransactionSuccessful()
+        } finally {
+            db.endTransaction()
+        }
+    }
+
     fun getUserId(): String? = get(KEY_USER_ID)
 
     @Synchronized
@@ -65,7 +78,8 @@ object SqliteManager {
     fun getPassword(): String? = get(KEY_PASSWORD)
 
     fun hasSavedLogin(): Boolean =
-        !getEmail().isNullOrBlank() && !getPassword().isNullOrBlank()
+        !getRefreshToken().isNullOrBlank() ||
+            (!getEmail().isNullOrBlank() && !getPassword().isNullOrBlank())
 
     @Synchronized
     fun clearSession() {

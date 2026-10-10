@@ -4,7 +4,7 @@ import com.zera.android.model.dto.places.ProblemDetailDTO
 import com.zera.android.model.dto.places.RecyclingPlaceResponseDTO
 import com.zera.android.model.entity.places.OpeningHour
 import com.zera.android.model.entity.places.RecyclingPlace
-import com.zera.android.model.remote.client.ApiClient
+import com.zera.android.model.remote.client.AdmCoreClient
 import kotlinx.serialization.json.Json
 import retrofit2.HttpException
 
@@ -20,7 +20,7 @@ class GetNearbyRecyclingPlaces {
         radiusMeters: Int? = null,
     ): List<RecyclingPlace> {
         try {
-            return ApiClient.recyclingPlacesService
+            return AdmCoreClient.recyclingPlacesService
                 .getNearby(lat = lat, lng = lng, radiusMeters = radiusMeters)
                 .map { it.toEntity() }
         } catch (error: HttpException) {

@@ -3,9 +3,11 @@ package com.zera.android.viewmodel.manager
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.zera.android.model.dto.inventory.DashboardHomeResponseDTO
+import com.zera.android.model.dto.notification.AlertResponseDTO
 import com.zera.android.model.entity.user.UserRole
 import com.zera.android.model.usecase.auth.GetSelfUser
 import com.zera.android.model.usecase.inventory.GetManagerHome
+import com.zera.android.model.usecase.notification.GetAlerts
 import com.zera.android.model.usecase.team.CountActiveEmployees
 import com.zera.android.view.components.lists.NotificationItem
 import com.zera.android.view.components.lists.ProductItem
@@ -37,6 +39,7 @@ data class ManagerHomeState(
 class ManagerHomeViewModel : ZeraViewModel() {
     private val getSelfUser = GetSelfUser()
     private val getManagerHome = GetManagerHome()
+    private val getAlerts = GetAlerts()
     private val countActiveEmployees = CountActiveEmployees()
 
     private val _state = mutableStateOf(ManagerHomeState())
@@ -50,6 +53,7 @@ class ManagerHomeViewModel : ZeraViewModel() {
         _state.value = _state.value.copy(errorMessage = null)
         viewModelScope.launch { loadLoggedUser() }
         viewModelScope.launch { loadInventoryHome() }
+        viewModelScope.launch { loadAlerts() }
         viewModelScope.launch { loadEmployeeCount() }
     }
 
@@ -76,7 +80,6 @@ class ManagerHomeViewModel : ZeraViewModel() {
                 totalItems = formatCount(home.activeItems),
                 itemsChangeLabel = formatChangePercent(home.activeItemsChangePercent).orEmpty(),
                 itemsChangePositive = home.activeItemsChangePercent?.let { it >= 0.0 } ?: true,
-                notifications = alertsFrom(home),
                 latestProducts = home.recentItems.content.map { item ->
                     ProductItem(id = item.id, name = item.name)
                 },
@@ -86,6 +89,17 @@ class ManagerHomeViewModel : ZeraViewModel() {
             throw e
         } catch (e: Exception) {
             _state.value = _state.value.copy(errorMessage = e.message)
+        }
+    }
+
+    private suspend fun loadAlerts() {
+        try {
+            val alerts = getAlerts.execute(status = "OPEN")
+            _state.value = _state.value.copy(notifications = alertsFrom(alerts))
+        } catch (e: CancellationException) {
+            throw e
+        } catch (_: Exception) {
+            // A home ainda pode ser preenchida se a lista de alertas falhar.
         }
     }
 
@@ -129,50 +143,26 @@ class ManagerHomeViewModel : ZeraViewModel() {
             return "$arrow ${formatDecimal(abs(value))}%"
         }
 
-        internal fun alertsFrom(home: DashboardHomeResponseDTO): List<NotificationItem> = listOfNotNull(
-            countAlert(
-                id = "pending-approval",
-                count = home.pendingApproval,
-                singular = "item aguardando aprovação",
-                plural = "itens aguardando aprovação",
-                style = ZeraColorFamily.Yellow,
-            ),
-            countAlert(
-                id = "in-maintenance",
-                count = home.inMaintenance,
-                singular = "item em manutenção",
-                plural = "itens em manutenção",
-                style = ZeraColorFamily.Yellow,
-            ),
-            countAlert(
-                id = "awaiting-evaluation",
-                count = home.awaitingEvaluation,
-                singular = "item aguardando avaliação",
-                plural = "itens aguardando avaliação",
-                style = ZeraColorFamily.Yellow,
-            ),
-        )
+        internal fun alertsFrom(alerts: List<AlertResponseDTO>): List<NotificationItem> =
+            alerts.map { alert ->
+                NotificationItem(
+                    id = alert.alertId,
+                    label = alert.description,
+                    style = colorFamilyForSeverity(alert.severity),
+                )
+            }
+
+        internal fun colorFamilyForSeverity(severity: String): ZeraColorFamily = when (severity) {
+            "HIGH" -> ZeraColorFamily.Red
+            "MEDIUM" -> ZeraColorFamily.Yellow
+            "LOW" -> ZeraColorFamily.Green
+            else -> ZeraColorFamily.Yellow
+        }
 
         internal fun roleLabel(role: String): String = when (role) {
             UserRole.MANAGER -> "Gestor"
             UserRole.EMPLOYEE -> "Operário"
             else -> role
-        }
-
-        private fun countAlert(
-            id: String,
-            count: Long,
-            singular: String,
-            plural: String,
-            style: ZeraColorFamily,
-        ): NotificationItem? {
-            if (count <= 0) return null
-            val noun = if (count == 1L) singular else plural
-            return NotificationItem(
-                id = id,
-                label = "${formatCount(count)} $noun",
-                style = style,
-            )
         }
 
         private fun formatDecimal(value: Double): String {

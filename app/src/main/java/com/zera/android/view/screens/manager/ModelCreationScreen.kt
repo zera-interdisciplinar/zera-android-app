@@ -25,6 +25,7 @@ import com.zera.android.view.components.inputs.ZeraDropdownInput
 import com.zera.android.view.components.inputs.ZeraTextInput
 import com.zera.android.view.components.navigation.UpperNavBar
 import com.zera.android.view.components.texts.BodyText
+import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
 import com.zera.android.viewmodel.manager.ModelCreationViewModel
@@ -62,6 +63,7 @@ fun ModelCreationScreen(
                         viewModel.onCreateClick()
                     },
                     fillMaxWidth = true,
+                    enabled = !state.isSaving && !state.isLoadingOptions,
                 )
                 ZeraButton(
                     text = "Cancelar",
@@ -84,6 +86,9 @@ fun ModelCreationScreen(
                 text = "Preencha os dados essenciais para que possa ser reutilizado nos próximos itens",
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+            state.errorMessage?.let { message ->
+                CaptionText(text = message, color = MaterialTheme.colorScheme.error)
+            }
             ZeraTextInput(
                 value = state.modelName,
                 onValueChange = viewModel::onModelNameChange,
@@ -92,11 +97,18 @@ fun ModelCreationScreen(
                 imeAction = ImeAction.Next,
             )
             ZeraDropdownInput(
+                value = state.category,
+                values = state.categoryOptions,
+                onValueChange = viewModel::onCategoryChange,
+                label = "Categoria",
+                placeholder = "Selecione uma categoria",
+            )
+            ZeraDropdownInput(
                 value = state.material,
                 values = state.materialOptions,
                 onValueChange = viewModel::onMaterialChange,
                 label = "Material",
-                placeholder = "Selecione uma categoria",
+                placeholder = "Selecione um material",
             )
             ZeraTextInput(
                 value = state.brand,

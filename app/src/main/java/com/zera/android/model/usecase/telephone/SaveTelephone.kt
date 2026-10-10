@@ -4,7 +4,7 @@ import com.zera.android.model.dto.telephone.CreateTelephoneRequestDTO
 import com.zera.android.model.dto.telephone.TelephoneResponseDTO
 import com.zera.android.model.dto.telephone.UpdateTelephoneNumberRequestDTO
 import com.zera.android.model.local.SqliteManager
-import com.zera.android.model.remote.client.ApiClient
+import com.zera.android.model.remote.client.AdmCoreClient
 import retrofit2.HttpException
 
 class SaveTelephone {
@@ -12,11 +12,11 @@ class SaveTelephone {
         val userId = SqliteManager.getUserId()
             ?: error("Não há usuário logado")
         return if (telephoneId.isNullOrBlank()) {
-            ApiClient.telephoneService.createForUser(
+            AdmCoreClient.telephoneService.createForUser(
                 CreateTelephoneRequestDTO(userId = userId, number = number),
             )
         } else {
-            val response = ApiClient.telephoneService.updateNumber(
+            val response = AdmCoreClient.telephoneService.updateNumber(
                 telephoneId,
                 UpdateTelephoneNumberRequestDTO(number),
             )

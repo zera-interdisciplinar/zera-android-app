@@ -7,7 +7,7 @@ import org.junit.Test
 class ScrapyClientUrlTest {
     @Test
     fun kongPrefixResolvesToV1BootAndFlags() {
-        val base = ScrapyClient.apiBaseUrl("https://34.95.129.59/qa/scrapy/")
+        val base = serviceBaseUrl("https://34.95.129.59/qa/scrapy/", stripApiV1 = false)
         val boot = base.toHttpUrl().resolve("v1/boot")!!.toString()
         val flags = base.toHttpUrl().resolve("v1/flags")!!.toString()
 
@@ -18,7 +18,7 @@ class ScrapyClientUrlTest {
 
     @Test
     fun apiUrlWithV1DoesNotDuplicateTheVersionSegment() {
-        val base = ScrapyClient.apiBaseUrl("http://34.95.129.59/qa/scrapy/v1")
+        val base = serviceBaseUrl("http://34.95.129.59/qa/scrapy/v1", stripApiV1 = false)
         val boot = base.toHttpUrl().resolve("v1/boot")!!.toString()
 
         assertEquals("http://34.95.129.59/qa/scrapy/", base)
@@ -27,7 +27,7 @@ class ScrapyClientUrlTest {
 
     @Test
     fun directServiceUrlResolvesToV1Boot() {
-        val base = ScrapyClient.apiBaseUrl("https://host/v1/")
+        val base = serviceBaseUrl("https://host/v1/", stripApiV1 = false)
         val boot = base.toHttpUrl().resolve("v1/boot")!!.toString()
 
         assertEquals("https://host/", base)

@@ -11,8 +11,10 @@ val ManagerSideBarItems = listOf(
     SideBarItem(label = "Perfil", icon = ZeraIcon.Profile, route = Route.Profile),
     SideBarItem(label = "Colaboradores", icon = ZeraIcon.Group, route = Route.Employees),
     SideBarItem(label = "Alertas", icon = ZeraIcon.Bell, route = Route.EmployeeHome),
+    SideBarItem(label = "Categorias", icon = ZeraIcon.Filter, route = Route.Categories),
     SideBarItem(label = "Modelos", icon = ZeraIcon.Crate, route = Route.Models),
     SideBarItem(label = "Itens", icon = ZeraIcon.Box, route = Route.Itens),
+    SideBarItem(label = "Descartes agendados", icon = ZeraIcon.Truck, route = Route.ScheduledDisposals),
     SideBarItem(label = "Itens em Manutenção", icon = ZeraIcon.Wrench, route = Route.Itens),
 )
 
