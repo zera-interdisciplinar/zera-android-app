@@ -129,7 +129,7 @@ sealed interface Route{
     data object WorkingCentral : Route
 
     @Serializable
-    data object ManualRegister : Route
+    data class ManualRegister(val modelName: String? = null) : Route
 
     // ROTAS COMPARTILHADAS
     @Serializable

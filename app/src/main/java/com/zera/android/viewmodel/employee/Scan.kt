@@ -24,7 +24,7 @@ class ScanViewModel : ZeraViewModel() {
     }
 
     fun onRegisterWithoutLabelClick() {
-        ZeraNavigator.push(Route.ManualRegister)
+        ZeraNavigator.push(Route.ManualRegister())
     }
 
     fun onRegisterModelClick() {
