@@ -5,6 +5,10 @@ import androidx.lifecycle.viewModelScope
 import com.zera.android.model.dto.inventory.DisposalScheduleDetailDTO
 import com.zera.android.model.usecase.inventory.CancelDisposalSchedule
 import com.zera.android.model.usecase.inventory.GetDisposalSchedule
+import com.zera.android.model.usecase.inventory.UpdateDisposalSchedule
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
 import com.zera.android.view.components.lists.OptionItem
 import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.viewmodel.ZeraViewModel
@@ -21,12 +25,16 @@ data class SchedulingDetailsState(
     val contactPhone: String = "",
     val contactButtonsEnabled: Boolean = false,
     val pendingUri: String? = null,
+    val rawScheduledAt: String = "",
+    val showDateSheet: Boolean = false,
+    val isSaving: Boolean = false,
     val isCancelling: Boolean = false,
     val errorMessage: String? = null,
 )
 
 class SchedulingDetailsViewModel : ZeraViewModel() {
     private val getDisposalSchedule = GetDisposalSchedule()
+    private val updateDisposalSchedule = UpdateDisposalSchedule()
     private val cancelDisposalSchedule = CancelDisposalSchedule()
     private val _state = mutableStateOf(SchedulingDetailsState())
     val state = _state
@@ -48,12 +56,36 @@ class SchedulingDetailsViewModel : ZeraViewModel() {
     }
 
     fun onOptionClick(option: OptionItem) {
-        _state.value = _state.value.copy(
-            errorMessage = when (option.name) {
-                "Alterar data ou horário" -> "A alteração de data ainda não tem tela."
-                else -> "A edição de produtos ainda não tem tela."
-            },
+        if (option.name == "Alterar data ou horário") {
+            _state.value = _state.value.copy(showDateSheet = true, errorMessage = null)
+            return
+        }
+        _state.value = _state.value.copy(errorMessage = "A edição de produtos ainda não tem tela.")
+    }
+
+    fun dismissDateSheet() {
+        if (_state.value.isSaving) return
+        _state.value = _state.value.copy(showDateSheet = false)
+    }
+
+    fun confirmSchedule(dateEpochDayMillis: Long, hour: Int, minute: Int) {
+        val id = scheduleId
+        if (id.isBlank() || _state.value.isSaving) return
+        val scheduledAt = LocalDateTime.of(
+            LocalDate.ofEpochDay(dateEpochDayMillis / MILLIS_PER_DAY),
+            LocalTime.of(hour, minute),
         )
+        _state.value = _state.value.copy(isSaving = true, errorMessage = null)
+        viewModelScope.launch {
+            try {
+                apply(updateDisposalSchedule.execute(id, scheduledAt))
+                _state.value = _state.value.copy(isSaving = false, showDateSheet = false)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(isSaving = false, errorMessage = e.message)
+            }
+        }
     }
 
     fun onGenerateReportClick() {
@@ -116,7 +148,22 @@ class SchedulingDetailsViewModel : ZeraViewModel() {
             contactEmail = email,
             contactPhone = phone,
             contactButtonsEnabled = email.isNotBlank() || phone.isNotBlank(),
+            rawScheduledAt = detail.scheduledAt,
             errorMessage = null,
         )
+    }
+
+    companion object {
+        private const val MILLIS_PER_DAY = 86_400_000L
+
+        internal fun initialDateMillis(iso: String): Long? {
+            val parsed = runCatching { LocalDateTime.parse(iso) }.getOrNull() ?: return null
+            return parsed.toLocalDate().toEpochDay() * MILLIS_PER_DAY
+        }
+
+        internal fun initialTime(iso: String): Pair<Int, Int> {
+            val parsed = runCatching { LocalDateTime.parse(iso) }.getOrNull()
+            return (parsed?.hour ?: 8) to (parsed?.minute ?: 0)
+        }
     }
 }

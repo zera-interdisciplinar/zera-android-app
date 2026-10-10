@@ -12,9 +12,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TimePicker
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberTimePickerState
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.runtime.Composable
@@ -30,6 +36,7 @@ import com.zera.android.view.components.buttons.ZeraButtonType
 import com.zera.android.view.components.cards.Notification
 import com.zera.android.view.components.containers.ZeraBox
 import com.zera.android.view.components.lists.OptionList
+import com.zera.android.view.components.overlays.BottomSheet
 import com.zera.android.view.components.navigation.UpperNavBar
 import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.components.texts.LabelText
@@ -40,6 +47,7 @@ import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.view.theme.ZeraTheme
 import com.zera.android.viewmodel.manager.SchedulingDetailsViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SchedulingDetailsScreen(
     scheduleId: String = "",
@@ -162,6 +170,40 @@ fun SchedulingDetailsScreen(
             state.errorMessage?.let { message ->
                 CaptionText(text = message, color = MaterialTheme.colorScheme.error)
             }
+        }
+    }
+
+    if (state.showDateSheet) {
+        val initial = SchedulingDetailsViewModel.initialDateMillis(state.rawScheduledAt)
+        val (hour, minute) = SchedulingDetailsViewModel.initialTime(state.rawScheduledAt)
+        val datePickerState = rememberDatePickerState(initialSelectedDateMillis = initial)
+        val timePickerState = rememberTimePickerState(initialHour = hour, initialMinute = minute)
+        BottomSheet(
+            onDismissRequest = viewModel::dismissDateSheet,
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        ) {
+            TitleText(text = "Alterar data ou horário", bold = true)
+            Column(
+                modifier = Modifier
+                    .heightIn(max = 520.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(Spacing.medium),
+            ) {
+                DatePicker(state = datePickerState, showModeToggle = false)
+                TimePicker(state = timePickerState)
+            }
+            state.errorMessage?.let { message ->
+                CaptionText(text = message, color = MaterialTheme.colorScheme.error)
+            }
+            ZeraButton(
+                text = "Salvar",
+                fillMaxWidth = true,
+                enabled = !state.isSaving && datePickerState.selectedDateMillis != null,
+                onClick = {
+                    val millis = datePickerState.selectedDateMillis ?: return@ZeraButton
+                    viewModel.confirmSchedule(millis, timePickerState.hour, timePickerState.minute)
+                },
+            )
         }
     }
 }
