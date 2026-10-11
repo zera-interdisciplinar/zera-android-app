@@ -53,6 +53,8 @@ Como Operário, quero ver o que está pendente no meu turno, para saber o que re
 
 - Lista vazia: o resumo mostra "0 pendências" e `NotificationList` mostra "Nenhuma notificação".
 - Rascunho sem `missingFields`: o texto do card é só o `name`.
+- Rascunho com `missingFields`: os nomes da API viram rótulos (`photoUrl` → foto). Upload de foto continua fora desta tela.
+- Rascunho com `missingFields` vazio: a Central busca `GET /items/{id}` e deriva o que falta (`photoUrl`, série, condição, modelo).
 - Recusado sem `rejectionReason`: o texto do card é só o `name`.
 
 ## Fora de escopo desta spec

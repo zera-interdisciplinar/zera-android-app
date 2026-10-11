@@ -37,7 +37,7 @@ Pacote `model/dto/inventory/`. Só os campos que as telas usam; o restante do JS
 - **`WorkCenterResponseDTO`** — `GET /api/v1/dashboard/work-center`: `drafts`, `rejected`, `damagedWithoutDestination`, `inMaintenance`, `awaitingEvaluation`.
 - **`PendingItemResponseDTO`** — item da central: `id`, `displayCode?`, `name`, `modelName?`, `missingFields`, `rejectionReason?`, `updatedAt?`.
 - **`PagedItemsDTO(content, page, size, totalElements, totalPages)`** — envelope de `recentItems` e de `GET /api/v1/items`.
-- **`ItemResponseDTO`** — lista e PDI: `id`, `name`, `displayCode?`, `status?` (aliases JSON `itemStatus`/`approvalStatus`), `condition?`, `createdByName?`, `createdAt?`, `model?`.
+- **`ItemResponseDTO`** — lista e PDI: `id`, `name`, `displayCode?`, `status?` (aliases JSON `itemStatus`/`approvalStatus`), `condition?`, `createdByName?` (aliases `created_by_name`), `createdBy?` (UUID ou objeto com `name`), `createdAt?`, `model?`.
 - **`ModelResponseDTO`** / **`MaterialResponseDTO`** / **`CategoryResponseDTO`** — modelo aninhado no item; categorias também vêm de `GET /api/v1/categories` (`id`, `name`, metadados opcionais).
 - **`IndicatorsResponseDTO`** — `GET /api/v1/dashboard/indicators`: `recyclingRatePercent`, `recyclingRateChangePoints?`, `monthlyWeightKg`, `weightByMaterial`.
 - **`MonthlyWeightDTO(month, weightKg)`** — `month` no formato `yyyy-MM`.

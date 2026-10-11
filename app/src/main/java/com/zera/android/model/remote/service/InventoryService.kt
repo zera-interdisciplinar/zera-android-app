@@ -3,6 +3,7 @@ package com.zera.android.model.remote.service
 import com.zera.android.model.dto.inventory.CategoryResponseDTO
 import com.zera.android.model.dto.inventory.CreateCategoryRequestDTO
 import com.zera.android.model.dto.inventory.CreateDisposalRequestDTO
+import com.zera.android.model.dto.inventory.CreateItemRequestDTO
 import com.zera.android.model.dto.inventory.CreateModelRequestDTO
 import com.zera.android.model.dto.inventory.DashboardHomeResponseDTO
 import com.zera.android.model.dto.inventory.DisposalResponseDTO
@@ -57,6 +58,11 @@ interface InventoryService {
     @GET("api/v1/items/by-barcode/{barcode}")
     suspend fun getItemByBarcode(
         @Path("barcode") barcode: String,
+    ): ItemResponseDTO
+
+    @POST("api/v1/items")
+    suspend fun createItem(
+        @Body body: CreateItemRequestDTO,
     ): ItemResponseDTO
 
     @GET("api/v1/categories")

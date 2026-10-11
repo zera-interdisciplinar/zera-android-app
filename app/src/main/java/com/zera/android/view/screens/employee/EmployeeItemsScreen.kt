@@ -87,7 +87,7 @@ fun EmployeeItemsScreen(
 
         ZeraButton(
             text = "Adicionar novo item",
-            onClick = { /* TODO: navegar para o cadastro de item do operário */ },
+            onClick = { ZeraNavigator.push(Route.ManualRegister()) },
             fillMaxWidth = true,
             style = ZeraColorFamily.Blue,
             icon = ZeraIcon.Plus,

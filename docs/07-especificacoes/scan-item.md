@@ -4,7 +4,7 @@
 
 - **Feature:** Tela de escanear item (`ScanScreen`)
 - **Perfil(is) envolvido(s):** Operário (funcionário)
-- **Status:** em progresso (leitura + busca por barcode prontas; cadastro de modelo pendente)
+- **Status:** em progresso (leitura + busca por barcode e cadastro de item prontos; cadastro de modelo pendente)
 - **Última atualização:** 2026-10-11
 
 ## Contexto
@@ -79,7 +79,7 @@ Como Operário, quero apontar a câmera para a etiqueta de um item, para identif
 ## Fora de escopo desta spec
 
 - Tela de cadastro de modelo do Operário.
-- Envio do cadastro de item (`POST /items`).
+- Envio do cadastro de item (`POST /items`) — ver [cadastro-manual-item.md](cadastro-manual-item.md).
 
 ## Referências
 

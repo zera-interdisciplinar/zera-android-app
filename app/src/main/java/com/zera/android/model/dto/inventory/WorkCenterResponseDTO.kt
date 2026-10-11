@@ -1,6 +1,8 @@
 package com.zera.android.model.dto.inventory
 
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonNames
 
 @Serializable
 data class PendingItemResponseDTO(
@@ -8,6 +10,8 @@ data class PendingItemResponseDTO(
     val displayCode: String? = null,
     val name: String,
     val modelName: String? = null,
+    @OptIn(ExperimentalSerializationApi::class)
+    @JsonNames("missing_fields", "incompleteFields", "incomplete_fields")
     val missingFields: List<String> = emptyList(),
     val rejectionReason: String? = null,
     val updatedAt: String? = null,

@@ -40,7 +40,7 @@ Mesma fonte (`GetEmployeePendencies`). Aqui cada elemento dos três arrays vira 
 
 | Bucket | Label | Texto | Cor |
 |---|---|---|---|
-| `drafts` | Completar cadastro | `name · faltam <missingFields>` (só `name` se a lista vier vazia) | Yellow |
+| `drafts` | Completar cadastro | `name · faltam <rótulos em pt-BR>` (`photoUrl` → foto, `serialNumber` → número de série, …; só `name` se a lista vier vazia) | Yellow |
 | `rejected` | Recusado pelo gestor | `name · rejectionReason` (só `name` se o motivo vier vazio) | Red |
 | `damagedWithoutDestination` | Enviar para manutenção | `name · aguardando destino` | Blue |
 

@@ -52,6 +52,9 @@ Fonte de verdade do dashboard: [contrato-ms-inventory/contrato-inventory-dashboa
 | `GET` | `api/v1/dashboard/indicators` | `from`/`to` opcionais (`yyyy-MM-dd`) | `IndicatorsResponseDTO` | `GetIndicators.execute()` (`IndexesViewModel`) |
 | `GET` | `api/v1/items` | `status`, `categoryId`, `q`, `page`, `size` (default 20) | `PagedItemsDTO` | `GetItems.execute()` (`ItensViewModel`) |
 | `GET` | `api/v1/items/{id}` | path `id` | `ItemResponseDTO` | `GetItemDetails.execute()` (`ItemDetailsViewModel`) |
+| `GET` | `api/v1/items/by-barcode/{barcode}` | path `barcode` | `ItemResponseDTO` | `GetItemByBarcode.execute()` (`ScanViewModel`) |
+| `POST` | `api/v1/items` | `name`, `modelId`, `barcode?`, `serialNumber`, `condition`, `hasDamages`, `damages`, `notes?`, `acquiredAt`, `manufacturingYear`, `usageIntensity` | `ItemResponseDTO` | `CreateItem.execute()` (`ManualRegisterViewModel`) |
+| `GET` | `api/v1/models` | `q`, `page`, `size` (default 20) | `PagedModelsDTO` | `GetModels.execute()` (`ModelsViewModel`, `ManualRegisterViewModel`) |
 | `GET` | `api/v1/categories` | — | `List<CategoryResponseDTO>` | `GetCategories.execute()` (`ItensViewModel`, `CategoriesViewModel`, `ModelCreationViewModel`) |
 | `POST` | `api/v1/categories` | `name`, `description` opcional. `unitId` vai no header, não no corpo | `CategoryResponseDTO` | `CreateCategory.execute()` (`CategoryCreationViewModel`) |
 | `POST` | `api/v1/items/{id}/approve` | path `id`, sem corpo | `ItemResponseDTO` | `ApproveItem.execute()` (`ItemDetailsViewModel`) |

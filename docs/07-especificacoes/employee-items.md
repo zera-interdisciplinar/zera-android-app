@@ -4,7 +4,7 @@
 
 - **Feature:** Lista de itens do Operário (`EmployeeItemsScreen`)
 - **Perfil(is) envolvido(s):** Operário (funcionário)
-- **Status:** em progresso (lista, busca e filtros prontos; cadastro de item pendente)
+- **Status:** em progresso (lista, busca, filtros e atalho de cadastro prontos)
 - **Última atualização:** 2026-10-09
 
 ## Contexto
@@ -39,14 +39,14 @@ Como Operário, quero consultar e buscar os itens do estoque, para encontrar um 
 
 - **Given** o Operário está na lista de itens
 - **When** toca em "Adicionar novo item"
-- **Then** ainda não acontece nada (ação vazia com `TODO`)
+- **Then** navega para `Route.ManualRegister()` (ver [cadastro-manual-item.md](cadastro-manual-item.md))
 
 ## Critérios de aceite
 
 - [x] Mesma busca, filtros e paginação da `ItensScreen`, reaproveitando `ItensViewModel`
 - [x] Itens sem tag de status
 - [x] Item leva a `Route.ItemDetails`
-- [ ] "Adicionar novo item" abrir o cadastro de item do Operário (candidato: `Route.ManualRegister`, ver [cadastro-manual-item.md](cadastro-manual-item.md))
+- [x] "Adicionar novo item" abrir o cadastro de item do Operário (`Route.ManualRegister`)
 
 ## Edge cases considerados
 

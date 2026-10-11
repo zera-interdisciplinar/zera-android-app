@@ -74,4 +74,24 @@ class WorkCenterResponseDTOTest {
         assertEquals(0, workCenter.damagedWithoutDestination.size)
         assertNull(workCenter.drafts.firstOrNull()?.rejectionReason)
     }
+
+    @Test
+    fun parsesSnakeCaseMissingFields() {
+        val payload = """
+            {
+              "drafts": [{
+                "id": "d1",
+                "name": "Monitor",
+                "missing_fields": ["photoUrl"]
+              }],
+              "rejected": [],
+              "damagedWithoutDestination": [],
+              "inMaintenance": 0,
+              "awaitingEvaluation": 0
+            }
+        """.trimIndent()
+
+        val workCenter = json.decodeFromString<WorkCenterResponseDTO>(payload)
+        assertEquals(listOf("photoUrl"), workCenter.drafts.first().missingFields)
+    }
 }

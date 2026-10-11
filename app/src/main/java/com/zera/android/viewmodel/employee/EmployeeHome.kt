@@ -96,7 +96,7 @@ class EmployeeHomeViewModel : ZeraViewModel() {
     }
 
     fun onScanClick() {
-        // TODO: navegar para o scanner quando a rota do operário existir
+        ZeraNavigator.push(Route.Scan)
     }
 
     fun onAddModelClick() {

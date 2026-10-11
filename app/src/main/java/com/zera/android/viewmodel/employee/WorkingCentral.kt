@@ -2,9 +2,11 @@ package com.zera.android.viewmodel.employee
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
+import com.zera.android.model.dto.inventory.ItemResponseDTO
 import com.zera.android.model.dto.inventory.PendingItemResponseDTO
 import com.zera.android.model.dto.inventory.WorkCenterResponseDTO
 import com.zera.android.model.usecase.inventory.GetEmployeePendencies
+import com.zera.android.model.usecase.inventory.GetItemDetails
 import com.zera.android.view.components.lists.NotificationItem
 import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.viewmodel.ZeraViewModel
@@ -25,9 +27,11 @@ data class WorkingCentralState(
  * ViewModel da Central de Trabalho do operário.
  *
  * Lista item a item o mesmo `GET /dashboard/work-center` da home; a home só mostra o resumo.
+ * Rascunho sem `missingFields` consulta `GET /items/{id}` para montar o texto do que falta.
  */
 class WorkingCentralViewModel : ZeraViewModel() {
     private val getEmployeePendencies = GetEmployeePendencies()
+    private val getItemDetails = GetItemDetails()
     private val _state = mutableStateOf(WorkingCentralState())
     val state = _state
 
@@ -38,14 +42,25 @@ class WorkingCentralViewModel : ZeraViewModel() {
     private suspend fun loadWorkCenter() {
         try {
             val workCenter = getEmployeePendencies.execute()
+            val drafts = workCenter.drafts.map { draft -> enrichDraft(draft) }
             _state.value = WorkingCentralState(
                 maintenanceCount = workCenter.inMaintenance.toInt(),
-                priorityNotifications = priorityFrom(workCenter),
+                priorityNotifications = priorityFrom(workCenter.copy(drafts = drafts)),
             )
         } catch (e: CancellationException) {
             throw e
         } catch (_: Exception) {
             _state.value = WorkingCentralState()
+        }
+    }
+
+    private suspend fun enrichDraft(draft: PendingItemResponseDTO): PendingItemResponseDTO {
+        if (draft.missingFields.isNotEmpty()) return draft
+        return try {
+            val item = getItemDetails.execute(draft.id)
+            draft.copy(missingFields = missingFieldsFrom(item))
+        } catch (_: Exception) {
+            draft
         }
     }
 
@@ -82,9 +97,36 @@ class WorkingCentralViewModel : ZeraViewModel() {
             return drafts + rejected + damaged
         }
 
-        private fun draftText(item: PendingItemResponseDTO): String {
+        internal fun missingFieldsFrom(item: ItemResponseDTO): List<String> {
+            if (item.missingFields.isNotEmpty()) return item.missingFields
+            return buildList {
+                if (item.photoUrl.isNullOrBlank()) add("photoUrl")
+                if (item.serialNumber.isNullOrBlank()) add("serialNumber")
+                if (item.condition.isNullOrBlank()) add("condition")
+            }
+        }
+
+        internal fun draftText(item: PendingItemResponseDTO): String {
             if (item.missingFields.isEmpty()) return item.name
-            return "${item.name} · faltam ${item.missingFields.joinToString(", ")}"
+            val labels = item.missingFields.map(::missingFieldLabel).distinct()
+            return "${item.name} · faltam ${labels.joinToString(", ")}"
+        }
+
+        internal fun missingFieldLabel(field: String): String {
+            val key = field.trim().replace("_", "").replace("-", "").lowercase()
+            return when (key) {
+                "photourl", "photo" -> "foto"
+                "serialnumber", "serial" -> "número de série"
+                "barcode" -> "código de barras"
+                "damages", "damagetype" -> "tipo de dano"
+                "condition" -> "condição"
+                "acquiredat" -> "data de aquisição"
+                "manufacturingyear" -> "ano de fabricação"
+                "usageintensity" -> "intensidade de uso"
+                "name" -> "nome"
+                "modelid", "model" -> "modelo"
+                else -> field
+            }
         }
 
         private fun rejectedText(item: PendingItemResponseDTO): String {

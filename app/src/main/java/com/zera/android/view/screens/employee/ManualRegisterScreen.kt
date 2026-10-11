@@ -29,6 +29,7 @@ import com.zera.android.view.components.inputs.ZeraSliderInput
 import com.zera.android.view.components.inputs.ZeraTextInput
 import com.zera.android.view.components.navigation.UpperNavBar
 import com.zera.android.view.components.texts.BodyText
+import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
 import com.zera.android.viewmodel.employee.ManualRegisterViewModel
@@ -71,14 +72,17 @@ fun ManualRegisterScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(Spacing.small),
             ) {
+                state.submitError?.let { message ->
+                    CaptionText(text = message, color = MaterialTheme.colorScheme.error)
+                }
                 ZeraButton(
-                    text = "Concluir Cadastro",
+                    text = if (state.isSubmitting) "Cadastrando…" else "Concluir Cadastro",
                     onClick = {
                         keyboardController?.hide()
                         viewModel.onConfirmClick()
                     },
                     fillMaxWidth = true,
-                    enabled = state.canSubmit,
+                    enabled = state.canSubmit && !state.isSubmitting,
                 )
                 ZeraButton(
                     text = "Cancelar",
@@ -127,7 +131,14 @@ fun ManualRegisterScreen(
                 values = state.modelOptions,
                 onValueChange = viewModel::onModelChange,
                 label = "Modelo",
-                placeholder = "Selecione uma categoria",
+                placeholder = when {
+                    state.isLoadingModels -> "Carregando…"
+                    state.modelOptions.isEmpty() -> "Nenhum modelo cadastrado"
+                    else -> "Selecione o modelo"
+                },
+                enabled = !state.isLoadingModels && state.modelOptions.isNotEmpty(),
+                isError = state.modelsError != null,
+                errorMessage = state.modelsError,
             )
             ZeraTextInput(
                 value = state.manufacturingYear,

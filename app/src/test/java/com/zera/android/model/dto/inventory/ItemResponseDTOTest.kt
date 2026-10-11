@@ -135,4 +135,19 @@ class ItemResponseDTOTest {
         assertEquals("APPROVED", item.status)
         assertEquals("USED", item.condition)
     }
+
+    @Test
+    fun parsesCreatedByObjectAndNameAlias() {
+        val withObject = json.decodeFromString<ItemResponseDTO>(
+            """{"id":"id-1","name":"Notebook","createdBy":{"id":"u1","name":"Ana Lima"}}""",
+        )
+        val name = (withObject.createdBy as kotlinx.serialization.json.JsonObject)["name"]
+            as kotlinx.serialization.json.JsonPrimitive
+        assertEquals("Ana Lima", name.content)
+
+        val withAlias = json.decodeFromString<ItemResponseDTO>(
+            """{"id":"id-1","name":"Notebook","created_by_name":"Ana Lima"}""",
+        )
+        assertEquals("Ana Lima", withAlias.createdByName)
+    }
 }
