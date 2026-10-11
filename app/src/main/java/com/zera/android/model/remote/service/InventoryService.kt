@@ -16,6 +16,7 @@ import com.zera.android.model.dto.inventory.RejectItemRequestDTO
 import com.zera.android.model.dto.inventory.UpdateItemRequestDTO
 import com.zera.android.model.dto.inventory.DisposalRecordDTO
 import com.zera.android.model.dto.inventory.PagedDisposalsDTO
+import com.zera.android.model.dto.inventory.WorkCenterResponseDTO
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.PATCH
@@ -29,6 +30,9 @@ interface InventoryService {
         @Query("page") page: Int = 0,
         @Query("size") size: Int = 5,
     ): DashboardHomeResponseDTO
+
+    @GET("api/v1/dashboard/work-center")
+    suspend fun getWorkCenter(): WorkCenterResponseDTO
 
     @GET("api/v1/dashboard/indicators")
     suspend fun getIndicators(

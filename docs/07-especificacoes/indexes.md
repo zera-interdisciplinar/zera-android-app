@@ -72,7 +72,7 @@ Como Gestor, quero ver indicadores de reciclagem e descarte da minha unidade, pa
 
 ## Fora de escopo desta spec
 
-- `GET /api/v1/dashboard/work-center` (não é usado por nenhuma tela).
+- `GET /api/v1/dashboard/work-center` (home do operário e Central de Trabalho; não entra nos indicadores).
 - Indicadores do perfil Funcionário.
 - Skeleton/`isLoading` na tela.
 

@@ -47,7 +47,8 @@ Fonte de verdade do dashboard: [contrato-ms-inventory/contrato-inventory-dashboa
 
 | Método | Endpoint | Query | Resposta | Usado por |
 |---|---|---|---|---|
-| `GET` | `api/v1/dashboard/home` | `page` (default 0), `size` (default 5) | `DashboardHomeResponseDTO` | `GetManagerHome.execute()` (`ManagerHomeViewModel`) |
+| `GET` | `api/v1/dashboard/home` | `page` (default 0), `size` (default 5) | `DashboardHomeResponseDTO` | `GetManagerHome.execute()` (`ManagerHomeViewModel`), `GetEmployeeHome.execute()` (`EmployeeHomeViewModel`) |
+| `GET` | `api/v1/dashboard/work-center` | — | `WorkCenterResponseDTO` | `GetEmployeePendencies.execute()` (`EmployeeHomeViewModel`, `WorkingCentralViewModel`) |
 | `GET` | `api/v1/dashboard/indicators` | `from`/`to` opcionais (`yyyy-MM-dd`) | `IndicatorsResponseDTO` | `GetIndicators.execute()` (`IndexesViewModel`) |
 | `GET` | `api/v1/items` | `status`, `categoryId`, `q`, `page`, `size` (default 20) | `PagedItemsDTO` | `GetItems.execute()` (`ItensViewModel`) |
 | `GET` | `api/v1/items/{id}` | path `id` | `ItemResponseDTO` | `GetItemDetails.execute()` (`ItemDetailsViewModel`) |
@@ -57,7 +58,7 @@ Fonte de verdade do dashboard: [contrato-ms-inventory/contrato-inventory-dashboa
 | `POST` | `api/v1/items/{id}/reject` | path `id`, `{ "reason" }` | `ItemResponseDTO` | `RejectItem.execute()` (`ItemDetailsViewModel`) |
 | `PATCH` | `api/v1/items/{id}` | parcial: `name`, `condition`, `hasDamages`, `damages`, `notes`, `serialNumber`, `acquiredAt`, `manufacturingYear`, `usageIntensity` | `ItemResponseDTO` | `UpdateItem.execute()` (`ItemDetailsViewModel`; a PDI só envia `name` ou `condition`) |
 
-`GET /api/v1/dashboard/work-center` existe no contrato e **não** tem método no `InventoryService`.
+`GET /api/v1/dashboard/work-center` alimenta a seção Pendências da home (resumo por bucket) e a Central de Trabalho (um card por item). O recorte é o usuário do token (sem query).
 
 ## Autenticação (AuthService)
 

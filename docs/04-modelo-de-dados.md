@@ -34,6 +34,8 @@ Pacote `model/dto/user/`. Constantes de papel em `model/entity/user/UserRole` (`
 Pacote `model/dto/inventory/`. Só os campos que as telas usam; o restante do JSON do contrato é ignorado (`ignoreUnknownKeys`). Contratos: [contrato-ms-inventory/contrato-inventory-dashboard.md](contrato-ms-inventory/contrato-inventory-dashboard.md), [contrato-pdi/contrato-detalhes-itens.md](contrato-pdi/contrato-detalhes-itens.md).
 
 - **`DashboardHomeResponseDTO`** — `GET /api/v1/dashboard/home`: `activeItems`, `activeItemsChangePercent?`, `occupancyPercent?`, `pendingApproval`, `inMaintenance`, `awaitingEvaluation`, `recentItems`.
+- **`WorkCenterResponseDTO`** — `GET /api/v1/dashboard/work-center`: `drafts`, `rejected`, `damagedWithoutDestination`, `inMaintenance`, `awaitingEvaluation`.
+- **`PendingItemResponseDTO`** — item da central: `id`, `displayCode?`, `name`, `modelName?`, `missingFields`, `rejectionReason?`, `updatedAt?`.
 - **`PagedItemsDTO(content, page, size, totalElements, totalPages)`** — envelope de `recentItems` e de `GET /api/v1/items`.
 - **`ItemResponseDTO`** — lista e PDI: `id`, `name`, `displayCode?`, `status?` (aliases JSON `itemStatus`/`approvalStatus`), `condition?`, `createdByName?`, `createdAt?`, `model?`.
 - **`ModelResponseDTO`** / **`MaterialResponseDTO`** / **`CategoryResponseDTO`** — modelo aninhado no item; categorias também vêm de `GET /api/v1/categories` (`id`, `name`, metadados opcionais).
@@ -41,7 +43,7 @@ Pacote `model/dto/inventory/`. Só os campos que as telas usam; o restante do JS
 - **`MonthlyWeightDTO(month, weightKg)`** — `month` no formato `yyyy-MM`.
 - **`WeightByMaterialDTO(material, percent)`** — `material` é código (`PLASTIC`, `METAL`, ...).
 
-Campos do contrato **não** modelados no app: `stockCapacity`, `disposalsInWindow`, `windowDays`, barcode/damages/serial da listagem, payload de work-center.
+Campos do contrato **não** modelados no app: `stockCapacity`, `disposalsInWindow`, `windowDays`, barcode/damages/serial da listagem.
 
 ## Config dinâmica (Scrapy)
 

@@ -3,11 +3,15 @@ package com.zera.android.viewmodel.employee
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.zera.android.model.dto.inventory.DashboardHomeResponseDTO
+import com.zera.android.model.dto.inventory.WorkCenterResponseDTO
 import com.zera.android.model.entity.user.UserRole
 import com.zera.android.model.usecase.auth.GetSelfUser
 import com.zera.android.model.usecase.inventory.GetEmployeeHome
+import com.zera.android.model.usecase.inventory.GetEmployeePendencies
 import com.zera.android.view.components.lists.NotificationItem
 import com.zera.android.view.components.lists.ProductItem
+import com.zera.android.view.navigation.Route
+import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.viewmodel.ZeraViewModel
 import kotlinx.coroutines.CancellationException
@@ -27,24 +31,18 @@ data class EmployeeHomeState(
 /**
  * ViewModel da home do operário.
  *
- * Nome, cargo e ocupação do estoque vêm da API; atalhos, pendências e últimos itens
- * ainda são mock até o back expor o restante do dashboard do operário.
+ * Nome, cargo, ocupação e pendências vêm da API; atalhos e últimos itens
+ * ainda são mock até o restante do dashboard do operário existir.
  */
 class EmployeeHomeViewModel : ZeraViewModel() {
     private val getSelfUser = GetSelfUser()
     private val getEmployeeHome = GetEmployeeHome()
+    private val getEmployeePendencies = GetEmployeePendencies()
 
     private val _state = mutableStateOf(
         EmployeeHomeState(
             maintenanceCount = "25",
             discardCount = "8",
-            pendingNotifications = listOf(
-                NotificationItem(
-                    id = "incomplete-registrations",
-                    label = "3 cadastros incompletos",
-                    style = ZeraColorFamily.Red
-                ),
-            ),
             latestProducts = listOf(
                 ProductItem(
                     id = "265964",
@@ -59,6 +57,7 @@ class EmployeeHomeViewModel : ZeraViewModel() {
     init {
         viewModelScope.launch { loadLoggedUser() }
         viewModelScope.launch { loadStockOccupation() }
+        viewModelScope.launch { loadPendencies() }
     }
 
     private suspend fun loadLoggedUser() {
@@ -89,6 +88,19 @@ class EmployeeHomeViewModel : ZeraViewModel() {
         }
     }
 
+    private suspend fun loadPendencies() {
+        try {
+            val workCenter = getEmployeePendencies.execute()
+            _state.value = _state.value.copy(
+                pendingNotifications = pendenciesFrom(workCenter),
+            )
+        } catch (e: CancellationException) {
+            throw e
+        } catch (_: Exception) {
+            // A lista cai no empty state se o work-center falhar.
+        }
+    }
+
     fun onScanClick() {
         // TODO: navegar para o scanner quando a rota do operário existir
     }
@@ -106,7 +118,7 @@ class EmployeeHomeViewModel : ZeraViewModel() {
     }
 
     fun onPendingClick() {
-        // TODO: navegar para cadastros incompletos
+        ZeraNavigator.push(Route.WorkingCentral)
     }
 
     fun onSeeAllItemsClick() {
@@ -123,6 +135,49 @@ class EmployeeHomeViewModel : ZeraViewModel() {
             UserRole.MANAGER -> "Gestor"
             UserRole.EMPLOYEE -> "Operário"
             else -> role
+        }
+
+        internal fun pendenciesFrom(workCenter: WorkCenterResponseDTO): List<NotificationItem> {
+            val cards = mutableListOf<NotificationItem>()
+            if (workCenter.drafts.isNotEmpty()) {
+                cards += NotificationItem(
+                    id = "incomplete-registrations",
+                    label = countLabel(
+                        workCenter.drafts.size,
+                        singular = "cadastro incompleto",
+                        plural = "cadastros incompletos",
+                    ),
+                    style = ZeraColorFamily.Red,
+                )
+            }
+            if (workCenter.rejected.isNotEmpty()) {
+                cards += NotificationItem(
+                    id = "rejected-registrations",
+                    label = countLabel(
+                        workCenter.rejected.size,
+                        singular = "cadastro recusado",
+                        plural = "cadastros recusados",
+                    ),
+                    style = ZeraColorFamily.Red,
+                )
+            }
+            if (workCenter.damagedWithoutDestination.isNotEmpty()) {
+                cards += NotificationItem(
+                    id = "damaged-without-destination",
+                    label = countLabel(
+                        workCenter.damagedWithoutDestination.size,
+                        singular = "item danificado sem destino",
+                        plural = "itens danificados sem destino",
+                    ),
+                    style = ZeraColorFamily.Yellow,
+                )
+            }
+            return cards
+        }
+
+        private fun countLabel(count: Int, singular: String, plural: String): String {
+            val noun = if (count == 1) singular else plural
+            return "$count $noun"
         }
     }
 }

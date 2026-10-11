@@ -68,7 +68,7 @@ Como Gestor, quero ver um resumo do estoque, dos alertas pendentes e dos último
 
 - Telas de destino dos atalhos (listagem completa de produtos, gestão de funcionários, chatbot) — cada uma tem (ou terá) spec própria.
 - Cálculo dos agregados no backend (capacidade de estoque, janela de descartes).
-- `GET /api/v1/dashboard/work-center`.
+- `GET /api/v1/dashboard/work-center` (home e Central do Operário, não desta tela).
 
 ## Referências
 
