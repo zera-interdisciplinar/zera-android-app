@@ -1,10 +1,13 @@
 package com.zera.android.viewmodel.employee
 
 import com.zera.android.model.dto.inventory.DashboardHomeResponseDTO
+import com.zera.android.model.dto.inventory.ItemResponseDTO
+import com.zera.android.model.dto.inventory.PagedItemsDTO
 import com.zera.android.model.dto.inventory.PendingItemResponseDTO
 import com.zera.android.model.dto.inventory.WorkCenterResponseDTO
 import com.zera.android.model.entity.user.UserRole
 import com.zera.android.view.components.lists.NotificationItem
+import com.zera.android.view.components.lists.ProductItem
 import com.zera.android.view.theme.ZeraColorFamily
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -70,5 +73,50 @@ class EmployeeHomeMappingTest {
         assertEquals("2 itens danificados sem destino", cards[2].label)
         assertEquals(ZeraColorFamily.Red, cards[1].style)
         assertEquals(ZeraColorFamily.Yellow, cards[2].style)
+    }
+
+    @Test
+    fun latestProductsMapsIdAndNameOnly() {
+        val home = DashboardHomeResponseDTO(
+            activeItems = 128,
+            recentItems = PagedItemsDTO(
+                content = listOf(
+                    ItemResponseDTO(
+                        id = "9c858901-8a57-4791-81fe-4c455b099bc9",
+                        name = "Notebook Dell Latitude",
+                        status = "IN_STOCK",
+                    ),
+                    ItemResponseDTO(
+                        id = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+                        name = "Mouse sem fio",
+                    ),
+                ),
+            ),
+        )
+
+        val products = EmployeeHomeViewModel.latestProductsFrom(home)
+        assertEquals(
+            listOf(
+                ProductItem(
+                    id = "9c858901-8a57-4791-81fe-4c455b099bc9",
+                    name = "Notebook Dell Latitude",
+                ),
+                ProductItem(
+                    id = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+                    name = "Mouse sem fio",
+                ),
+            ),
+            products,
+        )
+        assertEquals(listOf(null, null), products.map { it.statusText })
+    }
+
+    @Test
+    fun latestProductsEmptyWhenContentIsEmpty() {
+        val home = DashboardHomeResponseDTO(
+            activeItems = 0,
+            recentItems = PagedItemsDTO(),
+        )
+        assertEquals(emptyList<ProductItem>(), EmployeeHomeViewModel.latestProductsFrom(home))
     }
 }

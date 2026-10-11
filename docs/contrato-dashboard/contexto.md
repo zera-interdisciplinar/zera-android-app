@@ -14,7 +14,7 @@ model
 ├── remote/service/InventoryService.kt     GET dashboard/home, work-center, indicators
 └── usecase/inventory/
     ├── GetManagerHome.kt                  home do gestor
-    ├── GetEmployeeHome.kt                 ocupação da home do operário
+    ├── GetEmployeeHome.kt                 ocupação e últimos itens da home do operário
     ├── GetEmployeePendencies.kt           pendências da home do operário
     └── GetIndicators.kt                   tela de indicadores
 ```

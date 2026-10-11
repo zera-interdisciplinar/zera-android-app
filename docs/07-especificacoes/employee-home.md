@@ -4,12 +4,12 @@
 
 - **Feature:** Tela inicial do Operário
 - **Perfil(is) envolvido(s):** Operário (funcionário)
-- **Status:** em progresso (pendências reais; atalhos/últimos itens mock; navegação pendente)
+- **Status:** em progresso (pendências e últimos itens reais; atalhos mock; navegação parcial)
 - **Última atualização:** 2026-10-11
 
 ## Contexto
 
-Primeira tela do Operário após o login (`Route.EmployeeHome`). Reaproveita os componentes da home do Gestor ([manager-home-dashboard.md](manager-home-dashboard.md)) dentro do `EmployeeScaffold`, com textos próprios do fluxo de Operário. Nome e cargo vêm de `GetSelfUser`; ocupação de `GetEmployeeHome` (`GET /api/v1/dashboard/home`); pendências de `GetEmployeePendencies` (`GET /api/v1/dashboard/work-center`). Atalhos e últimos itens ainda são mock.
+Primeira tela do Operário após o login (`Route.EmployeeHome`). Reaproveita os componentes da home do Gestor ([manager-home-dashboard.md](manager-home-dashboard.md)) dentro do `EmployeeScaffold`, com textos próprios do fluxo de Operário. Nome e cargo vêm de `GetSelfUser`; ocupação e últimos itens vêm de `GetEmployeeHome` (`GET /api/v1/dashboard/home`, `recentItems.content`); pendências de `GetEmployeePendencies` (`GET /api/v1/dashboard/work-center`). Atalhos de manutenção/descarte ainda são mock.
 
 ## User story
 
@@ -39,15 +39,18 @@ Como Operário, quero ver a ocupação do estoque, meus atalhos de manutenção/
 
 - [x] Layout com os mesmos componentes da home do Gestor (`StockOccupationCard`, `ShortcutCard`, `NotificationList`, `ProductList`)
 - [x] Pendências mapeadas de `drafts` / `rejected` / `damagedWithoutDestination` (contador > 0 vira um `NotificationItem`; drafts e rejected em Red, danificados em Yellow)
-- [x] Dados reais de ocupação e pendências
-- [ ] Dados reais de manutenção, descartes e últimos itens
+- [x] Dados reais de ocupação, pendências e últimos itens (`recentItems.content`)
+- [ ] Dados reais de manutenção e descartes (atalhos ainda mock)
 - [x] Clique em pendência abre `Route.WorkingCentral`
-- [ ] Navegação de "Escanear", "Adicionar Modelo", "Manutenção", "Descartes" e "Ver Todos" (hoje `TODO` no `EmployeeHomeViewModel`)
+- [x] Clique em um último item abre `Route.ItemDetails(itemId)`
+- [x] "Ver Todos" abre `Route.EmployeeItems`
+- [ ] Navegação de "Escanear", "Adicionar Modelo", "Manutenção" e "Descartes" (hoje `TODO` no `EmployeeHomeViewModel`)
 
 ## Edge cases considerados
 
 - Lista de pendências vazia (todos os buckets vazios ou falha do work-center): `NotificationList` mostra "Nenhuma notificação".
 - Um item no bucket: label no singular (`1 cadastro incompleto`). Dois ou mais: plural (`3 cadastros incompletos`).
+- Lista de últimos itens vazia (`recentItems.content` vazio ou falha de `GetEmployeeHome`): `ProductList` mostra "Nenhum produto encontrado".
 
 ## Fora de escopo desta spec
 
@@ -58,5 +61,5 @@ Como Operário, quero ver a ocupação do estoque, meus atalhos de manutenção/
 
 - Componentes: `../03-catalogo-componentes.md` (`EmployeeScaffold`, `Notification`)
 - Spec relacionada: [manager-home-dashboard.md](manager-home-dashboard.md), [central-de-trabalho.md](central-de-trabalho.md)
-- Contrato: [../contrato-dashboard/contrato-inventory-dashboard.md](../contrato-dashboard/contrato-inventory-dashboard.md) (`GET /dashboard/work-center`)
+- Contrato: [../contrato-dashboard/contrato-inventory-dashboard.md](../contrato-dashboard/contrato-inventory-dashboard.md) (`GET /dashboard/home` e `GET /dashboard/work-center`)
 - Regras: [../05-regras-de-negocio/inventory-dashboard.md](../05-regras-de-negocio/inventory-dashboard.md)

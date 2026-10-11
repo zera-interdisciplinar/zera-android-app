@@ -31,8 +31,8 @@ data class EmployeeHomeState(
 /**
  * ViewModel da home do operário.
  *
- * Nome, cargo, ocupação e pendências vêm da API; atalhos e últimos itens
- * ainda são mock até o restante do dashboard do operário existir.
+ * Nome, cargo, ocupação, pendências e últimos itens vêm da API;
+ * atalhos de manutenção/descarte ainda são mock.
  */
 class EmployeeHomeViewModel : ZeraViewModel() {
     private val getSelfUser = GetSelfUser()
@@ -43,13 +43,6 @@ class EmployeeHomeViewModel : ZeraViewModel() {
         EmployeeHomeState(
             maintenanceCount = "25",
             discardCount = "8",
-            latestProducts = listOf(
-                ProductItem(
-                    id = "265964",
-                    name = "Placa de vídeo",
-                    statusText = "Em aprovação",
-                ),
-            ),
         )
     )
     val state = _state
@@ -80,11 +73,12 @@ class EmployeeHomeViewModel : ZeraViewModel() {
             _state.value = _state.value.copy(
                 stockItemCount = home.activeItems.toInt(),
                 stockOccupation = occupationFrom(home),
+                latestProducts = latestProductsFrom(home),
             )
         } catch (e: CancellationException) {
             throw e
         } catch (_: Exception) {
-            // O card fica em zero se o dashboard falhar; o restante da home continua visível.
+            // O card fica em zero e a lista cai no empty state; o restante da home continua visível.
         }
     }
 
@@ -122,10 +116,15 @@ class EmployeeHomeViewModel : ZeraViewModel() {
     }
 
     fun onSeeAllItemsClick() {
-        // TODO: navegar para os itens do operário
+        ZeraNavigator.push(Route.EmployeeItems)
     }
 
     companion object {
+        internal fun latestProductsFrom(home: DashboardHomeResponseDTO): List<ProductItem> =
+            home.recentItems.content.map { item ->
+                ProductItem(id = item.id, name = item.name)
+            }
+
         internal fun occupationFrom(home: DashboardHomeResponseDTO): Float {
             val percent = home.occupancyPercent ?: return 0f
             return (percent / 100.0).toFloat().coerceIn(0f, 1f)

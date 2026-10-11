@@ -60,7 +60,7 @@ Contador `0` não gera linha. A lista vazia cai no empty state do `NotificationL
 
 ### Últimos itens
 
-Vêm de `recentItems.content` (`id` + `name`). Não há mock nessa lista. Página padrão da home: `page=0`, `size=5` (defaults do `InventoryService`). Lista vazia usa o empty state do `ProductList`.
+Vêm de `recentItems.content` (`id` + `name`) em `GET /api/v1/dashboard/home`. A home do Gestor (`GetManagerHome`) e a home do Operário (`GetEmployeeHome`) usam o mesmo campo; não há mock nessa lista. Página padrão: `page=0`, `size=5` (defaults do `InventoryService`). Sem tag de status. Lista vazia usa o empty state do `ProductList`. No Operário, "Ver Todos" abre `Route.EmployeeItems` (catálogo `GET /api/v1/items`); no Gestor, abre `Route.Itens`.
 
 ### Funcionários na home
 
@@ -111,7 +111,7 @@ Nenhum parâmetro de negócio é configurável no app. Percentuais, janela padr�
 
 ## Relacionamento com perfis
 
-O Gestor vê `Route.ManagerHome` e `Route.Indexes`. O Operário vê ocupação e pendências em `Route.EmployeeHome`. O interceptor envia o token do usuário autenticado; a autorização de quem pode consultar o dashboard é do backend.
+O Gestor vê `Route.ManagerHome` e `Route.Indexes`. O Operário vê ocupação, últimos itens e pendências em `Route.EmployeeHome`. O interceptor envia o token do usuário autenticado; a autorização de quem pode consultar o dashboard é do backend.
 
 ## Referências
 

@@ -58,7 +58,7 @@ Fonte de verdade do dashboard: [contrato-ms-inventory/contrato-inventory-dashboa
 | `POST` | `api/v1/items/{id}/reject` | path `id`, `{ "reason" }` | `ItemResponseDTO` | `RejectItem.execute()` (`ItemDetailsViewModel`) |
 | `PATCH` | `api/v1/items/{id}` | parcial: `name`, `condition`, `hasDamages`, `damages`, `notes`, `serialNumber`, `acquiredAt`, `manufacturingYear`, `usageIntensity` | `ItemResponseDTO` | `UpdateItem.execute()` (`ItemDetailsViewModel`; a PDI só envia `name` ou `condition`) |
 
-`GET /api/v1/dashboard/work-center` alimenta a seção Pendências da home (resumo por bucket) e a Central de Trabalho (um card por item). O recorte é o usuário do token (sem query).
+`GET /api/v1/dashboard/home` alimenta ocupação e `recentItems` na home do Gestor e na home do Operário. `GET /api/v1/dashboard/work-center` alimenta a seção Pendências da home (resumo por bucket) e a Central de Trabalho (um card por item). O recorte do work-center é o usuário do token (sem query).
 
 ## Autenticação (AuthService)
 
