@@ -76,6 +76,9 @@ Arquivo: `view/components/inputs/`.
 - **`ZeraDropdownInput(values, onValueChange, modifier, value, label, placeholder, enabled, isError, errorMessage, width)`** — seletor controlado de uma opção textual; a lista é fornecida pelo chamador e o componente usa `ExposedDropdownMenuBox` com a mesma borda, fundo e rótulo visual de `ZeraTextInput`.
 - **`ZeraTokenInput(value, onValueChange, modifier, size=6, label, enabled, isError, errorMessage, onFilled)`** — campo de código/OTP: um único `BasicTextField` invisível desenhando `size` células via `decorationBox`; chama `onFilled` quando atinge `size` dígitos.
 - **`ZeraChipsGroup(options, selected, onSelectedChange, modifier, label, style, stacked, selectMany, selectedValues, onSelectedValuesChange, showX)`** — grupo controlado de chips. `selectMany = false` mantém seleção única; com `true`, o chamador fornece/recebe a lista `selectedValues` por `onSelectedValuesChange`. `showX` mostra X nos selecionados e é ativado automaticamente em seleção múltipla. `stacked = true` quebra linha (`FlowRow`); `false` (padrão) rola horizontalmente.
+- **`ZeraDateInput(onValueChange, modifier, value, label, placeholder, enabled, isError, errorMessage, width)`** — campo de data com a mesma estrutura visual do `ZeraTextInput`; o toque abre um `DatePickerDialog` em vez do teclado, então não há data digitada inválida. `value` e o retorno de `onValueChange` usam o formato `dd/MM/yyyy`.
+- **`ZeraSliderInput(value: Int, onValueChange: (Int) -> Unit, modifier, label, valueRange = 1..10, enabled, style, width)`** — slider numérico com paradas em cada inteiro de `valueRange`; `style` (`ZeraColorFamily`, padrão `Blue`) define a cor da trilha e da alça.
+- **`ZeraRadioButton(selected, onClick, modifier, label, style)`** — botão de seleção única: só o indicador circular, com `label` opcional acima. O estado é do chamador; selecionado, o indicador é preenchido com a cor base de `style` (padrão `Blue`). Não alterna sozinho: quem usa decide o novo valor em `onClick` (ex.: `ManualRegisterViewModel.onHasDamageChange` inverte o valor recebido).
 
 ```kotlin
 ZeraTextInput(label = "Email", placeholder = "Seu email", value = state.email, onValueChange = viewModel::onEmailChange, type = ZeraInputType.Email)
@@ -83,6 +86,9 @@ ZeraDropdownInput(label = "Material", values = state.materialOptions, value = st
 ZeraTokenInput(value = state.token, onValueChange = viewModel::onTokenChange, label = "Código de convite", onFilled = {})
 ZeraChipsGroup(label = "Possui danos?", options = listOf("Tela quebrada", "Não liga"), selected = selecionado, onSelectedChange = { selecionado = it }, stacked = true)
 ZeraChipsGroup(options = options, selectedValues = selecionados, onSelectedValuesChange = { selecionados = it }, selectMany = true)
+ZeraDateInput(label = "Data de aquisição", placeholder = "DD/MM/AAAA", value = state.acquisitionDate, onValueChange = viewModel::onAcquisitionDateChange)
+ZeraSliderInput(label = "Intensidade de uso", value = state.usageIntensity, onValueChange = viewModel::onUsageIntensityChange)
+ZeraRadioButton(label = "Possui danos?", selected = state.hasDamage, onClick = { viewModel.onHasDamageChange(state.hasDamage) })
 ```
 
 ## Cards
