@@ -24,12 +24,16 @@ import com.zera.android.view.theme.ZeraTheme
  * @param label texto em destaque do card.
  * @param text texto de apoio exibido abaixo do [label].
  * @param style família de cor do card. Ver [ZeraColorFamily].
+ * @param resolvable quando `true`, a lista pode exibir "Resolver agora" se houver [NotificationList.onItemClick].
+ * @param kind tipo do alerta da API, quando a notificação veio de `AlertResponseDTO`.
  */
 data class NotificationItem(
     val id: String,
     val label: String,
     val text: String? = null,
     val style: ZeraColorFamily = ZeraColorFamily.Yellow,
+    val resolvable: Boolean = false,
+    val kind: String? = null,
 )
 
 /**
@@ -78,7 +82,11 @@ fun NotificationList(
                 label = notification.label,
                 text = notification.text,
                 style = notification.style,
-                redirect = onItemClick?.let { { it(notification) } },
+                redirect = if (onItemClick != null && notification.resolvable) {
+                    { onItemClick(notification) }
+                } else {
+                    null
+                },
                 modifier = Modifier.fillMaxWidth(),
             )
         }
@@ -96,6 +104,7 @@ private fun NotificationListPreview() {
                     label = "5 produtos sem classificação",
                     text = "Aguardando revisão do gestor",
                     style = ZeraColorFamily.Yellow,
+                    resolvable = true,
                 ),
                 NotificationItem(
                     id = "2",

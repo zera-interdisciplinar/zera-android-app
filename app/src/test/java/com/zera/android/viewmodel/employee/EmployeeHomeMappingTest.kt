@@ -11,6 +11,7 @@ import com.zera.android.view.components.lists.ProductItem
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.theme.ZeraColorFamily
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class EmployeeHomeMappingTest {
@@ -78,6 +79,7 @@ class EmployeeHomeMappingTest {
         assertEquals("1 cadastro recusado", cards[1].label)
         assertEquals("2 itens danificados sem destino", cards[2].label)
         assertEquals(ZeraColorFamily.Red, cards[1].style)
+        assertTrue(cards.all { it.resolvable })
         assertEquals(ZeraColorFamily.Yellow, cards[2].style)
     }
 

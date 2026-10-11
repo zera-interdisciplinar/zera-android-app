@@ -3,8 +3,10 @@ package com.zera.android.viewmodel.manager
 import com.zera.android.model.dto.inventory.DashboardHomeResponseDTO
 import com.zera.android.model.dto.notification.AlertResponseDTO
 import com.zera.android.model.entity.user.UserRole
+import com.zera.android.view.navigation.Route
 import com.zera.android.view.theme.ZeraColorFamily
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -47,6 +49,20 @@ class ManagerHomeMappingTest {
         assertEquals("second", alerts[1].id)
         assertEquals("Item aprovado", alerts[1].label)
         assertEquals(ZeraColorFamily.Green, alerts[1].style)
+        assertTrue(alerts[0].resolvable)
+        assertFalse(alerts[1].resolvable)
+    }
+
+    @Test
+    fun onlyAlertKindsWithAScreenAreResolvable() {
+        assertEquals(Route.Itens, ManagerHomeViewModel.routeForAlertKind("STOCK_QUANTITY_LIMIT"))
+        assertEquals(Route.Itens, ManagerHomeViewModel.routeForAlertKind("WARRANTY_EXPIRATION"))
+        assertEquals(Route.Recycling, ManagerHomeViewModel.routeForAlertKind("RECYCLABLE_TO_LANDFILL"))
+        assertNull(ManagerHomeViewModel.routeForAlertKind("ITEM_APPROVED"))
+        assertNull(ManagerHomeViewModel.routeForAlertKind("ITEM_REJECTED"))
+        assertNull(ManagerHomeViewModel.routeForAlertKind("STORAGE"))
+        assertNull(ManagerHomeViewModel.routeForAlertKind("TIME"))
+        assertNull(ManagerHomeViewModel.routeForAlertKind("UNKNOWN"))
     }
 
     @Test
@@ -72,9 +88,10 @@ class ManagerHomeMappingTest {
         alertId: String,
         description: String,
         severity: String,
+        kind: String = if (alertId == "second") "ITEM_APPROVED" else "STOCK_QUANTITY_LIMIT",
     ) = AlertResponseDTO(
         alertId = alertId,
-        kind = "STOCK_QUANTITY_LIMIT",
+        kind = kind,
         severity = severity,
         status = "OPEN",
         description = description,

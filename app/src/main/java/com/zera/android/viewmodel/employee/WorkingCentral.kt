@@ -8,6 +8,8 @@ import com.zera.android.model.dto.inventory.WorkCenterResponseDTO
 import com.zera.android.model.usecase.inventory.GetEmployeePendencies
 import com.zera.android.model.usecase.inventory.GetItemDetails
 import com.zera.android.view.components.lists.NotificationItem
+import com.zera.android.view.navigation.Route
+import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.viewmodel.ZeraViewModel
 import kotlinx.coroutines.CancellationException
@@ -65,7 +67,8 @@ class WorkingCentralViewModel : ZeraViewModel() {
     }
 
     fun onNotificationClick(notification: NotificationItem) {
-        // TODO: navegar para a tela de resolução da pendência
+        if (!notification.resolvable) return
+        ZeraNavigator.push(Route.ItemDetails(itemId = notification.id))
     }
 
     companion object {
@@ -76,6 +79,7 @@ class WorkingCentralViewModel : ZeraViewModel() {
                     label = "Completar cadastro",
                     text = draftText(item),
                     style = ZeraColorFamily.Yellow,
+                    resolvable = true,
                 )
             }
             val rejected = workCenter.rejected.map { item ->
@@ -84,6 +88,7 @@ class WorkingCentralViewModel : ZeraViewModel() {
                     label = "Recusado pelo gestor",
                     text = rejectedText(item),
                     style = ZeraColorFamily.Red,
+                    resolvable = true,
                 )
             }
             val damaged = workCenter.damagedWithoutDestination.map { item ->

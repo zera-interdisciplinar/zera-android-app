@@ -5,6 +5,8 @@ import com.zera.android.model.dto.inventory.PendingItemResponseDTO
 import com.zera.android.model.dto.inventory.WorkCenterResponseDTO
 import com.zera.android.view.theme.ZeraColorFamily
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class WorkingCentralMappingTest {
@@ -47,6 +49,9 @@ class WorkingCentralMappingTest {
         assertEquals("Enviar para manutenção", cards[2].label)
         assertEquals("Mouse sem fio · aguardando destino", cards[2].text)
         assertEquals(ZeraColorFamily.Blue, cards[2].style)
+        assertTrue(cards[0].resolvable)
+        assertTrue(cards[1].resolvable)
+        assertFalse(cards[2].resolvable)
     }
 
     @Test

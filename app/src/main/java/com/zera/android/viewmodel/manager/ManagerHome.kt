@@ -4,6 +4,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.zera.android.model.dto.inventory.DashboardHomeResponseDTO
 import com.zera.android.model.dto.notification.AlertResponseDTO
+import com.zera.android.model.entity.notification.AlertKind
 import com.zera.android.model.entity.user.UserRole
 import com.zera.android.model.usecase.auth.GetSelfUser
 import com.zera.android.model.usecase.inventory.GetManagerHome
@@ -126,6 +127,11 @@ class ManagerHomeViewModel : ZeraViewModel() {
         ZeraNavigator.push(Route.Itens)
     }
 
+    fun onAlertClick(notification: NotificationItem) {
+        val route = routeForAlertKind(notification.kind) ?: return
+        ZeraNavigator.push(route)
+    }
+
     companion object {
         private val ptBr = Locale.forLanguageTag("pt-BR")
 
@@ -149,8 +155,23 @@ class ManagerHomeViewModel : ZeraViewModel() {
                     id = alert.alertId,
                     label = alert.description,
                     style = colorFamilyForSeverity(alert.severity),
+                    kind = alert.kind,
+                    resolvable = routeForAlertKind(alert.kind) != null,
                 )
             }
+
+        internal fun routeForAlertKind(kind: String?): Route? = when (AlertKind.from(kind.orEmpty())) {
+            AlertKind.STOCK_QUANTITY_LIMIT,
+            AlertKind.TIME_IN_STOCK_LIMIT,
+            AlertKind.STALE_ITEM,
+            AlertKind.WARRANTY_EXPIRATION,
+            AlertKind.LIFESPAN_EXPIRATION,
+            AlertKind.USAGE_INTENSITY_LIMIT,
+            AlertKind.PREDICTED_FAILURE,
+            -> Route.Itens
+            AlertKind.RECYCLABLE_TO_LANDFILL -> Route.Recycling
+            else -> null
+        }
 
         internal fun colorFamilyForSeverity(severity: String): ZeraColorFamily = when (severity) {
             "HIGH" -> ZeraColorFamily.Red

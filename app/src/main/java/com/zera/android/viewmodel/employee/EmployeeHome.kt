@@ -149,6 +149,7 @@ class EmployeeHomeViewModel : ZeraViewModel() {
                         plural = "cadastros incompletos",
                     ),
                     style = ZeraColorFamily.Red,
+                    resolvable = true,
                 )
             }
             if (workCenter.rejected.isNotEmpty()) {
@@ -160,6 +161,7 @@ class EmployeeHomeViewModel : ZeraViewModel() {
                         plural = "cadastros recusados",
                     ),
                     style = ZeraColorFamily.Red,
+                    resolvable = true,
                 )
             }
             if (workCenter.damagedWithoutDestination.isNotEmpty()) {
@@ -171,6 +173,7 @@ class EmployeeHomeViewModel : ZeraViewModel() {
                         plural = "itens danificados sem destino",
                     ),
                     style = ZeraColorFamily.Yellow,
+                    resolvable = true,
                 )
             }
             return cards
