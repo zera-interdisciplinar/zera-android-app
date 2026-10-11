@@ -1,32 +1,33 @@
 # 06 — Contratos de API
 
-## Configuração base (ApiClient)
+## Configuração base (AdmCoreClient)
 
-`model/remote/client/ApiClient.kt` é um `object` que monta uma única instância de `Retrofit` (`by lazy` nos `service`s expostos):
+`model/remote/client/AdmCoreClient.kt` monta o Retrofit do **ms-administrative-core**:
 
-- **Base URL**: definida em `ApiClient.init(environments)` com `environments.admCoreApiUrl` (`ms-adm-core-url` no JSON do `POST /v1/boot` da Scrapy). HTTP puro no QA exige `android:usesCleartextTraffic="true"` no `AndroidManifest.xml`.
-- **Interceptor OkHttp** aplicado a toda requisição:
-  - header `apiKey` com `environments.admCoreApiKey` (`ms-adm-core-api-key` no boot). Sem esse header o Kong responde 401.
-  - header `Authorization: Bearer <accessToken>`, quando há um `accessToken` salvo em `SharedPreferencesManager` (ausente apenas na primeira tela de login). Esse Bearer é do **adm-core** (sessão do usuário), não da Scrapy.
-- **Serialização**: `kotlinx.serialization.json.Json { ignoreUnknownKeys = true }` via `retrofit2-kotlinx-serialization-converter`.
-- **Services expostos**: `authService` (`AuthService`), `selfUserService` (`SelfUserService`), `invitationService` (`InvitationService`).
+- **Base URL**: `AdmCoreClient.init(environments)` com `environments.admCoreApiUrl` (`ms-adm-core-url` no `POST /v1/boot`). HTTP puro no QA exige `android:usesCleartextTraffic="true"`.
+- **Interceptor**: `apiKey` (`ms-adm-core-api-key`); `Authorization: Bearer` do access token em `SqliteManager` (exceto login/refresh).
+- **401**: `TokenRefreshAuthenticator` chama `POST auth/refresh` e repete a request. Ver [07-especificacoes/refresh-de-sessao.md](07-especificacoes/refresh-de-sessao.md).
+- **Serialização**: `Json { ignoreUnknownKeys = true }`.
+- **Services**: auth, self user, invitations, users, notifications, recycling places, recyclings, telephone.
+
+Fonte adm-core: [Confluence página 5](https://zerainterdisciplinar.atlassian.net/wiki/spaces/Backend/pages/55902210).
 
 ## Scrapy (ScrapyClient)
 
 Fonte de verdade do contrato: [contrato-scrapy/contrato-scrapy-api.md](contrato-scrapy/contrato-scrapy-api.md). Como o app usa hoje: [contrato-scrapy/contexto.md](contrato-scrapy/contexto.md).
 
-`model/remote/client/ScrapyClient.kt` é um `object` Retrofit **separado** do `ApiClient` (a Scrapy sobe antes de existir URL do adm-core). Interface: `ScrapyService`.
+`model/remote/client/ScrapyClient.kt` é um Retrofit **separado** do `AdmCoreClient` (a Scrapy sobe antes de existir URL do adm-core). Interface: `ScrapyService`.
 
 - **Base URL**: `scrapy.api.url` em `local.properties` (`BuildConfig.SCRAPY_API_URL`). O client normaliza o valor (aceita o prefixo Kong sem `/v1` ou a URL direta com `/v1`) e chama `POST v1/boot` e `POST v1/flags`. Em QA o path público é `http://34.95.129.59/qa/scrapy/v1/boot` — o prefixo `/qa/scrapy` é do Kong e entra **antes** do `/v1`; o backend só registra `/v1/boot` e `/v1/flags`, então o Kong precisa stripar o prefixo do serviço. Sem esse strip, a rota cai no fallback da UI (`200` HTML). Isso é roteamento, não desvio de contrato.
 - **Interceptor OkHttp**: header `apikey` com `BuildConfig.SCRAPY_API_KEY`. O contrato **não** usa `Authorization: Bearer` nessas rotas; o serviço não lê esse header.
-- **Serialização**: o mesmo `Json { ignoreUnknownKeys = true }` do `ApiClient`.
+- **Serialização**: o mesmo `Json { ignoreUnknownKeys = true }` do `AdmCoreClient`.
 
 | Método | Endpoint | Body | Resposta | Usado por |
 |---|---|---|---|---|
 | `POST` | `v1/boot` | nenhum | `Environments` (`ms-adm-core-url`, `ms-adm-core-api-key`, `ms-inventory-url`, `ms-inventory-api-key` opcional) | `Boot.execute()` (splash, antes do login) |
 | `POST` | `v1/flags` | `FlagsRequest(attrs)` | `JsonObject` | `LoadFlags.execute(selfUser)` (depois do login) |
 
-`Boot.execute()` grava o resultado em `AppConfig` e chama `ApiClient.init(environments)` e `InventoryClient.init(environments)`. `LoadFlags` manda `user_id`, `role`, `unit_id` e `app_version` em `attrs`.
+`Boot.execute()` grava o resultado em `AppConfig` e chama `AdmCoreClient.init(environments)` e `InventoryClient.init(environments)`. `LoadFlags` manda `user_id`, `role`, `unit_id` e `app_version` em `attrs`.
 
 Erros do contrato nessas rotas: `400` (body malformado em `/v1/flags`), `401 { "error": "missing api key" }` (header `apikey` ausente), `401 { "error": "invalid api key" }` (key inválida/revogada), `429`, `500`. Qualquer corpo não-JSON (HTML) nessas rotas indica que a chamada não chegou no handler.
 
@@ -34,7 +35,7 @@ Caching por `ETag` / `If-None-Match` está no contrato e **não** está implemen
 
 ## Inventário (InventoryClient)
 
-Fonte de verdade do dashboard: [contrato-ms-inventory/contrato-inventory-dashboard.md](contrato-ms-inventory/contrato-inventory-dashboard.md) ([contexto](contrato-ms-inventory/contexto.md)). Catálogo e PDI: [contrato-pdi/contrato-detalhes-itens.md](contrato-pdi/contrato-detalhes-itens.md) ([contexto](contrato-pdi/contexto.md)).
+Fonte: [Confluence ms-inventory](https://zerainterdisciplinar.atlassian.net/wiki/spaces/Backend/pages/55869441). Dashboard no app: [contrato-dashboard/contrato-inventory-dashboard.md](contrato-dashboard/contrato-inventory-dashboard.md) ([contexto](contrato-dashboard/contexto.md)). Catálogo/PDI: [contrato-pdi/contrato-detalhes-itens.md](contrato-pdi/contrato-detalhes-itens.md). Descartes: [contrato-places-api/contrato-descarte.md](contrato-places-api/contrato-descarte.md).
 
 `model/remote/client/InventoryClient.kt` é um `object` Retrofit **separado** (URL própria do boot). Interface: `InventoryService`.
 
@@ -42,7 +43,7 @@ Fonte de verdade do dashboard: [contrato-ms-inventory/contrato-inventory-dashboa
 - **Interceptor OkHttp**:
   - `apiKey`: `ms-inventory-api-key`, ou `ms-adm-core-api-key` se a key de inventory vier em branco. Sem `apiKey` o Kong responde **401**.
   - `Authorization: Bearer <accessToken>` do usuário logado.
-  - `X-Unit-Id`: `SharedPreferencesManager.getUnitId()` (gravado no login). Ausente → **400** no backend.
+  - `X-Unit-Id`: `SqliteManager.getUnitId()` (login). Ausente → **400**. O `unitId` **nunca** vai no corpo.
 - **Serialização**: o mesmo `Json { ignoreUnknownKeys = true }`.
 
 | Método | Endpoint | Query | Resposta | Usado por |
@@ -50,7 +51,7 @@ Fonte de verdade do dashboard: [contrato-ms-inventory/contrato-inventory-dashboa
 | `GET` | `api/v1/dashboard/home` | `page` (default 0), `size` (default 5) | `DashboardHomeResponseDTO` | `GetManagerHome.execute()` (`ManagerHomeViewModel`), `GetEmployeeHome.execute()` (`EmployeeHomeViewModel`) |
 | `GET` | `api/v1/dashboard/work-center` | — | `WorkCenterResponseDTO` | `GetEmployeePendencies.execute()` (`EmployeeHomeViewModel`, `WorkingCentralViewModel`) |
 | `GET` | `api/v1/dashboard/indicators` | `from`/`to` opcionais (`yyyy-MM-dd`) | `IndicatorsResponseDTO` | `GetIndicators.execute()` (`IndexesViewModel`) |
-| `GET` | `api/v1/items` | `status`, `categoryId`, `q`, `page`, `size` (default 20) | `PagedItemsDTO` | `GetItems.execute()` (`ItensViewModel`) |
+| `GET` | `api/v1/items` | `status` (omitir = **ativos**, não “todos”), `categoryId`, `q` (o app manda `q`; o texto Confluence às vezes diz `query`), `page`, `size` | `PagedItemsDTO` | `GetItems.execute()` (`ItensViewModel`) |
 | `GET` | `api/v1/items/{id}` | path `id` | `ItemResponseDTO` | `GetItemDetails.execute()` (`ItemDetailsViewModel`) |
 | `GET` | `api/v1/items/by-barcode/{barcode}` | path `barcode` | `ItemResponseDTO` | `GetItemByBarcode.execute()` (`ScanViewModel`) |
 | `POST` | `api/v1/items` | `name`, `modelId`, `barcode?`, `serialNumber`, `condition`, `hasDamages`, `damages`, `notes?`, `acquiredAt`, `manufacturingYear`, `usageIntensity` | `ItemResponseDTO` | `CreateItem.execute()` (`ManualRegisterViewModel`) |
@@ -65,11 +66,12 @@ Fonte de verdade do dashboard: [contrato-ms-inventory/contrato-inventory-dashboa
 
 ## Autenticação (AuthService)
 
-`model/remote/service/AuthService.kt`.
+`model/remote/service/AuthService.kt`. JWT **RS256** emitido só pelo adm-core; o inventory só valida.
 
 | Método | Endpoint | Body | Resposta | Usado por |
 |---|---|---|---|---|
-| `POST` | `auth/login` | `SingInRequestDTO(email, password)` | `SingInResponseDTO` | `SingIn.execute()` (login) |
+| `POST` | `auth/login` | `SingInRequestDTO(email, password)` | `SingInResponseDTO` | `SingIn.execute()` |
+| `POST` | `auth/refresh` | `{ refreshToken }` | mesmo formato do login | `RefreshSession` / `TokenRefreshAuthenticator` |
 
 ## Convite (InvitationService)
 
@@ -91,14 +93,10 @@ Depois do redeem, o cadastro chama `SingIn.execute` para persistir tokens, `unit
 
 ## Tratamento de erros
 
-Não há tratamento de erro estruturado hoje:
+Inventory/adm-core usam RFC 9457 `ProblemDetail`. O app em geral ainda não desserializa esse corpo: `HttpException`/`IOException` no ViewModel. `409` em item = transição inválida (recarregar). `422` no submit traz `missingFields`.
 
-- Não existe um DTO de erro (ex.: `{ "message": ... }` ou RFC 7807 `ProblemDetail` do inventory) sendo desserializado — falhas de rede/HTTP chegam ao `ViewModel` como exceções genéricas do Retrofit/OkHttp (`HttpException`, `IOException`, etc.), capturadas por um `catch (e: Exception)` amplo.
-- Na home e nos indicadores a mensagem exibida é `e.message` diretamente. Cadastro já traduz alguns HTTP codes.
-- Não há fluxo de **refresh de token**: embora `SingInResponseDTO` retorne um `refreshToken`, nada no código hoje o utiliza para renovar a sessão quando o `accessToken` expira — uma resposta 401 em qualquer chamada autenticada hoje resultaria no mesmo tratamento genérico de erro, não num refresh automático.
+Refresh no 401: [refresh-de-sessao.md](07-especificacoes/refresh-de-sessao.md). `403` de papel não dispara refresh.
 
-Ao adicionar tratamento de erro estruturado (DTO de erro, mensagens amigáveis, refresh de token), registre a decisão de formato em [08-decisoes-arquiteturais/](08-decisoes-arquiteturais/), já que impacta todos os `usecase`s existentes e futuros.
+## O que o Confluence descreve e o app ainda não chama
 
-## Endpoints esperados (backlog, ainda não implementados)
-
-Resumo leve dos contratos que o escopo de produto vai exigir (sem especificar payload aqui, já que dependem de definição com o backend): CRUD de categoria/modelo/produto, consulta de produto por código de barras, envio de resultado de triagem, geração e confirmação de relatório de descarte, registro/consulta de manutenção, e total de funcionários da unidade.
+Não é backlog de produto inventado: a API v1 já tem, o app pode não ter tela. Exemplos: `POST /items/{id}/submit`, foto, manutenção, `GET /materials`, `GET /unit-settings`, regras `/rules`, `GET /disposals/{id}/report`, analytics do adm-core. Não documentar `POST /users` — usuário entra só por convite.

@@ -18,7 +18,7 @@ model
     └── LoadFlags.kt                 depois do login, com attrs do usuário
 ```
 
-`Boot.execute()` chama `ScrapyClient.boot()`, grava em `AppConfig` e inicializa o `ApiClient` (`ms-adm-core-url` / `ms-adm-core-api-key`) e o `InventoryClient` (`ms-inventory-url` / `ms-inventory-api-key`). `LoadFlags.execute(selfUser)` chama `ScrapyClient.flags(attrs)`.
+`Boot.execute()` chama `ScrapyClient.boot()`, grava em `AppConfig` e inicializa o `AdmCoreClient` (`ms-adm-core-url` / `ms-adm-core-api-key`) e o `InventoryClient` (`ms-inventory-url` / `ms-inventory-api-key`). `LoadFlags.execute(selfUser)` chama `ScrapyClient.flags(attrs)`.
 
 ## Propósito
 

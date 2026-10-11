@@ -74,5 +74,5 @@ Como Gestor, quero ver um resumo do estoque, dos alertas pendentes e dos último
 
 - Regras de negócio: [../05-regras-de-negocio/inventory-dashboard.md](../05-regras-de-negocio/inventory-dashboard.md)
 - Catálogo de componentes usados: [../03-catalogo-componentes.md](../03-catalogo-componentes.md), seções "Cards" e "Listas"
-- Contratos: [../06-contratos-api.md](../06-contratos-api.md), [../contrato-ms-inventory/contrato-inventory-dashboard.md](../contrato-ms-inventory/contrato-inventory-dashboard.md)
+- Contratos: [../06-contratos-api.md](../06-contratos-api.md), [../contrato-dashboard/contrato-inventory-dashboard.md](../contrato-dashboard/contrato-inventory-dashboard.md)
 - Arquitetura / separação View-lógica: [../01-arquitetura.md](../01-arquitetura.md), seção "Separação entre View e lógica (regra estrita)"

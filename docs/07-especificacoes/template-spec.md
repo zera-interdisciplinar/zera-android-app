@@ -5,7 +5,7 @@
 ## Metadados
 
 - **Feature:** [nome da feature]
-- **Perfil(is) envolvido(s):** [Funcionário / Gestor / Administrador]
+- **Perfil(is) envolvido(s):** [Funcionário / Gestor]
 - **Status:** planejado | em progresso | implementado
 - **Última atualização:** [AAAA-MM-DD]
 

@@ -1,46 +1,43 @@
 # 00 — Contexto Geral
 
+Fonte de papéis e domínio: [Back-end v1](https://zerainterdisciplinar.atlassian.net/wiki/spaces/Backend/pages/55803906).
+
 ## Visão do produto
 
-O Zera é um sistema de gestão e controle de lixo eletrônico corporativo, desenvolvido inicialmente para o Instituto J&F / JBS. O app Android é o ponto de entrada operacional do sistema: é nele que funcionários e gestores registram, classificam e acompanham os equipamentos eletrônicos armazenados, do cadastro inicial até a destinação final (reuso, aproveitamento de peças ou descarte).
+O Zera gerencia o ciclo de vida de equipamentos eletrônicos **por unidade** de uma organização, do cadastro até o descarte, com alertas de regra e previsão de falha no back-end. O app Android é o ponto operacional: funcionário e gestor cadastram, acompanham e destinam itens.
 
-O produto resolve um problema hoje resolvido de forma manual e desorganizada (planilhas, controle informal), trazendo rastreabilidade via identificação individual dos itens, um fluxo obrigatório de triagem e alertas para evitar acúmulo de resíduos tóxicos além do tempo seguro de armazenamento.
+O back-end da v1 são dois serviços (`ms-administrative-core` + `ms-inventory`) mais o serviço preditivo (time de IA) e o AI core (MCP/PDF). O app não lê o grafo nem o Postgres direto: chama as APIs com JWT do adm-core e `X-Unit-Id`.
 
 ## Público-alvo
 
-Empresas de médio/grande porte com operação de TI própria e volume relevante de descarte de equipamentos eletrônicos. O piloto é o Instituto J&F / JBS. Os usuários finais do app são colaboradores do time de TI/almoxarifado (funcionários) e seus responsáveis (gestores), não o público externo.
+Empresas com operação de TI e volume de eletrônicos. Piloto: Instituto J&F / JBS. Usuários do app: operários e gestores da unidade, não o público externo.
 
 ## Perfis de usuário
 
-O app distingue três perfis, com permissões cumulativas (Administrador ⊃ Gestor e Funcionário):
+A v1 tem **dois papéis**, não três. Claim `role` do access token: `MANAGER` ou `EMPLOYEE`. **Não há Administrador** no modelo de autorização.
 
-- **Funcionário** — opera o dia a dia: triagem de produtos, escaneamento de código de barras, consulta ao inventário, registro de manutenções, criação de modelos.
-- **Gestor** — além do que o Funcionário faz, acompanha a operação: geração e visualização de relatórios, gestão de alertas, análise preventiva de manutenção, consulta ao inventário, criação de categorias e modelos.
-- **Administrador** — acesso total, incluindo gestão de usuários, configuração de parâmetros do sistema, confirmação de descartes e envio de relatórios para recicladoras.
+- **Funcionário (`EMPLOYEE`)** — leitura autenticada; cadastra e edita itens e modelos; registra descarte; manutenção e avaliação.
+- **Gestor (`MANAGER`)** — o mesmo, mais categorias, regras, aprovações, exclusões, transferência de unidade, cancelamento de descarte, convites e equipe.
 
-O papel do usuário autenticado (`role` em `SelfUserResponseDTO`) define para qual área do app ele é direcionado após o login — ver `05-regras-de-negocio/` (regras de autenticação ainda não escritas; usar `template-regra-negocio.md` como base).
+Leitura no inventory exige só autenticação. `unitId` vai no header `X-Unit-Id`, **nunca no corpo**. Recurso de outra unidade responde `404`, não `403`.
 
-> O Administrador é um perfil de permissões do sistema (ver escopo de produto), mas **não tem, até o momento, nenhum fluxo ou tela específica no app** — as seções a seguir cobrem apenas Gestor e Funcionário.
+## Principais fluxos de usuário (app hoje)
 
-## Principais fluxos de usuário
+1. **Onboarding/login** — splash (`POST /v1/boot` Scrapy) → welcome → login (`POST /auth/login`) ou convite (`POST /invitations/redeem`; **não** há `POST /users`) → `POST /v1/flags` → home por `role`. Refresh: `POST /auth/refresh` (ver spec).
+2. **Home do gestor** — `GET /dashboard/home` (ocupação, recentes). Indicadores: `GET /dashboard/indicators`. Equipe: `GET /users/count-by-manager` e lista.
+3. **Home do operário** — mesma home de ocupação/recentes + pendências via `GET /dashboard/work-center` e Central de Trabalho.
+4. **Catálogo e PDI** — `GET /items`, `GET /items/{id}`, approve/reject/PATCH. Item nasce **sempre `DRAFT`**; sai pelo `submit`. Foto **não** é obrigatória.
+5. **Modelos e categorias** — listagem/criação no inventory. Modelo de operário nasce `PENDING`; de gestor, `APPROVED`.
+6. **Scan** — `GET /items/by-barcode/{barcode}`. `barcode` ≠ `displayCode` (este é o código de 6 dígitos da UI).
+7. **Descarte** — registro de algo **já feito** (`POST /disposals`). Não há agendamento; `disposedAt` nunca é futuro. Histórico: `GET /disposals`. Cancelar: `PATCH /disposals/{id}/cancel` **só gestor**. PDF: AI core `POST /reports`. Mapa: `GET /recycling-places`.
 
-Implementados no app hoje:
+## Fora de escopo (produto v1)
 
-1. **Onboarding/login** — splash (`POST /v1/boot` na Scrapy, header `apikey`) → tela de boas-vindas → login ou primeiro acesso (cadastro via código de convite) → `POST /v1/flags` → redirecionamento por perfil (Gestor ou Funcionário).
-2. **Visão geral do Gestor** — dashboard com ocupação de estoque, atalhos (itens/funcionários), alertas e últimos itens cadastrados, alimentado por `GET /api/v1/dashboard/home` (`ms-inventory`). A tela de indicadores (`Route.Indexes`) usa `GET /api/v1/dashboard/indicators`. O atalho de funcionários ainda não tem fonte nessa API.
-3. **Catálogo e detalhe de itens (Gestor)** — `Route.Itens` lista o inventário da unidade (`GET /api/v1/items` + categorias); tocar um item abre a PDI (`GET /api/v1/items/{id}`). Editar/aprovar ainda não chamam API.
-4. **Modelos (Gestor, interface em progresso)** — `ModelsScreen` apresenta a lista e a orientação de uso; `ModelCreationScreen` coleta nome, material, marca e observação, seguida de `ModelCreationSuccessScreen`. A criação e a aprovação ainda não persistem na API; as opções de material são placeholders.
+- Agendar descarte futuro.
+- Catálogo próprio de recicladoras parceiras no inventory (só `placeId`/`placeName` do Places).
+- Galeria de fotos por item (uma foto).
+- Meta de reciclagem.
+- Perfil Administrador no app.
+- Automação física da coleta.
 
-Visão futura (resumo do escopo de produto para Gestor e Funcionário; cada item ganhará spec própria em [07-especificacoes/](07-especificacoes/) quando entrar em desenvolvimento):
-
-- **Cadastro de inventário (Funcionário/Gestor)** — hierarquia Categoria → Modelo → Produto, com código de barras `id_produto-id_modelo-id_categoria` impresso e aderido ao equipamento físico.
-- **Triagem (Funcionário)** — classificação de cada item como reutilizável, aproveitável (peças/upgrade) ou descartável, incluindo checklist de periculosidade para componentes sensíveis (ex.: baterias).
-- **Acompanhamento de alertas e relatórios (Gestor)** — alertas de lote crítico (item descartável armazenado por tempo excessivo) e geração de relatório consolidado de descarte, com prévia para revisão manual antes do envio à recicladora.
-- **Acompanhamento de manutenção (Gestor, com registro pelo Funcionário)** — análise preventiva baseada em regras de negócio simples (vida útil, histórico de manutenções, desgaste estimado, frequência de uso), sem sensores ou IA avançada.
-
-## Fora de escopo
-
-- Automação física do descarte (o sistema organiza e comunica, não substitui a coleta física).
-- Sensores físicos ou monitoramento em tempo real dos equipamentos.
-- Modelos preditivos de IA avançada — as análises de manutenção usam regras de negócio simples sobre dados cadastrados manualmente.
-- Impressão dos códigos de barras pelo próprio app (o app gera o código; a impressão e a fixação física são um processo externo).
+Previsão de falha **existe no back-end** (job + serviço preditivo). O app consome `predictedFailureDate` quando a API devolve; não chama o preditivo direto.

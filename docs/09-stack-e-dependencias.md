@@ -22,11 +22,11 @@
 - **Retrofit** 3.0.0 + **OkHttp** 5.2.1 (com `okhttp-logging-interceptor`) para as chamadas HTTP.
 - **kotlinx.serialization** 1.11.0 como formato de serialização, integrado ao Retrofit via `retrofit2-kotlinx-serialization-converter` 1.0.0 (em vez de Gson/Moshi).
 
-Ver configuração completa na seção "Configuração base (ApiClient)" de [06-contratos-api.md](06-contratos-api.md).
+Ver [06-contratos-api.md](06-contratos-api.md) (`AdmCoreClient`, `InventoryClient`, `ScrapyClient`, `AiClient`).
 
 ## Persistência local
 
-- Apenas `android.content.SharedPreferences` (via `androidx.core.content.edit` da `androidx-core-ktx`), encapsulado em `SharedPreferencesManager`. Não há Room nem outro banco embarcado no projeto hoje — ver a seção "Persistência local (SharedPreferences)" em [04-modelo-de-dados.md](04-modelo-de-dados.md).
+- SQLite via `SqliteManager` (`SQLiteOpenHelper`), banco `zera.db`, só sessão. Sem Room. Ver [04-modelo-de-dados.md](04-modelo-de-dados.md).
 
 ## Firebase (configurado, não utilizado)
 

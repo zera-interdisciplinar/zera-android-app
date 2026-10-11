@@ -4,12 +4,12 @@
 
 - **Feature:** Cadastro via código de convite
 - **Perfil(is) envolvido(s):** Funcionário
-- **Status:** em progresso (tela pronta, `ViewModel` sem integração com back-end)
-- **Última atualização:** 2026-09-17
+- **Status:** implementado (`POST /invitations/redeem` + login em seguida)
+- **Última atualização:** 2026-10-11
 
 ## Contexto
 
-Não existe autorregistro livre: um novo Funcionário só cria sua conta a partir de um código de convite gerado por alguém com permissão para isso (Gestor ou Administrador, conforme o escopo de produto — a emissão do convite em si não tem tela no app ainda). A tela de cadastro (`SignUpScreen`) e o `SignUpViewModel` já existem com a forma final de dados esperada, mas a ação de submeter (`signUp()`) ainda não está implementada.
+Não existe autorregistro nem `POST /users`. Conta nasce só em `POST /invitations/redeem` (público). O gestor emite o convite (`POST /invitations`). Papéis da v1: só `MANAGER` e `EMPLOYEE`.
 
 ## User story
 
@@ -17,7 +17,7 @@ Como Funcionário convidado, quero me cadastrar informando meu nome, email, senh
 
 ## Cenários (Given/When/Then)
 
-> Os cenários abaixo descrevem o comportamento **planejado**; hoje `signUp()` não faz nenhuma chamada de API nem navega (ver Status acima).
+> `SignUpViewModel.signUp()` chama `InvitationUseCase` (`POST invitations/redeem`) e depois `SingIn`.
 
 ### Cenário: Cadastro bem-sucedido
 
@@ -39,20 +39,20 @@ Como Funcionário convidado, quero me cadastrar informando meu nome, email, senh
 
 ## Critérios de aceite
 
-- [ ] `SignUpViewModel.signUp()` implementado, seguindo o mesmo roteiro de `SingInViewModel.signIn()` (`isLoading`/`errorMessage`, `viewModelScope.launch`, tratamento de exceção)
-- [ ] Contrato de API de cadastro definido e alinhado com os campos coletados pela tela (nome, email, senha, código de convite) — ver ressalva em [../06-contratos-api.md](../06-contratos-api.md), seção "Autenticação (AuthService)"
-- [ ] Validação client-side dos campos obrigatórios antes de chamar a API
-- [ ] Redirecionamento para a área correta após cadastro bem-sucedido
+- [x] `signUp()` → redeem + login
+- [x] Contrato: `RedeemRequestDTO(code, name, email, rawPassword)`
+- [x] Validação client-side dos obrigatórios
+- [x] Redirecionamento pela `role` devolvida / login seguinte
 
 ## Edge cases considerados
 
 - Código de convite incompleto — `ZeraTokenInput` já limita a 6 dígitos numéricos, mas `onFilled` não está conectado a nenhuma ação ainda.
 - Convite já utilizado por outra conta — comportamento a definir com o backend.
-- Cadastro de Gestor via convite — o escopo de produto não deixa claro se Gestores também entram pelo mesmo fluxo de convite ou por outro processo; confirmar antes de implementar.
+- Convite já `USED` não volta a `PENDING`. Gestor também entra por convite se o convite tiver esse papel.
 
 ## Fora de escopo desta spec
 
-- Emissão do código de convite (tela para Gestor/Administrador gerar convites) — ainda não tem spec própria.
+- Emissão do código (já coberta em gestão de equipe / convites do gestor).
 - Recuperação de senha.
 
 ## Referências

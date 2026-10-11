@@ -52,9 +52,8 @@ Como Operário, quero ver o que está pendente no meu turno, para saber o que re
 ## Edge cases considerados
 
 - Lista vazia: o resumo mostra "0 pendências" e `NotificationList` mostra "Nenhuma notificação".
-- Rascunho sem `missingFields`: o texto do card é só o `name`.
-- Rascunho com `missingFields`: os nomes da API viram rótulos (`photoUrl` → foto). Upload de foto continua fora desta tela.
-- Rascunho com `missingFields` vazio: a Central busca `GET /items/{id}` e deriva o que falta (`photoUrl`, série, condição, modelo).
+- Rascunho com `missingFields` vazio: o texto do card é só o `name`. O app **não** recalcula o que falta (foto não é obrigatória no back-end, ZERA-236).
+- Rascunho com `missingFields`: os nomes da API viram rótulos (`photoUrl` → foto, se o back-end ainda mandar). Upload de foto continua fora desta tela.
 - Recusado sem `rejectionReason`: o texto do card é só o `name`.
 
 ## Fora de escopo desta spec

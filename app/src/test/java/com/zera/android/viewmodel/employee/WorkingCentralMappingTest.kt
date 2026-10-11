@@ -1,6 +1,5 @@
 package com.zera.android.viewmodel.employee
 
-import com.zera.android.model.dto.inventory.ItemResponseDTO
 import com.zera.android.model.dto.inventory.PendingItemResponseDTO
 import com.zera.android.model.dto.inventory.WorkCenterResponseDTO
 import com.zera.android.view.theme.ZeraColorFamily
@@ -79,15 +78,13 @@ class WorkingCentralMappingTest {
     }
 
     @Test
-    fun derivesMissingFieldsWhenItemPayloadOmitsTheList() {
-        val item = ItemResponseDTO(
-            id = "d1",
-            name = "Monitor",
-            serialNumber = "SN1",
-            condition = "USED",
-            photoUrl = null,
+    fun emptyMissingFieldsDoesNotInventPhoto() {
+        assertEquals(
+            "Monitor",
+            WorkingCentralViewModel.draftText(
+                PendingItemResponseDTO(id = "d1", name = "Monitor", missingFields = emptyList()),
+            ),
         )
-        assertEquals(listOf("photoUrl"), WorkingCentralViewModel.missingFieldsFrom(item))
         assertEquals(
             "Monitor · faltam foto",
             WorkingCentralViewModel.draftText(

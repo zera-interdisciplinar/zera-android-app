@@ -79,5 +79,5 @@ Como Gestor, quero ver indicadores de reciclagem e descarte da minha unidade, pa
 ## Referências
 
 - Regras de negócio: [../05-regras-de-negocio/inventory-dashboard.md](../05-regras-de-negocio/inventory-dashboard.md)
-- Contratos de API: [../06-contratos-api.md](../06-contratos-api.md), [../contrato-ms-inventory/contrato-inventory-dashboard.md](../contrato-ms-inventory/contrato-inventory-dashboard.md)
+- Contratos de API: [../06-contratos-api.md](../06-contratos-api.md), [../contrato-dashboard/contrato-inventory-dashboard.md](../contrato-dashboard/contrato-inventory-dashboard.md)
 - Catálogo: [../03-catalogo-componentes.md](../03-catalogo-componentes.md) (gráficos)

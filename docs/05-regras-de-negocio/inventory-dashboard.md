@@ -14,7 +14,7 @@ Regras de apresentação dos agregados devolvidos pelo `ms-inventory` (`GET /api
 
 ### Ocupação do estoque
 
-`occupancyPercent` chega em 0–100. O card de ocupação espera fração `0f`–`1f`, então o app divide por 100 e limita a esse intervalo. `null` vira `0f` (card vazio, sem crash).
+`occupancyPercent` chega em 0–100. O card espera fração `0f`–`1f` (divide por 100). No back-end, **`null` significa “sem capacidade configurada”**, não zero. O app hoje mapeia `null` para `0f` para não crashar — isso visualmente parece estoque vazio, não “indisponível”.
 
 ### Variação de itens ativos
 
@@ -40,7 +40,7 @@ Mesma fonte (`GetEmployeePendencies`). Aqui cada elemento dos três arrays vira 
 
 | Bucket | Label | Texto | Cor |
 |---|---|---|---|
-| `drafts` | Completar cadastro | `name · faltam <rótulos em pt-BR>` (`photoUrl` → foto, `serialNumber` → número de série, …; só `name` se a lista vier vazia) | Yellow |
+| `drafts` | Completar cadastro | `name · faltam <rótulos>` a partir de `missingFields` da API; lista vazia = só `name` (não inventar foto/série/condição) | Yellow |
 | `rejected` | Recusado pelo gestor | `name · rejectionReason` (só `name` se o motivo vier vazio) | Red |
 | `damagedWithoutDestination` | Enviar para manutenção | `name · aguardando destino` | Blue |
 
@@ -103,7 +103,7 @@ Lista vazia mostra o empty state do `HorizontalBarGraph` ("Nenhum resíduo no pe
 
 ### Unidade consultada
 
-Todas as rotas do dashboard usam o `unitId` do usuário logado (`GET users/{userId}`), gravado em `SharedPreferences` e enviado no header `X-Unit-Id`. Sem unidade, o Kong/backend rejeita a chamada.
+Todas as rotas do dashboard usam o `unitId` do login (`GET users/{id}`), gravado em `SqliteManager` e enviado em `X-Unit-Id`. Sem unidade: `400`.
 
 ## Parâmetros configuráveis
 

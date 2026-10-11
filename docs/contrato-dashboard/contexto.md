@@ -19,7 +19,7 @@ model
     └── GetIndicators.kt                   tela de indicadores
 ```
 
-`Boot.execute()` chama `ScrapyClient.boot()`, grava em `AppConfig` e inicializa `ApiClient` **e** `InventoryClient` com as URLs/keys do boot.
+`Boot.execute()` chama `ScrapyClient.boot()`, grava em `AppConfig` e inicializa `AdmCoreClient` **e** `InventoryClient` com as URLs/keys do boot.
 
 `InventoryClient`:
 
@@ -27,7 +27,7 @@ model
 - **Headers em toda request:** `apiKey` (`ms-inventory-api-key`, ou fallback `ms-adm-core-api-key` se a key de inventory vier vazia), `Authorization: Bearer <accessToken>` do usuário logado, `X-Unit-Id` do `unitId` gravado no login.
 - Sem `apiKey` o Kong responde **401**. Sem token, **401**. Sem `X-Unit-Id`, **400**.
 
-O `unitId` é persistido em `SharedPreferencesManager.saveUnitId` depois de `GET users/{userId}` no `SingIn`. `clearSession()` também apaga a unidade.
+O `unitId` é persistido em `SqliteManager.saveUnitId` depois de `GET users/{id}` no `SingIn`. `clearSession()` também apaga a unidade.
 
 ## Endpoints consumidos
 

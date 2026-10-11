@@ -10,7 +10,11 @@ O inventory guarda `destination`, `placeId` e `placeName`. Não guarda CNPJ/e-ma
 
 Fonte: [API ms-inventory](https://zerainterdisciplinar.atlassian.net/wiki/spaces/Backend/pages/55869441/3.+API+ms-inventory+endpoints+contratos+e+erros). Operário ou gestor. `X-Unit-Id` no header, nunca no corpo.
 
-Não agenda. `disposedAt` ausente = hoje. **Nunca no futuro.** Só `IN_STOCK` e `AWAITING_EVALUATION` podem ir a `DISPOSED`. `DISPOSED` é terminal. Se um item da lista não puder ser descartado, a chamada inteira responde `409` e nada é gravado.
+Não agenda. `disposedAt` ausente = hoje. **Nunca no futuro.** Só `IN_STOCK` e `AWAITING_EVALUATION` podem ir a `DISPOSED`. `DISPOSED` **não** é terminal: o gestor cancela com `PATCH /disposals/{id}/cancel` (`204`, sem corpo) e os itens voltam ao estado anterior. Operário nessa rota: `403`. Se um item da lista não puder ser descartado, a chamada inteira responde `409` e nada é gravado.
+
+`GET /disposals` (histórico): filtros `destination`, `disposedFrom`/`disposedTo`, `createdFrom`/`createdTo`, `createdBy`, `placeId`, `itemId`, `q`. Cancelados não aparecem (`404` no detalhe). Resposta usa `items[]` (`itemId`, `displayCode`, `name`, `weightKg`), não o `itemIds` do POST. Sem e-mail/telefone neste contrato.
+
+`GET /disposals/{id}/report` — payload da cotação (não substitui o detalhe). PDF do app continua no AI core (`POST /reports`).
 
 ### Headers
 
