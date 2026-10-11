@@ -2,12 +2,14 @@ package com.zera.android.viewmodel.employee
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
+import com.zera.android.model.dto.inventory.DashboardHomeResponseDTO
+import com.zera.android.model.entity.user.UserRole
 import com.zera.android.model.usecase.auth.GetSelfUser
+import com.zera.android.model.usecase.inventory.GetEmployeeHome
 import com.zera.android.view.components.lists.NotificationItem
 import com.zera.android.view.components.lists.ProductItem
 import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.viewmodel.ZeraViewModel
-import com.zera.android.viewmodel.manager.ManagerHomeViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
@@ -25,16 +27,15 @@ data class EmployeeHomeState(
 /**
  * ViewModel da home do operário.
  *
- * Nome e cargo vêm do usuário logado; o restante dos dados ainda é fixo (mock) até o
- * back expor o dashboard do operário.
+ * Nome, cargo e ocupação do estoque vêm da API; atalhos, pendências e últimos itens
+ * ainda são mock até o back expor o restante do dashboard do operário.
  */
 class EmployeeHomeViewModel : ZeraViewModel() {
     private val getSelfUser = GetSelfUser()
+    private val getEmployeeHome = GetEmployeeHome()
 
     private val _state = mutableStateOf(
         EmployeeHomeState(
-            stockItemCount = 300,
-            stockOccupation = 0.71f,
             maintenanceCount = "25",
             discardCount = "8",
             pendingNotifications = listOf(
@@ -57,6 +58,7 @@ class EmployeeHomeViewModel : ZeraViewModel() {
 
     init {
         viewModelScope.launch { loadLoggedUser() }
+        viewModelScope.launch { loadStockOccupation() }
     }
 
     private suspend fun loadLoggedUser() {
@@ -64,12 +66,26 @@ class EmployeeHomeViewModel : ZeraViewModel() {
             val user = getSelfUser.execute()
             _state.value = _state.value.copy(
                 userName = user.name,
-                userRole = ManagerHomeViewModel.roleLabel(user.role),
+                userRole = roleLabel(user.role),
             )
         } catch (e: CancellationException) {
             throw e
         } catch (_: Exception) {
             // A home ainda pode ser exibida sem o nome.
+        }
+    }
+
+    private suspend fun loadStockOccupation() {
+        try {
+            val home = getEmployeeHome.execute()
+            _state.value = _state.value.copy(
+                stockItemCount = home.activeItems.toInt(),
+                stockOccupation = occupationFrom(home),
+            )
+        } catch (e: CancellationException) {
+            throw e
+        } catch (_: Exception) {
+            // O card fica em zero se o dashboard falhar; o restante da home continua visível.
         }
     }
 
@@ -95,5 +111,18 @@ class EmployeeHomeViewModel : ZeraViewModel() {
 
     fun onSeeAllItemsClick() {
         // TODO: navegar para os itens do operário
+    }
+
+    companion object {
+        internal fun occupationFrom(home: DashboardHomeResponseDTO): Float {
+            val percent = home.occupancyPercent ?: return 0f
+            return (percent / 100.0).toFloat().coerceIn(0f, 1f)
+        }
+
+        internal fun roleLabel(role: String): String = when (role) {
+            UserRole.MANAGER -> "Gestor"
+            UserRole.EMPLOYEE -> "Operário"
+            else -> role
+        }
     }
 }
