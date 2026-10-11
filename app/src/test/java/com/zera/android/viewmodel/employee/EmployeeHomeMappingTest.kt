@@ -8,11 +8,17 @@ import com.zera.android.model.dto.inventory.WorkCenterResponseDTO
 import com.zera.android.model.entity.user.UserRole
 import com.zera.android.view.components.lists.NotificationItem
 import com.zera.android.view.components.lists.ProductItem
+import com.zera.android.view.navigation.Route
 import com.zera.android.view.theme.ZeraColorFamily
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class EmployeeHomeMappingTest {
+    @Test
+    fun discardCardOpensHistory() {
+        assertEquals(Route.ScheduledDisposals, EmployeeHomeViewModel.discardCardRoute())
+    }
+
     @Test
     fun occupationConvertsPercentToFraction() {
         val home = DashboardHomeResponseDTO(

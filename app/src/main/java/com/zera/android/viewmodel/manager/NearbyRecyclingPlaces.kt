@@ -4,7 +4,9 @@ import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.zera.android.model.entity.places.RecyclingPlace
+import com.zera.android.model.usecase.auth.GetSelfUser
 import com.zera.android.model.usecase.places.GetNearbyRecyclingPlaces
+import com.zera.android.viewmodel.isEmployeeRole
 import com.zera.android.model.usecase.places.NearbyRecyclingPlacesException
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
@@ -20,6 +22,7 @@ private const val TEMP_LOG_TAG = "TEMP_PLACES"
 private const val TEMP_RADIUS_METERS = 20_000
 
 data class NearbyRecyclingPlacesState(
+    val isEmployee: Boolean = false,
     val canUseCurrentLocation: Boolean = false,
     val address: String = "",
     val places: List<RecyclingPlace> = emptyList(),
@@ -37,12 +40,26 @@ data class NearbyRecyclingPlacesState(
 
 class NearbyRecyclingPlacesViewModel : ZeraViewModel() {
     private val getNearbyRecyclingPlaces = GetNearbyRecyclingPlaces()
+    private val getSelfUser = GetSelfUser()
     private val _state = mutableStateOf(NearbyRecyclingPlacesState())
     val state = _state
 
     private var loadJob: Job? = null
     private var lastLatitude: Double? = null
     private var lastLongitude: Double? = null
+
+    init {
+        viewModelScope.launch {
+            try {
+                val user = getSelfUser.execute()
+                _state.value = _state.value.copy(isEmployee = isEmployeeRole(user.role))
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                // Casca do gestor até o papel ser conhecido.
+            }
+        }
+    }
 
     fun onLocationAvailabilityChanged(canUseCurrentLocation: Boolean) {
         _state.value = _state.value.copy(canUseCurrentLocation = canUseCurrentLocation)

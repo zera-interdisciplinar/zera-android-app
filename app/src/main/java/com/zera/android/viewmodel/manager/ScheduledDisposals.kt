@@ -4,7 +4,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.zera.android.model.dto.inventory.DisposalRecordDTO
 import com.zera.android.model.dto.inventory.PagedDisposalsDTO
+import com.zera.android.model.usecase.auth.GetSelfUser
 import com.zera.android.model.usecase.inventory.ListDisposalSchedules
+import com.zera.android.viewmodel.isEmployeeRole
 import com.zera.android.view.components.lists.OptionItem
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
@@ -18,6 +20,7 @@ import java.time.format.TextStyle
 import java.util.Locale
 
 data class ScheduledDisposalsState(
+    val isEmployee: Boolean = false,
     val disposals: List<OptionItem> = emptyList(),
     val isLoading: Boolean = false,
     val isLoadingMore: Boolean = false,
@@ -31,6 +34,7 @@ data class ScheduledDisposalsState(
 
 class ScheduledDisposalsViewModel : ZeraViewModel() {
     private val listDisposals = ListDisposalSchedules()
+    private val getSelfUser = GetSelfUser()
     private val _state = mutableStateOf(ScheduledDisposalsState())
     val state = _state
     private var visibleIds: List<String> = emptyList()
@@ -39,6 +43,16 @@ class ScheduledDisposalsViewModel : ZeraViewModel() {
     private var loadJob: Job? = null
 
     init {
+        viewModelScope.launch {
+            try {
+                val user = getSelfUser.execute()
+                _state.value = _state.value.copy(isEmployee = isEmployeeRole(user.role))
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                // Casca do gestor até o papel ser conhecido.
+            }
+        }
         load(reset = true)
     }
 

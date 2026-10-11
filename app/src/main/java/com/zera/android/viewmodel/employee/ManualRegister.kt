@@ -198,6 +198,9 @@ class ManualRegisterViewModel(
                 ),
             )
             _state.value = _state.value.copy(isSubmitting = false)
+            // TODO: tela de conclusão pós-cadastro (padrão ModelCreationSuccessScreen):
+            // "Item cadastrado!", card nome/modelo + ID, chip "Em aprovação",
+            // CTAs "Registrar outro item" / "Ver itens". Hoje vai direto ao PDI.
             ZeraNavigator.pushAndPop(Route.ItemDetails(itemId = item.id), popCount = 1)
         } catch (error: CancellationException) {
             throw error

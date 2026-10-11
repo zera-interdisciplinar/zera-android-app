@@ -44,7 +44,8 @@ Como Operário, quero ver a ocupação do estoque, meus atalhos de manutenção/
 - [x] Clique em pendência abre `Route.WorkingCentral`
 - [x] Clique em um último item abre `Route.ItemDetails(itemId)`
 - [x] "Ver Todos" abre `Route.EmployeeItems`
-- [ ] Navegação de "Escanear", "Adicionar Modelo", "Manutenção" e "Descartes" (hoje `TODO` no `EmployeeHomeViewModel`)
+- [x] Navegação de "Escanear" e "Descartes" (`Route.Scan` e `Route.ScheduledDisposals`)
+- [ ] Navegação de "Adicionar Modelo" e "Manutenção" (ainda `TODO` no `EmployeeHomeViewModel`)
 
 ## Edge cases considerados
 
@@ -60,6 +61,6 @@ Como Operário, quero ver a ocupação do estoque, meus atalhos de manutenção/
 ## Referências
 
 - Componentes: `../03-catalogo-componentes.md` (`EmployeeScaffold`, `Notification`)
-- Spec relacionada: [manager-home-dashboard.md](manager-home-dashboard.md), [central-de-trabalho.md](central-de-trabalho.md)
+- Spec relacionada: [manager-home-dashboard.md](manager-home-dashboard.md), [central-de-trabalho.md](central-de-trabalho.md), [employee-descarte.md](employee-descarte.md)
 - Contrato: [../contrato-dashboard/contrato-inventory-dashboard.md](../contrato-dashboard/contrato-inventory-dashboard.md) (`GET /dashboard/home` e `GET /dashboard/work-center`)
 - Regras: [../05-regras-de-negocio/inventory-dashboard.md](../05-regras-de-negocio/inventory-dashboard.md)

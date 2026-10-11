@@ -61,9 +61,9 @@ fun EmployeeBottomNavBar(
             modifier = Modifier.weight(1f),
             label = "Reciclagem",
             contentDescription = "Botão para Reciclagem",
-            onClick = {}, // TODO: fluxo de navegação do Operário ainda não existe
+            onClick = { navigateTo(currentRoute, Route.Recycling) },
             icon = ZeraIcon.Recycle,
-            selected = false,
+            selected = currentRoute == Route.Recycling,
         )
         ShortCutButton(
             modifier = Modifier.weight(1f),

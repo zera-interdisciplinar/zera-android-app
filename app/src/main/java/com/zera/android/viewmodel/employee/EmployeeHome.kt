@@ -108,7 +108,7 @@ class EmployeeHomeViewModel : ZeraViewModel() {
     }
 
     fun onDiscardCardClick() {
-        // TODO: navegar para descartes
+        ZeraNavigator.push(discardCardRoute())
     }
 
     fun onPendingClick() {
@@ -120,6 +120,8 @@ class EmployeeHomeViewModel : ZeraViewModel() {
     }
 
     companion object {
+        internal fun discardCardRoute() = Route.ScheduledDisposals
+
         internal fun latestProductsFrom(home: DashboardHomeResponseDTO): List<ProductItem> =
             home.recentItems.content.map { item ->
                 ProductItem(id = item.id, name = item.name)
