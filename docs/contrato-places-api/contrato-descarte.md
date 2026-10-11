@@ -56,8 +56,8 @@ JSON em **snake_case**. Este MS **não** valida `apiKey` nas rotas próprias. Ch
 
 | Autorização | Rotas |
 |---|---|
-| JWT encaminhado + `unit_id` conferido no admin-core | `POST /api/v1/multi-agent/process-message` |
-| Sem JWT neste serviço (identifica por `user_id`) | `GET /conversations`, `GET /conversations/{thread_id}`, `POST /reports`, `GET /reports/{disposal_id}` |
+| JWT encaminhado + unidade resolvida no admin-core | `POST /api/v1/multi-agent/process-message`, `POST /api/v1/reports` |
+| Sem JWT neste serviço (identifica por `user_id` ou `disposal_id`) | `GET /conversations`, `GET /conversations/{thread_id}`, `GET /reports/{disposal_id}` |
 | Público | `GET /health` |
 
 `process-message` sem `Authorization`: **`422`**. Token inválido / `unit_id` que não é do usuário: **`403`** (`"unit_id does not belong to this user"`). Não há `401` neste MS. Unidade **não** vem de header — vai no body (`unit_id`).
@@ -137,7 +137,9 @@ Gera HTML pelo `report_agent` (sem grafo inteiro), PDF, storage, persiste `{disp
 
 `user_id` UUID obrigatório (auditoria; não filtra o GET). `disposal_id` string, mínimo 1 caractere — é o `id` do `POST /disposals`.
 
-`200`: `{ "report_url": "https://cdn.example.com/disposal-42.pdf" }`. Arquivo: `disposal-{disposal_id}.pdf`. Falha de storage **não** grava no Mongo. `422` body inválido.
+Header `Authorization: Bearer` obrigatório neste POST. O app manda o access token da sessão. Sem ele: **`422`**. Unidade do usuário que não resolve no admin-core: **`403`** (`"unit_id does not belong to this user"`). O `GET` abaixo não exige esse header.
+
+`200`: `{ "report_url": "https://cdn.example.com/disposal-42.pdf" }`. Arquivo: `disposal-{disposal_id}.pdf`. Falha de storage **não** grava no Mongo. Body inválido também responde `422`.
 
 ### 5.2 `GET /api/v1/reports/{disposal_id}`
 

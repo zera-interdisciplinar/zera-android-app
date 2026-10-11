@@ -204,6 +204,7 @@ fun ZeraNavHost() {
                     ItensResumeScreen(
                         itemIds = route.itemIds,
                         itemNames = route.itemNames,
+                        title = route.title,
                     )
                 }
                 composable<Route.ScheduledDisposals> {

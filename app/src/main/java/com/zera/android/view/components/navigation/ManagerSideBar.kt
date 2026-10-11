@@ -129,8 +129,8 @@ fun ManagerSideBar(
                 route = Route.Itens,
             )
             SideBarButton(
-                label = "Descartes agendados",
-                contentDescription = "Botão para Descartes agendados",
+                label = "Histórico de descartes",
+                contentDescription = "Botão para Histórico de descartes",
                 currentRoute = currentRoute,
                 onButtonClicked = onButtonClicked,
                 icon = ZeraIcon.Truck,

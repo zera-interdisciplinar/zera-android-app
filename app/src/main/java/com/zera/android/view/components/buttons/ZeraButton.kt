@@ -3,10 +3,12 @@ package com.zera.android.view.components.buttons
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -29,6 +31,7 @@ import com.zera.android.view.theme.icons.ZeraIcon
  * @param style família de cor do botão. Ver [ZeraColorFamily].
  * @param type hierarquia visual dentro do estilo. Ver [ZeraButtonType].
  * @param enabled habilita ou desabilita a interação.
+ * @param loading quando `true`, troca o rótulo por um indicador e bloqueia o toque.
  * @param icon ícone opcional do catálogo [ZeraIcon]. Quando não for `null`, é exibido
  *   logo ao lado do texto.
  * @param width largura fixa em dp. Quando informado, ignora [fillMaxWidth], [maxWidth] e [minWidth].
@@ -44,6 +47,7 @@ fun ZeraButton(
     style: ZeraColorFamily = ZeraColorFamily.Blue,
     type: ZeraButtonType = ZeraButtonType.Primary,
     enabled: Boolean = true,
+    loading: Boolean = false,
     icon: ZeraIcon? = null,
     width: Int? = null,
     maxWidth: Int? = null,
@@ -63,29 +67,37 @@ fun ZeraButton(
                     )
                 } else Modifier
             ),
-        enabled = enabled,
+        enabled = enabled && !loading,
         colors = buttonColors(style, type),
         border = buttonBorder(style, type),
         shape = RoundedCornerShape(Radius.large),
 
     ) {
-        Row(
-            modifier = Modifier.padding(horizontal = Spacing.small),
-        ){
-            BodyText(
-                text = text,
-                bold = true,
+        if (loading) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(Spacing.large),
                 color = content,
-                modifier = Modifier.padding(horizontal = Spacing.small)
+                strokeWidth = 2.dp,
             )
-            if (icon != null) {
-                ZeraIcon(
-                    icon = icon,
-                    contentDescription = null,
-                    size = Spacing.large,
-                    tint = content,
-                    modifier = Modifier.padding(end = Spacing.small),
+        } else {
+            Row(
+                modifier = Modifier.padding(horizontal = Spacing.small),
+            ) {
+                BodyText(
+                    text = text,
+                    bold = true,
+                    color = content,
+                    modifier = Modifier.padding(horizontal = Spacing.small),
                 )
+                if (icon != null) {
+                    ZeraIcon(
+                        icon = icon,
+                        contentDescription = null,
+                        size = Spacing.large,
+                        tint = content,
+                        modifier = Modifier.padding(end = Spacing.small),
+                    )
+                }
             }
         }
     }

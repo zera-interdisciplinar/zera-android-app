@@ -4,6 +4,6 @@ import com.zera.android.model.remote.client.InventoryClient
 
 class CancelDisposalSchedule {
     suspend fun execute(id: String) {
-        InventoryClient.inventoryService.deleteDisposalSchedule(id.trim())
+        InventoryClient.inventoryService.cancelDisposal(id.trim())
     }
 }

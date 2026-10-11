@@ -2,96 +2,113 @@ package com.zera.android.viewmodel.manager
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
-import com.zera.android.model.dto.inventory.DisposalScheduleDetailDTO
+import com.zera.android.model.dto.inventory.DisposalRecordDTO
+import com.zera.android.model.usecase.ai.GenerateDisposalReport
+import com.zera.android.model.usecase.ai.GetDisposalReport
 import com.zera.android.model.usecase.inventory.CancelDisposalSchedule
 import com.zera.android.model.usecase.inventory.GetDisposalSchedule
-import com.zera.android.model.usecase.inventory.UpdateDisposalSchedule
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
 import com.zera.android.view.components.lists.OptionItem
+import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
+import com.zera.android.view.transition.ScreenAnimation
 import com.zera.android.viewmodel.ZeraViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
 
 data class SchedulingDetailsState(
-    val recyclerName: String = "",
     val scheduledAt: String = "",
     val placeName: String = "",
-    val itemsLabel: String = "",
     val options: List<OptionItem> = emptyList(),
     val contactEmail: String = "",
     val contactPhone: String = "",
     val contactButtonsEnabled: Boolean = false,
     val pendingUri: String? = null,
-    val rawScheduledAt: String = "",
-    val showDateSheet: Boolean = false,
-    val isSaving: Boolean = false,
+    val reportUrl: String? = null,
+    val isLoading: Boolean = false,
+    val isGeneratingReport: Boolean = false,
     val isCancelling: Boolean = false,
     val errorMessage: String? = null,
 )
 
 class SchedulingDetailsViewModel : ZeraViewModel() {
-    private val getDisposalSchedule = GetDisposalSchedule()
-    private val updateDisposalSchedule = UpdateDisposalSchedule()
-    private val cancelDisposalSchedule = CancelDisposalSchedule()
+    private val getDisposal = GetDisposalSchedule()
+    private val cancelDisposal = CancelDisposalSchedule()
+    private val generateReport = GenerateDisposalReport()
+    private val getReport = GetDisposalReport()
     private val _state = mutableStateOf(SchedulingDetailsState())
     val state = _state
-    private var scheduleId: String = ""
+    private var disposalId: String = ""
+    private var itemIds: List<String> = emptyList()
+    private var itemNames: List<String> = emptyList()
 
     fun load(scheduleId: String) {
-        if (scheduleId.isBlank() || scheduleId == this.scheduleId) return
-        this.scheduleId = scheduleId
-        _state.value = _state.value.copy(errorMessage = null)
+        if (scheduleId.isBlank() || scheduleId == this.disposalId) return
+        this.disposalId = scheduleId
+        _state.value = _state.value.copy(isLoading = true, errorMessage = null, reportUrl = null)
         viewModelScope.launch {
             try {
-                apply(getDisposalSchedule.execute(scheduleId))
+                apply(getDisposal.execute(scheduleId))
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                _state.value = _state.value.copy(errorMessage = e.message)
+                _state.value = _state.value.copy(isLoading = false, errorMessage = e.message)
             }
         }
-    }
-
-    fun onOptionClick(option: OptionItem) {
-        if (option.name == "Alterar data ou horário") {
-            _state.value = _state.value.copy(showDateSheet = true, errorMessage = null)
-            return
+        viewModelScope.launch {
+            lookupReport(scheduleId)
         }
-        _state.value = _state.value.copy(errorMessage = "A edição de produtos ainda não tem tela.")
     }
 
-    fun dismissDateSheet() {
-        if (_state.value.isSaving) return
-        _state.value = _state.value.copy(showDateSheet = false)
-    }
-
-    fun confirmSchedule(dateEpochDayMillis: Long, hour: Int, minute: Int) {
-        val id = scheduleId
-        if (id.isBlank() || _state.value.isSaving) return
-        val scheduledAt = LocalDateTime.of(
-            LocalDate.ofEpochDay(dateEpochDayMillis / MILLIS_PER_DAY),
-            LocalTime.of(hour, minute),
+    fun onItemsClick() {
+        ZeraNavigator.push(
+            Route.ItensResume(
+                itemIds = itemIds,
+                itemNames = itemNames,
+                title = "Itens descartados",
+            ),
+            animation = ScreenAnimation.SlideHorizontal,
         )
-        _state.value = _state.value.copy(isSaving = true, errorMessage = null)
-        viewModelScope.launch {
-            try {
-                apply(updateDisposalSchedule.execute(id, scheduledAt))
-                _state.value = _state.value.copy(isSaving = false, showDateSheet = false)
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                _state.value = _state.value.copy(isSaving = false, errorMessage = e.message)
-            }
-        }
     }
 
     fun onGenerateReportClick() {
-        _state.value = _state.value.copy(
-            errorMessage = "O relatório só existe depois que o descarte for registrado.",
-        )
+        val existing = _state.value.reportUrl
+        if (!existing.isNullOrBlank()) {
+            _state.value = _state.value.copy(pendingUri = existing, errorMessage = null)
+            return
+        }
+        val id = disposalId
+        if (id.isBlank() || _state.value.isGeneratingReport) return
+        _state.value = _state.value.copy(isGeneratingReport = true, errorMessage = null)
+        viewModelScope.launch {
+            try {
+                val reportUrl = generateReport.execute(id)
+                _state.value = _state.value.copy(
+                    isGeneratingReport = false,
+                    reportUrl = reportUrl,
+                    pendingUri = reportUrl,
+                )
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(
+                    isGeneratingReport = false,
+                    errorMessage = e.message ?: "Não foi possível gerar o relatório.",
+                )
+            }
+        }
+    }
+
+    private suspend fun lookupReport(id: String) {
+        try {
+            val url = getReport.execute(id) ?: return
+            if (disposalId != id) return
+            _state.value = _state.value.copy(reportUrl = url)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (_: Exception) {
+            // Sem PDF ainda: o botão continua em "Gerar relatório".
+        }
     }
 
     fun onEmailClick() {
@@ -111,59 +128,50 @@ class SchedulingDetailsViewModel : ZeraViewModel() {
     }
 
     fun onCancelSchedulingClick() {
-        val id = scheduleId
+        val id = disposalId
         if (id.isBlank() || _state.value.isCancelling) return
         _state.value = _state.value.copy(isCancelling = true, errorMessage = null)
         viewModelScope.launch {
             try {
-                cancelDisposalSchedule.execute(id)
+                cancelDisposal.execute(id)
                 ZeraNavigator.goBack()
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                _state.value = _state.value.copy(isCancelling = false, errorMessage = e.message)
+                _state.value = _state.value.copy(isCancelling = false, errorMessage = cancelError(e))
             }
         }
     }
 
-    private fun apply(detail: DisposalScheduleDetailDTO) {
-        val email = detail.contact?.email.orEmpty()
-        val phone = detail.contact?.phone.orEmpty()
-        val names = detail.items.map { it.name.ifBlank { it.displayCode } }.filter { it.isNotBlank() }
+    private fun apply(detail: DisposalRecordDTO) {
+        itemIds = detail.items.map { item ->
+            item.itemId.ifBlank { item.id }.ifBlank { item.displayCode }.ifBlank { "item" }
+        }
+        itemNames = detail.items.map { item ->
+            item.name.ifBlank { item.displayCode }.ifBlank { "Item" }
+        }
+        val names = itemNames
         _state.value = _state.value.copy(
-            recyclerName = detail.placeName,
-            scheduledAt = ScheduledDisposalsViewModel.formatSchedule(detail.scheduledAt),
-            placeName = detail.placeName,
-            itemsLabel = names.joinToString(", "),
+            isLoading = false,
+            scheduledAt = ScheduledDisposalsViewModel.formatDisposedAt(detail.disposedAt),
+            placeName = detail.placeName.orEmpty(),
             options = listOf(
                 OptionItem(
-                    name = "Alterar data ou horário",
-                    description = ScheduledDisposalsViewModel.formatSchedule(detail.scheduledAt),
-                ),
-                OptionItem(
-                    name = "Adicionar ou remover produtos",
-                    description = names.joinToString(", ").ifBlank { "Nenhum produto" },
+                    name = "Itens descartados",
+                    description = names.joinToString(", ").ifBlank { "Nenhum item" },
                 ),
             ),
-            contactEmail = email,
-            contactPhone = phone,
-            contactButtonsEnabled = email.isNotBlank() || phone.isNotBlank(),
-            rawScheduledAt = detail.scheduledAt,
             errorMessage = null,
         )
     }
 
-    companion object {
-        private const val MILLIS_PER_DAY = 86_400_000L
-
-        internal fun initialDateMillis(iso: String): Long? {
-            val parsed = runCatching { LocalDateTime.parse(iso) }.getOrNull() ?: return null
-            return parsed.toLocalDate().toEpochDay() * MILLIS_PER_DAY
+    private fun cancelError(error: Exception): String {
+        if (error is HttpException && error.code() == 403) {
+            return "Só o gestor pode cancelar um descarte."
         }
-
-        internal fun initialTime(iso: String): Pair<Int, Int> {
-            val parsed = runCatching { LocalDateTime.parse(iso) }.getOrNull()
-            return (parsed?.hour ?: 8) to (parsed?.minute ?: 0)
+        if (error is HttpException && error.code() == 409) {
+            return "Esse descarte já foi cancelado."
         }
+        return error.message ?: "Não foi possível cancelar o descarte."
     }
 }

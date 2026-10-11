@@ -81,4 +81,22 @@ class EnvironmentsTest {
         assertEquals("https://ai.example.com", environments.aiApiUrl)
         assertEquals("ai-key", environments.aiApiKey)
     }
+
+    @Test
+    fun parsesAiCoreKeyAsAiUrl() {
+        val payload = """
+            {
+              "ms-adm-core-url": "https://adm.example.com",
+              "ms-adm-core-api-key": "adm-key",
+              "ms-inventory-url": "https://inventory.example.com",
+              "ms-ai-core": "https://www.example.com/qa/ai-core/api/v1/",
+              "ms-ai-api-key": "ai-key"
+            }
+        """.trimIndent()
+
+        val environments = json.decodeFromString<Environments>(payload)
+
+        assertEquals("https://www.example.com/qa/ai-core/api/v1/", environments.aiApiUrl)
+        assertEquals("ai-key", environments.aiApiKey)
+    }
 }

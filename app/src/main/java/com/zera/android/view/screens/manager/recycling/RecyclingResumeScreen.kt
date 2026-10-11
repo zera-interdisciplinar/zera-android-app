@@ -142,11 +142,12 @@ fun RecyclingResumeScreen(
             }
 
             ZeraButton(
-                text = if (state.isConfirming) "Registrando…" else "Confirmar descarte",
+                text = "Confirmar descarte",
                 onClick = viewModel::onConfirmClick,
                 fillMaxWidth = true,
                 style = ZeraColorFamily.Green,
-                enabled = !state.isConfirming && state.itemIds.isNotEmpty(),
+                loading = state.isConfirming,
+                enabled = state.itemIds.isNotEmpty(),
             )
         }
     }

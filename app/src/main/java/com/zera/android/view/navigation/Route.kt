@@ -90,6 +90,7 @@ sealed interface Route{
     data class ItensResume(
         val itemIds: List<String>,
         val itemNames: List<String>,
+        val title: String = "Itens selecionados",
     ) : Route
 
     @Serializable

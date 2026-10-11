@@ -1,6 +1,7 @@
 package com.zera.android.view.screens.manager.recycling
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -12,20 +13,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.TimePicker
-import androidx.compose.material3.rememberDatePickerState
-import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.material3.rememberTimePickerState
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
@@ -36,7 +33,6 @@ import com.zera.android.view.components.buttons.ZeraButtonType
 import com.zera.android.view.components.cards.Notification
 import com.zera.android.view.components.containers.ZeraBox
 import com.zera.android.view.components.lists.OptionList
-import com.zera.android.view.components.overlays.BottomSheet
 import com.zera.android.view.components.navigation.UpperNavBar
 import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.components.texts.LabelText
@@ -47,7 +43,6 @@ import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.view.theme.ZeraTheme
 import com.zera.android.viewmodel.manager.SchedulingDetailsViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SchedulingDetailsScreen(
     scheduleId: String = "",
@@ -71,7 +66,7 @@ fun SchedulingDetailsScreen(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             UpperNavBar(
-                title = "Agendamento",
+                title = "Descarte",
                 goBack = true,
                 modifier = Modifier
                     .statusBarsPadding()
@@ -79,6 +74,17 @@ fun SchedulingDetailsScreen(
             )
         },
     ) { innerPadding ->
+        if (state.isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding),
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator()
+            }
+            return@Scaffold
+        }
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -104,21 +110,22 @@ fun SchedulingDetailsScreen(
                         color = LocalContentColor.current,
                     )
                     LabelText(
-                        text = state.placeName.ifBlank { state.recyclerName },
+                        text = state.placeName,
                         color = LocalContentColor.current,
                     )
                 }
             }
 
             ZeraButton(
-                text = "Gerar relatório",
+                text = if (state.reportUrl.isNullOrBlank()) "Gerar relatório" else "Ver relatório",
                 onClick = viewModel::onGenerateReportClick,
+                loading = state.isGeneratingReport,
                 fillMaxWidth = true,
             )
 
             OptionList(
                 options = state.options,
-                onItemClick = viewModel::onOptionClick,
+                onItemClick = { viewModel.onItemsClick() },
                 hasIcon = false,
                 contentPadding = PaddingValues(Spacing.none),
                 modifier = Modifier.heightIn(max = 400.dp),
@@ -153,15 +160,15 @@ fun SchedulingDetailsScreen(
 
             Notification(
                 label = "Precisa cancelar?",
-                text = "Avise o local para liberar o horário.",
+                text = "Os itens voltam para o estoque.",
                 style = ZeraColorFamily.Yellow,
                 modifier = Modifier.fillMaxWidth(),
             )
 
             ZeraButton(
-                text = "Cancelar agendamento",
+                text = "Cancelar descarte",
                 onClick = viewModel::onCancelSchedulingClick,
-                enabled = !state.isCancelling,
+                loading = state.isCancelling,
                 style = ZeraColorFamily.Red,
                 type = ZeraButtonType.Secondary,
                 fillMaxWidth = true,
@@ -170,40 +177,6 @@ fun SchedulingDetailsScreen(
             state.errorMessage?.let { message ->
                 CaptionText(text = message, color = MaterialTheme.colorScheme.error)
             }
-        }
-    }
-
-    if (state.showDateSheet) {
-        val initial = SchedulingDetailsViewModel.initialDateMillis(state.rawScheduledAt)
-        val (hour, minute) = SchedulingDetailsViewModel.initialTime(state.rawScheduledAt)
-        val datePickerState = rememberDatePickerState(initialSelectedDateMillis = initial)
-        val timePickerState = rememberTimePickerState(initialHour = hour, initialMinute = minute)
-        BottomSheet(
-            onDismissRequest = viewModel::dismissDateSheet,
-            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        ) {
-            TitleText(text = "Alterar data ou horário", bold = true)
-            Column(
-                modifier = Modifier
-                    .heightIn(max = 520.dp)
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(Spacing.medium),
-            ) {
-                DatePicker(state = datePickerState, showModeToggle = false)
-                TimePicker(state = timePickerState)
-            }
-            state.errorMessage?.let { message ->
-                CaptionText(text = message, color = MaterialTheme.colorScheme.error)
-            }
-            ZeraButton(
-                text = "Salvar",
-                fillMaxWidth = true,
-                enabled = !state.isSaving && datePickerState.selectedDateMillis != null,
-                onClick = {
-                    val millis = datePickerState.selectedDateMillis ?: return@ZeraButton
-                    viewModel.confirmSchedule(millis, timePickerState.hour, timePickerState.minute)
-                },
-            )
         }
     }
 }
