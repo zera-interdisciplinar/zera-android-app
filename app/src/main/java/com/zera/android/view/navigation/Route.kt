@@ -142,7 +142,10 @@ sealed interface Route{
     data object WorkingCentral : Route
 
     @Serializable
-    data class ManualRegister(val modelName: String? = null) : Route
+    data class ManualRegister(
+        val modelName: String? = null,
+        val barcode: String? = null,
+    ) : Route
 
     // ROTAS COMPARTILHADAS
     @Serializable

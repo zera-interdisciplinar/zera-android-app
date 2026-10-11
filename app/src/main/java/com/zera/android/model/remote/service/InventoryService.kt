@@ -54,6 +54,11 @@ interface InventoryService {
         @Path("id") id: String,
     ): ItemResponseDTO
 
+    @GET("api/v1/items/by-barcode/{barcode}")
+    suspend fun getItemByBarcode(
+        @Path("barcode") barcode: String,
+    ): ItemResponseDTO
+
     @GET("api/v1/categories")
     suspend fun getCategories(): List<CategoryResponseDTO>
 

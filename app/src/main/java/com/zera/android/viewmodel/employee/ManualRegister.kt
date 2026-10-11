@@ -5,6 +5,7 @@ import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.viewmodel.ZeraViewModel
 
 data class ManualRegisterState(
+    val barcode: String = "",
     val serialNumber: String = "",
     val itemName: String = "",
     val model: String = "",
@@ -37,12 +38,15 @@ data class ManualRegisterState(
  *
  * @param initialModel modelo já escolhido (ex.: vindo da tela de itens de um modelo). Quando
  *   informado, o campo de modelo já abre preenchido.
+ * @param initialBarcode código lido no scan quando o item ainda não existe no estoque.
  */
 class ManualRegisterViewModel(
     initialModel: String? = null,
+    initialBarcode: String? = null,
 ) : ZeraViewModel() {
     private val _state = mutableStateOf(
         ManualRegisterState(
+            barcode = initialBarcode.orEmpty(),
             model = initialModel.orEmpty(),
             // TODO: puxar os modelos cadastrados do back
             modelOptions = listOf("Teclado mecânico", "Mouse sem fio", "Chip controlador", "Placa de circuito")
@@ -52,6 +56,10 @@ class ManualRegisterViewModel(
         )
     )
     val state = _state
+
+    fun onBarcodeChange(value: String) {
+        _state.value = _state.value.copy(barcode = value)
+    }
 
     fun onSerialNumberChange(value: String) {
         _state.value = _state.value.copy(serialNumber = value)

@@ -44,6 +44,7 @@ class ItemResponseDTOTest {
         val item = json.decodeFromString<ItemResponseDTO>(payload)
 
         assertEquals("9c858901-8a57-4791-81fe-4c455b099bc9", item.id)
+        assertEquals("7891234567890", item.barcode)
         assertEquals("Notebook Dell Latitude", item.name)
         assertEquals("ITM-0042", item.displayCode)
         assertEquals("IN_STOCK", item.status)

@@ -5,11 +5,11 @@
 - **Feature:** Cadastro de item sem etiqueta (`ManualRegisterScreen`)
 - **Perfil(is) envolvido(s):** Operário (funcionário)
 - **Status:** em progresso (formulário e navegação prontos; envio ao back pendente)
-- **Última atualização:** 2026-10-09
+- **Última atualização:** 2026-10-11
 
 ## Contexto
 
-Itens que não têm etiqueta para escanear são cadastrados à mão em `Route.ManualRegister(modelName: String? = null)`. A tela é aberta de dois lugares: da `ScanScreen` ("Cadastrar sem etiqueta", sem modelo) e da `ModelItemsScreen` na visão do Operário ("Adicionar novo item", com o `modelName` do modelo aberto). Os campos seguem o payload esperado pelo back para um item; as opções dos dropdowns (modelos, condições e tipos de dano) são fixas no `ManualRegisterViewModel` até o back expor essas listas.
+Itens são cadastrados à mão em `Route.ManualRegister(modelName: String? = null, barcode: String? = null)`. A tela é aberta de três lugares: da `ScanScreen` ("Cadastrar sem etiqueta", sem modelo nem barcode), do scan quando o código não existe no estoque (`barcode` preenchido) e da `ModelItemsScreen` na visão do Operário ("Adicionar novo item", com o `modelName` do modelo aberto). Os campos seguem o payload esperado pelo back para um item; as opções dos dropdowns (modelos, condições e tipos de dano) são fixas no `ManualRegisterViewModel` até o back expor essas listas.
 
 ## User story
 
@@ -22,6 +22,12 @@ Como Operário, quero cadastrar manualmente um item sem etiqueta, para que ele e
 - **Given** o Operário está em `ScanScreen`
 - **When** toca em "Cadastrar sem etiqueta"
 - **Then** navega para `Route.ManualRegister()` com todos os campos vazios
+
+### Cenário: Abrir com barcode lido no scan
+
+- **Given** o Operário leu um código que o back não conhece (`404`)
+- **When** a busca termina
+- **Then** navega para `Route.ManualRegister(barcode = <código>)` e o campo "Código de barras" já vem preenchido
 
 ### Cenário: Abrir a partir de um modelo
 
@@ -55,9 +61,9 @@ Como Operário, quero cadastrar manualmente um item sem etiqueta, para que ele e
 
 ## Critérios de aceite
 
-- [x] Campos: número de série, item, modelo, ano de fabricação, data de aquisição (`ZeraDateInput`), condição, intensidade de uso (`ZeraSliderInput`, padrão 1), "Possui danos?" (`ZeraRadioButton`), tipo de dano e observação
-- [x] Só a observação é opcional; o tipo de dano só é exigido quando há dano
-- [x] `modelName` opcional na rota, com a `key` do `ViewModel` por modelo (`manual-register-$modelName`) para não reaproveitar o estado de outro modelo
+- [x] Campos: código de barras, número de série, item, modelo, ano de fabricação, data de aquisição (`ZeraDateInput`), condição, intensidade de uso (`ZeraSliderInput`, padrão 1), "Possui danos?" (`ZeraRadioButton`), tipo de dano e observação
+- [x] Só a observação é opcional; o tipo de dano só é exigido quando há dano; o barcode não entra em `canSubmit` (cadastro sem etiqueta continua válido)
+- [x] `modelName` e `barcode` opcionais na rota, com a `key` do `ViewModel` (`manual-register-$modelName-$barcode`) para não reaproveitar o estado
 - [ ] Enviar o cadastro ao back (`onConfirmClick` só volta à tela anterior)
 - [ ] Carregar modelos cadastrados do back no lugar da lista fixa
 - [ ] Carregar condições e tipos de dano de uma fonte oficial
@@ -66,13 +72,14 @@ Como Operário, quero cadastrar manualmente um item sem etiqueta, para que ele e
 ## Edge cases considerados
 
 - Abrir sem `modelName` mantém o campo "Modelo" vazio e as opções fixas.
+- Abrir sem `barcode` deixa o campo "Código de barras" vazio e editável.
 - Desmarcar "Possui danos?" descarta o tipo de dano já escolhido.
 - Ano de fabricação usa teclado numérico (`ZeraInputType.Number`), mas não há validação de faixa.
 
 ## Fora de escopo desta spec
 
 - Contrato de criação de item com o back.
-- Cadastro de item por leitura da etiqueta (ver [scan-item.md](scan-item.md)).
+- Decodificação da etiqueta (ver [scan-item.md](scan-item.md)).
 
 ## Referências
 

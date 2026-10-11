@@ -93,8 +93,12 @@ fun ScanScreen(
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 }
             },
-            statusText = state.scannedCode?.let { "Código lido: $it" }
-                ?: "Leitura automática ativada",
+            statusText = when {
+                state.isLookingUp -> "Buscando…"
+                state.lookupError != null -> state.lookupError.orEmpty()
+                state.scannedCode != null -> "Código lido: ${state.scannedCode}"
+                else -> "Leitura automática ativada"
+            },
         )
 
         Spacer(modifier = Modifier.weight(1f))

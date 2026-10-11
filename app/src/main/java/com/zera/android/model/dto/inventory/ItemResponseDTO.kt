@@ -8,6 +8,7 @@ import kotlinx.serialization.json.JsonNames
 data class ItemResponseDTO(
     val id: String,
     val name: String,
+    val barcode: String? = null,
     val displayCode: String? = null,
     @OptIn(ExperimentalSerializationApi::class)
     @JsonNames("itemStatus", "approvalStatus")

@@ -264,7 +264,7 @@ fun ZeraNavHost() {
                 }
                 composable<Route.ManualRegister> { backStackEntry ->
                     val route = backStackEntry.toRoute<Route.ManualRegister>()
-                    ManualRegisterScreen(modelName = route.modelName)
+                    ManualRegisterScreen(modelName = route.modelName, barcode = route.barcode)
                 }
                 composable<Route.Profile> {
                     ProfileScreen()

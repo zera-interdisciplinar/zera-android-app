@@ -39,12 +39,14 @@ import com.zera.android.viewmodel.employee.ManualRegisterViewModel
  * Modelo, condição e "possui danos?" são dropdowns; só a observação é opcional.
  *
  * @param modelName modelo opcional. Quando informado, o campo de modelo já vem preenchido.
+ * @param barcode código de barras opcional, pré-preenchido quando veio do scan.
  */
 @Composable
 fun ManualRegisterScreen(
     modelName: String? = null,
-    viewModel: ManualRegisterViewModel = viewModel(key = "manual-register-$modelName") {
-        ManualRegisterViewModel(modelName)
+    barcode: String? = null,
+    viewModel: ManualRegisterViewModel = viewModel(key = "manual-register-$modelName-$barcode") {
+        ManualRegisterViewModel(modelName, barcode)
     },
 ) {
     val state by viewModel.state
@@ -98,6 +100,13 @@ fun ManualRegisterScreen(
             BodyText(
                 text = "Preencha os dados essenciais",
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            ZeraTextInput(
+                value = state.barcode,
+                onValueChange = viewModel::onBarcodeChange,
+                label = "Código de barras",
+                placeholder = "Ex.: 7891234567890",
+                imeAction = ImeAction.Next,
             )
             ZeraTextInput(
                 value = state.serialNumber,
