@@ -1,8 +1,11 @@
 package com.zera.android.model.entity.config
 
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonNames
 
+@OptIn(ExperimentalSerializationApi::class)
 @Serializable
 data class Environments(
     @SerialName("ms-adm-core-url")
@@ -27,6 +30,7 @@ data class Environments(
     val supabaseAvatarsBucket: String = "",
 
     @SerialName("ms-ai-url")
+    @JsonNames("ms-ai-core")
     val aiApiUrl: String = "",
 
     @SerialName("ms-ai-api-key")

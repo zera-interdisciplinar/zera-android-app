@@ -137,12 +137,12 @@ fun SchedulingSuccessScreen(
                 )
                 Column(){
                     ZeraButton(
-                        text = if (state.isGeneratingReport) "Gerando relatório…" else "Gerar Relatorio",
+                        text = "Gerar Relatorio",
                         onClick = viewModel::onGenerateReport,
                         type = ZeraButtonType.Primary,
                         style = ZeraColorFamily.Yellow,
                         fillMaxWidth = true,
-                        enabled = !state.isGeneratingReport,
+                        loading = state.isGeneratingReport,
                     )
                     Row(
                         modifier = Modifier.fillMaxWidth(),

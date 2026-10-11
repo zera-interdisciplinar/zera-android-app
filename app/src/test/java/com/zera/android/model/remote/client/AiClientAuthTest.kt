@@ -1,6 +1,7 @@
 package com.zera.android.model.remote.client
 
 import com.zera.android.model.entity.config.Environments
+import com.zera.android.model.usecase.ai.GenerateDisposalReport
 import okhttp3.Request
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -43,5 +44,14 @@ class AiClientAuthTest {
             inventoryApiUrl = "https://inventory.example.com",
         )
         assertEquals("adm-key", AiClient.resolveApiKey(environments))
+    }
+
+    @Test
+    fun reportForbiddenMeansUnitCannotBeResolved() {
+        assertEquals(
+            "A unidade deste usuário não pode gerar o relatório.",
+            GenerateDisposalReport.failureMessage(403),
+        )
+        assertEquals(null, GenerateDisposalReport.failureMessage(422))
     }
 }

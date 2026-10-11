@@ -1,6 +1,7 @@
 package com.zera.android.view.screens.manager.recycling
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -12,12 +13,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -38,15 +45,28 @@ import com.zera.android.viewmodel.manager.SchedulingDetailsViewModel
 
 @Composable
 fun SchedulingDetailsScreen(
+    scheduleId: String = "",
     viewModel: SchedulingDetailsViewModel = viewModel(),
 ) {
     val state by viewModel.state
+    val context = LocalContext.current
+
+    LaunchedEffect(scheduleId) {
+        viewModel.load(scheduleId)
+    }
+
+    LaunchedEffect(state.pendingUri) {
+        val uri = state.pendingUri ?: return@LaunchedEffect
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(uri)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        runCatching { context.startActivity(intent) }
+        viewModel.consumePendingUri()
+    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             UpperNavBar(
-                title = "Agendamento",
+                title = "Descarte",
                 goBack = true,
                 modifier = Modifier
                     .statusBarsPadding()
@@ -54,6 +74,17 @@ fun SchedulingDetailsScreen(
             )
         },
     ) { innerPadding ->
+        if (state.isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding),
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator()
+            }
+            return@Scaffold
+        }
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -79,21 +110,22 @@ fun SchedulingDetailsScreen(
                         color = LocalContentColor.current,
                     )
                     LabelText(
-                        text = state.recyclerName,
+                        text = state.placeName,
                         color = LocalContentColor.current,
                     )
                 }
             }
 
             ZeraButton(
-                text = "Gerar relatório",
+                text = if (state.reportUrl.isNullOrBlank()) "Gerar relatório" else "Ver relatório",
                 onClick = viewModel::onGenerateReportClick,
+                loading = state.isGeneratingReport,
                 fillMaxWidth = true,
             )
 
             OptionList(
                 options = state.options,
-                onItemClick = viewModel::onOptionClick,
+                onItemClick = { viewModel.onItemsClick() },
                 hasIcon = false,
                 contentPadding = PaddingValues(Spacing.none),
                 modifier = Modifier.heightIn(max = 400.dp),
@@ -128,14 +160,15 @@ fun SchedulingDetailsScreen(
 
             Notification(
                 label = "Precisa cancelar?",
-                text = "Avise o local para liberar o horário.",
+                text = "Os itens voltam para o estoque.",
                 style = ZeraColorFamily.Yellow,
                 modifier = Modifier.fillMaxWidth(),
             )
 
             ZeraButton(
-                text = "Cancelar agendamento",
+                text = "Cancelar descarte",
                 onClick = viewModel::onCancelSchedulingClick,
+                loading = state.isCancelling,
                 style = ZeraColorFamily.Red,
                 type = ZeraButtonType.Secondary,
                 fillMaxWidth = true,

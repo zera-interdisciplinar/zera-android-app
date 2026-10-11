@@ -22,6 +22,7 @@ import com.zera.android.viewmodel.manager.ItensResumeViewModel
 fun ItensResumeScreen(
     itemIds: List<String>,
     itemNames: List<String>,
+    title: String = "Itens selecionados",
     viewModel: ItensResumeViewModel = viewModel(),
 ) {
     val state by viewModel.state
@@ -30,18 +31,19 @@ fun ItensResumeScreen(
         viewModel.bind(itemIds, itemNames)
     }
 
-    ItensResumeContent(items = state.items)
+    ItensResumeContent(items = state.items, title = title)
 }
 
 @Composable
 private fun ItensResumeContent(
     items: List<ProductItem>,
+    title: String = "Itens selecionados",
 ) {
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             UpperNavBar(
-                title = "Itens selecionados",
+                title = title,
                 goBack = true,
                 showActions = false,
                 modifier = Modifier
