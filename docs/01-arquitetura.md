@@ -70,7 +70,7 @@ O `State` de cada tela é uma `data class` imutável (`copy()` a cada mudança) 
 - `AdmCoreClient` — Retrofit do adm-core em `init(environments)` (`ms-adm-core-url`), header `apiKey`, JWT da sessão, `TokenRefreshAuthenticator` no 401. Expõe auth, users, invitations, notifications, places, etc.
 - `InventoryClient` — Retrofit do `ms-inventory` (`ms-inventory-url`). Headers `apiKey`, `Authorization: Bearer` e `X-Unit-Id`. Contrato em [contrato-dashboard/contexto.md](contrato-dashboard/contexto.md) e [contrato-pdi/](contrato-pdi/).
 - `AppConfig` — `environments` e `flags` em memória depois do boot / `LoadFlags`.
-- `SqliteManager` — sessão (`zera.db`). Init em `MainActivity.onCreate` antes de qualquer leitura/escrita.
+- `SqliteManager` — sessão (`zera.db`). Init em `ZeraApp.onCreate` (e de novo em `MainActivity` se a Activity subir primeiro em teste).
 - `ZeraNavigator` — ponto único de comandos de navegação (ver seção seguinte).
 
 `ViewModels` instanciam seus `usecase`s diretamente como propriedade (`val useCase = SingIn()`) e são obtidos nas `Screens` via o factory padrão do Compose (`viewModel()`), sem `Factory` customizada. Essa combinação funciona hoje porque os `usecase`s não têm dependências configuráveis além dos próprios singletons — se isso mudar (ex.: necessidade de trocar implementação em teste), vale considerar introduzir um framework de DI e registrar a decisão como ADR.

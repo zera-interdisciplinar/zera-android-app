@@ -95,6 +95,8 @@ Depois do redeem, o cadastro chama `SingIn.execute` para persistir tokens, `unit
 | Método | Endpoint | Resposta | Usado por |
 |---|---|---|---|
 | `GET` | `users/{userId}` | `SelfUserResponseDTO` | `GetSelfUser` — no login (`SingIn.execute`) para `role` + `unitId`; na home do gestor, para nome/papel |
+| `POST` | `users/me/device-tokens` | `{ token, platform: "ANDROID" }` | `RegisterDeviceToken` — login e `onNewToken` |
+| `DELETE` | `users/me/device-tokens` | `{ token }` | `UnregisterDeviceToken` — `SingIn.clearSession` |
 
 ## Tratamento de erros
 

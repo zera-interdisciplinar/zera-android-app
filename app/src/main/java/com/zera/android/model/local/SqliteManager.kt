@@ -19,6 +19,7 @@ object SqliteManager {
     private const val KEY_EMAIL = "email"
     private const val KEY_PASSWORD = "password"
     private const val KEY_SEEN_MODEL_USAGE = "seen_model_usage"
+    private const val KEY_FCM_TOKEN = "fcm_token"
 
     private lateinit var helper: SessionDbHelper
 
@@ -83,6 +84,13 @@ object SqliteManager {
             (!getEmail().isNullOrBlank() && !getPassword().isNullOrBlank())
 
     fun hasSeenModelUsage(): Boolean = get(KEY_SEEN_MODEL_USAGE) == "1"
+
+    @Synchronized
+    fun saveFcmToken(token: String) {
+        put(helper.writableDatabase, KEY_FCM_TOKEN, token)
+    }
+
+    fun getFcmToken(): String? = get(KEY_FCM_TOKEN)
 
     @Synchronized
     fun markModelUsageSeen() {

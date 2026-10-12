@@ -5,6 +5,11 @@ import com.zera.android.model.dto.user.SelfUserResponseDTO
 import com.zera.android.model.local.SqliteManager
 import com.zera.android.model.remote.client.AdmCoreClient
 import com.zera.android.model.usecase.config.LoadFlags
+import com.zera.android.model.usecase.notification.RegisterDeviceToken
+import com.zera.android.model.usecase.notification.UnregisterDeviceToken
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeoutOrNull
+import kotlin.time.Duration.Companion.seconds
 
 class SingIn {
     private val getSelfUser = GetSelfUser()
@@ -29,10 +34,16 @@ class SingIn {
         val selfUser = getSelfUser.execute(userId)
         SqliteManager.saveUnitId(selfUser.unitId)
         loadFlags.execute(selfUser)
+        runCatching { RegisterDeviceToken().execute() }
         return selfUser
     }
 
     fun clearSession() {
+        runCatching {
+            runBlocking {
+                withTimeoutOrNull(5.seconds) { UnregisterDeviceToken().execute() }
+            }
+        }
         SqliteManager.clearSession()
         loadFlags.clear()
     }
