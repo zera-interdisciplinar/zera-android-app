@@ -65,6 +65,30 @@ Pacotes `model/entity/config/` e `model/entity/scrapy/`. Contrato: [contrato-scr
 
 Precisa ser inicializado explicitamente (`SharedPreferencesManager.init(context)`, hoje chamado em `MainActivity.onCreate`) antes de qualquer leitura/escrita — chamar antes disso lança `UninitializedPropertyAccessException`. Não há cache local de dados de domínio (perfil do usuário, inventário, etc.) — apenas sessão. Não há banco de dados local (Room ou similar) no projeto.
 
+## Modelos de chat
+
+Pacote `model/entity/chat/`. São modelos de **UI/estado** (não são o JSON da API). O contrato do back está em [contrato-places-api/contrato-descarte.md](contrato-places-api/contrato-descarte.md) (seção `POST /api/v1/multi-agent/process-message`); spec da tela: [07-especificacoes/chat-bot.md](07-especificacoes/chat-bot.md).
+
+- **`Message(role: MessageRole, content: String, sentAt: LocalDateTime)`** — uma mensagem da conversa. Sem `id`: a identidade é a posição na lista.
+- **`MessageRole`** (enum) — `User`, `Assistant`. O back também devolve `system` (enum `role` do histórico); o app **não modela** esse valor e deve ignorá-lo ao montar a lista.
+
+### Padrão esperado pelo back (`process-message`)
+
+Um turno = uma requisição. Corpo (JSON em **snake_case**):
+
+| Campo | Origem no app |
+|---|---|
+| `user_id` | UUID do usuário logado (o mesmo do JWT) |
+| `thread_id` | UUID v4 **gerado pelo app** ao abrir a conversa e reutilizado em todos os turnos dela; novo UUID = nova conversa |
+| `unit_id` | unidade do usuário logado (a mesma enviada como `X-Unit-Id`); vai no **body**, não em header |
+| `content` | texto digitado, 1–8000 caracteres (`Message.content` da mensagem do usuário) |
+
+Resposta `200`: `content` (texto do assistente → `Message.content` com `MessageRole.Assistant`), `blocked`, `blocked_reason`, `agent_trace`, `report_url`. `blocked: true` ainda é HTTP 200 e `content` traz a recusa a exibir; `agent_trace` é telemetria e `report_url` é sempre `null` neste endpoint — nenhum dos dois vai para a UI. Erros: sem `Authorization` → `422`; `unit_id` que não é do usuário → `403` (não há `401` neste MS).
+
+O back **não devolve** data/hora por mensagem no turno: `sentAt` é preenchido pelo app (`LocalDateTime.now()`) no momento da inserção. O histórico (`GET /conversations/{thread_id}?user_id=`) devolve um array simples, mais antigas primeiro, com `role` em minúsculas (`user`/`assistant`/`system`).
+
+Mapeamento ao integrar: `"user"` → `MessageRole.User`, `"assistant"` → `MessageRole.Assistant`, `"system"` → descartar.
+
 ## Mapeamentos entre camadas
 
 Não existe uma camada `toDomain()`. Os `ViewModels` mapeiam DTO → campos de UI no próprio arquivo:
