@@ -140,15 +140,45 @@ Arquivo: `view/components/navigation/`. A maioria dos componentes é visual; `Ma
 - **`ManagerBottomNavBar(modifier, currentRoute)`** — barra inferior do fluxo de Gestor: atalhos "Início"/"Indicadores"/"Reciclagem"/"Itens" + botão central de adicionar item (`ZeraIcon.Plus`); usa `ShortCutButton` internamente. Não aplica shared element por si só: é o `ManagerScaffold` que o marca com `SharedElementKeys.ManagerBottomNavBar`, para a barra ficar parada enquanto o conteúdo das telas do Gestor anima.
 - **`EmployeeBottomNavBar(modifier, currentRoute)`** — barra inferior do fluxo de Operário: atalhos "Início"/"Central"/"Reciclagem"/"Itens" + botão central de escanear (`ZeraIcon.QrCode`); mesmo `ShortCutButton` interno de `ManagerBottomNavBar`.
 - **`ManagerSideBar(modifier, currentRoute, onButtonClicked)`** — menu lateral do Gestor. O `ManagerScaffold` fornece `onButtonClicked` para fechar o menu após escolher um item; a lista central rola quando necessário, enquanto o grupo inferior fica ancorado abaixo.
-- **`ManagerScaffold(title, currentRoute, modifier, goBack, onBackClick, fabIcon, onFabClick, scrollable, content: @Composable ColumnScope.() -> Unit)`** (em `view/screens/manager/ManagerScaffold.kt`, não em `view/components/` — é específico das telas do Gestor) — casca compartilhada com `UpperNavBar` + `Column` (rolável quando `scrollable = true`, padrão) + `ManagerBottomNavBar` (recebe a `currentRoute` da tela, para destacar e desabilitar o atalho atual) + FAB de assistente virtual. A `ManagerBottomNavBar` é um shared element (`SharedElementKeys.ManagerBottomNavBar`): fica parada durante as transições entre as telas que usam o scaffold, desde que o `composable<>` da tela forneça `LocalAnimatedVisibilityScope` em `ZeraNavHost`. `goBack = true` exibe o botão "Voltar" na `UpperNavBar` — use em telas acessadas por navegação (ex.: "Colaboradores", aberta a partir de um atalho do Home), diferente das telas raiz do `ManagerBottomNavBar` (ex.: `ManagerHomeScreen`).
+- **`ManagerScaffold(title, currentRoute, modifier, goBack, onBackClick, fabIcon, scrollable, content: @Composable ColumnScope.() -> Unit)`** (em `view/screens/manager/ManagerScaffold.kt`, não em `view/components/` — é específico das telas do Gestor) — casca compartilhada com `UpperNavBar` + `Column` (rolável quando `scrollable = true`, padrão) + `ManagerBottomNavBar` (recebe a `currentRoute` da tela, para destacar e desabilitar o atalho atual) + FAB de assistente virtual. A `ManagerBottomNavBar` é um shared element (`SharedElementKeys.ManagerBottomNavBar`): fica parada durante as transições entre as telas que usam o scaffold, desde que o `composable<>` da tela forneça `LocalAnimatedVisibilityScope` em `ZeraNavHost`. O FAB de assistente virtual (`fabIcon`, padrão `ZeraIcon.Chatbot`) sempre abre `Route.ChatBot` (`push` com `ScreenAnimation.SlideVertical`); a ação não é configurável por tela, e `fabIcon = null` esconde o FAB. `goBack = true` exibe o botão "Voltar" na `UpperNavBar` — use em telas acessadas por navegação (ex.: "Colaboradores", aberta a partir de um atalho do Home), diferente das telas raiz do `ManagerBottomNavBar` (ex.: `ManagerHomeScreen`).
 
-- **`EmployeeScaffold(title, currentRoute, modifier, goBack, onBackClick, fabIcon, onFabClick, scrollable, contentPadding, edgeFade, content: @Composable ColumnScope.() -> Unit)`** (em `view/screens/employee/EmployeeScaffold.kt`) — equivalente do `ManagerScaffold` para o fluxo de Operário: `UpperNavBar` + `Column` rolável + `EmployeeBottomNavBar` + FAB de assistente virtual, com o mesmo fade de topo/fim. Diferenças: não tem `ManagerSideBar` (o botão de menu da `UpperNavBar` ainda não faz nada) nem `backgroundVariant`. A barra inferior é marcada com `SharedElementKeys.EmployeeBottomNavBar`, mas o `composable<Route.EmployeeHome>` em `ZeraNavHost` ainda não fornece `LocalAnimatedVisibilityScope`, então `sharedTransition` não tem efeito hoje (retorna o modifier sem animar).
+- **`EmployeeScaffold(title, currentRoute, modifier, goBack, onBackClick, fabIcon, scrollable, contentPadding, edgeFade, content: @Composable ColumnScope.() -> Unit)`** (em `view/screens/employee/EmployeeScaffold.kt`) — equivalente do `ManagerScaffold` para o fluxo de Operário: `UpperNavBar` + `Column` rolável + `EmployeeBottomNavBar` + FAB de assistente virtual, com o mesmo fade de topo/fim. O FAB também sempre abre `Route.ChatBot` e só pode ser escondido com `fabIcon = null`. Diferenças: não tem `ManagerSideBar` (o botão de menu da `UpperNavBar` ainda não faz nada) nem `backgroundVariant`. A barra inferior é marcada com `SharedElementKeys.EmployeeBottomNavBar`, mas o `composable<Route.EmployeeHome>` em `ZeraNavHost` ainda não fornece `LocalAnimatedVisibilityScope`, então `sharedTransition` não tem efeito hoje (retorna o modifier sem animar).
 
 ```kotlin
-ManagerScaffold(title = "Visão geral", currentRoute = Route.ManagerHome, onFabClick = { /* abrir chatbot */ }) {
+ManagerScaffold(title = "Visão geral", currentRoute = Route.ManagerHome) {
     BodyText(text = "Conteúdo da tela")
 }
 ```
+
+## Chat
+
+Arquivo: `view/components/chat/`. Modelos: `Message` e `MessageRole` (ver [04-modelo-de-dados.md](04-modelo-de-dados.md)). Spec da tela: [07-especificacoes/chat-bot.md](07-especificacoes/chat-bot.md).
+
+- **`ChatScroll(modifier, messages, loadingMessage, contentPadding)`** — lista rolável (`LazyColumn`) com a conversa. Desenha `messages` na ordem recebida (da mais antiga para a mais recente) e rola sozinha para o último item sempre que a quantidade de itens muda (mensagem nova ou `loadingMessage` ligado). Com `messages` vazia, mostra uma mensagem de boas-vindas do assistente (texto fixo, não faz parte do estado). `loadingMessage = true` acrescenta o `LoadingMessageContainer` depois da última mensagem. Quem controla a lista é o `ViewModel`: o componente só renderiza.
+- **`MessageContainer(role, content, modifier, navigateTo, navigateToLabel)`** — uma mensagem. `role = User` → bolha à direita na cor primária; `role = Assistant` → bolha à esquerda, fundo `surface`, com `AssistantAvatar`. `navigateTo: Route?` (padrão `null`) + `navigateToLabel` acrescentam um link ao final da bolha; tocar faz `push` para a rota. O `ChatScroll` ainda não repassa esses dois parâmetros (há um `TODO` ali): o contrato do back não devolve rota por mensagem.
+- **`LoadingMessageContainer(modifier)`** — bolha do assistente com três reticências animadas ("digitando"). Deve ser sempre o último item; o `ChatScroll` já garante isso.
+- **`AssistantAvatar(modifier)`** (`internal`) — avatar circular amarelo do assistente, usado pelo `MessageContainer` e pelo `LoadingMessageContainer`.
+- **`MessageTextBox(value, onValueChange, onSend, modifier, placeholder, enabled)`** — campo de texto controlado + botão de enviar. Cresce até 4 linhas. O botão e a ação "enviar" do teclado ficam desabilitados com `value` em branco ou `enabled = false` (use `enabled = !state.isLoadingMessage` para bloquear envio enquanto o assistente responde).
+- **`SuggestionChip(text, onClick, modifier, style)`** — pílula clicável com uma pergunta sugerida; `style` é uma `ZeraColorFamily` (padrão `Yellow`).
+- **`SuggestionList(suggestions, onSuggestionClick, modifier, title)`** — título "Sugestões" + `SuggestionChip`s quebrando linha (`FlowRow`), alternando `Yellow`/`Blue`. Não desenha nada com `suggestions` vazia. **Quem decide quando mostrar a caixa é a tela**, não o componente: `ChatBotScreen` só a compõe quando `state.showSuggestions` (= conversa ainda sem mensagens).
+
+```kotlin
+ChatScroll(messages = state.messages, loadingMessage = state.isLoadingMessage, modifier = Modifier.weight(1f))
+if (state.showSuggestions) {
+    SuggestionList(suggestions = state.suggestions, onSuggestionClick = viewModel::onSuggestionClick)
+}
+MessageTextBox(value = state.input, onValueChange = viewModel::onInputChange, onSend = viewModel::onSend, enabled = !state.isLoadingMessage)
+```
+
+### Como inserir mensagens no chat
+
+Os componentes não têm API de "adicionar mensagem": o `ViewModel` cria um novo `ChatBotState` com a lista de `messages` acrescida (`state.copy(messages = state.messages + nova)`) e o `ChatScroll` rola sozinho. Regras:
+
+1. A lista é **append-only e cronológica**: nova mensagem sempre no fim; o `ChatScroll` não reordena.
+2. Mensagem do usuário: `Message(role = MessageRole.User, content = texto, sentAt = LocalDateTime.now())`, inserida **antes** da chamada ao back; em seguida o campo (`input`) é limpo e `isLoadingMessage = true`.
+3. Mensagem do assistente: `Message(role = MessageRole.Assistant, content = resposta.content, sentAt = LocalDateTime.now())`, inserida quando a resposta chega; em seguida `isLoadingMessage = false`.
+4. O loading **não é** uma `Message`: é só o flag `isLoadingMessage`.
+5. `content` é texto puro (`BodyText`); o contrato aceita 1–8000 caracteres por turno (ver [contrato-places-api/contrato-descarte.md](contrato-places-api/contrato-descarte.md), seção `process-message`).
 
 ## Overlays
 

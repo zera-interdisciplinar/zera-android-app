@@ -26,3 +26,6 @@ local.properties
 
 # we decided to keep AGENTS.md individually for each person to have their own set of agents.
 AGENTS.md
+# JVM crash logs
+hs_err_pid*.log
+replay_pid*.log

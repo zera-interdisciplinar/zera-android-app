@@ -39,7 +39,6 @@ fun ManagerHomeScreen(
     ManagerScaffold(
         title = "Visão geral",
         currentRoute = Route.ManagerHome,
-        onFabClick = { /* TODO: abrir chatbot */ },
     ) {
         Column(modifier = Modifier.padding(horizontal = Spacing.small)) {
             BodyText(text = state.userName, bold = true)

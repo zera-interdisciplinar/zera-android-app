@@ -58,7 +58,6 @@ fun ItensScreen(
         currentRoute = Route.Itens(status = initialStatus),
         goBack = true,
         scrollable = false,
-        onFabClick = { /* TODO: abrir chatbot */ },
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,

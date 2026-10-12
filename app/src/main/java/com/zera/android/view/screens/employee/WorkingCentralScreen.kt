@@ -31,7 +31,6 @@ fun WorkingCentralScreen(
     EmployeeScaffold(
         title = "Central de Trabalho",
         currentRoute = Route.WorkingCentral,
-        onFabClick = { /* TODO: abrir chatbot */ },
     ) {
         SummaryCard(
             label = "Resumo do turno",

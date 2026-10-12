@@ -3,13 +3,19 @@ package com.zera.android.view.components.navigation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -82,13 +88,25 @@ fun UpperNavBar(
                             horizontalArrangement = Arrangement.spacedBy(Spacing.small),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            TopBarIconButton(
-                                icon = ZeraIcon.LeftUTurn,
+                            // Button "cru" do Compose em vez do IconButton: assim o ícone
+                            // acompanha o contentColor (branco sobre o fundo primary).
+                            Button(
                                 onClick = onBackClick,
-                                contentDescription = "Voltar",
-                                type = ZeraButtonType.Tertiary,
-                                backgroundVariant = backgroundVariant,
-                            )
+                                modifier = Modifier.size(34.dp),
+                                shape = CircleShape,
+                                contentPadding = PaddingValues(Spacing.none),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color.Transparent,
+                                    contentColor = contentColor,
+                                ),
+                            ) {
+                                ZeraIcon(
+                                    icon = ZeraIcon.LeftUTurn,
+                                    contentDescription = "Voltar",
+                                    size = 17.dp,
+                                    tint = contentColor,
+                                )
+                            }
                             BodyText(
                                 text = "Voltar",
                                 bold = true,
@@ -163,7 +181,7 @@ private fun TopBarIconButton(
         onClick = onClick,
         contentDescription = contentDescription,
         type = type,
-        size = size,
+        size = size
     )
 }
 
@@ -178,9 +196,9 @@ private fun UpperNavBarWithBackPreview() {
 
 @Preview(showBackground = true, backgroundColor = 1)
 @Composable
-private fun UpperNavBarWithoutBackPreview() {
+private fun UpperNavBarPreview() {
     ZeraTheme {
-        UpperNavBar(title = "Modelos", backgroundVariant = true)
+        UpperNavBar(title = "Modelos", backgroundVariant = true, goBack = true)
     }
 }
 

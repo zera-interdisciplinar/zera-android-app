@@ -41,6 +41,7 @@ import com.zera.android.view.theme.NoColor
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
 import com.zera.android.view.theme.icons.ZeraIcon
+import com.zera.android.view.transition.ScreenAnimation
 import com.zera.android.view.transition.SharedElementKeys
 import com.zera.android.view.transition.sharedTransition
 
@@ -66,8 +67,8 @@ private val BottomFadeHeight = 25.dp
  * @param onBackClick ação do botão "Voltar". Só é usada quando [goBack] é `true`.
  * @param showActions quando `true` (padrão), exibe os atalhos de notificações/perfil/menu
  *   na [UpperNavBar]. Use `false` em telas que só precisam do "Voltar" (ex.: "Scanear item").
- * @param fabIcon ícone do botão flutuante. Quando `null`, nenhum FAB é exibido.
- * @param onFabClick ação do botão flutuante. Só é usada quando [fabIcon] não for `null`.
+ * @param fabIcon ícone do botão flutuante. Quando `null`, nenhum FAB é exibido. O FAB sempre
+ *   abre o chatbot ([Route.ChatBot]); a ação não é configurável.
  * @param scrollable quando `true` (padrão), a [Column] do conteúdo rola inteira. Use
  *   `false` quando [content] já tiver seu próprio elemento rolável.
  * @param contentPadding espaçamento horizontal do conteúdo.
@@ -83,7 +84,6 @@ fun EmployeeScaffold(
     onBackClick: () -> Unit = { ZeraNavigator.goBack() },
     showActions: Boolean = true,
     fabIcon: ZeraIcon? = ZeraIcon.Chatbot,
-    onFabClick: () -> Unit = {},
     scrollable: Boolean = true,
     contentPadding: Dp = Spacing.medium,
     backgroundVariant: Boolean = false,
@@ -128,7 +128,7 @@ fun EmployeeScaffold(
                 if (fabIcon != null) {
                     IconButton(
                         icon = fabIcon,
-                        onClick = onFabClick,
+                        onClick = { ZeraNavigator.push(Route.ChatBot, ScreenAnimation.SlideVertical) },
                         contentDescription = "Assistente virtual",
                         size = 56.dp,
                     )

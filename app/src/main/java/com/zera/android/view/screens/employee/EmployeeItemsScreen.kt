@@ -67,7 +67,6 @@ fun EmployeeItemsScreen(
         title = "Itens",
         currentRoute = Route.EmployeeItems(),
         scrollable = false,
-        onFabClick = { /* TODO: abrir chatbot */ },
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
