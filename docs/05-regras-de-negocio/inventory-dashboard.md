@@ -107,7 +107,7 @@ Todas as rotas do dashboard usam o `unitId` do login (`GET users/{id}`), gravado
 
 ## Parâmetros configuráveis
 
-Nenhum parâmetro de negócio é configurável no app. Percentuais, janela padrão de indicadores e capacidade de estoque vêm do backend. Campos do contrato que o app não usa (`stockCapacity`, `disposalsInWindow`, `windowDays`, detalhes extras do item, `inMaintenance`/`awaitingEvaluation` do work-center nesta tela) são ignorados (`ignoreUnknownKeys`).
+Nenhum parâmetro de negócio é configurável no app. Percentuais, janela padrão de indicadores e capacidade de estoque vêm do backend. Na home do Operário, `inMaintenance` e `disposalsInWindow` alimentam os atalhos (número puro, sem o texto da janela). Campos que o app não usa (`stockCapacity`, `windowDays`, detalhes extras do item, `inMaintenance`/`awaitingEvaluation` do work-center nas pendências) são ignorados (`ignoreUnknownKeys`).
 
 ## Relacionamento com perfis
 

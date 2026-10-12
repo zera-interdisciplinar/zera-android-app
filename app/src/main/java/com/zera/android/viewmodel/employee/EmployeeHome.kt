@@ -14,6 +14,7 @@ import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.viewmodel.ZeraViewModel
+import com.zera.android.viewmodel.manager.ItensViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
@@ -22,8 +23,8 @@ data class EmployeeHomeState(
     val userRole: String = "",
     val stockItemCount: Int = 0,
     val stockOccupation: Float = 0f,
-    val maintenanceCount: String = "",
-    val discardCount: String = "",
+    val maintenanceCount: String = "0",
+    val discardCount: String = "0",
     val pendingNotifications: List<NotificationItem> = emptyList(),
     val latestProducts: List<ProductItem> = emptyList(),
 )
@@ -31,20 +32,15 @@ data class EmployeeHomeState(
 /**
  * ViewModel da home do operário.
  *
- * Nome, cargo, ocupação, pendências e últimos itens vêm da API;
- * atalhos de manutenção/descarte ainda são mock.
+ * Nome, cargo, ocupação, pendências, atalhos e últimos itens vêm da API.
+ * Manutenção = `inMaintenance`; Descartes = `disposalsInWindow` (janela do backend).
  */
 class EmployeeHomeViewModel : ZeraViewModel() {
     private val getSelfUser = GetSelfUser()
     private val getEmployeeHome = GetEmployeeHome()
     private val getEmployeePendencies = GetEmployeePendencies()
 
-    private val _state = mutableStateOf(
-        EmployeeHomeState(
-            maintenanceCount = "25",
-            discardCount = "8",
-        )
-    )
+    private val _state = mutableStateOf(EmployeeHomeState())
     val state = _state
 
     init {
@@ -70,9 +66,12 @@ class EmployeeHomeViewModel : ZeraViewModel() {
     private suspend fun loadStockOccupation() {
         try {
             val home = getEmployeeHome.execute()
+            val (maintenance, discards) = shortcutCounts(home)
             _state.value = _state.value.copy(
                 stockItemCount = home.activeItems.toInt(),
                 stockOccupation = occupationFrom(home),
+                maintenanceCount = maintenance,
+                discardCount = discards,
                 latestProducts = latestProductsFrom(home),
             )
         } catch (e: CancellationException) {
@@ -104,7 +103,7 @@ class EmployeeHomeViewModel : ZeraViewModel() {
     }
 
     fun onMaintenanceCardClick() {
-        // TODO: navegar para manutenção
+        ZeraNavigator.push(maintenanceCardRoute())
     }
 
     fun onDiscardCardClick() {
@@ -116,16 +115,22 @@ class EmployeeHomeViewModel : ZeraViewModel() {
     }
 
     fun onSeeAllItemsClick() {
-        ZeraNavigator.push(Route.EmployeeItems)
+        ZeraNavigator.push(Route.EmployeeItems())
     }
 
     companion object {
         internal fun discardCardRoute() = Route.ScheduledDisposals
 
+        internal fun maintenanceCardRoute() =
+            Route.EmployeeItems(status = ItensViewModel.MAINTENANCE_STATUS_LABEL)
+
         internal fun latestProductsFrom(home: DashboardHomeResponseDTO): List<ProductItem> =
             home.recentItems.content.map { item ->
                 ProductItem(id = item.id, name = item.name)
             }
+
+        internal fun shortcutCounts(home: DashboardHomeResponseDTO): Pair<String, String> =
+            home.inMaintenance.toString() to home.disposalsInWindow.toString()
 
         internal fun occupationFrom(home: DashboardHomeResponseDTO): Float {
             val percent = home.occupancyPercent ?: return 0f

@@ -18,6 +18,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.zera.android.view.components.buttons.IconButton
 import com.zera.android.view.components.buttons.ZeraButton
 import com.zera.android.view.components.buttons.ZeraButtonType
@@ -46,7 +48,12 @@ import com.zera.android.viewmodel.manager.ItensViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EmployeeItemsScreen(
-    viewModel: ItensViewModel = viewModel(),
+    initialStatus: String? = null,
+    viewModel: ItensViewModel = viewModel(
+        factory = viewModelFactory {
+            initializer { ItensViewModel(initialStatuses = listOfNotNull(initialStatus)) }
+        },
+    ),
 ) {
     val state by viewModel.state
     var showFiltersSheet by rememberSaveable { mutableStateOf(false) }
@@ -58,7 +65,7 @@ fun EmployeeItemsScreen(
 
     EmployeeScaffold(
         title = "Itens",
-        currentRoute = Route.EmployeeItems,
+        currentRoute = Route.EmployeeItems(),
         scrollable = false,
         onFabClick = { /* TODO: abrir chatbot */ },
     ) {

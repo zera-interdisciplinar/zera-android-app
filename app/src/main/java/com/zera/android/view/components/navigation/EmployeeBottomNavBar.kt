@@ -69,9 +69,9 @@ fun EmployeeBottomNavBar(
             modifier = Modifier.weight(1f),
             label = "Itens",
             contentDescription = "Botão para Itens",
-            onClick = { navigateTo(currentRoute, Route.EmployeeItems) },
+            onClick = { navigateTo(currentRoute, Route.EmployeeItems()) },
             icon = ZeraIcon.Crate,
-            selected = currentRoute == Route.EmployeeItems,
+            selected = currentRoute == Route.EmployeeItems(),
         )
     }
 }

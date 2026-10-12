@@ -64,7 +64,7 @@ Como Operário, quero registrar um descarte no mapa e ver o histórico da unidad
 
 ## Fora de escopo desta spec
 
-- Contador real do card "Descartes" (continua mock).
+- Contador do card "Descartes" (`disposalsInWindow` na home).
 - Manutenção.
 - Cancelar descarte pelo Operário.
 - Telas ou rotas novas de descarte.

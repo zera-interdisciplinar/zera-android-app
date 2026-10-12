@@ -21,6 +21,24 @@ class EmployeeHomeMappingTest {
     }
 
     @Test
+    fun maintenanceCardOpensItemsFiltered() {
+        assertEquals(
+            Route.EmployeeItems(status = "Em manutenção"),
+            EmployeeHomeViewModel.maintenanceCardRoute(),
+        )
+    }
+
+    @Test
+    fun shortcutsUseHomeCounters() {
+        val home = DashboardHomeResponseDTO(
+            activeItems = 128,
+            inMaintenance = 2,
+            disposalsInWindow = 5,
+        )
+        assertEquals("2" to "5", EmployeeHomeViewModel.shortcutCounts(home))
+    }
+
+    @Test
     fun occupationConvertsPercentToFraction() {
         val home = DashboardHomeResponseDTO(
             activeItems = 128,

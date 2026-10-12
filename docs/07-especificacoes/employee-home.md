@@ -4,12 +4,12 @@
 
 - **Feature:** Tela inicial do Operário
 - **Perfil(is) envolvido(s):** Operário (funcionário)
-- **Status:** em progresso (pendências e últimos itens reais; atalhos mock; navegação parcial)
+- **Status:** em progresso (atalhos reais; "Adicionar Modelo" ainda sem destino)
 - **Última atualização:** 2026-10-11
 
 ## Contexto
 
-Primeira tela do Operário após o login (`Route.EmployeeHome`). Reaproveita os componentes da home do Gestor ([manager-home-dashboard.md](manager-home-dashboard.md)) dentro do `EmployeeScaffold`, com textos próprios do fluxo de Operário. Nome e cargo vêm de `GetSelfUser`; ocupação e últimos itens vêm de `GetEmployeeHome` (`GET /api/v1/dashboard/home`, `recentItems.content`); pendências de `GetEmployeePendencies` (`GET /api/v1/dashboard/work-center`). Atalhos de manutenção/descarte ainda são mock.
+Primeira tela do Operário após o login (`Route.EmployeeHome`). Reaproveita os componentes da home do Gestor ([manager-home-dashboard.md](manager-home-dashboard.md)) dentro do `EmployeeScaffold`, com textos próprios do fluxo de Operário. Nome e cargo vêm de `GetSelfUser`; ocupação e últimos itens vêm de `GetEmployeeHome` (`GET /api/v1/dashboard/home`, `recentItems.content`); pendências de `GetEmployeePendencies` (`GET /api/v1/dashboard/work-center`). Atalhos usam `inMaintenance` e `disposalsInWindow` de `GET /api/v1/dashboard/home`. O toque em Descartes abre o histórico. O toque em Manutenção abre os itens com o filtro "Em manutenção".
 
 ## User story
 
@@ -40,12 +40,13 @@ Como Operário, quero ver a ocupação do estoque, meus atalhos de manutenção/
 - [x] Layout com os mesmos componentes da home do Gestor (`StockOccupationCard`, `ShortcutCard`, `NotificationList`, `ProductList`)
 - [x] Pendências mapeadas de `drafts` / `rejected` / `damagedWithoutDestination` (contador > 0 vira um `NotificationItem`; drafts e rejected em Red, danificados em Yellow)
 - [x] Dados reais de ocupação, pendências e últimos itens (`recentItems.content`)
-- [ ] Dados reais de manutenção e descartes (atalhos ainda mock)
+- [x] Dados reais de manutenção e descartes (`inMaintenance` e `disposalsInWindow`)
 - [x] Clique em pendência abre `Route.WorkingCentral`
 - [x] Clique em um último item abre `Route.ItemDetails(itemId)`
 - [x] "Ver Todos" abre `Route.EmployeeItems`
 - [x] Navegação de "Escanear" e "Descartes" (`Route.Scan` e `Route.ScheduledDisposals`)
-- [ ] Navegação de "Adicionar Modelo" e "Manutenção" (ainda `TODO` no `EmployeeHomeViewModel`)
+- [x] "Manutenção" abre `Route.EmployeeItems(status = "Em manutenção")`
+- [ ] Navegação de "Adicionar Modelo" (ainda `TODO` no `EmployeeHomeViewModel`)
 
 ## Edge cases considerados
 

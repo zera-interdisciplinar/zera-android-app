@@ -136,7 +136,7 @@ sealed interface Route{
     data object Scan : Route
 
     @Serializable
-    data object EmployeeItems : Route
+    data class EmployeeItems(val status: String? = null) : Route
 
     @Serializable
     data object WorkingCentral : Route

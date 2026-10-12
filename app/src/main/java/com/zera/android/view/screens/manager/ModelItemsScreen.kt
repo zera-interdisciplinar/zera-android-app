@@ -59,7 +59,7 @@ fun ModelItemsScreen(
     if (state.isEmployee) {
         EmployeeScaffold(
             title = "Itens do Modelo",
-            currentRoute = Route.EmployeeItems,
+            currentRoute = Route.EmployeeItems(),
             goBack = true,
             scrollable = false,
             onFabClick = { /* TODO: abrir chatbot */ },
