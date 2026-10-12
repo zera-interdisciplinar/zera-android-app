@@ -3,6 +3,7 @@ package com.zera.android.view.screens.manager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,9 +20,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.zera.android.view.components.buttons.IconButton
 import com.zera.android.view.components.buttons.ZeraButton
-import com.zera.android.view.components.buttons.ZeraButtonType
 import com.zera.android.view.components.inputs.ZeraSearchInput
 import com.zera.android.view.components.lists.OptionItem
 import com.zera.android.view.components.lists.OptionList
@@ -31,6 +30,7 @@ import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.components.texts.LabelText
 import com.zera.android.view.components.texts.TitleText
 import com.zera.android.view.navigation.Route
+import com.zera.android.view.screens.employee.EmployeeScaffold
 import com.zera.android.view.theme.Radius
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
@@ -51,12 +51,7 @@ fun ModelsScreen(
         onPauseOrDispose { }
     }
 
-    ManagerScaffold(
-        title = "Modelos",
-        currentRoute = Route.Models,
-        goBack = true,
-        scrollable = false,
-    ) {
+    val body: @Composable ColumnScope.() -> Unit = {
         ZeraSearchInput(
             value = state.searchQuery,
             onValueChange = viewModel::onSearchQueryChange,
@@ -83,6 +78,26 @@ fun ModelsScreen(
             emptyContent = { BodyText(text = "Nenhum modelo encontrado") },
             onEndReached = viewModel::loadNextPage,
             isLoadingMore = state.isLoadingMore,
+        )
+    }
+
+    if (state.isEmployee) {
+        EmployeeScaffold(
+            title = "Modelos",
+            currentRoute = Route.Models,
+            goBack = true,
+            scrollable = false,
+            onFabClick = { /* TODO: abrir chatbot */ },
+            content = body,
+        )
+    } else {
+        ManagerScaffold(
+            title = "Modelos",
+            currentRoute = Route.Models,
+            goBack = true,
+            scrollable = false,
+            onFabClick = { /* TODO: abrir chatbot */ },
+            content = body,
         )
     }
 

@@ -51,15 +51,20 @@ Fonte: [Confluence ms-inventory](https://zerainterdisciplinar.atlassian.net/wiki
 | `GET` | `api/v1/dashboard/home` | `page` (default 0), `size` (default 5) | `DashboardHomeResponseDTO` | `GetManagerHome.execute()` (`ManagerHomeViewModel`), `GetEmployeeHome.execute()` (`EmployeeHomeViewModel`) |
 | `GET` | `api/v1/dashboard/work-center` | — | `WorkCenterResponseDTO` | `GetEmployeePendencies.execute()` (`EmployeeHomeViewModel`, `WorkingCentralViewModel`) |
 | `GET` | `api/v1/dashboard/indicators` | `from`/`to` opcionais (`yyyy-MM-dd`) | `IndicatorsResponseDTO` | `GetIndicators.execute()` (`IndexesViewModel`) |
-| `GET` | `api/v1/items` | `status` (omitir = **ativos**, não “todos”), `categoryId`, `q` (o app manda `q`; o texto Confluence às vezes diz `query`), `page`, `size` | `PagedItemsDTO` | `GetItems.execute()` (`ItensViewModel`) |
+| `GET` | `api/v1/items` | `status` (omitir = **ativos**, não “todos”), `categoryId`, `modelId`, `q` (o app manda `q`; o texto Confluence às vezes diz `query`), `page`, `size` | `PagedItemsDTO` | `GetItems.execute()` (`ItensViewModel`), `GetModelItems.execute()` (`ModelDetailsViewModel`) |
 | `GET` | `api/v1/items/{id}` | path `id` | `ItemResponseDTO` | `GetItemDetails.execute()` (`ItemDetailsViewModel`) |
 | `GET` | `api/v1/items/by-barcode/{barcode}` | path `barcode` | `ItemResponseDTO` | `GetItemByBarcode.execute()` (`ScanViewModel`) |
 | `POST` | `api/v1/items` | `name`, `modelId`, `barcode?`, `serialNumber`, `condition`, `hasDamages`, `damages`, `notes?`, `acquiredAt`, `manufacturingYear`, `usageIntensity` | `ItemResponseDTO` | `CreateItem.execute()` (`ManualRegisterViewModel`) |
 | `GET` | `api/v1/models` | `q`, `page`, `size` (default 20) | `PagedModelsDTO` | `GetModels.execute()` (`ModelsViewModel`, `ManualRegisterViewModel`) |
+| `GET` | `api/v1/models/{id}` | path `id` | `ModelResponseDTO` | `GetModel.execute()` (`ModelDetailsViewModel`) |
+| `GET` | `api/v1/models/{id}/items` | path `id`, `page`, `size` | `PagedItemsDTO` | `GetModelItems.execute()` (`ModelDetailsViewModel`; fallback `GET /items?modelId=&status=PENDING_APPROVAL`) |
+| `PATCH` | `api/v1/models/{id}/name` | `{ "name" }` | `ModelResponseDTO` | `UpdateModel.rename()` |
+| `PATCH` | `api/v1/models/{id}/manufacturer` | `{ "manufacturer" }` | `ModelResponseDTO` | `UpdateModel.manufacturer()` |
+| `PATCH` | `api/v1/models/{id}/materials` | `{ "materials": [code] }` | `ModelResponseDTO` | `UpdateModel.materials()` |
 | `GET` | `api/v1/categories` | — | `List<CategoryResponseDTO>` | `GetCategories.execute()` (`ItensViewModel`, `CategoriesViewModel`, `ModelCreationViewModel`) |
 | `POST` | `api/v1/categories` | `name`, `description` opcional. `unitId` vai no header, não no corpo | `CategoryResponseDTO` | `CreateCategory.execute()` (`CategoryCreationViewModel`) |
-| `POST` | `api/v1/items/{id}/approve` | path `id`, sem corpo | `ItemResponseDTO` | `ApproveItem.execute()` (`ItemDetailsViewModel`) |
-| `POST` | `api/v1/items/{id}/reject` | path `id`, `{ "reason" }` | `ItemResponseDTO` | `RejectItem.execute()` (`ItemDetailsViewModel`) |
+| `POST` | `api/v1/items/{id}/approve` | path `id`, sem corpo | `ItemResponseDTO` | `ApproveItem.execute()` (`ItemDetailsViewModel`, `ModelDetailsViewModel` — cascata no modelo) |
+| `POST` | `api/v1/items/{id}/reject` | path `id`, `{ "reason" }` | `ItemResponseDTO` | `RejectItem.execute()` (`ItemDetailsViewModel`, `ModelDetailsViewModel`) |
 | `PATCH` | `api/v1/items/{id}` | parcial: `name`, `condition`, `hasDamages`, `damages`, `notes`, `serialNumber`, `acquiredAt`, `manufacturingYear`, `usageIntensity` | `ItemResponseDTO` | `UpdateItem.execute()` (`ItemDetailsViewModel`; a PDI só envia `name` ou `condition`) |
 
 `GET /api/v1/dashboard/home` alimenta ocupação e `recentItems` na home do Gestor e na home do Operário. `GET /api/v1/dashboard/work-center` alimenta a seção Pendências da home (resumo por bucket) e a Central de Trabalho (um card por item). O recorte do work-center é o usuário do token (sem query).

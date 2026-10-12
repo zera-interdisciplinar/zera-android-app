@@ -6,6 +6,7 @@ import com.zera.android.model.dto.inventory.ModelResponseDTO
 import com.zera.android.model.dto.inventory.PagedModelsDTO
 import com.zera.android.model.usecase.inventory.CreateItem
 import com.zera.android.model.usecase.inventory.GetModels
+import com.zera.android.model.usecase.inventory.SubmitItem
 import com.zera.android.view.navigation.NavCommand
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
@@ -87,11 +88,16 @@ class ManualRegisterViewModelTest {
     @Test
     fun submitsMappedPayloadAndOpensDetails() = runBlocking {
         var request: CreateItemRequestDTO? = null
+        var submittedId: String? = null
         val viewModel = registerViewModel(
             models = listOf(ModelResponseDTO(id = "model-1", name = "Teclado mecânico")),
             createItem = CreateItem { body ->
                 request = body
                 ItemResponseDTO(id = "item-9", name = body.name)
+            },
+            submitItem = SubmitItem { id ->
+                submittedId = id
+                ItemResponseDTO(id = id, name = "Notebook")
             },
         )
         fillValid(viewModel)
@@ -114,6 +120,7 @@ class ManualRegisterViewModelTest {
             ),
             request,
         )
+        assertEquals("item-9", submittedId)
         assertEquals(
             NavCommand.PushAndPop(Route.ItemDetails(itemId = "item-9"), popCount = 1),
             nextNavCommand(),
@@ -160,6 +167,21 @@ class ManualRegisterViewModelTest {
     }
 
     @Test
+    fun keepsScreenWhenSubmitAfterCreateFails() {
+        val viewModel = registerViewModel(
+            models = listOf(ModelResponseDTO(id = "model-1", name = "Teclado mecânico")),
+            createItem = CreateItem { ItemResponseDTO(id = "item-1", name = it.name) },
+            submitItem = SubmitItem { throw httpError(422) },
+        )
+        fillValid(viewModel)
+
+        viewModel.onConfirmClick()
+
+        assertFalse(viewModel.state.value.isSubmitting)
+        assertTrue(viewModel.state.value.submitError != null)
+    }
+
+    @Test
     fun ignoresSecondSubmitWhileInFlight() = runBlocking {
         var pending: (suspend () -> Unit)? = null
         var launches = 0
@@ -172,6 +194,7 @@ class ManualRegisterViewModelTest {
                 submits += 1
                 ItemResponseDTO(id = "item-1", name = it.name)
             },
+            submitItem = SubmitItem { ItemResponseDTO(id = it, name = "item") },
             launchWork = { block ->
                 if (launches++ == 0) {
                     runBlocking { block() }
@@ -209,12 +232,14 @@ class ManualRegisterViewModelTest {
         initialBarcode: String? = null,
         models: List<ModelResponseDTO> = emptyList(),
         getModels: GetModels = GetModels { _, _, _ -> PagedModelsDTO(content = models) },
-        createItem: CreateItem = CreateItem { ItemResponseDTO(id = "item-1", name = it.name) },
+            createItem: CreateItem = CreateItem { ItemResponseDTO(id = "item-1", name = it.name) },
+        submitItem: SubmitItem = SubmitItem { ItemResponseDTO(id = it, name = "item") },
     ) = ManualRegisterViewModel(
         initialModel = initialModel,
         initialBarcode = initialBarcode,
         getModels = getModels,
         createItem = createItem,
+        submitItem = submitItem,
         launchWork = { block -> runBlocking { block() } },
     )
 

@@ -17,6 +17,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.zera.android.view.components.buttons.IconButton
 import com.zera.android.view.components.buttons.ZeraButton
 import com.zera.android.view.components.buttons.ZeraButtonType
@@ -38,7 +40,12 @@ import com.zera.android.viewmodel.manager.ItensViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ItensScreen(
-    viewModel: ItensViewModel = viewModel(),
+    initialStatus: String? = null,
+    viewModel: ItensViewModel = viewModel(
+        factory = viewModelFactory {
+            initializer { ItensViewModel(initialStatuses = listOfNotNull(initialStatus)) }
+        },
+    ),
 ) {
     val state by viewModel.state
     var showFiltersSheet by rememberSaveable { mutableStateOf(false) }
@@ -48,7 +55,7 @@ fun ItensScreen(
 
     ManagerScaffold(
         title = "Itens",
-        currentRoute = Route.Itens,
+        currentRoute = Route.Itens(status = initialStatus),
         goBack = true,
         scrollable = false,
     ) {

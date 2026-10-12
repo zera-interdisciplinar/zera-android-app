@@ -4,6 +4,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.zera.android.model.dto.inventory.ItemResponseDTO
 import com.zera.android.model.dto.inventory.UpdateItemRequestDTO
+import com.zera.android.model.usecase.auth.GetSelfUser
 import com.zera.android.model.usecase.inventory.ApproveItem
 import com.zera.android.model.usecase.inventory.GetItemDetails
 import com.zera.android.model.usecase.inventory.RejectItem
@@ -12,6 +13,7 @@ import com.zera.android.view.components.outros.ItemStatus
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.viewmodel.ZeraViewModel
+import com.zera.android.viewmodel.isEmployeeRole
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonObject
@@ -43,20 +45,24 @@ data class ItemDetailsState(
 
 class ItemDetailsViewModel : ZeraViewModel() {
     private val getItemDetails = GetItemDetails()
+    private val getSelfUser = GetSelfUser()
     private val approveItem = ApproveItem()
     private val rejectItem = RejectItem()
     private val updateItem = UpdateItem()
 
     private val _state = mutableStateOf(ItemDetailsState())
     val state = _state
+    private var isEmployee = false
 
     fun loadItem(itemId: String) {
         if (itemId.isBlank()) return
         _state.value = _state.value.copy(isLoading = true, errorMessage = null)
         viewModelScope.launch {
             try {
+                runCatching { getSelfUser.execute() }
+                    .onSuccess { isEmployee = isEmployeeRole(it.role) }
                 val item = getItemDetails.execute(itemId)
-                _state.value = stateFrom(item).copy(isLoading = false, errorMessage = null)
+                _state.value = stateFrom(item, isEmployee).copy(isLoading = false, errorMessage = null)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -198,7 +204,7 @@ class ItemDetailsViewModel : ZeraViewModel() {
         viewModelScope.launch {
             try {
                 val item = rejectItem.execute(itemId, trimmed)
-                _state.value = stateFrom(item).copy(isMutating = false, errorMessage = null)
+                _state.value = stateFrom(item, isEmployee).copy(isMutating = false, errorMessage = null)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -222,7 +228,7 @@ class ItemDetailsViewModel : ZeraViewModel() {
         viewModelScope.launch {
             try {
                 val item = updateItem.execute(itemId, request)
-                _state.value = stateFrom(item).copy(isMutating = false, errorMessage = null)
+                _state.value = stateFrom(item, isEmployee).copy(isMutating = false, errorMessage = null)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -257,8 +263,9 @@ class ItemDetailsViewModel : ZeraViewModel() {
             else -> value.orEmpty()
         }
 
-        internal fun canReview(status: ItemStatus?): Boolean =
-            status == ItemStatus.PendingApproval || status == ItemStatus.AwaitingEvaluation
+        internal fun canReview(status: ItemStatus?, isEmployee: Boolean = false): Boolean =
+            !isEmployee &&
+                (status == ItemStatus.PendingApproval || status == ItemStatus.AwaitingEvaluation)
 
         internal fun serialValidationError(value: String): String? {
             val trimmed = value.trim()
@@ -350,7 +357,10 @@ class ItemDetailsViewModel : ZeraViewModel() {
             }
         }
 
-        internal fun stateFrom(item: ItemResponseDTO): ItemDetailsState = ItemDetailsState(
+        internal fun stateFrom(
+            item: ItemResponseDTO,
+            isEmployee: Boolean = false,
+        ): ItemDetailsState = ItemDetailsState(
             itemId = item.id,
             itemName = item.name,
             itemSubtitle = item.model?.name.orEmpty(),
@@ -363,7 +373,7 @@ class ItemDetailsViewModel : ZeraViewModel() {
             notes = item.notes.orEmpty(),
             registeredBy = registeredByFrom(item),
             registeredAt = formatRegisteredAt(item.createdAt),
-            canReview = canReview(statusFrom(item.status)),
+            canReview = canReview(statusFrom(item.status), isEmployee),
         )
 
         internal fun userFacingError(

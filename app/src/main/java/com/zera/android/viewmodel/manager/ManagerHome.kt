@@ -116,7 +116,7 @@ class ManagerHomeViewModel : ZeraViewModel() {
     }
 
     fun onItemCardClick() {
-        ZeraNavigator.push(Route.Itens)
+        ZeraNavigator.push(Route.Itens())
     }
 
     fun onEmployeesCardClick() {
@@ -124,7 +124,7 @@ class ManagerHomeViewModel : ZeraViewModel() {
     }
 
     fun onSeeAllItemsClick() {
-        ZeraNavigator.push(Route.Itens)
+        ZeraNavigator.push(Route.Itens())
     }
 
     fun onAlertClick(notification: NotificationItem) {
@@ -168,7 +168,7 @@ class ManagerHomeViewModel : ZeraViewModel() {
             AlertKind.LIFESPAN_EXPIRATION,
             AlertKind.USAGE_INTENSITY_LIMIT,
             AlertKind.PREDICTED_FAILURE,
-            -> Route.Itens
+            -> Route.Itens()
             AlertKind.RECYCLABLE_TO_LANDFILL -> Route.Recycling
             else -> null
         }

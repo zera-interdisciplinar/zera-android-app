@@ -33,7 +33,7 @@ class ItemApprovedViewModel : ZeraViewModel() {
     }
 
     fun onViewPendingItemsClick() {
-        ZeraNavigator.push(Route.Itens)
+        ZeraNavigator.push(Route.Itens(status = ItemStatus.PendingApproval.label))
     }
 
     fun onBackToHomeClick() {

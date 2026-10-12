@@ -32,6 +32,7 @@ import com.zera.android.view.screens.manager.ItensScreen
 import com.zera.android.view.screens.manager.ManagerHomeScreen
 import com.zera.android.view.screens.manager.ModelCreationScreen
 import com.zera.android.view.screens.manager.ModelCreationSuccessScreen
+import com.zera.android.view.screens.manager.ModelDetailsScreen
 import com.zera.android.view.screens.manager.ModelItemsScreen
 import com.zera.android.view.screens.manager.ModelsScreen
 import com.zera.android.view.screens.manager.recycling.ItensResumeScreen
@@ -147,9 +148,10 @@ fun ZeraNavHost() {
                         IndexesScreen()
                     }
                 }
-                composable<Route.Itens> {
+                composable<Route.Itens> { backStackEntry ->
+                    val route = backStackEntry.toRoute<Route.Itens>()
                     CompositionLocalProvider(LocalAnimatedVisibilityScope provides this) {
-                        ItensScreen()
+                        ItensScreen(initialStatus = route.status)
                     }
                 }
                 composable<Route.Recycling> {
@@ -231,6 +233,10 @@ fun ZeraNavHost() {
                 }
                 composable<Route.Models> {
                     ModelsScreen()
+                }
+                composable<Route.ModelDetails> { backStackEntry ->
+                    val route = backStackEntry.toRoute<Route.ModelDetails>()
+                    ModelDetailsScreen(modelId = route.modelId)
                 }
                 composable<Route.ModelItems> { backStackEntry ->
                     val route = backStackEntry.toRoute<Route.ModelItems>()

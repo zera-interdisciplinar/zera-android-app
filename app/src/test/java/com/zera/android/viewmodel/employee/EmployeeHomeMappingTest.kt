@@ -16,6 +16,11 @@ import org.junit.Test
 
 class EmployeeHomeMappingTest {
     @Test
+    fun addModelOpensModels() {
+        assertEquals(Route.Models, EmployeeHomeViewModel.addModelRoute())
+    }
+
+    @Test
     fun discardCardOpensHistory() {
         assertEquals(Route.ScheduledDisposals, EmployeeHomeViewModel.discardCardRoute())
     }

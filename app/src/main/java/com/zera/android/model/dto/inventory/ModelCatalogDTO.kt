@@ -12,6 +12,21 @@ data class PagedModelsDTO(
 )
 
 @Serializable
+data class UpdateModelNameRequestDTO(
+    val name: String,
+)
+
+@Serializable
+data class UpdateModelManufacturerRequestDTO(
+    val manufacturer: String,
+)
+
+@Serializable
+data class UpdateModelMaterialsRequestDTO(
+    val materials: List<String>,
+)
+
+@Serializable
 data class CreateModelRequestDTO(
     val name: String,
     val manufacturer: String,

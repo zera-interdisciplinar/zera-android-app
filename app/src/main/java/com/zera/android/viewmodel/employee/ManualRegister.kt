@@ -6,6 +6,7 @@ import com.zera.android.model.dto.inventory.CreateItemRequestDTO
 import com.zera.android.model.dto.inventory.ModelResponseDTO
 import com.zera.android.model.usecase.inventory.CreateItem
 import com.zera.android.model.usecase.inventory.GetModels
+import com.zera.android.model.usecase.inventory.SubmitItem
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.viewmodel.ZeraViewModel
@@ -58,6 +59,7 @@ class ManualRegisterViewModel(
     initialBarcode: String? = null,
     private val getModels: GetModels = GetModels(),
     private val createItem: CreateItem = CreateItem(),
+    private val submitItem: SubmitItem = SubmitItem(),
     private val launchWork: ((suspend () -> Unit) -> Unit)? = null,
 ) : ZeraViewModel() {
     private val _state = mutableStateOf(
@@ -197,11 +199,12 @@ class ManualRegisterViewModel(
                     usageIntensity = current.usageIntensity,
                 ),
             )
+            val submitted = submitItem.execute(item.id)
             _state.value = _state.value.copy(isSubmitting = false)
             // TODO: tela de conclusão pós-cadastro (padrão ModelCreationSuccessScreen):
             // "Item cadastrado!", card nome/modelo + ID, chip "Em aprovação",
             // CTAs "Registrar outro item" / "Ver itens". Hoje vai direto ao PDI.
-            ZeraNavigator.pushAndPop(Route.ItemDetails(itemId = item.id), popCount = 1)
+            ZeraNavigator.pushAndPop(Route.ItemDetails(itemId = submitted.id), popCount = 1)
         } catch (error: CancellationException) {
             throw error
         } catch (error: Exception) {

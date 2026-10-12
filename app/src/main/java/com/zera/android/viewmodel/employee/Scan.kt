@@ -103,6 +103,6 @@ class ScanViewModel(
     }
 
     fun onRegisterModelClick() {
-        // TODO: navegar para o cadastro de modelo do operário
+        ZeraNavigator.push(Route.Models)
     }
 }

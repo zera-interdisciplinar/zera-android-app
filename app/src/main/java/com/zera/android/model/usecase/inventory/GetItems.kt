@@ -7,6 +7,7 @@ class GetItems {
     suspend fun execute(
         status: String? = null,
         categoryId: String? = null,
+        modelId: String? = null,
         q: String? = null,
         page: Int = 0,
         size: Int = 20,
@@ -14,6 +15,7 @@ class GetItems {
         return InventoryClient.inventoryService.getItems(
             status = status,
             categoryId = categoryId,
+            modelId = modelId,
             q = q,
             page = page,
             size = size,
