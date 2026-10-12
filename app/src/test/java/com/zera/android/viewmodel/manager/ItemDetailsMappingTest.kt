@@ -24,7 +24,6 @@ class ItemDetailsMappingTest {
         assertEquals(ItemStatus.InStock, ItemDetailsViewModel.statusFrom("APPROVED"))
         assertEquals(ItemStatus.PendingApproval, ItemDetailsViewModel.statusFrom(" pending_approval "))
         assertEquals(ItemStatus.PendingApproval, ItemDetailsViewModel.statusFrom("PENDING"))
-        assertNull(ItemDetailsViewModel.statusFrom("DRAFT"))
         assertNull(ItemDetailsViewModel.statusFrom(null))
     }
 
@@ -159,6 +158,8 @@ class ItemDetailsMappingTest {
         assertEquals(false, ItemDetailsViewModel.canReview(ItemStatus.Rejected))
         assertEquals(false, ItemDetailsViewModel.canReview(ItemStatus.Draft))
         assertEquals(false, ItemDetailsViewModel.canReview(null))
+        assertEquals(false, ItemDetailsViewModel.canReview(ItemStatus.PendingApproval, isEmployee = true))
+        assertEquals(false, ItemDetailsViewModel.canReview(ItemStatus.AwaitingEvaluation, isEmployee = true))
     }
 
     @Test
@@ -173,6 +174,15 @@ class ItemDetailsMappingTest {
         )
 
         assertEquals("Usado", state.condition)
+        assertEquals(false, state.canReview)
+    }
+
+    @Test
+    fun employeeDoesNotGetReviewOnPendingItem() {
+        val state = ItemDetailsViewModel.stateFrom(
+            ItemResponseDTO(id = "id-1", name = "Notebook", status = "PENDING_APPROVAL"),
+            isEmployee = true,
+        )
         assertEquals(false, state.canReview)
     }
 

@@ -99,7 +99,7 @@ class EmployeeHomeViewModel : ZeraViewModel() {
     }
 
     fun onAddModelClick() {
-        // TODO: navegar para o cadastro de modelo do operário
+        ZeraNavigator.push(addModelRoute())
     }
 
     fun onMaintenanceCardClick() {
@@ -119,6 +119,8 @@ class EmployeeHomeViewModel : ZeraViewModel() {
     }
 
     companion object {
+        internal fun addModelRoute() = Route.Models
+
         internal fun discardCardRoute() = Route.ScheduledDisposals
 
         internal fun maintenanceCardRoute() =

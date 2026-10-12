@@ -55,8 +55,8 @@ class ManagerHomeMappingTest {
 
     @Test
     fun onlyAlertKindsWithAScreenAreResolvable() {
-        assertEquals(Route.Itens, ManagerHomeViewModel.routeForAlertKind("STOCK_QUANTITY_LIMIT"))
-        assertEquals(Route.Itens, ManagerHomeViewModel.routeForAlertKind("WARRANTY_EXPIRATION"))
+        assertEquals(Route.Itens(), ManagerHomeViewModel.routeForAlertKind("STOCK_QUANTITY_LIMIT"))
+        assertEquals(Route.Itens(), ManagerHomeViewModel.routeForAlertKind("WARRANTY_EXPIRATION"))
         assertEquals(Route.Recycling, ManagerHomeViewModel.routeForAlertKind("RECYCLABLE_TO_LANDFILL"))
         assertNull(ManagerHomeViewModel.routeForAlertKind("ITEM_APPROVED"))
         assertNull(ManagerHomeViewModel.routeForAlertKind("ITEM_REJECTED"))

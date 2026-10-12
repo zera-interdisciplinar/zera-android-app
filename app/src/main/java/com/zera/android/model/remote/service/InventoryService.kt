@@ -15,6 +15,9 @@ import com.zera.android.model.dto.inventory.PagedItemsDTO
 import com.zera.android.model.dto.inventory.PagedModelsDTO
 import com.zera.android.model.dto.inventory.RejectItemRequestDTO
 import com.zera.android.model.dto.inventory.UpdateItemRequestDTO
+import com.zera.android.model.dto.inventory.UpdateModelManufacturerRequestDTO
+import com.zera.android.model.dto.inventory.UpdateModelMaterialsRequestDTO
+import com.zera.android.model.dto.inventory.UpdateModelNameRequestDTO
 import com.zera.android.model.dto.inventory.DisposalRecordDTO
 import com.zera.android.model.dto.inventory.PagedDisposalsDTO
 import com.zera.android.model.dto.inventory.WorkCenterResponseDTO
@@ -45,6 +48,7 @@ interface InventoryService {
     suspend fun getItems(
         @Query("status") status: String? = null,
         @Query("categoryId") categoryId: String? = null,
+        @Query("modelId") modelId: String? = null,
         @Query("q") q: String? = null,
         @Query("page") page: Int = 0,
         @Query("size") size: Int = 20,
@@ -65,6 +69,11 @@ interface InventoryService {
         @Body body: CreateItemRequestDTO,
     ): ItemResponseDTO
 
+    @POST("api/v1/items/{id}/submit")
+    suspend fun submitItem(
+        @Path("id") id: String,
+    ): ItemResponseDTO
+
     @GET("api/v1/categories")
     suspend fun getCategories(): List<CategoryResponseDTO>
 
@@ -83,6 +92,36 @@ interface InventoryService {
     @POST("api/v1/models")
     suspend fun createModel(
         @Body body: CreateModelRequestDTO,
+    ): ModelResponseDTO
+
+    @GET("api/v1/models/{id}")
+    suspend fun getModel(
+        @Path("id") id: String,
+    ): ModelResponseDTO
+
+    @GET("api/v1/models/{id}/items")
+    suspend fun getModelItems(
+        @Path("id") id: String,
+        @Query("page") page: Int = 0,
+        @Query("size") size: Int = 20,
+    ): PagedItemsDTO
+
+    @PATCH("api/v1/models/{id}/name")
+    suspend fun updateModelName(
+        @Path("id") id: String,
+        @Body body: UpdateModelNameRequestDTO,
+    ): ModelResponseDTO
+
+    @PATCH("api/v1/models/{id}/manufacturer")
+    suspend fun updateModelManufacturer(
+        @Path("id") id: String,
+        @Body body: UpdateModelManufacturerRequestDTO,
+    ): ModelResponseDTO
+
+    @PATCH("api/v1/models/{id}/materials")
+    suspend fun updateModelMaterials(
+        @Path("id") id: String,
+        @Body body: UpdateModelMaterialsRequestDTO,
     ): ModelResponseDTO
 
     @GET("api/v1/materials")

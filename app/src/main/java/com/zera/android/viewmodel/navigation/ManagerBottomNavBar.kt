@@ -41,6 +41,6 @@ class ManagerBottomNavBarViewModel : ZeraViewModel() {
     }
 
     fun onItensClick(currentRoute: Route) {
-        navigate(currentRoute, Route.Itens)
+        navigate(currentRoute, Route.Itens())
     }
 }

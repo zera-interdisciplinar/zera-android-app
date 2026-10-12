@@ -3,12 +3,15 @@ package com.zera.android.viewmodel.manager
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.zera.android.model.dto.inventory.ModelResponseDTO
+import com.zera.android.model.local.SqliteManager
+import com.zera.android.model.usecase.auth.GetSelfUser
 import com.zera.android.model.usecase.inventory.GetModels
 import com.zera.android.view.components.lists.OptionItem
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.viewmodel.ZeraViewModel
+import com.zera.android.viewmodel.isEmployeeRole
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -16,6 +19,7 @@ import java.text.NumberFormat
 import java.util.Locale
 
 data class ModelsState(
+    val isEmployee: Boolean = false,
     val searchQuery: String = "",
     val totalModelsLabel: String = "",
     val models: List<OptionItem> = emptyList(),
@@ -27,6 +31,7 @@ data class ModelsState(
 
 class ModelsViewModel : ZeraViewModel() {
     private val getModels = GetModels()
+    private val getSelfUser = GetSelfUser()
 
     private val _state = mutableStateOf(ModelsState())
     val state = _state
@@ -37,6 +42,8 @@ class ModelsViewModel : ZeraViewModel() {
     private var loadedModels: List<ModelResponseDTO> = emptyList()
 
     fun refresh() {
+        loadRole()
+        maybeShowUsageSheet()
         loadModels()
     }
 
@@ -69,11 +76,36 @@ class ModelsViewModel : ZeraViewModel() {
     }
 
     fun onModelClick(model: OptionItem) {
-        // TODO: navegar para os detalhes do modelo.
+        val id = model.id?.takeIf { it.isNotBlank() } ?: return
+        ZeraNavigator.push(Route.ModelDetails(id))
     }
 
     fun setModelUsageSheetVisible(isVisible: Boolean) {
         _state.value = _state.value.copy(isModelUsageSheetVisible = isVisible)
+        if (!isVisible) {
+            runCatching { SqliteManager.markModelUsageSeen() }
+        }
+    }
+
+    private fun loadRole() {
+        viewModelScope.launch {
+            try {
+                val user = getSelfUser.execute()
+                _state.value = _state.value.copy(isEmployee = isEmployeeRole(user.role))
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                // Mantém o scaffold do gestor se o papel não vier.
+            }
+        }
+    }
+
+    private fun maybeShowUsageSheet() {
+        if (_state.value.isModelUsageSheetVisible) return
+        val seen = runCatching { SqliteManager.hasSeenModelUsage() }.getOrDefault(true)
+        if (shouldShowUsageSheet(seen)) {
+            _state.value = _state.value.copy(isModelUsageSheetVisible = true)
+        }
     }
 
     private fun loadModels(reset: Boolean = true) {
@@ -118,6 +150,8 @@ class ModelsViewModel : ZeraViewModel() {
 
     companion object {
         internal const val PAGE_SIZE = 20
+
+        internal fun shouldShowUsageSheet(hasSeen: Boolean): Boolean = !hasSeen
         private val ptBr = Locale.forLanguageTag("pt-BR")
 
         internal fun totalModelsLabel(total: Long): String {
@@ -136,6 +170,7 @@ class ModelsViewModel : ZeraViewModel() {
             ).joinToString(" · ")
             val approval = approvalOf(model.approvalStatus)
             return OptionItem(
+                id = model.id,
                 name = model.name.orEmpty(),
                 description = description,
                 statusText = approval?.label,
