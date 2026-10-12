@@ -71,10 +71,12 @@ fun ChatBotScreen(
                     .padding(horizontal = Spacing.medium, vertical = Spacing.small),
                 verticalArrangement = Arrangement.spacedBy(Spacing.medium),
             ) {
-                SuggestionList(
-                    suggestions = state.suggestions,
-                    onSuggestionClick = viewModel::onSuggestionClick,
-                )
+                if (state.showSuggestions) {
+                    SuggestionList(
+                        suggestions = state.suggestions,
+                        onSuggestionClick = viewModel::onSuggestionClick,
+                    )
+                }
                 MessageTextBox(
                     value = state.input,
                     onValueChange = viewModel::onInputChange,
