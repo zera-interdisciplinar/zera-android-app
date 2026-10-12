@@ -147,4 +147,7 @@ sealed interface Route{
     // ROTAS COMPARTILHADAS
     @Serializable
     data object Profile : Route
+
+    @Serializable
+    data object ChatBot : Route
 }
