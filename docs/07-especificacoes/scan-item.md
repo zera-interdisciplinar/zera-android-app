@@ -67,7 +67,7 @@ Como Operário, quero apontar a câmera para a etiqueta de um item, para identif
 - [x] "Cadastrar sem etiqueta" leva ao cadastro manual
 - [x] Ler a etiqueta/QR code e abrir o item correspondente (`GET /items/by-barcode/{barcode}`)
 - [x] Código desconhecido abre o cadastro com o barcode preenchido
-- [ ] "Cadastrar modelo" navegar para o cadastro de modelo do Operário (hoje `TODO` em `onRegisterModelClick`; a tela de destino ainda não existe)
+- [x] "Cadastrar modelo" navega para `Route.Models` (lista, orientação e cadastro já existentes)
 
 ## Edge cases considerados
 

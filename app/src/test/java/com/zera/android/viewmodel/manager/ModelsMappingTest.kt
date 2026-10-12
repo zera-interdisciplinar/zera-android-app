@@ -20,10 +20,17 @@ class ModelsMappingTest {
             ),
         )
 
+        assertEquals("m1", option.id)
         assertEquals("Latitude 5420", option.name)
         assertEquals("Dell · Plástico", option.description)
         assertEquals("Aprovado", option.statusText)
         assertEquals(ZeraColorFamily.Green, option.statusStyle)
+    }
+
+    @Test
+    fun usageSheetOnlyOnFirstAccess() {
+        assertEquals(true, ModelsViewModel.shouldShowUsageSheet(hasSeen = false))
+        assertEquals(false, ModelsViewModel.shouldShowUsageSheet(hasSeen = true))
     }
 
     @Test

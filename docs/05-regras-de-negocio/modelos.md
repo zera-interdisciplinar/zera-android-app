@@ -3,7 +3,7 @@
 ## Metadados
 
 - **Domínio:** Inventário (modelos)
-- **Perfil(is) envolvido(s):** Gestor
+- **Perfil(is) envolvido(s):** Gestor e Operário
 - **Última atualização:** 2026-10-03
 
 ## Visão geral
@@ -14,7 +14,7 @@ Este documento descreve o fluxo de consulta e cadastro de modelos disponível na
 
 ### Orientação de uso
 
-A tela de modelos apresenta a orientação “Como usar o Modelo”, controlada por `isModelUsageSheetVisible` em `ModelsViewModel`. O estado começa visível para cada nova instância do ViewModel; persistir que já foi vista e mostrar somente no primeiro acesso ainda não está implementado.
+A tela de modelos apresenta a orientação “Como usar o Modelo”, controlada por `isModelUsageSheetVisible` em `ModelsViewModel`. A sheet aparece só no primeiro acesso; ao dispensar, a marca fica em `SqliteManager` e sobrevive ao logout.
 
 ### Campos do cadastro
 
@@ -28,7 +28,7 @@ Ao concluir, a interface navega para a tela de sucesso levando os valores preenc
 
 ## Relacionamento com perfis
 
-O fluxo está disponível na área do Gestor (`Route.Models`, `Route.ModelCreation` e `Route.ModelCreationSuccess`).
+O fluxo está em `Route.Models`, `Route.ModelDetails`, `Route.ModelCreation` e `Route.ModelCreationSuccess`. Clique na lista abre o detalhe (`GET /models/{id}`). Não existe `POST /models/{id}/approve`. Modelo `PENDING`: o gestor vê Aprovar/Recusar. O clique busca o item em `GET /models/{id}/items` (fallback `GET /items?modelId=&status=PENDING_APPROVAL`) e chama `POST /items/{id}/approve` ou `/reject`. Sem item pendente, o botão permanece e a API responde com aviso. O operário edita nome e marca (`PATCH` por campo).
 
 ## Referências
 

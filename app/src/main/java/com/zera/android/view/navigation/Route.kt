@@ -37,7 +37,7 @@ sealed interface Route{
     data object Indexes : Route
 
     @Serializable
-    data object Itens : Route
+    data class Itens(val status: String? = null) : Route
 
     @Serializable
     data object Recycling : Route
@@ -110,6 +110,9 @@ sealed interface Route{
 
     @Serializable
     data object Models : Route
+
+    @Serializable
+    data class ModelDetails(val modelId: String) : Route
 
     @Serializable
     data class ModelItems(

@@ -18,6 +18,7 @@ object SqliteManager {
     private const val KEY_UNIT_ID = "unit_id"
     private const val KEY_EMAIL = "email"
     private const val KEY_PASSWORD = "password"
+    private const val KEY_SEEN_MODEL_USAGE = "seen_model_usage"
 
     private lateinit var helper: SessionDbHelper
 
@@ -81,9 +82,20 @@ object SqliteManager {
         !getRefreshToken().isNullOrBlank() ||
             (!getEmail().isNullOrBlank() && !getPassword().isNullOrBlank())
 
+    fun hasSeenModelUsage(): Boolean = get(KEY_SEEN_MODEL_USAGE) == "1"
+
+    @Synchronized
+    fun markModelUsageSeen() {
+        put(helper.writableDatabase, KEY_SEEN_MODEL_USAGE, "1")
+    }
+
     @Synchronized
     fun clearSession() {
-        helper.writableDatabase.delete(TABLE_SESSION, null, null)
+        helper.writableDatabase.delete(
+            TABLE_SESSION,
+            "$COLUMN_KEY != ?",
+            arrayOf(KEY_SEEN_MODEL_USAGE),
+        )
     }
 
     private fun put(db: SQLiteDatabase, key: String, value: String) {

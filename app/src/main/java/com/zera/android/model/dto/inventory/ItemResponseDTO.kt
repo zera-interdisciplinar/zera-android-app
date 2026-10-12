@@ -40,6 +40,8 @@ data class ModelResponseDTO(
     val category: CategoryResponseDTO? = null,
     val notes: String? = null,
     val approvalStatus: String? = null,
+    val rejectionReason: String? = null,
+    val createdByName: String? = null,
 )
 
 @Serializable

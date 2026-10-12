@@ -74,7 +74,7 @@ fun ModelItemsScreen(
     } else {
         ManagerScaffold(
             title = "Itens do Modelo",
-            currentRoute = Route.Itens,
+            currentRoute = Route.Itens(),
             goBack = true,
             scrollable = false,
             onFabClick = { /* TODO: abrir chatbot */ },

@@ -3,7 +3,7 @@
 ## Metadados
 
 - **Feature:** Consulta, orientação e cadastro de modelos (`ModelsScreen`)
-- **Perfil(is) envolvido(s):** Gestor
+- **Perfil(is) envolvido(s):** Gestor e Operário
 - **Status:** interface em progresso; persistência pendente
 - **Última atualização:** 2026-10-03
 
@@ -21,7 +21,25 @@ Como Gestor, quero preencher os dados de um modelo e ver uma confirmação do fl
 
 - **Given** o Gestor abre a tela de modelos
 - **When** `isModelUsageSheetVisible` está ativo
-- **Then** a tela apresenta “Como usar o Modelo”; o estado atualmente inicia visível em uma nova instância do ViewModel
+- **Then** a tela apresenta “Como usar o Modelo” só se ainda não tiver sido vista neste aparelho
+
+### Cenário: Abrir o detalhe
+
+- **Given** a lista de modelos tem um item com `id`
+- **When** toca no modelo
+- **Then** navega para `Route.ModelDetails(modelId)` e carrega `GET /models/{id}`
+
+### Cenário: Gestor aprova ou recusa
+
+- **Given** o modelo está `PENDING`, o usuário é gestor e existe item `PENDING_APPROVAL` do modelo
+- **When** toca Aprovar, ou Recusar com motivo
+- **Then** chama `POST /items/{id}/approve` ou `POST /items/{id}/reject` (cascata no modelo, contrato Confluence)
+
+### Cenário: Operário edita
+
+- **Given** o usuário é operário
+- **When** confirma nome, marca ou material
+- **Then** chama o `PATCH` correspondente (`/name` ou `/manufacturer`)
 
 ### Cenário: Abrir o formulário
 
@@ -55,7 +73,7 @@ Como Gestor, quero preencher os dados de um modelo e ver uma confirmação do fl
 - [x] Confirmação mostra nome, material, marca e observação quando preenchidos
 - [ ] Validar campos e persistir o modelo pela API
 - [ ] Carregar opções de material de uma fonte oficial
-- [ ] Implementar regra durável para mostrar a orientação somente no primeiro acesso
+- [x] Implementar regra durável para mostrar a orientação somente no primeiro acesso
 
 ## Edge cases considerados
 

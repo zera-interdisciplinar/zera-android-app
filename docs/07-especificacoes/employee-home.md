@@ -4,7 +4,7 @@
 
 - **Feature:** Tela inicial do Operário
 - **Perfil(is) envolvido(s):** Operário (funcionário)
-- **Status:** em progresso (atalhos reais; "Adicionar Modelo" ainda sem destino)
+- **Status:** em progresso (atalhos reais; "Adicionar Modelo" abre `Route.Models`)
 - **Última atualização:** 2026-10-11
 
 ## Contexto
@@ -46,7 +46,7 @@ Como Operário, quero ver a ocupação do estoque, meus atalhos de manutenção/
 - [x] "Ver Todos" abre `Route.EmployeeItems`
 - [x] Navegação de "Escanear" e "Descartes" (`Route.Scan` e `Route.ScheduledDisposals`)
 - [x] "Manutenção" abre `Route.EmployeeItems(status = "Em manutenção")`
-- [ ] Navegação de "Adicionar Modelo" (ainda `TODO` no `EmployeeHomeViewModel`)
+- [x] Navegação de "Adicionar Modelo" (`Route.Models`)
 
 ## Edge cases considerados
 
