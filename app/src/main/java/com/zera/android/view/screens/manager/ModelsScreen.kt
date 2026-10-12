@@ -87,7 +87,6 @@ fun ModelsScreen(
             currentRoute = Route.Models,
             goBack = true,
             scrollable = false,
-            onFabClick = { /* TODO: abrir chatbot */ },
             content = body,
         )
     } else {
@@ -96,7 +95,6 @@ fun ModelsScreen(
             currentRoute = Route.Models,
             goBack = true,
             scrollable = false,
-            onFabClick = { /* TODO: abrir chatbot */ },
             content = body,
         )
     }
