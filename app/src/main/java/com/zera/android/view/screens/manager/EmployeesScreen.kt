@@ -45,7 +45,6 @@ fun EmployeesScreen(
         currentRoute = Route.Employees,
         goBack = true,
         onBackClick = viewModel::onBackClick,
-        onFabClick = { /* TODO: abrir chatbot */ },
     ) {
         ZeraBox(style = ZeraColorFamily.Blue) {
             Row(

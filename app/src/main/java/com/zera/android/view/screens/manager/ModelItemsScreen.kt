@@ -62,7 +62,6 @@ fun ModelItemsScreen(
             currentRoute = Route.EmployeeItems,
             goBack = true,
             scrollable = false,
-            onFabClick = { /* TODO: abrir chatbot */ },
         ) {
             ModelItemsContent(
                 state = state,
@@ -77,7 +76,6 @@ fun ModelItemsScreen(
             currentRoute = Route.Itens,
             goBack = true,
             scrollable = false,
-            onFabClick = { /* TODO: abrir chatbot */ },
         ) {
             ModelItemsContent(
                 state = state,

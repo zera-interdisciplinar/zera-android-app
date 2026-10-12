@@ -41,7 +41,6 @@ fun EmployeeHomeScreen(
     EmployeeScaffold(
         title = "Visão geral",
         currentRoute = Route.EmployeeHome,
-        onFabClick = { /* TODO: abrir chatbot */ },
     ) {
         Column(modifier = Modifier.padding(horizontal = Spacing.small)) {
             BodyText(text = state.userName, bold = true)

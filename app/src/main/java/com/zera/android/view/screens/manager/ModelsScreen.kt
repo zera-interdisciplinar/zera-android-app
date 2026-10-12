@@ -56,7 +56,6 @@ fun ModelsScreen(
         currentRoute = Route.Models,
         goBack = true,
         scrollable = false,
-        onFabClick = { /* TODO: abrir chatbot */ },
     ) {
         ZeraSearchInput(
             value = state.searchQuery,

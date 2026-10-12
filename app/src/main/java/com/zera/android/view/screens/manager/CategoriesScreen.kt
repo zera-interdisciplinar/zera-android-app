@@ -38,7 +38,6 @@ fun CategoriesScreen(
         currentRoute = Route.Categories,
         goBack = true,
         scrollable = false,
-        onFabClick = { /* TODO: abrir chatbot */ },
     ) {
         ZeraSearchInput(
             value = state.searchQuery,
