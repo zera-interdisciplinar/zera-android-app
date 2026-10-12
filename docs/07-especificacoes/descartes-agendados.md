@@ -1,59 +1,55 @@
-# Spec — Descartes agendados e Detalhes do agendamento
+# Spec — Histórico de descartes e detalhe
 
 ## Metadados
 
-- **Feature:** Lista de descartes agendados e tela de detalhes de um agendamento
-- **Perfil(is) envolvido(s):** Gestor
-- **Status:** em progresso (UI e navegação prontas; dados mockados)
-- **Última atualização:** 2026-10-06
+- **Feature:** Lista e detalhe de descartes já registrados
+- **Perfil(is) envolvido(s):** Gestor (lista + cancelar); Operário (lista/detalhe sem cancelar)
+- **Status:** implementado (API; nomes de rota `ScheduledDisposals` / `SchedulingDetails` são legado de UI)
+- **Última atualização:** 2026-10-11
 
 ## Contexto
 
-`Route.ScheduledDisposals` ("Descartes agendados") é aberta pela `ManagerSideBar` e lista os descartes já agendados com uma recicladora. Tocar em um item abre `Route.SchedulingDetails` ("Agendamento"), com data/horário, ações de alteração, contato com a recicladora e cancelamento. Ambas usam dados mockados nos ViewModels (`ScheduledDisposalsViewModel`, `SchedulingDetailsViewModel`); o contrato de API ainda não foi definido.
+A v1 **não agenda** descarte. `Route.ScheduledDisposals` é o histórico (`GET /api/v1/disposals`). O detalhe lê `GET /disposals/{id}`. Cancelar: `PATCH /disposals/{id}/cancel`, só gestor. Novo registro continua no mapa (`POST /disposals`).
+
+Fonte: [API ms-inventory](https://zerainterdisciplinar.atlassian.net/wiki/spaces/Backend/pages/55869441), [contrato-descarte.md](../contrato-places-api/contrato-descarte.md).
 
 ## User story
 
-Como Gestor, quero ver os descartes agendados e abrir os detalhes de cada um, para alterar o agendamento, contatar a recicladora ou cancelar.
+Como Gestor ou Operário, quero ver os descartes da unidade e o detalhe de um registro, para conferir destino, itens e (gestor) cancelar um registro errado.
 
 ## Cenários (Given/When/Then)
 
 ### Cenário: Abrir a lista
 
-- **Given** o Gestor abre a `ManagerSideBar`
-- **When** escolhe "Descartes agendados"
-- **Then** navega para `Route.ScheduledDisposals`, que mostra o card "Próximo descarte" (quando há), o botão "Agendar próximo descarte" e a `OptionList` de descartes
+- **Given** o usuário autenticado abre a sidebar
+- **When** escolhe o histórico de descartes
+- **Then** navega para `Route.ScheduledDisposals` com `GET /disposals` (paginação, `q` e filtros de destino/data)
 
 ### Cenário: Abrir os detalhes
 
-- **Given** a lista de descartes agendados está visível
-- **When** o Gestor toca em um item
-- **Then** navega (animação `SlideHorizontal`) para `Route.SchedulingDetails`
+- **Given** a lista está visível
+- **When** toca em um item
+- **Then** navega para `Route.SchedulingDetails` com o `id` do descarte
 
-### Cenário: Contato desativado
+### Cenário: Contato sem ficha
 
-- **Given** `SchedulingDetailsState.contactButtonsEnabled` é `false`
-- **When** a tela é exibida
-- **Then** os botões "E-mail" e "Telefone" ficam desabilitados
+- **Given** o descarte só tem `placeId`/`placeName`
+- **When** a tela não tem e-mail/telefone do adm-core
+- **Then** botões de contato visíveis e desabilitados — não é bug da listagem
+
+### Cenário: Cancelar (gestor)
+
+- **Given** o Gestor está no detalhe
+- **When** confirma cancelar
+- **Then** `PATCH /disposals/{id}/cancel`, `204`, o registro some da lista
 
 ## Critérios de aceite
 
-- [x] `ScheduledDisposals` acessível pela sidebar; item da lista navega para `SchedulingDetails`
-- [x] `SchedulingDetailsScreen` usa `OptionList(hasIcon = false)` para "Alterar data ou horário" e "Adicionar ou remover produtos"
-- [x] `contactButtonsEnabled` controla E-mail e Telefone em conjunto
-- [ ] `Route.SchedulingDetails` receber o id do agendamento (hoje todo item abre o mesmo mock)
-- [ ] Ações implementadas: "Gerar relatório", alterar data/horário, editar produtos, e-mail, telefone, cancelar agendamento (hoje `TODO` no `SchedulingDetailsViewModel`)
-- [ ] "Agendar próximo descarte" e o card "Próximo descarte" navegarem
-
-## Edge cases considerados
-
-- Sem descartes agendados: `OptionList` mostra "Nenhum descarte agendado".
-- Sem próximo descarte (`nextDisposalDate` vazio): o card azul não é exibido.
-
-## Fora de escopo desta spec
-
-- Fluxo de criação do agendamento (`RecyclingScreen` → `SchedulingSuccessScreen`).
-- Menu lateral em `SchedulingDetailsScreen`: usa `Scaffold` simples, então o botão de menu da `UpperNavBar` não abre nada.
+- [x] Lista e detalhe usam a API (não mock)
+- [x] Operário não vê cancelar
+- [x] Relatório PDF via AI core com o `id` do descarte
 
 ## Referências
 
-- Componentes: `../03-catalogo-componentes.md` (`OptionList`/`OptionListItem` com `hasIcon`, `Notification`)
+- [employee-descarte.md](employee-descarte.md)
+- [contrato-ai-core-api/reports.md](../contrato-ai-core-api/reports.md)

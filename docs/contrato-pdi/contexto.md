@@ -74,7 +74,7 @@ O PATCH é parcial: a PDI edita `name`, `condition`, `serialNumber` e `notes`. A
 | Categoria | `model.category.name` | Categoria vive no modelo, não no item |
 | Material | `model.materials[].name` juntados com “e” | O modelo pode ter vários materiais |
 | Condição | `condition` (`NEW`/`USED`/…) em português | Texto da tabela do contrato |
-| Cadastrado por | `createdByName` | Nome já vem pronto; não há GET extra de usuário |
+| Cadastrado por | `createdByName`, ou `createdBy.name` se o autor vier aninhado | UUID em `createdBy` não é nome; sem texto o campo fica em branco |
 | Data de cadastro | `createdAt` formatado `pt-BR` | ISO da API → “26 de set 2026 - 21h11” |
 
 - **Aliases de status.** `ItemStatus.fromBackend` aceita `PENDING` e `APPROVED` além dos enums oficiais, porque payloads antigos/ variados já apareceram.

@@ -250,6 +250,6 @@ fun ManagerSideBarPreview() {
 @Preview(heightDp = 900)
 fun EmployeeSideBarPreview() {
     ZeraTheme {
-        SideBar(items = EmployeeSideBarItems, currentRoute = Route.EmployeeItems)
+        SideBar(items = EmployeeSideBarItems, currentRoute = Route.EmployeeItems())
     }
 }

@@ -10,6 +10,7 @@ data class DashboardHomeResponseDTO(
     val pendingApproval: Long = 0,
     val inMaintenance: Long = 0,
     val awaitingEvaluation: Long = 0,
+    val disposalsInWindow: Long = 0,
     val recentItems: PagedItemsDTO = PagedItemsDTO(),
 )
 

@@ -9,14 +9,14 @@ O app é um módulo Android único (`:app`) organizado em três camadas, inspira
   - Subpasta `shared/`: `ViewModels` de telas acessadas por mais de um tipo de usuário (ex.: "Perfil", acessada tanto por Gestor quanto por Operário) — ver a mesma convenção em `view/screens/shared/` logo abaixo.
 - **`view`** — Jetpack Compose puro: `screens` (telas, uma por rota, organizadas por domínio — `auth/`, `manager/`, `employee/` e `shared/` para telas comuns a mais de um tipo de usuário), `components` (Design System reutilizável — ver [03-catalogo-componentes.md](03-catalogo-componentes.md)), `navigation` (rotas e navegação), `theme` (tokens visuais) e `transition` (transições compartilhadas entre telas).
 
-Não há camada de `Repository` separada: o `usecase` fala diretamente com `ApiClient.<service>`, `ScrapyClient` ou `InventoryClient` e com `SharedPreferencesManager`. Para o volume atual de regras isso é suficiente; se a lógica de acesso a dados crescer (ex.: cache local, múltiplas fontes), vale reavaliar (registrar a decisão em [08-decisoes-arquiteturais/](08-decisoes-arquiteturais/) quando isso acontecer).
+Não há camada de `Repository` separada: o `usecase` fala diretamente com `AdmCoreClient.<service>`, `ScrapyClient`, `InventoryClient` (e `AiClient` quando for o caso) e com `SqliteManager`. Para o volume atual de regras isso é suficiente; se a lógica de acesso a dados crescer, vale reavaliar (ADR em [08-decisoes-arquiteturais/](08-decisoes-arquiteturais/)).
 
 ## Separação entre View e lógica (regra estrita)
 
 A `View` (`Screen`/componente Compose) deve ser **puramente de apresentação**: renderiza o `State` recebido e encaminha eventos de UI (`onClick`, `onValueChange`, ...) para o `ViewModel`. É **proibido implementar lógica na View** — isso inclui:
 
 - decisões condicionais sobre dados de domínio (ex.: `if (usuario.role == "MANAGER")`);
-- chamadas a `usecase`, `ApiClient` ou `SharedPreferencesManager`;
+- chamadas a `usecase`, clients Retrofit ou `SqliteManager`;
 - validação de dados de negócio (validação puramente de formato de UI, como desabilitar um botão enquanto um campo obrigatório está vazio, é aceitável na View; a regra de negócio em si mora no `ViewModel`);
 - disparo de navegação (`ZeraNavigator`) como reação a uma regra — a `View` só invoca `onClick`, é o `ViewModel` quem decide **para onde** navegar e **quando**.
 
@@ -32,10 +32,10 @@ com.zera.android
 │   ├── config/            AppConfig (envs e flags da Scrapy, em memória)
 │   ├── dto/               DTOs de rede (@Serializable), por domínio (auth, user, invitation, inventory)
 │   ├── entity/            modelos de domínio/config (Environments, UserRole, FlagsRequest)
-│   ├── local/             persistência local (SharedPreferencesManager)
+│   ├── local/             persistência local (SqliteManager, sessão em zera.db)
 │   ├── remote/
-│   │   ├── client/        ApiClient, ScrapyClient e InventoryClient (Retrofit + OkHttp, singletons)
-│   │   └── service/       interfaces Retrofit (AuthService, SelfUserService, InvitationService, InventoryService, ScrapyService, ...)
+│   │   ├── client/        AdmCoreClient, ScrapyClient, InventoryClient, AiClient
+│   │   └── service/       interfaces Retrofit (AuthService, InventoryService, ScrapyService, ...)
 │   └── usecase/           regra de negócio de acesso a dados, por domínio (auth/SingIn, config/Boot, inventory/GetManagerHome, GetItems, GetItemDetails, ...)
 ├── viewmodel/             um ViewModel por tela/feature, por domínio (auth/, manager/, shared/, ...)
 └── view
@@ -56,7 +56,7 @@ Fluxo típico de uma ação de usuário (exemplo: login, ver [viewmodel/auth/Sig
 
 1. A `Screen` (Compose) observa o `state` do `ViewModel` (`val state by viewModel.state`) e chama seus métodos em resposta a eventos de UI (`onClick`, `onValueChange`).
 2. O `ViewModel` atualiza seu `State` imediatamente quando cabível (ex.: `isLoading = true`) e lança uma `viewModelScope.launch` para chamar o `usecase`.
-3. O `usecase` chama `ApiClient.<service>`, `ScrapyClient` ou `InventoryClient` (Retrofit, `suspend fun`) e, quando necessário, grava/lê `SharedPreferencesManager` / `AppConfig`.
+3. O `usecase` chama `AdmCoreClient.<service>`, `ScrapyClient`, `InventoryClient` ou `AiClient` e, quando necessário, grava/lê `SqliteManager` / `AppConfig`.
 4. O resultado (sucesso ou exceção) volta ao `ViewModel`, que atualiza o `State` e, se for o caso, dispara uma navegação via `ZeraNavigator`.
 5. A `Screen` recompõe automaticamente a partir do novo `State` (Compose reage a `State` via `getValue`/`by`).
 
@@ -67,10 +67,10 @@ O `State` de cada tela é uma `data class` imutável (`copy()` a cada mudança) 
 **Não há framework de injeção de dependência** (nem Hilt, nem Koin, nem injeção manual via construtor). As dependências compartilhadas são `object` (singletons de linguagem Kotlin):
 
 - `ScrapyClient` — Retrofit da Scrapy (`POST /v1/boot` e `POST /v1/flags`), header `apikey`. Sobe na splash, antes dos outros clients. Contrato em [contrato-scrapy/contrato-scrapy-api.md](contrato-scrapy/contrato-scrapy-api.md).
-- `ApiClient` — monta o `Retrofit`/`OkHttpClient` em `init(environments)` com a URL vinda do boot (`ms-adm-core-url`), header `apiKey` de `ms-adm-core-api-key`, e expõe os `service`s (`authService`, `selfUserService`, `invitationService`) via `by lazy`.
-- `InventoryClient` — Retrofit do `ms-inventory` em `init(environments)` (`ms-inventory-url`). Headers `apiKey`, `Authorization: Bearer` e `X-Unit-Id`. Expõe `inventoryService`. Contrato em [contrato-ms-inventory/contexto.md](contrato-ms-inventory/contexto.md).
-- `AppConfig` — guarda `environments` e `flags` em memória depois do boot / do `LoadFlags`.
-- `SharedPreferencesManager` — precisa ser inicializado explicitamente em `MainActivity.onCreate` (`SharedPreferencesManager.init(this)`) antes de qualquer leitura/escrita.
+- `AdmCoreClient` — Retrofit do adm-core em `init(environments)` (`ms-adm-core-url`), header `apiKey`, JWT da sessão, `TokenRefreshAuthenticator` no 401. Expõe auth, users, invitations, notifications, places, etc.
+- `InventoryClient` — Retrofit do `ms-inventory` (`ms-inventory-url`). Headers `apiKey`, `Authorization: Bearer` e `X-Unit-Id`. Contrato em [contrato-dashboard/contexto.md](contrato-dashboard/contexto.md) e [contrato-pdi/](contrato-pdi/).
+- `AppConfig` — `environments` e `flags` em memória depois do boot / `LoadFlags`.
+- `SqliteManager` — sessão (`zera.db`). Init em `MainActivity.onCreate` antes de qualquer leitura/escrita.
 - `ZeraNavigator` — ponto único de comandos de navegação (ver seção seguinte).
 
 `ViewModels` instanciam seus `usecase`s diretamente como propriedade (`val useCase = SingIn()`) e são obtidos nas `Screens` via o factory padrão do Compose (`viewModel()`), sem `Factory` customizada. Essa combinação funciona hoje porque os `usecase`s não têm dependências configuráveis além dos próprios singletons — se isso mudar (ex.: necessidade de trocar implementação em teste), vale considerar introduzir um framework de DI e registrar a decisão como ADR.
@@ -120,10 +120,10 @@ flowchart LR
     subgraph Model
         UC["UseCase"]
         Scrapy["ScrapyClient (Retrofit)"]
-        API["ApiClient (Retrofit)"]
+        API["AdmCoreClient (Retrofit)"]
         Inventory["InventoryClient (Retrofit)"]
         Config["AppConfig"]
-        Prefs["SharedPreferencesManager"]
+        Prefs["SqliteManager"]
     end
     Nav["ZeraNavigator / ZeraNavHost"]
 

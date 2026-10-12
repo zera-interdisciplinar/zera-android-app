@@ -21,6 +21,8 @@ local.properties
 
 .cursor/
 .cursorrules
+.vscode/settings.json
+/Makefile
 
 # we decided to keep AGENTS.md individually for each person to have their own set of agents.
 AGENTS.md

@@ -8,3 +8,10 @@ fun homeRouteForRole(role: String): Route? = when (role) {
     UserRole.MANAGER -> Route.ManagerHome
     else -> null
 }
+
+fun isEmployeeRole(role: String): Boolean = role == UserRole.EMPLOYEE
+
+fun homeRouteForRoleOrManager(role: String): Route =
+    homeRouteForRole(role) ?: Route.ManagerHome
+
+fun canCancelDisposal(role: String): Boolean = role == UserRole.MANAGER

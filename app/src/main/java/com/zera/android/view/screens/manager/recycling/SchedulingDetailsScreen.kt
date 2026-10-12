@@ -158,21 +158,23 @@ fun SchedulingDetailsScreen(
                 )
             }
 
-            Notification(
-                label = "Precisa cancelar?",
-                text = "Os itens voltam para o estoque.",
-                style = ZeraColorFamily.Yellow,
-                modifier = Modifier.fillMaxWidth(),
-            )
+            if (state.canCancel) {
+                Notification(
+                    label = "Precisa cancelar?",
+                    text = "Os itens voltam para o estoque.",
+                    style = ZeraColorFamily.Yellow,
+                    modifier = Modifier.fillMaxWidth(),
+                )
 
-            ZeraButton(
-                text = "Cancelar descarte",
-                onClick = viewModel::onCancelSchedulingClick,
-                loading = state.isCancelling,
-                style = ZeraColorFamily.Red,
-                type = ZeraButtonType.Secondary,
-                fillMaxWidth = true,
-            )
+                ZeraButton(
+                    text = "Cancelar descarte",
+                    onClick = viewModel::onCancelSchedulingClick,
+                    loading = state.isCancelling,
+                    style = ZeraColorFamily.Red,
+                    type = ZeraButtonType.Secondary,
+                    fillMaxWidth = true,
+                )
+            }
 
             state.errorMessage?.let { message ->
                 CaptionText(text = message, color = MaterialTheme.colorScheme.error)

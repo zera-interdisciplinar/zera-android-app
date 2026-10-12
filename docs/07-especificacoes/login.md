@@ -51,7 +51,7 @@ Como usuário cadastrado (Funcionário ou Gestor), quero entrar com meu email e 
 
 - [x] Campos de email e senha são obrigatórios (validação no cliente antes de chamar a API)
 - [x] Tokens de acesso e refresh são persistidos após login bem-sucedido
-- [x] `unitId` do `SelfUserResponseDTO` é persistido (`SharedPreferencesManager.saveUnitId`) para o header `X-Unit-Id` do `InventoryClient`
+- [x] `unitId` do `SelfUserResponseDTO` é persistido (`SqliteManager.saveUnitId`) para o header `X-Unit-Id` do `InventoryClient`
 - [x] Redirecionamento correto por perfil (`EMPLOYEE` → `EmployeeHome`, `MANAGER` → `ManagerHome`)
 - [x] Erro exibido em caso de falha (validação, credenciais, rede, perfil desconhecido)
 - [x] Pilha de navegação anterior é removida ao redirecionar após login (`pushAndPop`)

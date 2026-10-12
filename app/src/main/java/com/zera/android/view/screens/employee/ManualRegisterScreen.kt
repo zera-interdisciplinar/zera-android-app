@@ -29,6 +29,7 @@ import com.zera.android.view.components.inputs.ZeraSliderInput
 import com.zera.android.view.components.inputs.ZeraTextInput
 import com.zera.android.view.components.navigation.UpperNavBar
 import com.zera.android.view.components.texts.BodyText
+import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
 import com.zera.android.viewmodel.employee.ManualRegisterViewModel
@@ -39,12 +40,14 @@ import com.zera.android.viewmodel.employee.ManualRegisterViewModel
  * Modelo, condição e "possui danos?" são dropdowns; só a observação é opcional.
  *
  * @param modelName modelo opcional. Quando informado, o campo de modelo já vem preenchido.
+ * @param barcode código de barras opcional, pré-preenchido quando veio do scan.
  */
 @Composable
 fun ManualRegisterScreen(
     modelName: String? = null,
-    viewModel: ManualRegisterViewModel = viewModel(key = "manual-register-$modelName") {
-        ManualRegisterViewModel(modelName)
+    barcode: String? = null,
+    viewModel: ManualRegisterViewModel = viewModel(key = "manual-register-$modelName-$barcode") {
+        ManualRegisterViewModel(modelName, barcode)
     },
 ) {
     val state by viewModel.state
@@ -69,14 +72,17 @@ fun ManualRegisterScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(Spacing.small),
             ) {
+                state.submitError?.let { message ->
+                    CaptionText(text = message, color = MaterialTheme.colorScheme.error)
+                }
                 ZeraButton(
-                    text = "Concluir Cadastro",
+                    text = if (state.isSubmitting) "Cadastrando…" else "Concluir Cadastro",
                     onClick = {
                         keyboardController?.hide()
                         viewModel.onConfirmClick()
                     },
                     fillMaxWidth = true,
-                    enabled = state.canSubmit,
+                    enabled = state.canSubmit && !state.isSubmitting,
                 )
                 ZeraButton(
                     text = "Cancelar",
@@ -100,6 +106,13 @@ fun ManualRegisterScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             ZeraTextInput(
+                value = state.barcode,
+                onValueChange = viewModel::onBarcodeChange,
+                label = "Código de barras",
+                placeholder = "Ex.: 7891234567890",
+                imeAction = ImeAction.Next,
+            )
+            ZeraTextInput(
                 value = state.serialNumber,
                 onValueChange = viewModel::onSerialNumberChange,
                 label = "Número de série",
@@ -118,7 +131,14 @@ fun ManualRegisterScreen(
                 values = state.modelOptions,
                 onValueChange = viewModel::onModelChange,
                 label = "Modelo",
-                placeholder = "Selecione uma categoria",
+                placeholder = when {
+                    state.isLoadingModels -> "Carregando…"
+                    state.modelOptions.isEmpty() -> "Nenhum modelo cadastrado"
+                    else -> "Selecione o modelo"
+                },
+                enabled = !state.isLoadingModels && state.modelOptions.isNotEmpty(),
+                isError = state.modelsError != null,
+                errorMessage = state.modelsError,
             )
             ZeraTextInput(
                 value = state.manufacturingYear,

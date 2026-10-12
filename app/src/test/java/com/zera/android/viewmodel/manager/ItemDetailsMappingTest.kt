@@ -5,6 +5,7 @@ import com.zera.android.model.dto.inventory.ItemResponseDTO
 import com.zera.android.model.dto.inventory.MaterialResponseDTO
 import com.zera.android.model.dto.inventory.ModelResponseDTO
 import com.zera.android.view.components.outros.ItemStatus
+import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
@@ -173,5 +174,24 @@ class ItemDetailsMappingTest {
 
         assertEquals("Usado", state.condition)
         assertEquals(false, state.canReview)
+    }
+
+    @Test
+    fun readsRegisteredByFromNestedCreatedBy() {
+        val json = Json { ignoreUnknownKeys = true }
+        val item = json.decodeFromString<ItemResponseDTO>(
+            """{"id":"id-1","name":"Notebook","createdBy":{"id":"u1","name":"Ana Lima"}}""",
+        )
+        assertEquals("Ana Lima", ItemDetailsViewModel.registeredByFrom(item))
+        assertEquals("Ana Lima", ItemDetailsViewModel.stateFrom(item).registeredBy)
+    }
+
+    @Test
+    fun ignoresCreatedByUuidWithoutName() {
+        val json = Json { ignoreUnknownKeys = true }
+        val item = json.decodeFromString<ItemResponseDTO>(
+            """{"id":"id-1","name":"Notebook","createdBy":"user-uuid"}""",
+        )
+        assertEquals("", ItemDetailsViewModel.registeredByFrom(item))
     }
 }

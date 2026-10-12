@@ -24,7 +24,7 @@ Catálogo = `GET /api/v1/items`. Não usar `dashboard/home.recentItems` nem `das
 
 Os filtros são escolhidos no BottomSheet aberto pelo botão de filtro. Status e Categoria permitem seleção múltipla. Os chips exibidos abaixo da busca representam somente filtros aplicados; tocar em um chip remove aquele valor e recarrega a lista. Abrir e fechar o BottomSheet sem aplicar descarta o rascunho de seleção.
 
-Seleções dentro do mesmo grupo usam OR; Status e Categoria combinados usam AND. Como `GET /api/v1/items` aceita um `status` e um `categoryId` por chamada, o app consulta cada combinação do produto cartesiano entre os valores escolhidos e mescla as páginas por `id`. Sem seleção em um grupo, esse parâmetro fica ausente. Sem nenhum filtro, é feita uma consulta sem `status` e sem `categoryId`.
+Seleções dentro do mesmo grupo usam OR; Status e Categoria combinados usam AND. Como `GET /api/v1/items` aceita um `status` e um `categoryId` por chamada, o app consulta cada combinação do produto cartesiano entre os valores escolhidos e mescla as páginas por `id`. Sem seleção em um grupo, esse parâmetro fica ausente. Sem nenhum filtro, a consulta omite `status` e `categoryId`: o back-end devolve **ativos** (não `DISPOSED`/`REMOVED`). Para ver descartados, o chip manda `status=DISPOSED`.
 
 O grupo Status usa os valores visíveis de `ItemStatus`: Pendente, Recusado, Aprovado, Em manutenção, Em aprovação e Descartado. O grupo Categoria usa os nomes obtidos por `GET /api/v1/categories`, convertidos para seus UUIDs em `categoryId`. A seção Situação ainda não tem opções nem regra e não aparece no filtro ativo.
 
@@ -54,4 +54,5 @@ Implementado no app para o Gestor (`Route.Itens` / `Route.ItemDetails`). O inter
 
 - Specs: [../07-especificacoes/itens.md](../07-especificacoes/itens.md), [../07-especificacoes/item-details.md](../07-especificacoes/item-details.md)
 - Contratos: [../contrato-pdi/contrato-detalhes-itens.md](../contrato-pdi/contrato-detalhes-itens.md)
+- Estados: [maquina-de-estados-item.md](maquina-de-estados-item.md)
 - Modelo: [../04-modelo-de-dados.md](../04-modelo-de-dados.md)

@@ -93,7 +93,7 @@ fun ManagerHomeScreen(
         )
         NotificationList(
             notifications = state.notifications,
-            onItemClick = { /* TODO: abrir alerta */ },
+            onItemClick = viewModel::onAlertClick,
             contentPadding = PaddingValues(Spacing.none),
             modifier = Modifier.heightIn(max = 400.dp),
         )

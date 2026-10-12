@@ -4,22 +4,18 @@
 
 - **Feature:** Renovação de access token via refresh
 - **Perfil(is) envolvido(s):** Funcionário, Gestor
-- **Status:** planejado
-- **Última atualização:** 2026-10-08
+- **Status:** implementado (`AuthService.refresh`, `TokenRefreshAuthenticator`, `RefreshSession`)
+- **Última atualização:** 2026-10-11
 
 ## Contexto
 
 O login (`POST auth/login`) devolve `accessToken`, `refreshToken`, `tokenType` e `expiresIn`. `SingIn` grava access, refresh, `userId`, e-mail e senha em `SqliteManager` (`zera.db`, tabela `session`). `expiresIn` não é persistido.
 
-Nas chamadas seguintes, `ApiClient`, `InventoryClient` e `AiClient` só leem o access token e colocam `Authorization: Bearer`. O refresh token fica parado. `ScrapyClient` não usa JWT de usuário (só `apikey`).
+Nas chamadas seguintes, `AdmCoreClient`, `InventoryClient` e `AiClient` mandam `Authorization: Bearer` com o access token. `ScrapyClient` não usa JWT (só `apikey`).
 
-A sessão “restaurada” no splash não reutiliza token: `RestoreSession` relê e-mail e senha e chama `auth/login` de novo. `401`/`403` nessa chamada apagam a sessão e mandam para `Route.Welcome`. Nas outras telas, `401` cai no `catch` genérico do ViewModel e vira mensagem de erro. A request original não é repetida.
+O splash restaura com `POST auth/refresh` quando há `refresh_token`. `401` autenticado nas APIs de negócio dispara refresh e retry. `ScrapyClient` não usa JWT.
 
-## Problema
-
-O access token expira e o app não tem como trocá-lo. O refresh token já está no SQLite e não participa de nenhum fluxo. O usuário autenticado leva erro de sessão (ou é deslogado no splash) mesmo com refresh válido. A única renovação hoje é um login completo com a senha guardada no banco.
-
-## Solução
+## Comportamento (implementado)
 
 Renovar só quando uma chamada autenticada receber **401** e a request original já levava `Authorization: Bearer`.
 
@@ -47,7 +43,7 @@ Camada `model/`. Nenhuma tela nova. ViewModels de feature não ganham lógica de
 |---|---|
 | `AuthService.refresh` | `POST auth/refresh` |
 | `RefreshSession` (`model/usecase/auth`) | Lê o refresh no SQLite, chama o endpoint, grava o par novo. Não manda Bearer. |
-| `TokenRefreshAuthenticator` (`model/remote/client`) | `okhttp3.Authenticator` compartilhado por `ApiClient`, `InventoryClient` e `AiClient`. No `401` com Bearer, chama `RefreshSession` e devolve a request com o access novo. Ignora `auth/login` e `auth/refresh`. |
+| `TokenRefreshAuthenticator` (`model/remote/client`) | `okhttp3.Authenticator` em `AdmCoreClient`, `InventoryClient` e `AiClient`. No `401` com Bearer, chama `RefreshSession` e repete. Ignora `auth/login` e `auth/refresh`. |
 | Cliente HTTP do refresh | OkHttp/Retrofit **sem** esse authenticator, para o `401` do próprio refresh não entrar em loop. |
 | `SqliteManager` | Método que atualiza só `access_token` e `refresh_token`, sem regravar senha. |
 | `RestoreSession` | Prefere refresh. Login com senha só no legado sem refresh token. `hasSavedLogin()` passa a ser “tem refresh token” **ou** (e-mail e senha). |
@@ -59,14 +55,10 @@ O authenticator é o ponto único de retry. Interceptor que lê o body de erro e
 
 ## DOD
 
-- [ ] `POST auth/refresh` existe em `AuthService` e o `200` atualiza `access_token` e `refresh_token` no SQLite.
-- [ ] `401` com Bearer em `ApiClient`, `InventoryClient` ou `AiClient` dispara um refresh e repete a request uma vez com o access novo, sem o ViewModel saber.
-- [ ] Requests paralelas com `401` geram um único `POST auth/refresh`.
-- [ ] `401`/`403` do refresh limpa a sessão e navega para `Route.Welcome` uma vez.
-- [ ] Erro de rede no refresh não apaga o SQLite.
-- [ ] `403` de regra de negócio, `auth/login` e `ScrapyClient` não disparam refresh.
-- [ ] Splash com `refresh_token` não envia a senha. Sem refresh token e com senha salva, faz login uma vez e passa a ter refresh.
-- [ ] Teste de unidade do authenticator/coordenador: `401` → um refresh → retry; segundo `401` não chama refresh de novo; ausência de refresh token não chama a API; falha de auth no refresh pede `clearSession`.
+- [x] `POST auth/refresh` em `AuthService`; `200` atualiza tokens no SQLite
+- [x] `401` com Bearer em `AdmCoreClient` / `InventoryClient` / `AiClient` dispara refresh e retry
+- [x] Mutex: um refresh para 401s paralelos
+- [x] Testes em `TokenRefreshAuthenticatorTest`
 
 ## Fora de escopo (OOS)
 
@@ -80,5 +72,5 @@ O authenticator é o ponto único de retry. Interceptor que lê o body de erro e
 ## Referências
 
 - Login atual: [login.md](login.md) (refresh automático listado como fora de escopo de lá)
-- Contrato e o gap de hoje: [../06-contratos-api.md](../06-contratos-api.md), seções Autenticação e Tratamento de erros
+- Contrato: [../06-contratos-api.md](../06-contratos-api.md) (auth + refresh)
 - Persistência: `SqliteManager.saveSession` / `getRefreshToken`

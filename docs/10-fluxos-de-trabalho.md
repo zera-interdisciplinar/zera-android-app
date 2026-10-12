@@ -27,7 +27,7 @@ E termina com **Ao terminar**, lembrando quais docs sugerir atualizar (ver regra
 **Quando envolver o usuário**
 - Falta um componente do catálogo para atender a uma imagem de referência (ou a qualquer necessidade visual da tela) — é o próprio gatilho do "pare e proponha o fluxo de criação" acima; nunca resolver sozinho com um substituto improvisado ou com medidas/cores livres "só para essa tela".
 - A tela pertence a um domínio sem spec em `07-especificacoes/` nem regra em `05-regras-de-negocio/` — não invente a regra de negócio, pergunte antes de codar o comportamento.
-- A tela implica uma rota/fluxo para o perfil Administrador — hoje o app não tem nenhum fluxo desse perfil ([00-contexto-geral.md](00-contexto-geral.md)); confirmar antes de introduzir o primeiro.
+- A tela implica um terceiro perfil (Administrador): a v1 só tem `MANAGER` e `EMPLOYEE` ([00-contexto-geral.md](00-contexto-geral.md)). Não inventar esse papel.
 - A tela lida com dado sensível (token, dado pessoal) de um jeito não coberto pelos padrões já existentes.
 
 **Ao terminar:** sugerir criar/atualizar a spec em `07-especificacoes/` e, se criou componente novo, o catálogo em `03-catalogo-componentes.md`.
@@ -59,18 +59,18 @@ E termina com **Ao terminar**, lembrando quais docs sugerir atualizar (ver regra
 
 **Quando envolver o usuário**
 - **Sempre que a regra não estiver clara ou completa no documento, ou conflitar com o que o código faz hoje** — regra de negócio é decisão de produto, não algo para o modelo inferir a partir do código.
-- Mudança que afeta permissões/comportamento entre perfis (Funcionário/Gestor) — combinada com a nota de que o Administrador não tem fluxo no app hoje, qualquer coisa que pareça "precisar" de um terceiro perfil na UI merece confirmação antes.
+- Mudança que afeta permissões entre Funcionário e Gestor. Terceiro perfil na UI: não.
 
 **Ao terminar:** atualizar o arquivo em `05-regras-de-negocio/` e o `Status` da spec em `07-especificacoes/`.
 
 ## 4. Integrar um novo endpoint ou mudar um contrato existente
 
 **Antes de começar**
-- Docs: [06-contratos-api.md](06-contratos-api.md), [04-modelo-de-dados.md](04-modelo-de-dados.md) e, conforme o serviço, [contrato-scrapy/contrato-scrapy-api.md](contrato-scrapy/contrato-scrapy-api.md) ou [contrato-ms-inventory/contrato-inventory-dashboard.md](contrato-ms-inventory/contrato-inventory-dashboard.md).
-- Código: `model/remote/service/` (interface do serviço), `model/dto/<domínio>/` (DTOs), `ApiClient` / `ScrapyClient` / `InventoryClient` (para expor o novo `service`, se for o caso).
+- Docs: [06-contratos-api.md](06-contratos-api.md), [04-modelo-de-dados.md](04-modelo-de-dados.md) e o contrato da pasta certa (`contrato-scrapy/`, `contrato-dashboard/`, `contrato-pdi/`, `contrato-places-api/`, `contrato-adm-core-*`). Conferir Confluence Back-end v1 se for inventory/adm-core.
+- Código: `model/remote/service/`, `model/dto/`, `AdmCoreClient` / `ScrapyClient` / `InventoryClient` / `AiClient`.
 
 **Durante**
-- A chamada de rede em si fica no `usecase`, nunca direto na `Screen` nem "solta" no `ViewModel` sem passar por um `usecase`. O `usecase` fala com `ApiClient.<service>`, `ScrapyClient` ou `InventoryClient` e, quando precisar, com `SharedPreferencesManager` / `AppConfig` — não existe camada de `Repository` intermediária hoje (ver "Visão geral das camadas" em [01-arquitetura.md](01-arquitetura.md)).
+- A chamada de rede fica no `usecase`. O `usecase` fala com o client Retrofit certo e, quando precisar, com `SqliteManager` / `AppConfig` — sem `Repository` (ver [01-arquitetura.md](01-arquitetura.md)).
 - Scrapy: header obrigatório é `apikey`, nunca `Authorization: Bearer`. `200` HTML em `/v1/boot` ou `/v1/flags` é roteamento Kong (prefixo do serviço não removido), não contrato.
 - ms-inventory: headers `apiKey` + `Authorization: Bearer` + `X-Unit-Id`. Sem `apiKey` → 401 no Kong; sem unidade → 400.
 
@@ -79,7 +79,7 @@ E termina com **Ao terminar**, lembrando quais docs sugerir atualizar (ver regra
 - Mudança que quebra um contrato já documentado em `06-contratos-api.md` e usado por telas existentes.
 - Qualquer decisão sobre tratamento de erro padronizado ou refresh de token — hoje não existe um padrão definido; introduzir um é uma decisão de arquitetura, não uma escolha local de quem está integrando um endpoint específico.
 
-**Ao terminar:** atualizar `06-contratos-api.md` e `04-modelo-de-dados.md`. Se o contrato for da Scrapy, atualizar também `contrato-scrapy/`. Se for do `ms-inventory`, atualizar `contrato-ms-inventory/contexto.md` (o `.md` do contrato em si só muda se o backend mudar).
+**Ao terminar:** atualizar `06-contratos-api.md`, `04-modelo-de-dados.md` e a pasta de contrato correspondente. Inventory/adm-core: alinhar ao Confluence, não ao mapeamento antigo.
 
 ## 5. Adicionar uma dependência
 
@@ -128,7 +128,7 @@ E termina com **Ao terminar**, lembrando quais docs sugerir atualizar (ver regra
 ## 8. Mexer em navegação (rotas, `ZeraNavigator`, telas por perfil)
 
 **Antes de começar**
-- Docs: [01-arquitetura.md](01-arquitetura.md) (seção "Navegação") e [08-decisoes-arquiteturais/0001-navegacao-centralizada-zeranavigator.md](08-decisoes-arquiteturais/0001-navegacao-centralizada-zeranavigator.md); [00-contexto-geral.md](00-contexto-geral.md) para a nota sobre o Administrador não ter fluxo hoje.
+- Docs: [01-arquitetura.md](01-arquitetura.md) (navegação), ADR-0001, [00-contexto-geral.md](00-contexto-geral.md) (só dois papéis).
 
 **Durante**
 - Rota nova sempre `sealed interface Route` + `@Serializable`; navegação disparada pelo `ViewModel` (regra estrita em `01`), exceto as duas telas incondicionais já registradas como exceção (`SplashScreen`, `WelcomeScreen`).
@@ -136,7 +136,7 @@ E termina com **Ao terminar**, lembrando quais docs sugerir atualizar (ver regra
 - Tela nova que use shared element (ou que deva ter o `ManagerBottomNavBar` fixo) precisa ter o `composable<>` envolvido em `CompositionLocalProvider(LocalAnimatedVisibilityScope provides this)` em `ZeraNavHost`; sem isso `Modifier.sharedTransition` não faz nada.
 
 **Quando envolver o usuário**
-- Introdução da primeira rota/área exclusiva do perfil Administrador — contradiz o que está documentado hoje; confirmar antes.
+- Rota exclusiva de um terceiro perfil — a v1 não tem Administrador.
 - Mudança em como a pilha de navegação é gerenciada para uma tela existente (`push` → `pushAndPop`, por exemplo) — isso muda o comportamento de "voltar" percebido pelo usuário final, não é um detalhe puramente técnico.
 
 **Ao terminar:** se a mudança contradiz uma decisão registrada no ADR-0001, criar um **novo ADR** que a substitui — não reescrever o ADR-0001 (decisões antigas não são apagadas, ficam registradas com seu contexto histórico).
@@ -165,7 +165,7 @@ Resumo dos gatilhos que se repetem acima:
 
 - Regra de negócio não documentada ou ambígua.
 - Contrato de API ainda não confirmado com o backend.
-- Qualquer coisa que envolva o perfil Administrador ter um fluxo no app.
+- Inventar perfil Administrador no app.
 - Corrigir uma inconsistência já registrada em `02-padroes-e-convencoes.md` como parte de uma tarefa não relacionada a ela.
 - Decisão que merece um ADR (nova dependência estrutural, mudança de padrão arquitetural).
 - Modelagem de dados para um domínio ainda não implementado.

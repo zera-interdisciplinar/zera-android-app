@@ -11,13 +11,15 @@ model
 ├── entity/config/Environments.kt          ms-inventory-url e ms-inventory-api-key (boot)
 ├── dto/inventory/                         DTOs slimados do dashboard
 ├── remote/client/InventoryClient.kt       Retrofit próprio do ms-inventory
-├── remote/service/InventoryService.kt     GET api/v1/dashboard/home e .../indicators
+├── remote/service/InventoryService.kt     GET dashboard/home, work-center, indicators
 └── usecase/inventory/
     ├── GetManagerHome.kt                  home do gestor
+    ├── GetEmployeeHome.kt                 ocupação e últimos itens da home do operário
+    ├── GetEmployeePendencies.kt           pendências da home do operário
     └── GetIndicators.kt                   tela de indicadores
 ```
 
-`Boot.execute()` chama `ScrapyClient.boot()`, grava em `AppConfig` e inicializa `ApiClient` **e** `InventoryClient` com as URLs/keys do boot.
+`Boot.execute()` chama `ScrapyClient.boot()`, grava em `AppConfig` e inicializa `AdmCoreClient` **e** `InventoryClient` com as URLs/keys do boot.
 
 `InventoryClient`:
 
@@ -25,16 +27,15 @@ model
 - **Headers em toda request:** `apiKey` (`ms-inventory-api-key`, ou fallback `ms-adm-core-api-key` se a key de inventory vier vazia), `Authorization: Bearer <accessToken>` do usuário logado, `X-Unit-Id` do `unitId` gravado no login.
 - Sem `apiKey` o Kong responde **401**. Sem token, **401**. Sem `X-Unit-Id`, **400**.
 
-O `unitId` é persistido em `SharedPreferencesManager.saveUnitId` depois de `GET users/{userId}` no `SingIn`. `clearSession()` também apaga a unidade.
+O `unitId` é persistido em `SqliteManager.saveUnitId` depois de `GET users/{id}` no `SingIn`. `clearSession()` também apaga a unidade.
 
 ## Endpoints consumidos
 
 | Rota | Use case | Tela |
 |---|---|---|
-| `GET /api/v1/dashboard/home` | `GetManagerHome` | `ManagerHomeScreen` |
+| `GET /api/v1/dashboard/home` | `GetManagerHome`, `GetEmployeeHome` | `ManagerHomeScreen`, `EmployeeHomeScreen` |
+| `GET /api/v1/dashboard/work-center` | `GetEmployeePendencies` | `EmployeeHomeScreen` (resumo), `WorkingCentralScreen` (lista) |
 | `GET /api/v1/dashboard/indicators` | `GetIndicators` | `IndexesScreen` |
-
-`GET /api/v1/dashboard/work-center` existe no contrato e **não** é chamado pelo app (nenhuma tela usa).
 
 Os DTOs no app só declaram os campos que as telas usam; o restante do JSON é ignorado (`ignoreUnknownKeys`).
 

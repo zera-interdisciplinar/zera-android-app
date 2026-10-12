@@ -14,6 +14,9 @@ import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.viewmodel.ZeraViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.contentOrNull
 import retrofit2.HttpException
 import java.time.LocalDateTime
 import java.time.format.TextStyle
@@ -316,6 +319,21 @@ class ItemDetailsViewModel : ZeraViewModel() {
             else -> names.dropLast(1).joinToString(", ") + " e " + names.last()
         }
 
+        internal fun registeredByFrom(item: ItemResponseDTO): String {
+            item.createdByName?.trim()?.takeIf { it.isNotEmpty() }?.let { return it }
+            val createdBy = item.createdBy
+            if (createdBy is JsonObject) {
+                return sequenceOf("name", "fullName", "displayName", "userName")
+                    .mapNotNull { key ->
+                        val value = createdBy[key] as? JsonPrimitive ?: return@mapNotNull null
+                        value.contentOrNull?.trim()?.takeIf { it.isNotEmpty() }
+                    }
+                    .firstOrNull()
+                    .orEmpty()
+            }
+            return ""
+        }
+
         internal fun formatRegisteredAt(iso: String?): String {
             if (iso.isNullOrBlank()) return ""
             return try {
@@ -343,7 +361,7 @@ class ItemDetailsViewModel : ZeraViewModel() {
             conditionCode = item.condition,
             serialNumber = item.serialNumber.orEmpty(),
             notes = item.notes.orEmpty(),
-            registeredBy = item.createdByName.orEmpty(),
+            registeredBy = registeredByFrom(item),
             registeredAt = formatRegisteredAt(item.createdAt),
             canReview = canReview(statusFrom(item.status)),
         )

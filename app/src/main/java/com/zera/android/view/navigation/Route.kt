@@ -136,13 +136,16 @@ sealed interface Route{
     data object Scan : Route
 
     @Serializable
-    data object EmployeeItems : Route
+    data class EmployeeItems(val status: String? = null) : Route
 
     @Serializable
     data object WorkingCentral : Route
 
     @Serializable
-    data class ManualRegister(val modelName: String? = null) : Route
+    data class ManualRegister(
+        val modelName: String? = null,
+        val barcode: String? = null,
+    ) : Route
 
     // ROTAS COMPARTILHADAS
     @Serializable
