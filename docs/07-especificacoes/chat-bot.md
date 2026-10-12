@@ -9,7 +9,7 @@
 
 ## Contexto
 
-Tela de conversa com o assistente de IA, aberta pelo FAB de assistente virtual dos scaffolds (`ManagerScaffold` e `EmployeeScaffold`, animação `SlideVertical`) e pelo item "Fale com o Zé" do menu lateral do Gestor. É uma tela compartilhada entre os dois perfis (`view/screens/shared/ChatBotScreen.kt`, `viewmodel/shared/ChatBot.kt`).
+Tela de conversa com o assistente de IA, aberta pelo FAB de assistente virtual dos scaffolds (`ManagerScaffold` e `EmployeeScaffold`, animação `SlideVertical`; o destino é fixo, não há parâmetro `onFabClick`, e só telas com `fabIcon = null` — scan, mapa de reciclagem e histórico de descartes — ficam sem o atalho) e pelo item "Fale com o Zé" do menu lateral do Gestor. É uma tela compartilhada entre os dois perfis (`view/screens/shared/ChatBotScreen.kt`, `viewmodel/shared/ChatBot.kt`).
 
 O back é o microsserviço de IA (`POST /api/v1/multi-agent/process-message`), documentado em [../contrato-places-api/contrato-descarte.md](../contrato-places-api/contrato-descarte.md). O cliente não escolhe o agente; cada turno é uma requisição que devolve a resposta completa (sem streaming).
 
