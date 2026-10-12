@@ -86,10 +86,15 @@ fun EmployeeScaffold(
     fabIcon: ZeraIcon? = ZeraIcon.Chatbot,
     scrollable: Boolean = true,
     contentPadding: Dp = Spacing.medium,
+    backgroundVariant: Boolean = false,
     edgeFade: Boolean = true,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    val backgroundColor = MaterialTheme.colorScheme.background
+    val backgroundColor = if (backgroundVariant) {
+        MaterialTheme.colorScheme.primary
+    } else {
+        MaterialTheme.colorScheme.background
+    }
 
     var showSideBar by rememberSaveable { mutableStateOf(false) }
 

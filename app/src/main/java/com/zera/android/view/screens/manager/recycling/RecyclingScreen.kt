@@ -2,6 +2,7 @@ package com.zera.android.view.screens.manager.recycling
 
 import android.util.Log
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,6 +22,7 @@ import com.zera.android.view.components.texts.BodyText
 import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.components.texts.SubtitleText
 import com.zera.android.view.navigation.Route
+import com.zera.android.view.screens.employee.EmployeeScaffold
 import com.zera.android.view.screens.manager.ManagerScaffold
 import com.zera.android.view.theme.Radius
 import com.zera.android.view.theme.Spacing
@@ -36,15 +38,7 @@ fun RecyclingScreen(
     val state by viewModel.state
     Log.i("TEMP_PLACES", "RecyclingScreen places=${state.places.size} loading=${state.isLoading}")
 
-    ManagerScaffold(
-        title = "Reciclagem",
-        currentRoute = Route.Recycling,
-        backgroundVariant = true,
-        scrollable = false,
-        edgeFade = false,
-        contentPadding = Spacing.none,
-        fabIcon = null,
-    ) {
+    val body: @Composable ColumnScope.() -> Unit = {
         CurrentLocationMap(
             modifier = Modifier
                 .fillMaxWidth()
@@ -96,6 +90,30 @@ fun RecyclingScreen(
             fillMaxWidth = true,
             style = ZeraColorFamily.Green,
             modifier = Modifier.padding(horizontal = Spacing.medium),
+        )
+    }
+
+    if (state.isEmployee) {
+        EmployeeScaffold(
+            title = "Reciclagem",
+            currentRoute = Route.Recycling,
+            backgroundVariant = true,
+            scrollable = false,
+            edgeFade = false,
+            contentPadding = Spacing.none,
+            fabIcon = null,
+            content = body,
+        )
+    } else {
+        ManagerScaffold(
+            title = "Reciclagem",
+            currentRoute = Route.Recycling,
+            backgroundVariant = true,
+            scrollable = false,
+            edgeFade = false,
+            contentPadding = Spacing.none,
+            fabIcon = null,
+            content = body,
         )
     }
 }

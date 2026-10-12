@@ -3,9 +3,10 @@ package com.zera.android.viewmodel.manager
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.zera.android.model.usecase.ai.GenerateDisposalReport
-import com.zera.android.view.navigation.Route
+import com.zera.android.model.usecase.auth.GetSelfUser
 import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.viewmodel.ZeraViewModel
+import com.zera.android.viewmodel.homeRouteForRoleOrManager
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import java.net.URLEncoder
@@ -26,6 +27,7 @@ data class SchedulingSuccessState(
 
 class SchedulingSuccessViewModel : ZeraViewModel() {
     private val generateDisposalReport = GenerateDisposalReport()
+    private val getSelfUser = GetSelfUser()
     private val _state = mutableStateOf(SchedulingSuccessState())
     val state = _state
 
@@ -86,11 +88,24 @@ class SchedulingSuccessViewModel : ZeraViewModel() {
     }
 
     fun onCloseClick() {
-        ZeraNavigator.pushAndPopAll(Route.ManagerHome)
+        goHome()
     }
 
     fun onBackToHomeClick() {
-        ZeraNavigator.pushAndPopAll(Route.ManagerHome)
+        goHome()
+    }
+
+    private fun goHome() {
+        viewModelScope.launch {
+            val destination = try {
+                homeRouteForRoleOrManager(getSelfUser.execute().role)
+            } catch (error: CancellationException) {
+                throw error
+            } catch (_: Exception) {
+                homeRouteForRoleOrManager("")
+            }
+            ZeraNavigator.pushAndPopAll(destination)
+        }
     }
 
     fun onGenerateReport() {

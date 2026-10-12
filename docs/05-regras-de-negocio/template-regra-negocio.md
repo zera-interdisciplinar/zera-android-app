@@ -5,7 +5,7 @@
 ## Metadados
 
 - **Domínio:** [nome do domínio]
-- **Perfil(is) envolvido(s):** [Funcionário / Gestor / Administrador]
+- **Perfil(is) envolvido(s):** [Funcionário / Gestor]
 - **Última atualização:** [AAAA-MM-DD]
 
 ## Visão geral
@@ -28,7 +28,7 @@
 
 ## Relacionamento com perfis
 
-[Quem pode acionar cada regra, ou ver o resultado dela — diferencie Funcionário, Gestor e, se algum dia se aplicar, Administrador.]
+[Quem pode acionar cada regra — Funcionário e/ou Gestor. A v1 não tem perfil Administrador.]
 
 ## Referências
 

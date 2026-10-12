@@ -4,7 +4,7 @@ O mapa e o contato da parceira usam o **ms-administrative-core**. O registro do 
 
 Contratos HTTP: [contrato-places-api.md](contrato-places-api.md) (adm-core: pin, ficha, telefone) e [contrato-descarte.md](contrato-descarte.md) (`POST /disposals` + `POST /reports`). Catálogo `IN_STOCK` na seleção: [contrato-pdi](../contrato-pdi/contrato-detalhes-itens.md).
 
-O `ApiClient` já usa base URL com `api/v1/`. O Retrofit declara só `recycling-places` (sem prefixo duplicado).
+O `AdmCoreClient` já usa base URL com `api/v1/`. O Retrofit declara só `recycling-places` (sem prefixo duplicado).
 
 Não há endpoint faltando. `disposal_report` no adm-core continua sem HTTP. O app não chama Google Places.
 
@@ -53,7 +53,7 @@ Recycling
 | DTO da lista | `RecyclingPlaceResponseDTO` — pin + `isOpen`, `description`, `openingHours`, `recyclingBusinessId`, `email` |
 | Erro RFC 7807 | `ProblemDetailDTO` (`detail`) |
 | Entidade | `RecyclingPlace` |
-| Service | `RecyclingPlacesService.getNearby` em `ApiClient` |
+| Service | `RecyclingPlacesService.getNearby` em `AdmCoreClient` |
 | Use case | `GetNearbyRecyclingPlaces` |
 | View model | `NearbyRecyclingPlacesViewModel` |
 

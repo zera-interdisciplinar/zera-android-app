@@ -3,6 +3,7 @@ package com.zera.android.view.screens.manager.recycling
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -30,6 +31,7 @@ import com.zera.android.view.components.texts.BodyText
 import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.components.texts.TitleText
 import com.zera.android.view.navigation.Route
+import com.zera.android.view.screens.employee.EmployeeScaffold
 import com.zera.android.view.screens.manager.ManagerScaffold
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraColorFamily
@@ -48,13 +50,7 @@ fun ScheduledDisposalsScreen(
     var draftPeriod by rememberSaveable { mutableStateOf<String?>(null) }
     val selectedFilterChips = state.selectedDestinations + listOfNotNull(state.selectedPeriod)
 
-    ManagerScaffold(
-        title = "Histórico de descartes",
-        currentRoute = Route.ScheduledDisposals,
-        goBack = true,
-        scrollable = false,
-        fabIcon = null,
-    ) {
+    val body: @Composable ColumnScope.() -> Unit = {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(Spacing.small),
@@ -111,6 +107,26 @@ fun ScheduledDisposalsScreen(
                 emptyContent = { BodyText(text = "Nenhum descarte") },
             )
         }
+    }
+
+    if (state.isEmployee) {
+        EmployeeScaffold(
+            title = "Histórico de descartes",
+            currentRoute = Route.ScheduledDisposals,
+            goBack = true,
+            scrollable = false,
+            fabIcon = null,
+            content = body,
+        )
+    } else {
+        ManagerScaffold(
+            title = "Histórico de descartes",
+            currentRoute = Route.ScheduledDisposals,
+            goBack = true,
+            scrollable = false,
+            fabIcon = null,
+            content = body,
+        )
     }
 
     if (showFiltersSheet) {

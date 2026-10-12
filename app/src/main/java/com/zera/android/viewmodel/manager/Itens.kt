@@ -35,11 +35,13 @@ data class ItensState(
     val errorMessage: String? = null,
 )
 
-class ItensViewModel : ZeraViewModel() {
+class ItensViewModel(
+    initialStatuses: List<String> = emptyList(),
+) : ZeraViewModel() {
     private val getItems = GetItems()
     private val getCategories = GetCategories()
 
-    private val _state = mutableStateOf(ItensState())
+    private val _state = mutableStateOf(ItensState(selectedStatuses = initialStatuses))
     val state = _state
 
     private var categories: List<CategoryResponseDTO> = emptyList()
@@ -173,12 +175,13 @@ class ItensViewModel : ZeraViewModel() {
 
     companion object {
         internal const val PAGE_SIZE = 20
+        internal const val MAINTENANCE_STATUS_LABEL = "Em manutenção"
         private val ptBr = Locale.forLanguageTag("pt-BR")
         private val STATUS_API_VALUES = linkedMapOf(
             "Pendente" to "PENDING_APPROVAL",
             "Recusado" to "REJECTED",
             "Aprovado" to "IN_STOCK",
-            "Em manutenção" to "IN_MAINTENANCE",
+            MAINTENANCE_STATUS_LABEL to "IN_MAINTENANCE",
             "Em aprovação" to "AWAITING_EVALUATION",
             "Descartado" to "DISPOSED",
         )

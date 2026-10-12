@@ -2,9 +2,9 @@
 
 ## Metadados
 
-- **Domínio:** Inventário (home do gestor e indicadores)
-- **Perfil(is) envolvido(s):** Gestor
-- **Última atualização:** 2026-09-26
+- **Domínio:** Inventário (home do gestor, home do operário e indicadores)
+- **Perfil(is) envolvido(s):** Gestor, Operário
+- **Última atualização:** 2026-10-11
 
 ## Visão geral
 
@@ -14,11 +14,37 @@ Regras de apresentação dos agregados devolvidos pelo `ms-inventory` (`GET /api
 
 ### Ocupação do estoque
 
-`occupancyPercent` chega em 0–100. O card de ocupação espera fração `0f`–`1f`, então o app divide por 100 e limita a esse intervalo. `null` vira `0f` (card vazio, sem crash).
+`occupancyPercent` chega em 0–100. O card espera fração `0f`–`1f` (divide por 100). No back-end, **`null` significa “sem capacidade configurada”**, não zero. O app hoje mapeia `null` para `0f` para não crashar — isso visualmente parece estoque vazio, não “indisponível”.
 
 ### Variação de itens ativos
 
 `activeItemsChangePercent` vira o subtítulo do atalho "Itens" (`↑`/`↓` + valor em %). Valor `null` some o subtítulo. Sinal positivo ou zero usa cor de sucesso; negativo, cor de erro.
+
+### Pendências da home do operário
+
+Fonte: `GET /api/v1/dashboard/work-center` (`GetEmployeePendencies`). O backend já filtra pelo `Actor` do token. O app não envia `createdBy` nem `status`.
+
+A lista da seção Pendências **não** lista cada item: um card por bucket com tamanho maior que zero, nesta ordem:
+
+| Bucket | `id` do card | Texto (1 / N) | Cor |
+|---|---|---|---|
+| `drafts` | `incomplete-registrations` | cadastro incompleto / cadastros incompletos | Red |
+| `rejected` | `rejected-registrations` | cadastro recusado / cadastros recusados | Red |
+| `damagedWithoutDestination` | `damaged-without-destination` | item danificado sem destino / itens danificados sem destino | Yellow |
+
+Bucket vazio não gera linha. Todos vazios (ou erro da chamada) caem no empty state do `NotificationList` ("Nenhuma notificação"). Clique em qualquer card abre `Route.WorkingCentral`. `inMaintenance` e `awaitingEvaluation` **não** entram nos atalhos da home.
+
+### Pendências da Central de Trabalho
+
+Mesma fonte (`GetEmployeePendencies`). Aqui cada elemento dos três arrays vira um `NotificationItem` (`id` = `item.id`), nesta ordem:
+
+| Bucket | Label | Texto | Cor |
+|---|---|---|---|
+| `drafts` | Completar cadastro | `name · faltam <rótulos>` a partir de `missingFields` da API; lista vazia = só `name` (não inventar foto/série/condição) | Yellow |
+| `rejected` | Recusado pelo gestor | `name · rejectionReason` (só `name` se o motivo vier vazio) | Red |
+| `damagedWithoutDestination` | Enviar para manutenção | `name · aguardando destino` | Blue |
+
+`pendingCount` do resumo = tamanho dessa lista. `maintenanceCount` = `inMaintenance` (contador; não há IDs para montar a seção "Em manutenção"). Falha da chamada zera o estado.
 
 ### Alertas da home
 
@@ -34,7 +60,7 @@ Contador `0` não gera linha. A lista vazia cai no empty state do `NotificationL
 
 ### Últimos itens
 
-Vêm de `recentItems.content` (`id` + `name`). Não há mock nessa lista. Página padrão da home: `page=0`, `size=5` (defaults do `InventoryService`). Lista vazia usa o empty state do `ProductList`.
+Vêm de `recentItems.content` (`id` + `name`) em `GET /api/v1/dashboard/home`. A home do Gestor (`GetManagerHome`) e a home do Operário (`GetEmployeeHome`) usam o mesmo campo; não há mock nessa lista. Página padrão: `page=0`, `size=5` (defaults do `InventoryService`). Sem tag de status. Lista vazia usa o empty state do `ProductList`. No Operário, "Ver Todos" abre `Route.EmployeeItems` (catálogo `GET /api/v1/items`); no Gestor, abre `Route.Itens`.
 
 ### Funcionários na home
 
@@ -77,18 +103,18 @@ Lista vazia mostra o empty state do `HorizontalBarGraph` ("Nenhum resíduo no pe
 
 ### Unidade consultada
 
-Todas as rotas do dashboard usam o `unitId` do usuário logado (`GET users/{userId}`), gravado em `SharedPreferences` e enviado no header `X-Unit-Id`. Sem unidade, o Kong/backend rejeita a chamada.
+Todas as rotas do dashboard usam o `unitId` do login (`GET users/{id}`), gravado em `SqliteManager` e enviado em `X-Unit-Id`. Sem unidade: `400`.
 
 ## Parâmetros configuráveis
 
-Nenhum parâmetro de negócio é configurável no app. Percentuais, janela padrão de indicadores e capacidade de estoque vêm do backend. Campos do contrato que o app não usa (`stockCapacity`, `disposalsInWindow`, `windowDays`, detalhes extras do item, `GET .../work-center`) são ignorados (`ignoreUnknownKeys`).
+Nenhum parâmetro de negócio é configurável no app. Percentuais, janela padrão de indicadores e capacidade de estoque vêm do backend. Na home do Operário, `inMaintenance` e `disposalsInWindow` alimentam os atalhos (número puro, sem o texto da janela). Campos que o app não usa (`stockCapacity`, `windowDays`, detalhes extras do item, `inMaintenance`/`awaitingEvaluation` do work-center nas pendências) são ignorados (`ignoreUnknownKeys`).
 
 ## Relacionamento com perfis
 
-Só o Gestor vê essas telas (`Route.ManagerHome`, `Route.Indexes`). O interceptor ainda envia o token do usuário autenticado; a autorização de quem pode consultar o dashboard é do backend.
+O Gestor vê `Route.ManagerHome` e `Route.Indexes`. O Operário vê ocupação, últimos itens e pendências em `Route.EmployeeHome`. O interceptor envia o token do usuário autenticado; a autorização de quem pode consultar o dashboard é do backend.
 
 ## Referências
 
-- Specs relacionadas: [../07-especificacoes/manager-home-dashboard.md](../07-especificacoes/manager-home-dashboard.md), [../07-especificacoes/indexes.md](../07-especificacoes/indexes.md)
-- Contratos de API: [../06-contratos-api.md](../06-contratos-api.md), [../contrato-ms-inventory/contrato-inventory-dashboard.md](../contrato-ms-inventory/contrato-inventory-dashboard.md)
+- Specs relacionadas: [../07-especificacoes/manager-home-dashboard.md](../07-especificacoes/manager-home-dashboard.md), [../07-especificacoes/indexes.md](../07-especificacoes/indexes.md), [../07-especificacoes/employee-home.md](../07-especificacoes/employee-home.md), [../07-especificacoes/central-de-trabalho.md](../07-especificacoes/central-de-trabalho.md)
+- Contratos de API: [../06-contratos-api.md](../06-contratos-api.md), [../contrato-dashboard/contrato-inventory-dashboard.md](../contrato-dashboard/contrato-inventory-dashboard.md)
 - Modelo de dados: [../04-modelo-de-dados.md](../04-modelo-de-dados.md)

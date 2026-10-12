@@ -1,14 +1,14 @@
 # contexto
 
-As telas de time do gestor (card "Funcionários" na home e `EmployeesScreen`) deixaram de usar mock. Os dados vêm do `ms-administrative-core` via `ApiClient`. O contrato fechado está em [contrato-team-management.md](contrato-team-management.md). Este arquivo descreve **o que o app já implementa** e **por que** cada escolha existe.
+As telas de time do gestor (card "Funcionários" na home e `EmployeesScreen`) vêm do `ms-administrative-core` via `AdmCoreClient`. Contrato: [contrato-team-management.md](contrato-team-management.md). **Não existe `POST /users`.**
 
 Indicadores (`Route.Indexes`) **não** entram nesta integração: continuam numa única chamada de inventory (`GetIndicators` → `GET /api/v1/dashboard/indicators`).
 
 ## Integração no app
 
-O client é o Retrofit do adm-core (`ApiClient` / `UsersService` + `InvitationService`). Não há Retrofit novo. Headers iguais ao resto do adm-core: `apiKey` e `Authorization: Bearer`. **Não** se envia `X-Unit-Id` nestas rotas — a unidade sai do usuário autenticado no back.
+O client é o Retrofit do adm-core (`AdmCoreClient` / `UsersService` + `InvitationService`). Headers: `apiKey` e `Authorization: Bearer`. **Não** se envia `X-Unit-Id` nestas rotas.
 
-`managerId` em query e body é o `userId` gravado na sessão (`SharedPreferencesManager.getUserId()`).
+`managerId` em query e body é o `userId` gravado na sessão (`SqliteManager.getUserId()`).
 
 ```
 model
@@ -24,7 +24,7 @@ model
 ├── entity/team/
 │   ├── TeamEmployee.kt
 │   └── PendingInvite.kt
-├── remote/client/ApiClient.kt          usersService + invitationService
+├── remote/client/AdmCoreClient.kt      usersService + invitationService
 ├── remote/service/UsersService.kt      GET users, GET users/count-by-manager
 ├── remote/service/InvitationService.kt GET invitations/pending, POST invitations, POST redeem
 └── usecase/team/

@@ -257,15 +257,16 @@ fun ZeraNavHost() {
                 composable<Route.Scan> {
                     ScanScreen()
                 }
-                composable<Route.EmployeeItems> {
-                    EmployeeItemsScreen()
+                composable<Route.EmployeeItems> { backStackEntry ->
+                    val route = backStackEntry.toRoute<Route.EmployeeItems>()
+                    EmployeeItemsScreen(initialStatus = route.status)
                 }
                 composable<Route.WorkingCentral> {
                     WorkingCentralScreen()
                 }
                 composable<Route.ManualRegister> { backStackEntry ->
                     val route = backStackEntry.toRoute<Route.ManualRegister>()
-                    ManualRegisterScreen(modelName = route.modelName)
+                    ManualRegisterScreen(modelName = route.modelName, barcode = route.barcode)
                 }
                 composable<Route.Profile> {
                     ProfileScreen()

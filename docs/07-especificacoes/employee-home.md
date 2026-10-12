@@ -4,12 +4,12 @@
 
 - **Feature:** Tela inicial do Operário
 - **Perfil(is) envolvido(s):** Operário (funcionário)
-- **Status:** em progresso (UI pronta; dados mockados e navegação pendente)
-- **Última atualização:** 2026-10-04
+- **Status:** em progresso (atalhos reais; "Adicionar Modelo" ainda sem destino)
+- **Última atualização:** 2026-10-11
 
 ## Contexto
 
-Primeira tela do Operário após o login (`Route.EmployeeHome`). Reaproveita os componentes da home do Gestor ([manager-home-dashboard.md](manager-home-dashboard.md)) dentro do `EmployeeScaffold`, com textos próprios do fluxo de Operário. Só nome e cargo vêm de dado real (`GetSelfUser`); ocupação, atalhos, pendências e últimos itens são mock no `EmployeeHomeViewModel` até o back expor um dashboard do Operário.
+Primeira tela do Operário após o login (`Route.EmployeeHome`). Reaproveita os componentes da home do Gestor ([manager-home-dashboard.md](manager-home-dashboard.md)) dentro do `EmployeeScaffold`, com textos próprios do fluxo de Operário. Nome e cargo vêm de `GetSelfUser`; ocupação e últimos itens vêm de `GetEmployeeHome` (`GET /api/v1/dashboard/home`, `recentItems.content`); pendências de `GetEmployeePendencies` (`GET /api/v1/dashboard/work-center`). Atalhos usam `inMaintenance` e `disposalsInWindow` de `GET /api/v1/dashboard/home`. O toque em Descartes abre o histórico. O toque em Manutenção abre os itens com o filtro "Em manutenção".
 
 ## User story
 
@@ -21,7 +21,7 @@ Como Operário, quero ver a ocupação do estoque, meus atalhos de manutenção/
 
 - **Given** o Operário está autenticado e abre `Route.EmployeeHome`
 - **When** a tela é composta
-- **Then** mostra nome e cargo (de `GetSelfUser`), `StockOccupationCard`, botões "Escanear" e "Adicionar Modelo", atalhos "Manutenção" e "Descartes", a lista de pendências e os últimos itens
+- **Then** mostra nome e cargo (de `GetSelfUser`), `StockOccupationCard`, botões "Escanear" e "Adicionar Modelo", atalhos "Manutenção" e "Descartes", a lista de pendências (work-center) e os últimos itens
 
 ### Cenário: Falha ao carregar o usuário
 
@@ -38,13 +38,21 @@ Como Operário, quero ver a ocupação do estoque, meus atalhos de manutenção/
 ## Critérios de aceite
 
 - [x] Layout com os mesmos componentes da home do Gestor (`StockOccupationCard`, `ShortcutCard`, `NotificationList`, `ProductList`)
-- [x] Pendência exibida com `NotificationItem(style = Red, redirectLabel = "Continuar preenchimento")`
-- [ ] Dados reais de ocupação, manutenção, descartes, pendências e últimos itens
-- [ ] Navegação de "Escanear", "Adicionar Modelo", "Manutenção", "Descartes", pendências e "Ver Todos" (hoje `TODO` no `EmployeeHomeViewModel`)
+- [x] Pendências mapeadas de `drafts` / `rejected` / `damagedWithoutDestination` (contador > 0 vira um `NotificationItem`; drafts e rejected em Red, danificados em Yellow)
+- [x] Dados reais de ocupação, pendências e últimos itens (`recentItems.content`)
+- [x] Dados reais de manutenção e descartes (`inMaintenance` e `disposalsInWindow`)
+- [x] Clique em pendência abre `Route.WorkingCentral`
+- [x] Clique em um último item abre `Route.ItemDetails(itemId)`
+- [x] "Ver Todos" abre `Route.EmployeeItems`
+- [x] Navegação de "Escanear" e "Descartes" (`Route.Scan` e `Route.ScheduledDisposals`)
+- [x] "Manutenção" abre `Route.EmployeeItems(status = "Em manutenção")`
+- [ ] Navegação de "Adicionar Modelo" (ainda `TODO` no `EmployeeHomeViewModel`)
 
 ## Edge cases considerados
 
-- Lista de pendências vazia: `NotificationList` mostra "Nenhuma notificação".
+- Lista de pendências vazia (todos os buckets vazios ou falha do work-center): `NotificationList` mostra "Nenhuma notificação".
+- Um item no bucket: label no singular (`1 cadastro incompleto`). Dois ou mais: plural (`3 cadastros incompletos`).
+- Lista de últimos itens vazia (`recentItems.content` vazio ou falha de `GetEmployeeHome`): `ProductList` mostra "Nenhum produto encontrado".
 
 ## Fora de escopo desta spec
 
@@ -54,4 +62,6 @@ Como Operário, quero ver a ocupação do estoque, meus atalhos de manutenção/
 ## Referências
 
 - Componentes: `../03-catalogo-componentes.md` (`EmployeeScaffold`, `Notification`)
-- Spec relacionada: [manager-home-dashboard.md](manager-home-dashboard.md)
+- Spec relacionada: [manager-home-dashboard.md](manager-home-dashboard.md), [central-de-trabalho.md](central-de-trabalho.md), [employee-descarte.md](employee-descarte.md)
+- Contrato: [../contrato-dashboard/contrato-inventory-dashboard.md](../contrato-dashboard/contrato-inventory-dashboard.md) (`GET /dashboard/home` e `GET /dashboard/work-center`)
+- Regras: [../05-regras-de-negocio/inventory-dashboard.md](../05-regras-de-negocio/inventory-dashboard.md)

@@ -72,12 +72,12 @@ Como Gestor, quero ver indicadores de reciclagem e descarte da minha unidade, pa
 
 ## Fora de escopo desta spec
 
-- `GET /api/v1/dashboard/work-center` (não é usado por nenhuma tela).
+- `GET /api/v1/dashboard/work-center` (home do operário e Central de Trabalho; não entra nos indicadores).
 - Indicadores do perfil Funcionário.
 - Skeleton/`isLoading` na tela.
 
 ## Referências
 
 - Regras de negócio: [../05-regras-de-negocio/inventory-dashboard.md](../05-regras-de-negocio/inventory-dashboard.md)
-- Contratos de API: [../06-contratos-api.md](../06-contratos-api.md), [../contrato-ms-inventory/contrato-inventory-dashboard.md](../contrato-ms-inventory/contrato-inventory-dashboard.md)
+- Contratos de API: [../06-contratos-api.md](../06-contratos-api.md), [../contrato-dashboard/contrato-inventory-dashboard.md](../contrato-dashboard/contrato-inventory-dashboard.md)
 - Catálogo: [../03-catalogo-componentes.md](../03-catalogo-componentes.md) (gráficos)

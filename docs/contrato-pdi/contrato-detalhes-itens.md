@@ -29,7 +29,7 @@ X-Unit-Id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
 
 | Query param | Tipo | Obrigatório | Descrição |
 |---|---|---|---|
-| `status` | `ItemStatus` | Não | Ver mapeamento de chips abaixo. Omitir = todos os status (chip "Todos"). |
+| `status` | `ItemStatus` | Não | Um valor. **Omitir = itens ativos** (tudo menos `DISPOSED` e `REMOVED`), não “todos os status”. Chip "Todos" no app = essa listagem padrão. `DISPOSED` só entra se o chip mandar `status=DISPOSED`. |
 | `categoryId` | UUID | Não | Chip "Categoria" — app manda o `id` da categoria (de `GET /api/v1/categories`), não o nome. |
 | `modelId` | UUID | Não | Não usado pelas telas atuais; disponível se precisar. |
 | `q` | string | Não | Busca. Cobre prefixo do `displayCode`, nome do item, nome do modelo e material — **cobre nome, e código curto (`displayCode`), não o UUID `id`.** Ver nota abaixo sobre busca por ID. |
@@ -53,7 +53,7 @@ Envelope de paginação igual ao `/dashboard/home` (`PageResponse<ItemResponse>`
     {
       "id": "9c858901-8a57-4791-81fe-4c455b099bc9",
       "barcode": "7891234567890",
-      "displayCode": "ITM-0042",
+      "displayCode": "265964",
       "name": "Notebook Dell Latitude",
       "status": "IN_STOCK",
       "condition": "USED",
@@ -90,13 +90,13 @@ Título "1.230 Itens" da tela = `totalElements`, sem filtro (chip "Todos", sem `
 
 | Chip do app | `status` (um ou mais valores) |
 |---|---|
-| "Todos" | omitir `status` (não filtra) |
+| "Todos" | omitir `status` (ativos: não inclui `DISPOSED`/`REMOVED`) |
 | "Pendentes" | `PENDING_APPROVAL` **e** `AWAITING_EVALUATION` — a API só aceita **um** valor de `status` por chamada; se o app quiser os dois num chip só, precisa de 2 chamadas (uma por status) e mesclar as páginas no cliente, **ou** pedir ao backend um `statusIn` que aceite lista. Hoje não existe filtro por múltiplos status numa chamada. |
 | "Categoria" | usa `categoryId`, não `status` |
 
 ### Nota sobre "busca por ID"
 
-O placeholder da busca diz "Pesquisar por ID ou Nome...". A implementação atual (`ItemFilter.query`) casa com **`displayCode`** (código curto, ex. `"ITM-0042"`), não com o UUID interno (`id`). Se a intenção do app é buscar pelo `displayCode` visível ao usuário, já funciona. Se for para buscar pelo UUID completo, não tem suporte hoje — confirmar com o backend qual dos dois é o "ID" da UI antes de assumir que funciona.
+O placeholder da busca diz "Pesquisar por ID ou Nome...". O back-end casa `displayCode` (6 dígitos, ex. `"265964"`), nome, modelo ou material — **não** o UUID `id`. O app envia o query param `q` (OpenAPI/client); a página Confluence às vezes chama o campo de `query`.
 
 ### Enum `ItemStatus` → chip/tag da UI
 
@@ -106,7 +106,7 @@ O placeholder da busca diz "Pesquisar por ID ou Nome...". A implementação atua
 | `REJECTED` | Recusado |
 | `IN_STOCK` | Aprovado |
 | `IN_MAINTENANCE` | Em manutenção |
-| `AWAITING_EVALUATION` | Em aprovação |
+| `AWAITING_EVALUATION` | Em aprovação *(rótulo da UI; no domínio é avaliação pós-manutenção, não a fila de cadastro)* |
 | `DISPOSED` | Descartado |
 | `DRAFT` | sem chip no app hoje — item ainda incompleto, geralmente não aparece pro gestor fora da Central de Trabalho |
 | `REMOVED` | sem chip no app hoje — removido logicamente, não aparece em listagens normais |

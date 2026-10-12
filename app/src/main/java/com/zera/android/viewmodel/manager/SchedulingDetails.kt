@@ -5,8 +5,10 @@ import androidx.lifecycle.viewModelScope
 import com.zera.android.model.dto.inventory.DisposalRecordDTO
 import com.zera.android.model.usecase.ai.GenerateDisposalReport
 import com.zera.android.model.usecase.ai.GetDisposalReport
+import com.zera.android.model.usecase.auth.GetSelfUser
 import com.zera.android.model.usecase.inventory.CancelDisposalSchedule
 import com.zera.android.model.usecase.inventory.GetDisposalSchedule
+import com.zera.android.viewmodel.canCancelDisposal
 import com.zera.android.view.components.lists.OptionItem
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
@@ -28,6 +30,7 @@ data class SchedulingDetailsState(
     val isLoading: Boolean = false,
     val isGeneratingReport: Boolean = false,
     val isCancelling: Boolean = false,
+    val canCancel: Boolean = false,
     val errorMessage: String? = null,
 )
 
@@ -36,6 +39,7 @@ class SchedulingDetailsViewModel : ZeraViewModel() {
     private val cancelDisposal = CancelDisposalSchedule()
     private val generateReport = GenerateDisposalReport()
     private val getReport = GetDisposalReport()
+    private val getSelfUser = GetSelfUser()
     private val _state = mutableStateOf(SchedulingDetailsState())
     val state = _state
     private var disposalId: String = ""
@@ -46,6 +50,16 @@ class SchedulingDetailsViewModel : ZeraViewModel() {
         if (scheduleId.isBlank() || scheduleId == this.disposalId) return
         this.disposalId = scheduleId
         _state.value = _state.value.copy(isLoading = true, errorMessage = null, reportUrl = null)
+        viewModelScope.launch {
+            try {
+                val user = getSelfUser.execute()
+                _state.value = _state.value.copy(canCancel = canCancelDisposal(user.role))
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                _state.value = _state.value.copy(canCancel = false)
+            }
+        }
         viewModelScope.launch {
             try {
                 apply(getDisposal.execute(scheduleId))
@@ -129,7 +143,7 @@ class SchedulingDetailsViewModel : ZeraViewModel() {
 
     fun onCancelSchedulingClick() {
         val id = disposalId
-        if (id.isBlank() || _state.value.isCancelling) return
+        if (!_state.value.canCancel || id.isBlank() || _state.value.isCancelling) return
         _state.value = _state.value.copy(isCancelling = true, errorMessage = null)
         viewModelScope.launch {
             try {

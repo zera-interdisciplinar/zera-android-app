@@ -27,43 +27,45 @@ Pacote `model/dto/invitation/`.
 
 Pacote `model/dto/user/`. Constantes de papel em `model/entity/user/UserRole` (`EMPLOYEE`, `MANAGER`).
 
-- **`SelfUserResponseDTO(userId, name, email, role, status, unitId, createdAt, updatedAt, managerId: String?)`** — retornado por `GET users/{userId}`. `role` é uma `String` livre (valores observados: `"MANAGER"`, `"EMPLOYEE"`), não um enum Kotlin — a decisão de rota (`SingInViewModel.signIn()`) faz `when (selfUser.role) { "EMPLOYEE" -> ...; "MANAGER" -> ...; else -> erro }`. Não há um terceiro valor para Administrador (coerente com [00-contexto-geral.md](00-contexto-geral.md), que registra que esse perfil não tem fluxo no app). `unitId` é gravado em `SharedPreferences` no login e enviado como `X-Unit-Id` no `InventoryClient`.
+- **`SelfUserResponseDTO(userId, name, email, role, status, unitId, createdAt, updatedAt, managerId: String?)`** — `GET users/{id}`. `role` é `"MANAGER"` ou `"EMPLOYEE"` (v1 não tem Administrador). `unitId` vai para `SqliteManager` e o header `X-Unit-Id`.
 
 ## DTOs de inventário (dashboard)
 
-Pacote `model/dto/inventory/`. Só os campos que as telas usam; o restante do JSON do contrato é ignorado (`ignoreUnknownKeys`). Contratos: [contrato-ms-inventory/contrato-inventory-dashboard.md](contrato-ms-inventory/contrato-inventory-dashboard.md), [contrato-pdi/contrato-detalhes-itens.md](contrato-pdi/contrato-detalhes-itens.md).
+Pacote `model/dto/inventory/`. Só os campos que as telas usam; o restante do JSON é ignorado (`ignoreUnknownKeys`). Contratos: [contrato-dashboard/contrato-inventory-dashboard.md](contrato-dashboard/contrato-inventory-dashboard.md), [contrato-pdi/contrato-detalhes-itens.md](contrato-pdi/contrato-detalhes-itens.md).
 
 - **`DashboardHomeResponseDTO`** — `GET /api/v1/dashboard/home`: `activeItems`, `activeItemsChangePercent?`, `occupancyPercent?`, `pendingApproval`, `inMaintenance`, `awaitingEvaluation`, `recentItems`.
+- **`WorkCenterResponseDTO`** — `GET /api/v1/dashboard/work-center`: `drafts`, `rejected`, `damagedWithoutDestination`, `inMaintenance`, `awaitingEvaluation`.
+- **`PendingItemResponseDTO`** — item da central: `id`, `displayCode?`, `name`, `modelName?`, `missingFields`, `rejectionReason?`, `updatedAt?`.
 - **`PagedItemsDTO(content, page, size, totalElements, totalPages)`** — envelope de `recentItems` e de `GET /api/v1/items`.
-- **`ItemResponseDTO`** — lista e PDI: `id`, `name`, `displayCode?`, `status?` (aliases JSON `itemStatus`/`approvalStatus`), `condition?`, `createdByName?`, `createdAt?`, `model?`.
+- **`ItemResponseDTO`** — lista e PDI: `id`, `name`, `displayCode?`, `status?` (aliases JSON `itemStatus`/`approvalStatus`), `condition?`, `createdByName?` (aliases `created_by_name`), `createdBy?` (UUID ou objeto com `name`), `createdAt?`, `model?`.
 - **`ModelResponseDTO`** / **`MaterialResponseDTO`** / **`CategoryResponseDTO`** — modelo aninhado no item; categorias também vêm de `GET /api/v1/categories` (`id`, `name`, metadados opcionais).
 - **`IndicatorsResponseDTO`** — `GET /api/v1/dashboard/indicators`: `recyclingRatePercent`, `recyclingRateChangePoints?`, `monthlyWeightKg`, `weightByMaterial`.
 - **`MonthlyWeightDTO(month, weightKg)`** — `month` no formato `yyyy-MM`.
 - **`WeightByMaterialDTO(material, percent)`** — `material` é código (`PLASTIC`, `METAL`, ...).
 
-Campos do contrato **não** modelados no app: `stockCapacity`, `disposalsInWindow`, `windowDays`, barcode/damages/serial da listagem, payload de work-center.
+Campos do contrato **não** modelados no app: `stockCapacity`, `disposalsInWindow`, `windowDays`, barcode/damages/serial da listagem.
 
 ## Config dinâmica (Scrapy)
 
 Pacotes `model/entity/config/` e `model/entity/scrapy/`. Contrato: [contrato-scrapy/contrato-scrapy-api.md](contrato-scrapy/contrato-scrapy-api.md).
 
 - **`Environments`** — resposta do `POST /v1/boot`:
-  - `admCoreApiUrl` ← `ms-adm-core-url` (base do `ApiClient`)
-  - `admCoreApiKey` ← `ms-adm-core-api-key` (header `apiKey` do `ApiClient`; fallback do `InventoryClient`)
+  - `admCoreApiUrl` ← `ms-adm-core-url` (base do `AdmCoreClient`)
+  - `admCoreApiKey` ← `ms-adm-core-api-key` (header `apiKey` do `AdmCoreClient`; fallback do `InventoryClient`)
   - `inventoryApiUrl` ← `ms-inventory-url` (base do `InventoryClient`)
   - `inventoryApiKey` ← `ms-inventory-api-key` (opcional; se vazio, usa `admCoreApiKey`)
 - **`FlagsRequest(attrs: Map<String, JsonElement>)`** — body do `POST /v1/flags`. `LoadFlags` preenche `user_id`, `role`, `unit_id` e `app_version`.
-- **`AppConfig.flags`** — `JsonObject` com o mapa `key -> value` do `POST /v1/flags` (bool, número, string ou objeto, conforme o admin). Em memória; não vai para `SharedPreferences`.
+- **`AppConfig.flags`** — `JsonObject` do `POST /v1/flags`. Em memória; não vai para o SQLite.
 
-## Persistência local (SharedPreferences)
+## Persistência local (SQLite)
 
-Único mecanismo de persistência local hoje é `SharedPreferencesManager` (`model/local/SharedPreferencesManager.kt`), um `object` sobre um único arquivo de preferências (`"zera_prefs"`):
+Sessão em `SqliteManager` (`model/local/SqliteManager.kt`), banco `zera.db`, tabela `session`. Motivo: [mudanca-shared-para-sqlite/contexto.md](mudanca-shared-para-sqlite/contexto.md).
 
 - `saveSession` / `getAccessToken` / `getRefreshToken` / `getUserId` / `getEmail` / `getPassword`
-- `saveUnitId` / `getUnitId` — unidade do usuário logado, usada no header `X-Unit-Id`
-- `hasSavedLogin` / `clearSession` (`clearSession` também remove `unit_id`)
+- `saveUnitId` / `getUnitId` — header `X-Unit-Id`
+- `hasSavedLogin` / `clearSession`
 
-Precisa ser inicializado explicitamente (`SharedPreferencesManager.init(context)`, hoje chamado em `MainActivity.onCreate`) antes de qualquer leitura/escrita — chamar antes disso lança `UninitializedPropertyAccessException`. Não há cache local de dados de domínio (perfil do usuário, inventário, etc.) — apenas sessão. Não há banco de dados local (Room ou similar) no projeto.
+Init em `MainActivity.onCreate`. Sem cache de inventário. Refresh de token: [07-especificacoes/refresh-de-sessao.md](07-especificacoes/refresh-de-sessao.md).
 
 ## Modelos de chat
 
@@ -100,12 +102,6 @@ Não existe uma camada `toDomain()`. Os `ViewModels` mapeiam DTO → campos de U
 - **PDI:** `ItemResponseDTO` → `ItemDetailsState` (`ItemDetailsViewModel.stateFrom`).
 - **Funcionários na home:** sem DTO — o contrato não traz esse número.
 
-## Modelo de dados esperado (backlog, ainda não implementado)
+## Identificadores do item (back-end v1)
 
-Resumo leve do modelo de dados previsto pelo escopo de produto — sem detalhar schema aqui, já que ainda não há código correspondente:
-
-- Hierarquia **Categoria → Modelo → Produto**, com o código de barras do produto físico codificando `id_produto-id_modelo-id_categoria`.
-- Status de triagem por produto: reutilizável, aproveitável (peças/upgrade) ou descartável.
-- Metadados de manutenção por produto: vida útil esperada, histórico de manutenções, desgaste estimado, frequência de uso.
-- Registro de tempo de armazenamento de itens descartáveis, para os alertas de lote crítico.
-- Total de funcionários da unidade (não coberto pelo Inventory Dashboard).
+Não misturar: `id` (UUID), `barcode` (físico, único por unidade), `displayCode` (6 dígitos na UI, atribuído no cadastro). O código de barras **não** é `id_produto-id_modelo-id_categoria`.
