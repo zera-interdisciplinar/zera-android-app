@@ -43,6 +43,7 @@ import com.zera.android.view.theme.NoColor
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
 import com.zera.android.view.theme.icons.ZeraIcon
+import com.zera.android.view.transition.ScreenAnimation
 import com.zera.android.view.transition.SharedElementKeys
 import com.zera.android.view.transition.sharedTransition
 
@@ -95,7 +96,7 @@ fun ManagerScaffold(
     goBack: Boolean = false,
     onBackClick: () -> Unit = { ZeraNavigator.goBack() },
     fabIcon: ZeraIcon? = ZeraIcon.Chatbot,
-    onFabClick: () -> Unit = {},
+    onFabClick: () -> Unit = { ZeraNavigator.push(Route.ChatBot, ScreenAnimation.SlideVertical) },
     scrollable: Boolean = true,
     contentPadding: Dp = Spacing.medium,
     backgroundVariant: Boolean = false,
