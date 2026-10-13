@@ -20,6 +20,8 @@ object AdmCoreClient {
     private val json = Json { ignoreUnknownKeys = true }
 
     private lateinit var retrofit: Retrofit
+
+    fun isReady(): Boolean = ::retrofit.isInitialized
     lateinit var refreshAuthService: AuthService
         private set
 

@@ -6,6 +6,7 @@ import com.zera.android.model.usecase.auth.RestoreSession
 import com.zera.android.model.usecase.config.Boot
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
+import com.zera.android.view.navigation.consumePendingAlertDeepLink
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -41,6 +42,7 @@ class SplashViewModel : ViewModel() {
                 return
             }
             ZeraNavigator.pushAndPopAll(destination)
+            consumePendingAlertDeepLink()
         } catch (error: Exception) {
             if (error is HttpException && error.code() in AUTH_FAILURE_CODES) {
                 restoreSession.clearSession()

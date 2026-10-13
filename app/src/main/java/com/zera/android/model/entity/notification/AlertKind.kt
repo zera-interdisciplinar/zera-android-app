@@ -13,6 +13,7 @@ enum class AlertKind {
     PREDICTED_FAILURE,
     ITEM_APPROVED,
     ITEM_REJECTED,
+    ITEM_PENDING_APPROVAL,
     ;
 
     companion object {
