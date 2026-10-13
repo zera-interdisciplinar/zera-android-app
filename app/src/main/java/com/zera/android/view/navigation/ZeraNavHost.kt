@@ -43,6 +43,7 @@ import com.zera.android.view.screens.manager.recycling.ScheduledDisposalsScreen
 import com.zera.android.view.screens.manager.recycling.SchedulingDetailsScreen
 import com.zera.android.view.screens.manager.recycling.SchedulingSuccessScreen
 import com.zera.android.view.screens.shared.ChatBotScreen
+import com.zera.android.view.screens.shared.ChatConversationsScreen
 import com.zera.android.view.screens.shared.ProfileScreen
 import com.zera.android.view.transition.LocalAnimatedVisibilityScope
 import com.zera.android.view.transition.LocalSharedTransitionScope
@@ -277,8 +278,12 @@ fun ZeraNavHost() {
                 composable<Route.Profile> {
                     ProfileScreen()
                 }
-                composable<Route.ChatBot> {
-                    ChatBotScreen()
+                composable<Route.ChatConversations> {
+                    ChatConversationsScreen()
+                }
+                composable<Route.ChatBot> { backStackEntry ->
+                    val route = backStackEntry.toRoute<Route.ChatBot>()
+                    ChatBotScreen(threadId = route.threadId)
                 }
             }
         }

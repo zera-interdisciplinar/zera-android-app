@@ -28,7 +28,10 @@ import com.zera.android.viewmodel.shared.ChatBotViewModel
 
 @Composable
 fun ChatBotScreen(
-    viewModel: ChatBotViewModel = viewModel()
+    threadId: String,
+    viewModel: ChatBotViewModel = viewModel(key = threadId) {
+        ChatBotViewModel(threadId)
+    },
 ) {
     val state by viewModel.state
 
@@ -71,10 +74,12 @@ fun ChatBotScreen(
                     .padding(horizontal = Spacing.medium, vertical = Spacing.small),
                 verticalArrangement = Arrangement.spacedBy(Spacing.medium),
             ) {
-                SuggestionList(
-                    suggestions = state.suggestions,
-                    onSuggestionClick = viewModel::onSuggestionClick,
-                )
+                if (state.messages.isEmpty()) {
+                    SuggestionList(
+                        suggestions = state.suggestions,
+                        onSuggestionClick = viewModel::onSuggestionClick,
+                    )
+                }
                 MessageTextBox(
                     value = state.input,
                     onValueChange = viewModel::onInputChange,
@@ -90,6 +95,6 @@ fun ChatBotScreen(
 @Preview(heightDp = 900)
 fun ChatBotScreenPreview() {
     ZeraTheme {
-        ChatBotScreen()
+        ChatBotScreen(threadId = "preview-thread")
     }
 }

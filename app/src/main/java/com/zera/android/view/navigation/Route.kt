@@ -155,5 +155,8 @@ sealed interface Route{
     data object Profile : Route
 
     @Serializable
-    data object ChatBot : Route
+    data object ChatConversations : Route
+
+    @Serializable
+    data class ChatBot(val threadId: String) : Route
 }

@@ -68,7 +68,7 @@ private val BottomFadeHeight = 25.dp
  * @param showActions quando `true` (padrão), exibe os atalhos de notificações/perfil/menu
  *   na [UpperNavBar]. Use `false` em telas que só precisam do "Voltar" (ex.: "Scanear item").
  * @param fabIcon ícone do botão flutuante. Quando `null`, nenhum FAB é exibido. O FAB sempre
- *   abre o chatbot ([Route.ChatBot]); a ação não é configurável.
+ *   abre o inbox de conversas ([Route.ChatConversations]); a ação não é configurável.
  * @param scrollable quando `true` (padrão), a [Column] do conteúdo rola inteira. Use
  *   `false` quando [content] já tiver seu próprio elemento rolável.
  * @param contentPadding espaçamento horizontal do conteúdo.
@@ -128,7 +128,7 @@ fun EmployeeScaffold(
                 if (fabIcon != null) {
                     IconButton(
                         icon = fabIcon,
-                        onClick = { ZeraNavigator.push(Route.ChatBot, ScreenAnimation.SlideVertical) },
+                        onClick = { ZeraNavigator.push(Route.ChatConversations, ScreenAnimation.SlideVertical) },
                         contentDescription = "Assistente virtual",
                         size = 56.dp,
                     )

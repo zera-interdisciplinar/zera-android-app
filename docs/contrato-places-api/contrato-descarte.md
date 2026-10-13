@@ -60,11 +60,11 @@ JSON em **snake_case**. Este MS **não** valida `apiKey` nas rotas próprias. Ch
 
 | Autorização | Rotas |
 |---|---|
-| JWT encaminhado + unidade resolvida no admin-core | `POST /api/v1/multi-agent/process-message`, `POST /api/v1/reports` |
-| Sem JWT neste serviço (identifica por `user_id` ou `disposal_id`) | `GET /conversations`, `GET /conversations/{thread_id}`, `GET /reports/{disposal_id}` |
+| JWT Bearer | `POST /api/v1/multi-agent/process-message`, `GET /conversations`, `GET /conversations/{thread_id}`, `POST /api/v1/reports` |
+| Sem JWT neste serviço | `GET /reports/{disposal_id}` |
 | Público | `GET /health` |
 
-`process-message` sem `Authorization`: **`422`**. Token inválido / `unit_id` que não é do usuário: **`403`** (`"unit_id does not belong to this user"`). Não há `401` neste MS. Unidade **não** vem de header — vai no body (`unit_id`).
+Usuário só do claim `sub` — **não** vai no body nem na query. `process-message` sem `Authorization`: **`422`**. Token inválido: **`401`**. `unit_id` que não é do usuário: **`403`**. Unidade do chat vai no body (`unit_id`), não em `X-Unit-Id`.
 
 ---
 
@@ -80,7 +80,6 @@ O cliente **não** escolhe o agente. `report_url` neste endpoint é **sempre `nu
 
 ```json
 {
-  "user_id": "9c858901-8a57-4791-81fe-4c455b099bc9",
   "thread_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
   "unit_id": "aa11bb22-0000-0000-0000-000000000009",
   "content": "O que é o projeto Zera?"
@@ -89,9 +88,8 @@ O cliente **não** escolhe o agente. `report_url` neste endpoint é **sempre `nu
 
 | Campo | Obrigatório | Descrição |
 |---|---|---|
-| `user_id` | Sim | UUID do dono. Mesmo do JWT no admin-core. |
-| `thread_id` | Sim | **O app gera** (UUID v4). Mesmo par = continua histórico. |
-| `unit_id` | Sim | Tem que coincidir com `unitId` no admin-core. Ausente: `422`. Errado: `403`. |
+| `thread_id` | Sim | UUID v4 da rota. Novo UUID = nova conversa. |
+| `unit_id` | Sim | `unitId` da sessão. Ausente: `422`. Errado: `403`. |
 | `content` | Sim | 1–**8000** caracteres. |
 
 `200`:
@@ -102,25 +100,26 @@ O cliente **não** escolhe o agente. `report_url` neste endpoint é **sempre `nu
   "blocked": false,
   "blocked_reason": null,
   "agent_trace": ["guardrail_in", "orchestrator", "faq", "formatter", "judge", "guardrail_out"],
-  "report_url": null
+  "report_url": null,
+  "redirect_to": { "screen": "Recycling", "message": "Ver pontos próximos" }
 }
 ```
 
-`blocked: true` ainda é HTTP **200**. `agent_trace` é telemetria, não UI. Recusa de `unit_id`: `403`. Body/header inválidos: `422` (envelope FastAPI).
+`blocked: true` ainda é HTTP **200**. `redirect_to` é `{screen, message}` ou `null`. `screen` = PascalCase de `Route.kt`. O app só mostra o CTA se a rota existir, não exigir id e for permitida ao papel. `agent_trace` não vai à UI. `report_url` neste endpoint é sempre `null`.
 
 ---
 
 ## 4. Histórico de conversas
 
-Sem `Authorization` neste serviço. Recorte por `user_id`. Gateway deve autenticar se a chamada passar pelo edge.
+Bearer obrigatório. Só threads do `sub`.
 
 ### 4.1 `GET /api/v1/multi-agent/conversations`
 
-`user_id` obrigatório. `page` **1-based** (default 1). `page_size` 1–100 (default 20). `preview` = 40 chars da **primeira** mensagem. Lista vazia: `items: []`, `total: 0` (não `404`).
+`page` **1-based** (default 1). `page_size` 1–100 (default 20). Envelope `items` + `page` + `page_size` + `total`. `preview` = 40 chars da **primeira** mensagem. Lista vazia: `items: []`, `total: 0`.
 
-### 4.2 `GET /api/v1/multi-agent/conversations/{thread_id}?user_id=`
+### 4.2 `GET /api/v1/multi-agent/conversations/{thread_id}`
 
-Array simples, mais antigas primeiro. `role`: `user` / `assistant` / `system`. Thread inexistente ou de outro usuário: **`[]`**.
+Array simples, mais antigas primeiro. `role`: `user` / `assistant` / `system` (`system` o app descarta). Inexistente ou de outro usuário: **`[]`**. Sem `redirect_to` por mensagem.
 
 ---
 
