@@ -67,7 +67,7 @@ private val BottomFadeHeight = 25.dp
  *   [ManagerBottomNavBar] (ex.: [ManagerHomeScreen]).
  * @param onBackClick ação do botão "Voltar". Só é usada quando [goBack] é `true`.
  * @param fabIcon ícone do botão flutuante. Quando `null`, nenhum FAB é exibido. O FAB sempre
- *   abre o chatbot ([Route.ChatBot]); a ação não é configurável.
+ *   abre o inbox de conversas ([Route.ChatConversations]); a ação não é configurável.
  * @param scrollable quando `true` (padrão), a [Column] do conteúdo rola inteira. Use
  *   `false` quando [content] já tiver seu próprio elemento rolável (ex.: uma lista longa
  *   em [com.zera.android.view.components.lists.ProductList] com `Modifier.weight(1f)`) —
@@ -140,7 +140,7 @@ fun ManagerScaffold(
                 if (fabIcon != null) {
                     IconButton(
                         icon = fabIcon,
-                        onClick = { ZeraNavigator.push(Route.ChatBot, ScreenAnimation.SlideVertical) },
+                        onClick = { ZeraNavigator.push(Route.ChatConversations, ScreenAnimation.SlideVertical) },
                         contentDescription = "Assistente virtual",
                         size = 56.dp,
                     )

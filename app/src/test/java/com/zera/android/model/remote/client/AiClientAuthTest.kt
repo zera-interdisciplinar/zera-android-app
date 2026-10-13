@@ -37,13 +37,22 @@ class AiClientAuthTest {
     }
 
     @Test
-    fun fallsBackToAdmCoreApiKeyWhenAiKeyIsBlank() {
-        val environments = Environments(
+    fun prefersAiApiKeyAndFallsBackToAdm() {
+        val withAi = Environments(
             admCoreApiUrl = "https://adm.example.com",
             admCoreApiKey = "adm-key",
             inventoryApiUrl = "https://inventory.example.com",
+            aiApiUrl = "https://ai.example.com",
+            aiApiKey = "ai-key",
         )
-        assertEquals("adm-key", AiClient.resolveApiKey(environments))
+        assertEquals("ai-key", AiClient.resolveApiKey(withAi))
+        val withoutAi = Environments(
+            admCoreApiUrl = "https://adm.example.com",
+            admCoreApiKey = "adm-key",
+            inventoryApiUrl = "https://inventory.example.com",
+            aiApiKey = "",
+        )
+        assertEquals("adm-key", AiClient.resolveApiKey(withoutAi))
     }
 
     @Test

@@ -10,6 +10,12 @@ internal fun OkHttpClient.Builder.zeraTimeouts(): OkHttpClient.Builder =
         .readTimeout(30, TimeUnit.SECONDS)
         .writeTimeout(30, TimeUnit.SECONDS)
 
+/** O grafo do chat (FAQ + juiz) passa fácil de 30s; reports de PDF também. */
+internal fun OkHttpClient.Builder.aiTimeouts(): OkHttpClient.Builder =
+    connectTimeout(15, TimeUnit.SECONDS)
+        .readTimeout(120, TimeUnit.SECONDS)
+        .writeTimeout(60, TimeUnit.SECONDS)
+
 internal fun serviceBaseUrl(raw: String, stripApiV1: Boolean): String {
     val url = raw.trim().toHttpUrl()
     val segments = url.pathSegments.filter { it.isNotEmpty() }.toMutableList()

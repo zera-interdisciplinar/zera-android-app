@@ -56,7 +56,7 @@ Como Gestor, quero ver um resumo do estoque, dos alertas pendentes e dos último
 - [x] "Ver Todos" (últimos itens) navega para `Route.Itens`
 - [ ] Total de funcionários preenchido (não existe no Inventory Dashboard — ver TODO no `ManagerHomeViewModel`)
 - [ ] Estado de carregamento (`isLoading`) na UI (campo removido do `State`; a tela não mostra skeleton)
-- [x] FAB de assistente virtual abre `Route.ChatBot` (comportamento fixo do `ManagerScaffold`; spec do chat em [chat-bot.md](chat-bot.md))
+- [x] FAB de assistente virtual abre `Route.ChatConversations` (comportamento fixo do `ManagerScaffold`; spec em [chat-bot.md](chat-bot.md))
 
 ## Edge cases considerados
 

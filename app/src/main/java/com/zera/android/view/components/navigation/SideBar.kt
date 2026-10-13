@@ -67,7 +67,7 @@ data class SideBarItem(
  */
 private val FixedSideBarItems = listOf(
     SideBarItem(label = "Central de Ajuda", icon = ZeraIcon.InfoCircle), // TODO: rota da Central de Ajuda
-    SideBarItem(label = "Fale com o Zé", icon = ZeraIcon.Chatbot, route = Route.ChatBot),
+    SideBarItem(label = "Fale com o Zé", icon = ZeraIcon.Chatbot, route = Route.ChatConversations),
     SideBarItem(label = "Configurações", icon = ZeraIcon.Gear), // TODO: rota de Configurações
 )
 

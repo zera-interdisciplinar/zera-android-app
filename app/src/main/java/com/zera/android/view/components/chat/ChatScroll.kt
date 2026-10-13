@@ -56,8 +56,12 @@ fun ChatScroll(
         verticalArrangement = Arrangement.spacedBy(Spacing.medium),
     ) {
         items(displayedMessages) { message ->
-            // TODO: extrair a rota/rótulo de navegação do conteúdo quando o back passar a enviá-los.
-            MessageContainer(role = message.role, content = message.content)
+            MessageContainer(
+                role = message.role,
+                content = message.content,
+                navigateTo = message.navigateTo,
+                navigateToLabel = message.navigateToLabel,
+            )
         }
         if (loadingMessage) {
             item { LoadingMessageContainer() }
