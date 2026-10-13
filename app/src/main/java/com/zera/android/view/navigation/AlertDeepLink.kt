@@ -2,6 +2,7 @@ package com.zera.android.view.navigation
 
 import android.content.Intent
 import com.zera.android.model.entity.notification.AlertKind
+import com.zera.android.view.components.outros.ItemStatus
 
 object PendingAlertDeepLink {
     const val ExtraAlertId = "alertId"
@@ -33,6 +34,7 @@ fun routeForAlertKind(kind: String?): Route? = when (AlertKind.from(kind.orEmpty
     AlertKind.PREDICTED_FAILURE,
     -> Route.Itens()
     AlertKind.RECYCLABLE_TO_LANDFILL -> Route.Recycling
+    AlertKind.ITEM_PENDING_APPROVAL -> Route.Itens(status = ItemStatus.PendingApproval.label)
     else -> null
 }
 

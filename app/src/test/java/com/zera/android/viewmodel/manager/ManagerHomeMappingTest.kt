@@ -45,7 +45,7 @@ class ManagerHomeMappingTest {
         assertEquals(2, alerts.size)
         assertEquals("first", alerts[0].id)
         assertEquals("Estoque alto", alerts[0].label)
-        assertEquals(ZeraColorFamily.Red, alerts[0].style)
+        assertEquals(ZeraColorFamily.Blue, alerts[0].style)
         assertEquals("second", alerts[1].id)
         assertEquals("Item aprovado", alerts[1].label)
         assertEquals(ZeraColorFamily.Green, alerts[1].style)
@@ -58,6 +58,10 @@ class ManagerHomeMappingTest {
         assertEquals(Route.Itens(), ManagerHomeViewModel.routeForAlertKind("STOCK_QUANTITY_LIMIT"))
         assertEquals(Route.Itens(), ManagerHomeViewModel.routeForAlertKind("WARRANTY_EXPIRATION"))
         assertEquals(Route.Recycling, ManagerHomeViewModel.routeForAlertKind("RECYCLABLE_TO_LANDFILL"))
+        assertEquals(
+            Route.Itens(status = "Pendente"),
+            ManagerHomeViewModel.routeForAlertKind("ITEM_PENDING_APPROVAL"),
+        )
         assertNull(ManagerHomeViewModel.routeForAlertKind("ITEM_APPROVED"))
         assertNull(ManagerHomeViewModel.routeForAlertKind("ITEM_REJECTED"))
         assertNull(ManagerHomeViewModel.routeForAlertKind("STORAGE"))
@@ -71,11 +75,31 @@ class ManagerHomeMappingTest {
     }
 
     @Test
-    fun severityMapsToColorFamily() {
-        assertEquals(ZeraColorFamily.Red, ManagerHomeViewModel.colorFamilyForSeverity("HIGH"))
-        assertEquals(ZeraColorFamily.Yellow, ManagerHomeViewModel.colorFamilyForSeverity("MEDIUM"))
-        assertEquals(ZeraColorFamily.Green, ManagerHomeViewModel.colorFamilyForSeverity("LOW"))
-        assertEquals(ZeraColorFamily.Yellow, ManagerHomeViewModel.colorFamilyForSeverity("UNKNOWN"))
+    fun kindMapsToColorFamily() {
+        assertEquals(
+            ZeraColorFamily.Green,
+            ManagerHomeViewModel.colorFamilyForAlert("ITEM_APPROVED", "HIGH"),
+        )
+        assertEquals(
+            ZeraColorFamily.Yellow,
+            ManagerHomeViewModel.colorFamilyForAlert("ITEM_PENDING_APPROVAL", "LOW"),
+        )
+        assertEquals(
+            ZeraColorFamily.Red,
+            ManagerHomeViewModel.colorFamilyForAlert("ITEM_REJECTED", "LOW"),
+        )
+        assertEquals(
+            ZeraColorFamily.Blue,
+            ManagerHomeViewModel.colorFamilyForAlert("STOCK_QUANTITY_LIMIT", "HIGH"),
+        )
+        assertEquals(
+            ZeraColorFamily.Red,
+            ManagerHomeViewModel.colorFamilyForAlert("RECYCLABLE_TO_LANDFILL", "LOW"),
+        )
+        assertEquals(
+            ZeraColorFamily.Red,
+            ManagerHomeViewModel.colorFamilyForAlert("UNKNOWN", "HIGH"),
+        )
     }
 
     @Test
