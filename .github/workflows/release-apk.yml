@@ -1,0 +1,42 @@
+name: Release APK
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Criar local.properties
+        run: |
+          cat > local.properties <<EOF
+          scrapy.api.url=${{ secrets.SCRAPY_API_URL }}
+          scrapy.api.key=${{ secrets.SCRAPY_API_KEY }}
+          maps.api.key=${{ secrets.MAPS_API_KEY }}
+          EOF
+
+      - name: Build APK (debug)
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Anexar APK na release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          mv app/build/outputs/apk/debug/app-debug.apk "zera-$TAG-debug.apk"
+          gh release upload "$TAG" "zera-$TAG-debug.apk" --clobber
