@@ -27,10 +27,6 @@ class ConfigurationsViewModel : ZeraViewModel() {
         // TODO: navegar para as configurações de notificações
     }
 
-    fun onRegistrationItemsClick() {
-        // TODO: navegar para as configurações de itens do cadastro
-    }
-
     fun onPrivacyClick() {
         // TODO: navegar para as configurações de privacidade
     }

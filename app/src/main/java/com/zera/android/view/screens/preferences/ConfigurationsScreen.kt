@@ -79,12 +79,6 @@ fun ConfigurationsScreen(
                 hasIcon = false,
             )
             OptionListItem(
-                itemName = "Itens do cadastro",
-                description = state.registrationItemsSummary,
-                onClick = viewModel::onRegistrationItemsClick,
-                hasIcon = false,
-            )
-            OptionListItem(
                 itemName = "Privacidade",
                 description = state.privacySummary,
                 onClick = viewModel::onPrivacyClick,
