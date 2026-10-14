@@ -1,56 +1,69 @@
 package com.zera.android.view.screens.preferences
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.zera.android.view.components.buttons.ZeraButton
 import com.zera.android.view.components.lists.OptionListItem
+import com.zera.android.view.components.navigation.UpperNavBar
+import com.zera.android.view.components.overlays.BottomSheet
 import com.zera.android.view.components.texts.BodyText
-import com.zera.android.view.components.texts.HeadlineText
+import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.components.texts.TitleText
+import com.zera.android.view.theme.DarkBlue15
+import com.zera.android.view.theme.Radius
 import com.zera.android.view.theme.Spacing
-import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.view.theme.ZeraTheme
-import com.zera.android.view.theme.icons.ZeraIcon
-import com.zera.android.view.theme.palette
+import com.zera.android.viewmodel.preferences.AppThemeOption
 import com.zera.android.viewmodel.preferences.ConfigurationsViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ConfigurationsScreen(
     viewModel: ConfigurationsViewModel = viewModel(),
 ) {
     val state by viewModel.state
-    val accent = ZeraColorFamily.Yellow.palette().base
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.primary,
         topBar = {
-            ConfigurationsHeader(
-                accent = accent,
-                onBackClick = viewModel::onBackClick,
-                modifier = Modifier
-                    .statusBarsPadding()
-                    .padding(horizontal = Spacing.small),
-            )
+            Column(modifier = Modifier.statusBarsPadding()) {
+                UpperNavBar(
+                    title = "Configurações",
+                    goBack = true,
+                    showActions = false,
+                    backgroundVariant = true,
+                    onBackClick = viewModel::onBackClick,
+                    modifier = Modifier.padding(horizontal = Spacing.small),
+                )
+                BodyText(
+                    text = "Personalize sua experiência",
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier.padding(horizontal = Spacing.large),
+                )
+            }
         },
     ) { innerPadding ->
         Column(
@@ -68,7 +81,7 @@ fun ConfigurationsScreen(
             )
             OptionListItem(
                 itemName = "Aparência",
-                description = state.appearanceSummary,
+                description = state.appliedTheme.summary,
                 onClick = viewModel::onAppearanceClick,
                 hasIcon = false,
             )
@@ -104,51 +117,73 @@ fun ConfigurationsScreen(
             )
         }
     }
+
+    if (state.isAppearanceSheetVisible) {
+        BottomSheet(
+            onDismissRequest = viewModel::onAppearanceSheetDismiss,
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        ) {
+            TitleText(text = "Escolher aparência", bold = true, color = MaterialTheme.colorScheme.onSurface)
+            ThemeOptionCard(
+                name = AppThemeOption.WarmLight.label,
+                description = AppThemeOption.WarmLight.description,
+                selected = state.selectedTheme == AppThemeOption.WarmLight,
+                containerColor = MaterialTheme.colorScheme.background,
+                contentColor = MaterialTheme.colorScheme.onSurface,
+                onClick = { viewModel.onThemeSelected(AppThemeOption.WarmLight) },
+            )
+            ThemeOptionCard(
+                name = AppThemeOption.Dark.label,
+                description = AppThemeOption.Dark.description,
+                selected = state.selectedTheme == AppThemeOption.Dark,
+                containerColor = DarkBlue15,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                onClick = { viewModel.onThemeSelected(AppThemeOption.Dark) },
+            )
+            ZeraButton(
+                text = "Aplicar tema",
+                onClick = viewModel::onApplyThemeClick,
+                fillMaxWidth = true,
+            )
+        }
+    }
 }
 
 /**
- * Cabeçalho da tela: botão "Voltar", título e subtítulo na cor de destaque sobre o fundo primary.
+ * Card de uma opção de tema no bottom sheet de aparência: pinta o fundo com a cor do
+ * próprio tema, como uma pré-visualização, e destaca a opção [selected] com uma borda.
  *
- * Fica local à tela porque a `UpperNavBar` só suporta o branco sobre o fundo primary.
+ * Fica local à tela porque as cores vêm do tema que está sendo mostrado, não do tema atual.
  */
 @Composable
-private fun ConfigurationsHeader(
-    accent: Color,
-    onBackClick: () -> Unit,
+private fun ThemeOptionCard(
+    name: String,
+    description: String,
+    selected: Boolean,
+    containerColor: Color,
+    contentColor: Color,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(
-        modifier = modifier.padding(Spacing.small),
-        verticalArrangement = Arrangement.spacedBy(Spacing.micro),
+    val borderColor = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
+
+    Surface(
+        onClick = onClick,
+        modifier = modifier
+            .fillMaxWidth()
+            .semantics { role = Role.RadioButton },
+        shape = RoundedCornerShape(Radius.large),
+        color = containerColor,
+        contentColor = contentColor,
+        border = BorderStroke(if (selected) 2.dp else 1.dp, borderColor),
     ) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(Spacing.small),
-            verticalAlignment = Alignment.CenterVertically,
+        Column(
+            modifier = Modifier.padding(Spacing.medium),
+            verticalArrangement = Arrangement.spacedBy(Spacing.micro),
         ) {
-            Button(
-                onClick = onBackClick,
-                modifier = Modifier.size(34.dp),
-                shape = CircleShape,
-                contentPadding = PaddingValues(Spacing.none),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Transparent,
-                    contentColor = accent,
-                ),
-            ) {
-                ZeraIcon(
-                    icon = ZeraIcon.LeftUTurn,
-                    contentDescription = "Voltar",
-                    size = 17.dp,
-                    tint = accent,
-                )
-            }
-            BodyText(text = "Voltar", bold = true, color = accent)
+            BodyText(text = name, bold = true, color = contentColor)
+            CaptionText(text = description, color = contentColor)
         }
-        HeadlineText(text = "Configurações", bold = true, color = accent)
-        BodyText(
-            text = "Personalize sua experiência",
-            color = MaterialTheme.colorScheme.onPrimary,
-        )
     }
 }
 
