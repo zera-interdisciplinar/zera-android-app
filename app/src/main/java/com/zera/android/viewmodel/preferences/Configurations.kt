@@ -1,7 +1,9 @@
 package com.zera.android.viewmodel.preferences
 
 import androidx.compose.runtime.mutableStateOf
+import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
+import com.zera.android.view.transition.ScreenAnimation
 import com.zera.android.viewmodel.ZeraViewModel
 
 data class ConfigurationsState(
@@ -32,7 +34,7 @@ class ConfigurationsViewModel : ZeraViewModel() {
     }
 
     fun onAccessibilityClick() {
-        // TODO: navegar para as configurações de acessibilidade
+        ZeraNavigator.push(Route.Acessibility, ScreenAnimation.SlideHorizontal)
     }
 
     fun onTalkToZoeClick() {
