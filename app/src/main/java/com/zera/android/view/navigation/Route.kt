@@ -155,6 +155,12 @@ sealed interface Route{
     data object Profile : Route
 
     @Serializable
+    data object Configurations : Route
+
+    @Serializable
+    data object Acessibility : Route
+
+    @Serializable
     data object ChatConversations : Route
 
     @Serializable
