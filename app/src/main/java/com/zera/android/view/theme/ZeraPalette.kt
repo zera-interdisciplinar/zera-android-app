@@ -38,7 +38,7 @@ fun ZeraColorFamily.palette(): ZeraPalette {
             base = scheme.primary,
             onBase = scheme.onPrimary,
             container = scheme.primaryContainer,
-            onContainer = scheme.onPrimaryContainer,
+            onContainer = MaterialTheme.zeraColors.onBlueContainer,
         )
 
         ZeraColorFamily.Red -> ZeraPalette(

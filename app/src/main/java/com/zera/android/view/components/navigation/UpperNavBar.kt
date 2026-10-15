@@ -51,6 +51,9 @@ import com.zera.android.view.transition.ScreenAnimation
  * @param backgroundVariant quando `true`, adapta título, "Voltar" e ícones para
  *   [MaterialTheme.colorScheme.onPrimary] — use quando a barra estiver sobre um fundo
  *   [MaterialTheme.colorScheme.primary] (ver [com.zera.android.view.screens.manager.ManagerScaffold]).
+ * @param variantContentColor cor do conteúdo quando [backgroundVariant] é `true`. Troque
+ *   quando o fundo não for o `primary` (ex.: `MaterialTheme.zeraColors.onNavContainer` sobre
+ *   o `navContainer`).
  * @param onSideBarClick ação do botão de menu (abre a [SideBar] no
  *   [com.zera.android.view.screens.manager.ManagerScaffold] e no
  *   [com.zera.android.view.screens.employee.EmployeeScaffold]).
@@ -63,10 +66,11 @@ fun UpperNavBar(
     onBackClick: () -> Unit = { ZeraNavigator.goBack() },
     showActions: Boolean = true,
     backgroundVariant: Boolean = false,
+    variantContentColor: Color = MaterialTheme.colorScheme.onPrimary,
     onSideBarClick: () -> Unit = {}
 ) {
     val contentColor = if (backgroundVariant) {
-        MaterialTheme.colorScheme.onPrimary
+        variantContentColor
     } else {
         MaterialTheme.colorScheme.primary
     }

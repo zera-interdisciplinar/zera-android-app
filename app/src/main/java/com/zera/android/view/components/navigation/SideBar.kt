@@ -43,6 +43,7 @@ import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.view.theme.Radius
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
+import com.zera.android.view.theme.zeraColors
 import com.zera.android.view.theme.icons.ZeraIcon
 
 private val SideBarWidth = 280.dp
@@ -96,7 +97,7 @@ fun SideBar(
     Column(
         modifier = modifier
             .background(
-                color = MaterialTheme.colorScheme.primary,
+                color = MaterialTheme.zeraColors.navContainer,
                 shape = RoundedCornerShape(topStart = Radius.xLarge, bottomStart = Radius.xLarge),
             )
             .padding(horizontal = Spacing.medium, vertical = Spacing.large)
@@ -202,9 +203,10 @@ private fun SideBarButton(
     modifier: Modifier = Modifier,
 ) {
     val selected = item.route != null && item.route == currentRoute
+    val navColors = MaterialTheme.zeraColors
     val contentColor =
-        if (selected) MaterialTheme.colorScheme.primary
-        else MaterialTheme.colorScheme.onPrimary
+        if (selected) navColors.navContainer
+        else navColors.onNavContainer
 
     Button(
         onClick = {
@@ -217,10 +219,10 @@ private fun SideBarButton(
         enabled = !selected,
         contentPadding = PaddingValues(horizontal = Spacing.small, vertical = Spacing.small),
         colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.primary,
+            containerColor = navColors.navContainer,
             contentColor = contentColor,
-            disabledContainerColor = MaterialTheme.colorScheme.onPrimary,
-            disabledContentColor = MaterialTheme.colorScheme.primary,
+            disabledContainerColor = navColors.onNavContainer,
+            disabledContentColor = navColors.navContainer,
         ),
     ) {
         Row(

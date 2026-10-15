@@ -38,6 +38,7 @@ import com.zera.android.view.theme.Radius
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.White95
 import com.zera.android.view.theme.ZeraTheme
+import com.zera.android.view.theme.zeraColors
 import com.zera.android.viewmodel.preferences.AppThemeOption
 import com.zera.android.viewmodel.preferences.ConfigurationsViewModel
 
@@ -49,7 +50,7 @@ fun ConfigurationsScreen(
     val state by viewModel.state
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.primary,
+        containerColor = MaterialTheme.zeraColors.navContainer,
         topBar = {
             Column(modifier = Modifier.statusBarsPadding()) {
                 UpperNavBar(
@@ -57,12 +58,13 @@ fun ConfigurationsScreen(
                     goBack = true,
                     showActions = false,
                     backgroundVariant = true,
+                    variantContentColor = MaterialTheme.zeraColors.onNavContainer,
                     onBackClick = viewModel::onBackClick,
                     modifier = Modifier.padding(horizontal = Spacing.small),
                 )
                 BodyText(
                     text = "Personalize sua experiência",
-                    color = MaterialTheme.colorScheme.onPrimary,
+                    color = MaterialTheme.zeraColors.onNavContainer,
                     modifier = Modifier.padding(horizontal = Spacing.large),
                 )
             }
@@ -79,7 +81,7 @@ fun ConfigurationsScreen(
             TitleText(
                 text = "Preferências",
                 bold = true,
-                color = MaterialTheme.colorScheme.onPrimary,
+                color = MaterialTheme.zeraColors.onNavContainer,
             )
             OptionListItem(
                 itemName = "Aparência",
@@ -103,7 +105,7 @@ fun ConfigurationsScreen(
             TitleText(
                 text = "Suporte e acesso",
                 bold = true,
-                color = MaterialTheme.colorScheme.onPrimary,
+                color = MaterialTheme.zeraColors.onNavContainer,
             )
             OptionListItem(
                 itemName = "Acessibilidade",

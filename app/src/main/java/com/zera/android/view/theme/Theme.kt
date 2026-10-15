@@ -7,6 +7,7 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalContext
 
 // Espelha os papéis do LightColorScheme. Como o app usa `primary` também como cor de texto
@@ -15,7 +16,7 @@ private val DarkColorScheme = darkColorScheme(
     primary = LightBlue80,
     onPrimary = DarkBlue15,
     primaryContainer = DarkBlue25,
-    onPrimaryContainer = LightPastelBlue90,
+    onPrimaryContainer = DarkBlue25,
 
     secondary = Orange50,
     onSecondary = DarkBlue15,
@@ -93,9 +94,13 @@ fun ZeraTheme(
         else -> LightColorScheme
     }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        content = content
-    )
+    CompositionLocalProvider(
+        LocalZeraColors provides if (darkTheme) DarkZeraColors else LightZeraColors,
+    ) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = Typography,
+            content = content
+        )
+    }
 }

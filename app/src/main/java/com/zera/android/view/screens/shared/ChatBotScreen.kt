@@ -24,6 +24,7 @@ import com.zera.android.view.components.navigation.UpperNavBar
 import com.zera.android.view.theme.Radius
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
+import com.zera.android.view.theme.zeraColors
 import com.zera.android.viewmodel.shared.ChatBotViewModel
 
 @Composable
@@ -36,13 +37,14 @@ fun ChatBotScreen(
     val state by viewModel.state
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.primary,
+        containerColor = MaterialTheme.zeraColors.brandContainer,
         topBar = {
             UpperNavBar(
                 title = "Zé Bot",
                 goBack = true,
                 showActions = false,
                 backgroundVariant = true,
+                variantContentColor = MaterialTheme.zeraColors.onBrandContainer,
                 onBackClick = viewModel::onBackClick,
                 modifier = Modifier
                     .statusBarsPadding()
