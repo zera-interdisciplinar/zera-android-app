@@ -33,8 +33,10 @@ import com.zera.android.view.components.texts.BodyText
 import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.components.texts.TitleText
 import com.zera.android.view.theme.DarkBlue15
+import com.zera.android.view.theme.PastelYellow90
 import com.zera.android.view.theme.Radius
 import com.zera.android.view.theme.Spacing
+import com.zera.android.view.theme.White95
 import com.zera.android.view.theme.ZeraTheme
 import com.zera.android.viewmodel.preferences.AppThemeOption
 import com.zera.android.viewmodel.preferences.ConfigurationsViewModel
@@ -128,8 +130,8 @@ fun ConfigurationsScreen(
                 name = AppThemeOption.WarmLight.label,
                 description = AppThemeOption.WarmLight.description,
                 selected = state.selectedTheme == AppThemeOption.WarmLight,
-                containerColor = MaterialTheme.colorScheme.background,
-                contentColor = MaterialTheme.colorScheme.onSurface,
+                containerColor = PastelYellow90,
+                contentColor = DarkBlue15,
                 onClick = { viewModel.onThemeSelected(AppThemeOption.WarmLight) },
             )
             ThemeOptionCard(
@@ -137,7 +139,7 @@ fun ConfigurationsScreen(
                 description = AppThemeOption.Dark.description,
                 selected = state.selectedTheme == AppThemeOption.Dark,
                 containerColor = DarkBlue15,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
+                contentColor = White95,
                 onClick = { viewModel.onThemeSelected(AppThemeOption.Dark) },
             )
             ZeraButton(

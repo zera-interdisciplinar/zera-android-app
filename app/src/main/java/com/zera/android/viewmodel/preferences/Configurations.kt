@@ -3,6 +3,7 @@ package com.zera.android.viewmodel.preferences
 import androidx.compose.runtime.mutableStateOf
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
+import com.zera.android.view.theme.ThemeManager
 import com.zera.android.view.transition.ScreenAnimation
 import com.zera.android.viewmodel.ZeraViewModel
 
@@ -25,7 +26,12 @@ data class ConfigurationsState(
 )
 
 class ConfigurationsViewModel : ZeraViewModel() {
-    private val _state = mutableStateOf(ConfigurationsState())
+    private val _state = mutableStateOf(
+        ConfigurationsState(
+            appliedTheme = ThemeManager.current,
+            selectedTheme = ThemeManager.current,
+        ),
+    )
     val state = _state
 
     fun onBackClick() {
@@ -48,9 +54,10 @@ class ConfigurationsViewModel : ZeraViewModel() {
     }
 
     fun onApplyThemeClick() {
-        // TODO: aplicar de fato as cores do tema escolhido
+        val theme = _state.value.selectedTheme
+        ThemeManager.apply(theme)
         _state.value = _state.value.copy(
-            appliedTheme = _state.value.selectedTheme,
+            appliedTheme = theme,
             isAppearanceSheetVisible = false,
         )
     }
