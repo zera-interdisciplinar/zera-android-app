@@ -10,10 +10,16 @@ import com.zera.android.model.remote.client.ScrapyClient
 class Boot {
     suspend fun execute(): Environments {
         val environments = ScrapyClient.boot()
-        AppConfig.updateEnvironments(environments)
-        AdmCoreClient.init(environments)
-        InventoryClient.init(environments)
-        AiClient.init(environments)
+        apply(environments)
         return environments
+    }
+
+    companion object {
+        fun apply(environments: Environments) {
+            AppConfig.updateEnvironments(environments)
+            AdmCoreClient.init(environments)
+            InventoryClient.init(environments)
+            AiClient.init(environments)
+        }
     }
 }
