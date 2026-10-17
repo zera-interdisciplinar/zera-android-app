@@ -28,6 +28,7 @@ import com.zera.android.view.theme.Radius
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.view.theme.ZeraTheme
+import com.zera.android.view.theme.zeraColors
 import com.zera.android.viewmodel.manager.NearbyRecyclingPlacesViewModel
 import com.zera.android.viewmodel.manager.formatDistanceMeters
 
@@ -69,15 +70,15 @@ fun RecyclingScreen(
         if (state.isLoading || state.statusMessage != null) {
             Column(modifier = Modifier.padding(horizontal = Spacing.medium, vertical = Spacing.small)) {
                 if (state.isLoading) {
-                    CaptionText(text = "Buscando recicladoras próximas…", color = MaterialTheme.colorScheme.onPrimary)
+                    CaptionText(text = "Buscando recicladoras próximas…", color = MaterialTheme.zeraColors.onBrandContainer)
                 }
                 state.statusMessage?.let { message ->
-                    CaptionText(text = message, color = MaterialTheme.colorScheme.onPrimary)
+                    CaptionText(text = message, color = MaterialTheme.zeraColors.onBrandContainer)
                 }
                 if (state.canRetry) {
                     CaptionText(
                         text = "Tentar de novo",
-                        color = MaterialTheme.colorScheme.onPrimary,
+                        color = MaterialTheme.zeraColors.onBrandContainer,
                         onClick = viewModel::onRetry,
                     )
                 }

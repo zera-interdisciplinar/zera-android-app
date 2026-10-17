@@ -40,6 +40,7 @@ import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.view.theme.NoColor
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
+import com.zera.android.view.theme.zeraColors
 import com.zera.android.view.theme.icons.ZeraIcon
 import com.zera.android.view.transition.ScreenAnimation
 import com.zera.android.view.transition.SharedElementKeys
@@ -73,6 +74,9 @@ private val BottomFadeHeight = 25.dp
  * @param scrollable quando `true` (padrão), a [Column] do conteúdo rola inteira. Use
  *   `false` quando [content] já tiver seu próprio elemento rolável.
  * @param contentPadding espaçamento horizontal do conteúdo.
+ * @param backgroundVariant quando `true`, troca o fundo do Scaffold (corpo, gradientes e
+ *   título/ícones da [UpperNavBar]) para o azul de destaque
+ *   ([com.zera.android.view.theme.ZeraColors.brandContainer]/`onBrandContainer`).
  * @param edgeFade quando `true` (padrão), mostra o gradiente de fade no topo/fim do conteúdo.
  * @param content conteúdo da tela, desenhado dentro da [Column] do Scaffold.
  */
@@ -92,7 +96,7 @@ fun EmployeeScaffold(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val backgroundColor = if (backgroundVariant) {
-        MaterialTheme.colorScheme.primary
+        MaterialTheme.zeraColors.brandContainer
     } else {
         MaterialTheme.colorScheme.background
     }
@@ -109,6 +113,8 @@ fun EmployeeScaffold(
                     goBack = goBack,
                     onBackClick = onBackClick,
                     showActions = showActions,
+                    backgroundVariant = backgroundVariant,
+                    variantContentColor = MaterialTheme.zeraColors.onBrandContainer,
                     onSideBarClick = { showSideBar = true },
                     modifier = Modifier
                         .statusBarsPadding()

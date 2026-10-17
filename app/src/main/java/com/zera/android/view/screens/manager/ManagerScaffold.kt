@@ -42,6 +42,7 @@ import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.view.theme.NoColor
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
+import com.zera.android.view.theme.zeraColors
 import com.zera.android.view.theme.icons.ZeraIcon
 import com.zera.android.view.transition.ScreenAnimation
 import com.zera.android.view.transition.SharedElementKeys
@@ -74,8 +75,9 @@ private val BottomFadeHeight = 25.dp
  *   em [com.zera.android.view.components.lists.ProductList] com `Modifier.weight(1f)`) —
  *   caso contrário, um `LazyColumn` dentro de uma `Column` rolável quebra em tempo de execução.
  * @param backgroundVariant quando `true`, troca o fundo do Scaffold (corpo, gradientes e
- *   título/ícones da [UpperNavBar]) para [MaterialTheme.colorScheme.primary]/`onPrimary`,
- *   em vez do fundo neutro padrão. Não afeta a [ManagerBottomNavBar], que mantém sempre
+ *   título/ícones da [UpperNavBar]) para o azul de destaque
+ *   ([com.zera.android.view.theme.ZeraColors.brandContainer]/`onBrandContainer`), em vez do
+ *   fundo neutro padrão. Não afeta a [ManagerBottomNavBar], que mantém sempre
  *   o mesmo estilo em qualquer tela.
  * @param edgeFade quando `true` (padrão), mostra o gradiente de fade no topo/fim do
  *   conteúdo. Com [scrollable] `true`, ele só aparece enquanto houver mais conteúdo a
@@ -104,7 +106,7 @@ fun ManagerScaffold(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val backgroundColor = if (backgroundVariant) {
-        MaterialTheme.colorScheme.primary
+        MaterialTheme.zeraColors.brandContainer
     } else {
         MaterialTheme.colorScheme.background
     }
@@ -121,6 +123,7 @@ fun ManagerScaffold(
                     goBack = goBack,
                     onBackClick = onBackClick,
                     backgroundVariant = backgroundVariant,
+                    variantContentColor = MaterialTheme.zeraColors.onBrandContainer,
                     onSideBarClick = { showSideBar = true },
                     modifier = Modifier
                         .statusBarsPadding()
