@@ -6,6 +6,7 @@ import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.view.theme.ThemeManager
 import com.zera.android.view.transition.ScreenAnimation
 import com.zera.android.viewmodel.ZeraViewModel
+import java.util.UUID
 
 enum class AppThemeOption(
     val label: String,
@@ -71,6 +72,6 @@ class ConfigurationsViewModel : ZeraViewModel() {
     }
 
     fun onTalkToZoeClick() {
-        // TODO: navegar para a conversa com o Zoe
+        ZeraNavigator.push(Route.ChatBot(UUID.randomUUID().toString()), ScreenAnimation.SlideHorizontal)
     }
 }
