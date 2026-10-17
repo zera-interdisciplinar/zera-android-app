@@ -69,17 +69,19 @@ fun AcessibilityScreen(
                 )
 
                 TitleText(text = "Visual", bold = true, color = MaterialTheme.colorScheme.onSurface)
-                TextSizeOption(
-                    label = state.textSize.label,
-                    onDecreaseClick = viewModel::onDecreaseTextSizeClick,
-                    onIncreaseClick = viewModel::onIncreaseTextSizeClick,
-                )
-                SelectSwitchOption(
-                    name = "Alto contraste",
-                    description = "Melhora a separação de elementos",
-                    checked = state.highContrast,
-                    onCheckedChange = viewModel::onHighContrastChange,
-                )
+//                TextSizeOption(
+//                    label = state.textSize.label,
+//                    onDecreaseClick = viewModel::onDecreaseTextSizeClick,
+//                    onIncreaseClick = viewModel::onIncreaseTextSizeClick,
+//                )
+                // TODO: Ver com a equipe se devemos ou não manter os botoes de controle do tamanho de fonte
+//                SelectSwitchOption(
+//                    name = "Alto contraste",
+//                    description = "Melhora a separação de elementos",
+//                    checked = state.highContrast,
+//                    onCheckedChange = viewModel::onHighContrastChange,
+//                )
+                // TODO: Implementar depois
                 SelectSwitchOption(
                     name = "Reduzir animações",
                     description = "Evita movimentos desnecessários",
@@ -88,12 +90,13 @@ fun AcessibilityScreen(
                 )
 
                 TitleText(text = "Interação", bold = true, color = MaterialTheme.colorScheme.onSurface)
-                SelectSwitchOption(
-                    name = "Leitura por voz",
-                    description = "Ouvir conteúdos importantes",
-                    checked = state.voiceReading,
-                    onCheckedChange = viewModel::onVoiceReadingChange,
-                )
+//                SelectSwitchOption(
+//                    name = "Leitura por voz",
+//                    description = "Ouvir conteúdos importantes",
+//                    checked = state.voiceReading,
+//                    onCheckedChange = viewModel::onVoiceReadingChange,
+//                )
+                // TODO: Ver com a equipe se devemos ou não manter o botao de Leitura por voz
                 SelectSwitchOption(
                     name = "Confirmação antes de excluir",
                     description = "Reduz ações acidentais",

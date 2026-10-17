@@ -94,12 +94,13 @@ fun ConfigurationsScreen(
                 onClick = viewModel::onAppearanceClick,
                 hasIcon = false,
             )
-            OptionListItem(
-                itemName = "Notificações",
-                description = state.notificationsSummary,
-                onClick = viewModel::onNotificationsClick,
-                hasIcon = false,
-            )
+//            OptionListItem(
+//                itemName = "Notificações",
+//                description = state.notificationsSummary,
+//                onClick = viewModel::onNotificationsClick,
+//                hasIcon = false,
+//            )
+            // TODO: Ver com a equipe se devemos ou não manter o botao de Notificacoes
             OptionListItem(
                 itemName = "Privacidade",
                 description = state.privacySummary,
