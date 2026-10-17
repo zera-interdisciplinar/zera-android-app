@@ -1,5 +1,8 @@
 package com.zera.android.view.screens.preferences
 
+import android.content.Intent
+import android.net.Uri
+import android.provider.Settings
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -19,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
@@ -48,6 +52,7 @@ fun ConfigurationsScreen(
     viewModel: ConfigurationsViewModel = viewModel(),
 ) {
     val state by viewModel.state
+    val context = LocalContext.current
 
     Scaffold(
         containerColor = MaterialTheme.zeraColors.navContainer,
@@ -98,7 +103,13 @@ fun ConfigurationsScreen(
             OptionListItem(
                 itemName = "Privacidade",
                 description = state.privacySummary,
-                onClick = viewModel::onPrivacyClick,
+                onClick = {
+                    val intent = Intent(
+                        Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                        Uri.fromParts("package", context.packageName, null),
+                    ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    runCatching { context.startActivity(intent) }
+                },
                 hasIcon = false,
             )
 

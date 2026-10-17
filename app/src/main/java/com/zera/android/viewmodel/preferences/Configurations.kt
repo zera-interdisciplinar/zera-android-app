@@ -66,10 +66,6 @@ class ConfigurationsViewModel : ZeraViewModel() {
         // TODO: navegar para as configurações de notificações
     }
 
-    fun onPrivacyClick() {
-        // TODO: navegar para as configurações de privacidade
-    }
-
     fun onAccessibilityClick() {
         ZeraNavigator.push(Route.Acessibility, ScreenAnimation.SlideHorizontal)
     }
