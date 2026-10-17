@@ -6,11 +6,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavGraph
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.ComposeNavigator
+import androidx.navigation.compose.DialogNavigator
+import com.zera.android.model.remote.client.AdmCoreClient
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.zera.android.view.screens.auth.SignInScreen
 import com.zera.android.view.screens.auth.SignUpScreen
@@ -54,7 +59,7 @@ import com.zera.android.view.transition.ScreenAnimationRegistry
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun ZeraNavHost() {
-    val navController: NavHostController = rememberNavController()
+    val navController = rememberBootAwareNavController()
     val animations = remember { ScreenAnimationRegistry() }
 
     LaunchedEffect(Unit) {
@@ -297,3 +302,29 @@ fun ZeraNavHost() {
         }
     }
 }
+
+@Composable
+private fun rememberBootAwareNavController(): NavHostController {
+    val context = LocalContext.current
+    return rememberSaveable(
+        saver = Saver(
+            save = { it.saveState() },
+            restore = { saved ->
+                if (!AdmCoreClient.isReady()) {
+                    null // when it return null, the app will start in the first screen, witch is the SplashScreen
+                } else {
+                    // when it return a NavHostController, the app will start in the last screen that was open
+                    navController(context).apply { restoreState(saved) }
+                }
+            },
+        ),
+    ) {
+        navController(context)
+    }
+}
+
+private fun navController(context: android.content.Context): NavHostController =
+    NavHostController(context).apply {
+        navigatorProvider.addNavigator(ComposeNavigator())
+        navigatorProvider.addNavigator(DialogNavigator())
+    }
