@@ -34,8 +34,11 @@ import com.zera.android.view.theme.palette
  * @param text texto de apoio exibido abaixo do [label].
  * @param modifier modificador externo opcional.
  * @param style família de cor da notificação. Ver [ZeraColorFamily].
- * @param redirect ação de "Resolver agora →" exibida ao final do card. Quando `null`
- *   (padrão), esse texto clicável não é exibido.
+ * @param redirect ação exibida ao final do card (por padrão "Resolver agora →"). Quando
+ *   `null` (padrão), esse texto clicável não é exibido.
+ * @param redirectLabel texto da ação de [redirect].
+ * @param neutral quando `true`, ignora o [style] e usa o fundo de superfície, sem borda
+ *   colorida, com a ação na cor primária — visual das notificações antigas, já sem urgência.
  */
 @Composable
 fun Notification(
@@ -44,20 +47,25 @@ fun Notification(
     style: ZeraColorFamily = ZeraColorFamily.Yellow,
     text: String? = null,
     redirect: (() -> Unit)? = null,
+    redirectLabel: String = "Resolver agora",
+    neutral: Boolean = false,
 ) {
     val palette = style.palette()
+    val containerColor = if (neutral) MaterialTheme.colorScheme.surface else palette.container
+    val labelColor = if (neutral) MaterialTheme.colorScheme.onSurface else palette.onContainer
+    val actionColor = if (neutral) MaterialTheme.colorScheme.primary else palette.onContainer
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(Radius.xLarge),
-        color = palette.container,
-        contentColor = palette.onContainer,
-        border = BorderStroke(1.dp, palette.base.copy(alpha = 0.4f)),
+        color = containerColor,
+        contentColor = labelColor,
+        border = if (neutral) null else BorderStroke(1.dp, palette.base.copy(alpha = 0.4f)),
     ) {
         Column(
             modifier = Modifier.padding(Spacing.medium),
             verticalArrangement = Arrangement.spacedBy(Spacing.small),
         ) {
-            BodyText(text = label, bold = true, color = palette.onContainer)
+            BodyText(text = label, bold = true, color = labelColor)
             if(text!=null){
                 BodyText(text = text, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
@@ -67,12 +75,12 @@ fun Notification(
                     horizontalArrangement = Arrangement.spacedBy(Spacing.micro),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    LabelText(text = "Resolver agora", bold = true, color = palette.onContainer)
+                    LabelText(text = redirectLabel, bold = true, color = actionColor)
                     ZeraIcon(
                         icon = ZeraIcon.ProceedArrow,
                         contentDescription = null,
                         size = Spacing.medium,
-                        tint = palette.onContainer,
+                        tint = actionColor,
                     )
                 }
             }
@@ -103,6 +111,12 @@ private fun NotificationPreview() {
                 text = "Mouse sem fio · aguardando destino",
                 style = ZeraColorFamily.Blue,
                 redirect = {},
+            )
+            Notification(
+                label = "Convite de Carol expira hoje",
+                redirect = {},
+                redirectLabel = "Reenviar convite",
+                neutral = true,
             )
         }
     }
