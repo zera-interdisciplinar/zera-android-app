@@ -39,8 +39,8 @@ import com.zera.android.view.transition.ScreenAnimation
  * em dois blocos: à esquerda o botão "Voltar" (opcional) com o título da tela
  * logo abaixo; à direita os atalhos de notificações e de perfil.
  *
- * O clique em "Voltar" e em "Perfil" já navega (via [ZeraNavigator]). Notificações e
- * menu ainda estão como `TODO`.
+ * O clique em "Voltar", em "Notificações" (Central de Alertas) e em "Perfil" já navega
+ * (via [ZeraNavigator]). O menu abre a [SideBar] pelo [onSideBarClick].
  *
  * @param title título da tela, exibido abaixo do botão "Voltar". Quando [goBack] é
  *   `false`, ele ocupa também o espaço que seria do botão.
@@ -135,7 +135,7 @@ fun UpperNavBar(
                             if (showActions) {
                                 TopBarIconButton(
                                     icon = ZeraIcon.Bell,
-                                    onClick = { /* TODO: adicionar rota para notificações */ },
+                                    onClick = { ZeraNavigator.push(Route.AlertCentral, animation = ScreenAnimation.SlideHorizontal) },
                                     contentDescription = "Notificações",
                                     type = ZeraButtonType.Secondary,
                                     backgroundVariant = backgroundVariant,
