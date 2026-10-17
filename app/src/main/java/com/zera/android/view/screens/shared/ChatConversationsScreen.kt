@@ -51,7 +51,7 @@ fun ChatConversationsScreen(
             UpperNavBar(
                 title = "Conversas",
                 goBack = true,
-                showActions = true,
+                showActions = false,
                 backgroundVariant = true,
                 variantContentColor = MaterialTheme.zeraColors.onBrandContainer,
                 onBackClick = viewModel::onBackClick,

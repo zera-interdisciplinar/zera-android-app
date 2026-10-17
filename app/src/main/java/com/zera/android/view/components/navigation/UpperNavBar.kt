@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -57,6 +58,9 @@ import com.zera.android.view.transition.ScreenAnimation
  * @param onSideBarClick ação do botão de menu (abre a [SideBar] no
  *   [com.zera.android.view.screens.manager.ManagerScaffold] e no
  *   [com.zera.android.view.screens.employee.EmployeeScaffold]).
+ * @param actions ações personalizadas à direita, desenhadas antes dos atalhos padrão (se
+ *   [showActions] for `true`). Use com `showActions = false` para exibir só as suas, por
+ *   exemplo um [IconButton] com o atalho de uma tela.
  */
 @Composable
 fun UpperNavBar(
@@ -67,7 +71,8 @@ fun UpperNavBar(
     showActions: Boolean = true,
     backgroundVariant: Boolean = false,
     variantContentColor: Color = MaterialTheme.colorScheme.onPrimary,
-    onSideBarClick: () -> Unit = {}
+    onSideBarClick: () -> Unit = {},
+    actions: (@Composable RowScope.() -> Unit)? = null,
 ) {
     val contentColor = if (backgroundVariant) {
         variantContentColor
@@ -121,32 +126,35 @@ fun UpperNavBar(
                 }
 
                 Box {
-                    if (showActions) {
+                    if (showActions || actions != null) {
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(Spacing.small),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            TopBarIconButton(
-                                icon = ZeraIcon.Bell,
-                                onClick = { /* TODO: adicionar rota para notificações */ },
-                                contentDescription = "Notificações",
-                                type = ZeraButtonType.Secondary,
-                                backgroundVariant = backgroundVariant,
-                            )
-                            TopBarIconButton(
-                                icon = ZeraIcon.Profile,
-                                onClick = { ZeraNavigator.push(Route.Profile, animation = ScreenAnimation.SlideHorizontal) },
-                                contentDescription = "Perfil",
-                                type = if(!backgroundVariant) ZeraButtonType.Primary else ZeraButtonType.Base,
-                                backgroundVariant = backgroundVariant,
-                            )
-                            TopBarIconButton(
-                                icon = ZeraIcon.Menu,
-                                onClick = onSideBarClick,
-                                contentDescription = "Menu",
-                                type = if(!backgroundVariant) ZeraButtonType.Tertiary else ZeraButtonType.Primary,
-                                backgroundVariant = backgroundVariant,
-                            )
+                            actions?.invoke(this)
+                            if (showActions) {
+                                TopBarIconButton(
+                                    icon = ZeraIcon.Bell,
+                                    onClick = { /* TODO: adicionar rota para notificações */ },
+                                    contentDescription = "Notificações",
+                                    type = ZeraButtonType.Secondary,
+                                    backgroundVariant = backgroundVariant,
+                                )
+                                TopBarIconButton(
+                                    icon = ZeraIcon.Profile,
+                                    onClick = { ZeraNavigator.push(Route.Profile, animation = ScreenAnimation.SlideHorizontal) },
+                                    contentDescription = "Perfil",
+                                    type = if(!backgroundVariant) ZeraButtonType.Primary else ZeraButtonType.Base,
+                                    backgroundVariant = backgroundVariant,
+                                )
+                                TopBarIconButton(
+                                    icon = ZeraIcon.Menu,
+                                    onClick = onSideBarClick,
+                                    contentDescription = "Menu",
+                                    type = if(!backgroundVariant) ZeraButtonType.Tertiary else ZeraButtonType.Primary,
+                                    backgroundVariant = backgroundVariant,
+                                )
+                            }
                         }
                     }
                 }
