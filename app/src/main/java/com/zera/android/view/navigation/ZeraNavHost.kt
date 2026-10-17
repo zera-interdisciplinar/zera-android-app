@@ -49,6 +49,7 @@ import com.zera.android.view.screens.manager.recycling.SchedulingDetailsScreen
 import com.zera.android.view.screens.manager.recycling.SchedulingSuccessScreen
 import com.zera.android.view.screens.preferences.AcessibilityScreen
 import com.zera.android.view.screens.preferences.ConfigurationsScreen
+import com.zera.android.view.screens.shared.AlertCentralScreen
 import com.zera.android.view.screens.shared.ChatBotScreen
 import com.zera.android.view.screens.shared.ChatConversationsScreen
 import com.zera.android.view.screens.shared.ProfileScreen
@@ -284,6 +285,9 @@ fun ZeraNavHost() {
                 }
                 composable<Route.Profile> {
                     ProfileScreen()
+                }
+                composable<Route.AlertCentral> {
+                    AlertCentralScreen()
                 }
                 composable<Route.Configurations> {
                     ConfigurationsScreen()

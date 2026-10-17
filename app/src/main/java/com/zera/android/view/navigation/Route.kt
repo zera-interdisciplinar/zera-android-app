@@ -155,6 +155,9 @@ sealed interface Route{
     data object Profile : Route
 
     @Serializable
+    data object AlertCentral : Route
+
+    @Serializable
     data object Configurations : Route
 
     @Serializable
