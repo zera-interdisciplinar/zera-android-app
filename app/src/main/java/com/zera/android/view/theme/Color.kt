@@ -33,3 +33,25 @@ val TransparentBlue40 = Color(0x662A58CE)
 val TransparentBlue17 = Color(0x40122038)
 
 val NoColor = Color(0x00000000)
+
+// Dark theme: o fundo reaproveita DarkBlue15 e o restante deriva da mesma matiz azul
+// Shades of blue (dark)
+val DarkBlue10 = Color(0xFF0C1626)
+val DarkBlue20 = Color(0xFF1A2C4A)
+val DarkBlue30 = Color(0xFF26395C)
+val DarkBlue40 = Color(0xFF3B5077)
+val LightBlue80 = Color(0xFFB5C7F7)
+val Gray70 = Color(0xFFA9B4C9)
+
+// Shades of Yellow (dark)
+val DarkYellow20 = Color(0xFF4A3410)
+val LightYellow80 = Color(0xFFF5C77A)
+
+// Shades of Green (dark)
+val DarkGreen20 = Color(0xFF0F3D30)
+val LightGreen80 = Color(0xFF9BE8CB)
+
+// Shades of Red (dark)
+val DarkRed20 = Color(0xFF5A1D10)
+
+val TransparentBlack40 = Color(0x66000000)

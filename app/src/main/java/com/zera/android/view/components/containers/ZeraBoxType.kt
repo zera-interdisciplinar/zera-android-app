@@ -1,11 +1,13 @@
 package com.zera.android.view.components.containers
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.view.theme.palette
+import com.zera.android.view.theme.zeraColors
 
 /** Hierarquia visual do [ZeraBox] dentro de uma [ZeraColorFamily]. */
 enum class ZeraBoxType {
@@ -25,8 +27,14 @@ internal fun boxColorPair(
     type: ZeraBoxType,
 ): Pair<Color, Color> {
     val palette = style.palette()
+    val zeraColors = MaterialTheme.zeraColors
     return when (type) {
-        ZeraBoxType.Primary -> palette.base to palette.onBase
+        // O azul sólido usa o brandContainer: igual ao primary no claro, e a cor dos cards no escuro.
+        ZeraBoxType.Primary -> if (style == ZeraColorFamily.Blue) {
+            zeraColors.brandContainer to zeraColors.onBrandContainer
+        } else {
+            palette.base to palette.onBase
+        }
         ZeraBoxType.Secondary -> palette.container to palette.onContainer
     }
 }

@@ -42,10 +42,12 @@ import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.view.theme.NoColor
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
+import com.zera.android.view.theme.zeraColors
 import com.zera.android.view.theme.icons.ZeraIcon
 import com.zera.android.view.transition.ScreenAnimation
 import com.zera.android.view.transition.SharedElementKeys
 import com.zera.android.view.transition.sharedTransition
+import java.util.UUID
 
 private val TopFadeHeight = 15.dp
 private val BottomFadeHeight = 25.dp
@@ -67,14 +69,15 @@ private val BottomFadeHeight = 25.dp
  *   [ManagerBottomNavBar] (ex.: [ManagerHomeScreen]).
  * @param onBackClick ação do botão "Voltar". Só é usada quando [goBack] é `true`.
  * @param fabIcon ícone do botão flutuante. Quando `null`, nenhum FAB é exibido. O FAB sempre
- *   abre o inbox de conversas ([Route.ChatConversations]); a ação não é configurável.
+ *   abre uma conversa nova com o assistente ([Route.ChatBot]); a ação não é configurável.
  * @param scrollable quando `true` (padrão), a [Column] do conteúdo rola inteira. Use
  *   `false` quando [content] já tiver seu próprio elemento rolável (ex.: uma lista longa
  *   em [com.zera.android.view.components.lists.ProductList] com `Modifier.weight(1f)`) —
  *   caso contrário, um `LazyColumn` dentro de uma `Column` rolável quebra em tempo de execução.
  * @param backgroundVariant quando `true`, troca o fundo do Scaffold (corpo, gradientes e
- *   título/ícones da [UpperNavBar]) para [MaterialTheme.colorScheme.primary]/`onPrimary`,
- *   em vez do fundo neutro padrão. Não afeta a [ManagerBottomNavBar], que mantém sempre
+ *   título/ícones da [UpperNavBar]) para o azul de destaque
+ *   ([com.zera.android.view.theme.ZeraColors.brandContainer]/`onBrandContainer`), em vez do
+ *   fundo neutro padrão. Não afeta a [ManagerBottomNavBar], que mantém sempre
  *   o mesmo estilo em qualquer tela.
  * @param edgeFade quando `true` (padrão), mostra o gradiente de fade no topo/fim do
  *   conteúdo. Com [scrollable] `true`, ele só aparece enquanto houver mais conteúdo a
@@ -103,7 +106,7 @@ fun ManagerScaffold(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val backgroundColor = if (backgroundVariant) {
-        MaterialTheme.colorScheme.primary
+        MaterialTheme.zeraColors.brandContainer
     } else {
         MaterialTheme.colorScheme.background
     }
@@ -120,6 +123,7 @@ fun ManagerScaffold(
                     goBack = goBack,
                     onBackClick = onBackClick,
                     backgroundVariant = backgroundVariant,
+                    variantContentColor = MaterialTheme.zeraColors.onBrandContainer,
                     onSideBarClick = { showSideBar = true },
                     modifier = Modifier
                         .statusBarsPadding()
@@ -140,7 +144,9 @@ fun ManagerScaffold(
                 if (fabIcon != null) {
                     IconButton(
                         icon = fabIcon,
-                        onClick = { ZeraNavigator.push(Route.ChatConversations, ScreenAnimation.SlideVertical) },
+                        onClick = {
+                            ZeraNavigator.push(Route.ChatBot(UUID.randomUUID().toString()), ScreenAnimation.SlideVertical)
+                        },
                         contentDescription = "Assistente virtual",
                         size = 56.dp,
                     )

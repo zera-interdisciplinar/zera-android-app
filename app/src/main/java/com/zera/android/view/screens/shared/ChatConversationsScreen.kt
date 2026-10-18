@@ -28,6 +28,7 @@ import com.zera.android.view.theme.Radius
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
 import com.zera.android.view.theme.icons.ZeraIcon
+import com.zera.android.view.theme.zeraColors
 import com.zera.android.viewmodel.shared.ChatConversationsViewModel
 
 @Composable
@@ -45,13 +46,14 @@ fun ChatConversationsScreen(
     }
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.primary,
+        containerColor = MaterialTheme.zeraColors.brandContainer,
         topBar = {
             UpperNavBar(
                 title = "Conversas",
                 goBack = true,
-                showActions = true,
+                showActions = false,
                 backgroundVariant = true,
+                variantContentColor = MaterialTheme.zeraColors.onBrandContainer,
                 onBackClick = viewModel::onBackClick,
                 modifier = Modifier
                     .statusBarsPadding()

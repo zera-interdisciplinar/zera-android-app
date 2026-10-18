@@ -28,6 +28,7 @@ import com.zera.android.view.theme.Radius
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.view.theme.ZeraTheme
+import com.zera.android.view.theme.palette
 import com.zera.android.view.theme.icons.ZeraIcon
 
 /** Tamanho (largura e altura) do quadrado de miniatura. */
@@ -76,7 +77,7 @@ fun ItemSummaryCard(
                     ZeraIcon(
                         icon = icon ?: ZeraIcon.Placeholder,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                        tint = ZeraColorFamily.Blue.palette().onContainer,
                     )
                 }
             }

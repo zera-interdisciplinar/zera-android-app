@@ -34,7 +34,7 @@ internal fun buttonColorPair(
         ZeraButtonType.Primary -> palette.base to palette.onBase
         ZeraButtonType.Secondary -> palette.container to palette.onContainer
         ZeraButtonType.Tertiary -> Color.Transparent to palette.base
-        ZeraButtonType.Base -> Color.White to palette.base
+        ZeraButtonType.Base -> MaterialTheme.colorScheme.surface to palette.base
     }
 }
 

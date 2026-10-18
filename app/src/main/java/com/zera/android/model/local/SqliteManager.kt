@@ -20,6 +20,7 @@ object SqliteManager {
     private const val KEY_PASSWORD = "password"
     private const val KEY_SEEN_MODEL_USAGE = "seen_model_usage"
     private const val KEY_FCM_TOKEN = "fcm_token"
+    private const val KEY_THEME = "theme"
 
     private lateinit var helper: SessionDbHelper
 
@@ -98,11 +99,19 @@ object SqliteManager {
     }
 
     @Synchronized
+    fun saveTheme(theme: String) {
+        put(helper.writableDatabase, KEY_THEME, theme)
+    }
+
+    fun getTheme(): String? = get(KEY_THEME)
+
+    // Preferências do aparelho (modelo de uso visto, tema) sobrevivem ao logout.
+    @Synchronized
     fun clearSession() {
         helper.writableDatabase.delete(
             TABLE_SESSION,
-            "$COLUMN_KEY != ?",
-            arrayOf(KEY_SEEN_MODEL_USAGE),
+            "$COLUMN_KEY NOT IN (?, ?)",
+            arrayOf(KEY_SEEN_MODEL_USAGE, KEY_THEME),
         )
     }
 

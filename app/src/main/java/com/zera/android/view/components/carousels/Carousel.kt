@@ -14,7 +14,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.zera.android.view.components.texts.BodyText
 import com.zera.android.view.theme.Spacing
+import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.view.theme.ZeraTheme
+import com.zera.android.view.theme.palette
 import kotlinx.coroutines.delay
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
@@ -64,11 +66,11 @@ private fun CarouselPreview() {
         ) { _, item ->
             Surface(
                 color = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                contentColor = ZeraColorFamily.Blue.palette().onContainer,
             ) {
                 BodyText(
                     text = item,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    color = ZeraColorFamily.Blue.palette().onContainer,
                     modifier = Modifier.padding(Spacing.medium),
                 )
             }

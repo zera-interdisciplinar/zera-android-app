@@ -7,14 +7,42 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalContext
 
-// Montar esquema do tema escuro depois
+// Espelha os papéis do LightColorScheme. Como o app usa `primary` também como cor de texto
+// (ver os componentes de texto), no escuro ele vira um azul claro e `onPrimary` o azul escuro.
 private val DarkColorScheme = darkColorScheme(
+    primary = LightBlue80,
+    onPrimary = DarkBlue15,
+    primaryContainer = DarkBlue25,
+    onPrimaryContainer = DarkBlue25,
 
-    primary = DarkBlue25,
     secondary = Orange50,
-    tertiary = Green50
+    onSecondary = DarkBlue15,
+    secondaryContainer = DarkYellow20,
+    onSecondaryContainer = LightYellow80,
+
+    tertiary = Green50,
+    onTertiary = DarkBlue15,
+    tertiaryContainer = DarkGreen20,
+    onTertiaryContainer = LightGreen80,
+
+    error = Red50,
+    onError = White100,
+    errorContainer = DarkRed20,
+    onErrorContainer = PastelRed85,
+
+    background = DarkBlue15,
+    onBackground = White95,
+    surface = DarkBlue20,
+    surfaceVariant = DarkBlue30,
+    surfaceContainerLowest = DarkBlue10,
+    surfaceContainerLow = DarkBlue30,
+    onSurface = White95,
+    onSurfaceVariant = Gray70,
+    outline = DarkBlue40,
+    scrim = TransparentBlack40,
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -66,9 +94,13 @@ fun ZeraTheme(
         else -> LightColorScheme
     }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        content = content
-    )
+    CompositionLocalProvider(
+        LocalZeraColors provides if (darkTheme) DarkZeraColors else LightZeraColors,
+    ) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = Typography,
+            content = content
+        )
+    }
 }

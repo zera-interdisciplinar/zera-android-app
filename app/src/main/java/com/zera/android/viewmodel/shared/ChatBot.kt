@@ -10,7 +10,9 @@ import com.zera.android.model.entity.user.UserRole
 import com.zera.android.model.usecase.ai.GetChatConversation
 import com.zera.android.model.usecase.ai.ProcessChatMessage
 import com.zera.android.model.usecase.auth.GetSelfUser
+import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
+import com.zera.android.view.transition.ScreenAnimation
 import com.zera.android.viewmodel.ZeraViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
@@ -61,6 +63,10 @@ class ChatBotViewModel(
                 _state.value = _state.value.copy(isLoadingHistory = false)
             }
         }
+    }
+
+    fun onHistoryClick() {
+        ZeraNavigator.push(Route.ChatConversations, ScreenAnimation.SlideHorizontal)
     }
 
     fun onInputChange(newValue: String) {
