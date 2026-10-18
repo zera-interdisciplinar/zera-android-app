@@ -1,0 +1,124 @@
+package com.zera.android.view.screens.main.indexes
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.zera.android.view.components.graphs.CircularGraph
+import com.zera.android.view.components.graphs.HorizontalBarGraph
+import com.zera.android.view.components.graphs.VerticalBarGraph
+import com.zera.android.view.components.inputs.ZeraChipsGroup
+import com.zera.android.view.components.scaffolds.ManagerScaffold
+import com.zera.android.view.components.texts.CaptionText
+import com.zera.android.view.components.texts.HeadlineText
+import com.zera.android.view.components.texts.LabelText
+import com.zera.android.view.components.texts.SubtitleText
+import com.zera.android.view.components.texts.TitleText
+import com.zera.android.view.navigation.Route
+import com.zera.android.view.theme.Radius
+import com.zera.android.view.theme.Spacing
+import com.zera.android.view.theme.ZeraColorFamily
+import com.zera.android.view.theme.ZeraTheme
+import com.zera.android.view.theme.palette
+import com.zera.android.viewmodel.main.indexes.IndexesViewModel
+
+@Composable
+fun IndexesScreen(
+    viewModel: IndexesViewModel = viewModel()
+) {
+    val state by viewModel.state
+    val greenPalette = ZeraColorFamily.Green.palette()
+
+    ManagerScaffold(
+        title = "Indicadores",
+        currentRoute = Route.Indexes,
+        goBack = true,
+    ) {
+        SubtitleText(text = "Acompanhe desempenho e impacto")
+
+        state.errorMessage?.let { message ->
+            CaptionText(text = message, color = MaterialTheme.colorScheme.error)
+        }
+
+        ZeraChipsGroup(
+            options = state.periodFilters,
+            selected = state.selectedFilter,
+            onSelectedChange = viewModel::onFilterChange,
+            style = ZeraColorFamily.Blue,
+        )
+
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(Radius.large),
+            color = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface,
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(Spacing.large),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                val deltaPalette = if (state.recyclingRateDeltaPositive) {
+                    greenPalette
+                } else {
+                    ZeraColorFamily.Red.palette()
+                }
+                Column(verticalArrangement = Arrangement.spacedBy(Spacing.micro)) {
+                    LabelText(text = "Taxa de reciclagem")
+                    HeadlineText(text = state.recyclingRateLabel, bold = true)
+                    if (state.recyclingRateDeltaLabel.isNotBlank()) {
+                        CaptionText(
+                            text = state.recyclingRateDeltaLabel,
+                            color = deltaPalette.base,
+                            bold = true,
+                        )
+                    }
+                }
+                CircularGraph(
+                    progress = { state.recyclingRateProgress },
+                    label = "Meta",
+                    color = greenPalette.base,
+                )
+            }
+        }
+
+        TitleText(
+            text = "Evolução mensal",
+            bold = true,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        VerticalBarGraph(
+            title = "Materiais descartados (kg)",
+            items = state.monthlyEvolution,
+            barWidth = 55.dp
+        )
+
+        TitleText(
+            text = "Resíduos por categoria",
+            bold = true,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        HorizontalBarGraph(items = state.residuesByCategory)
+    }
+}
+
+@Composable
+@Preview(heightDp = 900)
+fun IndexesScreenPreview() {
+    ZeraTheme {
+        IndexesScreen()
+    }
+}

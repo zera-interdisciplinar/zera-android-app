@@ -51,13 +51,13 @@ import com.zera.android.view.transition.ScreenAnimation
  *   à direita. Use `false` em telas que só precisam do botão "Voltar" (ex.: "Perfil").
  * @param backgroundVariant quando `true`, adapta título, "Voltar" e ícones para
  *   [MaterialTheme.colorScheme.onPrimary] — use quando a barra estiver sobre um fundo
- *   [MaterialTheme.colorScheme.primary] (ver [com.zera.android.view.screens.manager.ManagerScaffold]).
+ *   [MaterialTheme.colorScheme.primary] (ver [com.zera.android.view.components.scaffolds.ManagerScaffold]).
  * @param variantContentColor cor do conteúdo quando [backgroundVariant] é `true`. Troque
  *   quando o fundo não for o `primary` (ex.: `MaterialTheme.zeraColors.onNavContainer` sobre
  *   o `navContainer`).
  * @param onSideBarClick ação do botão de menu (abre a [SideBar] no
- *   [com.zera.android.view.screens.manager.ManagerScaffold] e no
- *   [com.zera.android.view.screens.employee.EmployeeScaffold]).
+ *   [com.zera.android.view.components.scaffolds.ManagerScaffold] e no
+ *   [com.zera.android.view.components.scaffolds.EmployeeScaffold]).
  * @param actions ações personalizadas à direita, desenhadas antes dos atalhos padrão (se
  *   [showActions] for `true`). Use com `showActions = false` para exibir só as suas, por
  *   exemplo um [IconButton] com o atalho de uma tela.

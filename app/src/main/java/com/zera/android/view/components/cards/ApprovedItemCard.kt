@@ -21,7 +21,7 @@ import com.zera.android.view.theme.ZeraTheme
 /**
  * Card branco simples com o resumo de um item: título (nome + subtítulo), o ID
  * como legenda e uma [ItemStatusTag] — usado na tela de confirmação de aprovação
- * ([com.zera.android.view.screens.manager.ItemApprovedScreen]), diferente do
+ * ([com.zera.android.view.screens.main.items.manager.ItemApprovedScreen]), diferente do
  * [ItemSummaryCard] (card azul com miniatura, usado na tela de detalhe do item).
  *
  * @param itemName nome do item.

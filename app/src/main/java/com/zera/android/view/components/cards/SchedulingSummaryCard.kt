@@ -22,7 +22,7 @@ import com.zera.android.view.theme.ZeraTheme
  * sobretítulo, data e horário em destaque e os materiais descartados como legenda.
  *
  * Usado na tela de descarte registrado
- * ([com.zera.android.view.screens.manager.recycling.SchedulingSuccessScreen]). Diferente
+ * ([com.zera.android.view.screens.main.recycling.SchedulingSuccessScreen]). Diferente
  * do [ApprovedItemCard], não é específico de item: não tem tag de status.
  *
  * @param recyclerName nome da recicladora (exibido em maiúsculas).

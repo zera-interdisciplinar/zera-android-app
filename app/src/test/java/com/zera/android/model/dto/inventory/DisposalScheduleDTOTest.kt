@@ -1,6 +1,6 @@
 package com.zera.android.model.dto.inventory
 
-import com.zera.android.viewmodel.manager.ScheduledDisposalsViewModel
+import com.zera.android.viewmodel.main.recycling.ScheduledDisposalsViewModel
 import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
