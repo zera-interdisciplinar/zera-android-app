@@ -16,7 +16,7 @@ E termina com **Ao terminar**, lembrando quais docs sugerir atualizar (ver regra
 
 **Antes de começar**
 - Docs: [00-contexto-geral.md](00-contexto-geral.md) (a que fluxo/perfil ela pertence), [01-arquitetura.md](01-arquitetura.md) (camadas e a regra de separação View/lógica), [02-padroes-e-convencoes.md](02-padroes-e-convencoes.md) (nomenclatura e pasta), [03-catalogo-componentes.md](03-catalogo-componentes.md) (o que já existe pra montar a tela), e a spec em [07-especificacoes/](07-especificacoes/) — se não existir, é sinal de que a regra de negócio ainda não foi definida.
-- Código: telas existentes do mesmo domínio (`view/screens/<domínio>/`) para replicar o padrão; se a tela precisa de uma rota nova, `view/navigation/Route.kt` e `ZeraNavHost.kt`.
+- Código: telas existentes do mesmo fluxo (`view/screens/main/<fluxo>/`, com subpasta `manager/`/`employee/` só quando os dois perfis têm telas próprias no fluxo — ver [01-arquitetura.md](01-arquitetura.md)) para replicar o padrão; se a tela precisa de uma rota nova, `view/navigation/Route.kt` e `ZeraNavHost.kt`.
 - **Levantamento de componentes (obrigatório, faça antes de escrever a tela):** liste todo componente de UI "principal" que a tela vai precisar (botão, input, card, tag, lista, etc.) e confira cada um em [03-catalogo-componentes.md](03-catalogo-componentes.md). Isso é especialmente crítico quando o usuário fornece uma **imagem/mockup de referência** — não modele visualmente algo parecido "na mão" dentro da tela. **Se algum componente necessário ainda não existir no catálogo, pare antes de montar a tela e proponha ao usuário o fluxo de criação desse componente** (item 2 deste documento). Só continue montando a tela depois que os componentes que faltam existirem.
 
 **Durante**
@@ -114,7 +114,7 @@ E termina com **Ao terminar**, lembrando quais docs sugerir atualizar (ver regra
 
 **Antes de começar**
 - Docs: a seção "Visão futura" em [00-contexto-geral.md](00-contexto-geral.md) dá só um resumo leve, de propósito — não é uma spec. Antes de modelar qualquer coisa, confirmar com o usuário o escopo exato da primeira fatia a implementar.
-- Código: seguir a estrutura por camada já estabelecida (`model/dto/<domínio>/`, `model/entity/` só para o que não é payload, `model/usecase/<domínio>/`, `viewmodel/<domínio>/`, `view/screens/<domínio>/`), replicando o padrão do domínio `auth`/`manager`/`inventory`.
+- Código: seguir a estrutura por camada já estabelecida (`model/dto/<domínio>/`, `model/entity/` só para o que não é payload, `model/usecase/<domínio>/`, `viewmodel/main/<fluxo>/`, `view/screens/main/<fluxo>/`), replicando o padrão de `auth`, `main/<fluxo>` e `inventory`.
 
 **Durante**
 - Reforçando onde cada responsabilidade fica, para o domínio novo inteiro: DTOs em `model/dto/<domínio>/`; chamadas de API e regra de acesso a dado em `model/usecase/<domínio>/` (sem `Repository`, como no resto do projeto); coordenação de estado e navegação em `viewmodel/<domínio>/`; apresentação pura em `view/screens/<domínio>/` — seguindo a regra estrita de separação View/lógica em [01-arquitetura.md](01-arquitetura.md).

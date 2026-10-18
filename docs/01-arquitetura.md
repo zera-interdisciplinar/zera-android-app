@@ -6,8 +6,8 @@ O app é um módulo Android único (`:app`) organizado em três camadas, inspira
 
 - **`model`** — dados e regras de acesso a dados: DTOs de rede (`model/dto`), modelos de domínio/config (`model/entity`), persistência local (`model/local`), acesso remoto via Retrofit (`model/remote`) e casos de uso (`model/usecase`).
 - **`viewmodel`** — um `ViewModel` por tela (ou por feature de tela), expõe um `State` imutável via `mutableStateOf` e métodos de intenção (`onEmailChange`, `signIn`, ...). Instancia o(s) `usecase` que precisa diretamente (`val useCase = SingIn()`), sem injeção.
-  - Subpasta `shared/`: `ViewModels` de telas acessadas por mais de um tipo de usuário (ex.: "Perfil", acessada tanto por Gestor quanto por Operário) — ver a mesma convenção em `view/screens/shared/` logo abaixo.
-- **`view`** — Jetpack Compose puro: `screens` (telas, uma por rota, organizadas por domínio — `auth/`, `manager/`, `employee/` e `shared/` para telas comuns a mais de um tipo de usuário), `components` (Design System reutilizável — ver [03-catalogo-componentes.md](03-catalogo-componentes.md)), `navigation` (rotas e navegação), `theme` (tokens visuais) e `transition` (transições compartilhadas entre telas).
+  - Pastas espelhadas de `view/screens/` (`auth/`, `preferences/`, `profile/` e `main/<fluxo>/`) — ver "Organização de módulos/pacotes" abaixo. Ficam soltos na raiz `HomeRoute.kt`, `Splash.kt` e `ZeraViewModel.kt`.
+- **`view`** — Jetpack Compose puro: `screens` (telas, uma por rota — `auth/`, `preferences/`, `profile/` e `main/<fluxo>/` para as telas do app em si), `components` (Design System reutilizável — ver [03-catalogo-componentes.md](03-catalogo-componentes.md)), `navigation` (rotas e navegação), `theme` (tokens visuais) e `transition` (transições compartilhadas entre telas).
 
 Não há camada de `Repository` separada: o `usecase` fala diretamente com `AdmCoreClient.<service>`, `ScrapyClient`, `InventoryClient` (e `AiClient` quando for o caso) e com `SqliteManager`. Para o volume atual de regras isso é suficiente; se a lógica de acesso a dados crescer, vale reavaliar (ADR em [08-decisoes-arquiteturais/](08-decisoes-arquiteturais/)).
 
@@ -37,10 +37,10 @@ com.zera.android
 │   │   ├── client/        AdmCoreClient, ScrapyClient, InventoryClient, AiClient
 │   │   └── service/       interfaces Retrofit (AuthService, InventoryService, ScrapyService, ...)
 │   └── usecase/           regra de negócio de acesso a dados, por domínio (auth/SingIn, config/Boot, inventory/GetManagerHome, GetItems, GetItemDetails, ...)
-├── viewmodel/             um ViewModel por tela/feature, por domínio (auth/, manager/, shared/, ...)
+├── viewmodel/             um ViewModel por tela/feature, espelhando view/screens (auth/, preferences/, profile/, main/<fluxo>/, ...)
 └── view
-    ├── screens/           telas Compose, por domínio (auth/, manager/, employee/, shared/) + telas soltas (SplashScreen)
-    ├── components/        Design System (buttons, cards, containers, inputs, lists, navigation, texts, ...)
+    ├── screens/           telas Compose: auth/, preferences/, profile/, main/<fluxo>/ + telas soltas (SplashScreen)
+    ├── components/        Design System (buttons, cards, containers, inputs, lists, navigation, scaffolds, texts, ...)
     ├── navigation/         Route, NavCommand, ZeraNavigator, ZeraNavHost
     ├── theme/              tokens (cores, tipografia, espaçamento, raio) + ícones
     └── transition/         SharedElement (transições compartilhadas), ScreenAnimation e ScreenAnimationRegistry (animações de entrada/saída de tela)
@@ -48,7 +48,13 @@ com.zera.android
 
 A organização é **por camada primeiro, por domínio depois** (`model/usecase/auth`, `viewmodel/auth`, `view/screens/auth`), e não por feature verticalizada. Ao adicionar um domínio novo, siga esse mesmo padrão de subpasta.
 
-`shared/` é um "domínio" especial para telas acessadas por mais de um tipo de usuário (ex.: "Perfil", acessada tanto por Gestor quanto por Operário) — não use os domínios `manager/`/`employee/` para esses casos, mesmo que a tela tenha sido pensada a partir de um mockup de um perfil específico.
+Dentro de `view/screens/` (e, espelhado, em `viewmodel/`):
+
+- `SplashScreen.kt` fica solta na raiz; `auth/` e `preferences/` são domínios próprios, fora do app em si.
+- `profile/` — tela de "Perfil", acessada tanto por Gestor quanto por Operário.
+- `main/<fluxo>/` — telas do app em si, agrupadas por fluxo: `alerts`, `categories`, `chat`, `employees`, `home`, `indexes`, `items`, `models`, `recycling`, `registration` e `workcentral`.
+
+**Subpasta por perfil:** dentro de `main/<fluxo>/` só existem subpastas `manager/` e `employee/` quando os dois perfis têm telas próprias naquele fluxo — hoje, `main/home/` e `main/items/` em `view/screens/`, e só `main/home/` em `viewmodel/` (o `ItensViewModel` é usado pelas telas dos dois perfis, então `viewmodel/main/items/` não tem subpasta). Telas compartilhadas entre os perfis, ou de um perfil só, ficam soltas na raiz do fluxo (ex.: `main/models/ModelsScreen.kt`, usada pelos dois perfis; `main/workcentral/WorkingCentralScreen.kt`, só do Operário). Não crie pastas `shared/`, nem `manager/`/`employee/` fora de um fluxo.
 
 ## Fluxo de dados entre camadas
 
