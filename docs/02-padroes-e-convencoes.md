@@ -2,12 +2,12 @@
 
 ## Convenções de nomenclatura
 
-- **Pacotes**: `com.zera.android.<camada>.<subpacote>`, camada primeiro (`model`, `viewmodel`, `view`), domínio depois (`auth`, `manager`, `employee`, `user`, `inventory`). Ver estrutura completa em [01-arquitetura.md](01-arquitetura.md).
+- **Pacotes**: `com.zera.android.<camada>.<subpacote>`, camada primeiro (`model`, `viewmodel`, `view`), domínio depois (`auth`, `profile`, `main.<fluxo>`, `user`, `inventory`). Ver estrutura completa em [01-arquitetura.md](01-arquitetura.md).
 - **DTOs**: sufixo `DTO`, `data class` anotada `@Serializable` (kotlinx.serialization), em `model/dto/<domínio>/`. Ex.: `SingInRequestDTO`, `DashboardHomeResponseDTO`. Modelos que não são payload de API ficam em `model/entity/` (ex.: `Environments`, `UserRole`, `FlagsRequest`).
 - **Casos de uso**: nome no infinitivo/ação, sem sufixo (`SingIn`, não `SingInUseCase`), com um único ponto de entrada `suspend fun execute(...)`.
 - **ViewModels**: arquivo nomeado pela feature (`viewmodel/auth/SignIn.kt`), classe com sufixo `ViewModel` (`SingInViewModel`). O nome do arquivo não repete o sufixo.
 - **State**: `data class <Feature>State` com todos os campos tendo valor padrão (strings vazias, `false`, `null`, `emptyList()`), permitindo instanciar o `ViewModel`/`State` sem argumentos (útil para `@Preview`).
-- **Screens**: `view/screens/<domínio>/<Feature>Screen.kt`, função `@Composable fun <Feature>Screen(viewModel: <Feature>ViewModel = viewModel())`. Telas sem domínio específico ficam soltas em `view/screens/` (ex.: `SplashScreen`).
+- **Screens**: `view/screens/main/<fluxo>/<Feature>Screen.kt` (ou `view/screens/main/<fluxo>/<perfil>/` quando os dois perfis têm telas próprias no fluxo — ver [01-arquitetura.md](01-arquitetura.md)); `auth/`, `preferences/` e `profile/` ficam direto em `view/screens/`. Função `@Composable fun <Feature>Screen(viewModel: <Feature>ViewModel = viewModel())`. Telas sem domínio específico ficam soltas em `view/screens/` (ex.: `SplashScreen`).
 - **Rotas**: `sealed interface Route` com `data object` `@Serializable`, nome curto sem sufixo `Screen`/`Route` (`Route.SignIn`, não `Route.SignInScreen`). Grupos de rotas por perfil são marcados por comentário (`// ROTAS DE GESTOR`, `// ROTAS DE OPERARIO`).
 - **Componentes do Design System**: prefixo `Zera` reservado para os componentes mais "fundamentais"/parametrizáveis por família de cor (`ZeraButton`, `ZeraBox`, `ZeraTextInput`, `ZeraTokenInput`, `ZeraChipsGroup`, `ZeraIcon`). Componentes compostos de mais alto nível não usam o prefixo (`IconButton`, `Notification`, `Tag`, `ShortcutCard`, `StockOccupationCard`, `ProductList`, `NotificationList`, `UpperNavBar`, `BottomNavBar`, `ProgressBar`). Ao criar um componente novo, siga esse critério (fundamentação/reuso amplo → prefixo `Zera`; composição específica → sem prefixo) e documente a escolha em [03-catalogo-componentes.md](03-catalogo-componentes.md).
 - **Textos**: sufixo `Text` mapeando direto para um papel do type scale Material 3 (`HeadlineText`, `TitleText`, `SubtitleText`, `BodyText`, `LabelText`, `CaptionText`, `OverlineText`).
@@ -21,12 +21,12 @@ Regra ao adicionar um domínio novo (ex.: "inventário"):
 - `model/dto/inventory/` — DTOs de rede desse domínio.
 - `model/entity/` — só modelos de domínio/config que não são payload (não misturar DTO aqui).
 - `model/usecase/inventory/` — casos de uso desse domínio.
-- `viewmodel/` — um `ViewModel` por tela (home/indicadores ficam em `viewmodel/manager/`, não numa pasta `inventory/`, porque a tela é do perfil Gestor).
-- `view/screens/` — telas Compose do perfil (`view/screens/manager/`).
+- `viewmodel/` — um `ViewModel` por tela, na pasta do fluxo da tela (a home do Gestor fica em `viewmodel/main/home/manager/` e os indicadores em `viewmodel/main/indexes/`, não numa pasta `inventory/`).
+- `view/screens/` — telas Compose do fluxo (`view/screens/main/<fluxo>/`), com subpastas `manager/`/`employee/` só quando os dois perfis têm telas próprias naquele fluxo.
 
-Componentes reutilizáveis (usados por mais de um domínio) vão em `view/components/<família>` — famílias hoje existentes: `buttons`, `cards`, `containers`, `graphs`, `images`, `inputs`, `lists`, `logo`, `navigation`, `outros`, `overlays`, `progressbars`, `texts`. `outros` é um bucket genérico (hoje contém `Tag` e `SplashBackground`); antes de adicionar um terceiro componente ali, avalie se ele não define uma família própria (ex.: um componente de status poderia justificar uma pasta `status/`).
+Componentes reutilizáveis (usados por mais de um domínio) vão em `view/components/<família>` — famílias hoje existentes: `buttons`, `cards`, `containers`, `graphs`, `images`, `inputs`, `lists`, `logo`, `navigation`, `outros`, `overlays`, `progressbars`, `scaffolds`, `texts`. `outros` é um bucket genérico (hoje contém `Tag` e `SplashBackground`); antes de adicionar um terceiro componente ali, avalie se ele não define uma família própria (ex.: um componente de status poderia justificar uma pasta `status/`).
 
-Componentes usados por uma única feature (ex.: `ManagerScaffold`) ficam junto da tela, em `view/screens/<domínio>/`, não em `view/components/`.
+Componentes usados por uma única feature ficam junto da tela, em `view/screens/main/<fluxo>/`, não em `view/components/`. As cascas de tela de cada perfil (`ManagerScaffold`, `EmployeeScaffold`) ficam em `view/components/scaffolds/`, porque são usadas pelas telas de vários fluxos.
 
 ## Estilo de código Kotlin
 
