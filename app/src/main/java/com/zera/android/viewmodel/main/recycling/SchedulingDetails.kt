@@ -27,7 +27,7 @@ data class SchedulingDetailsState(
     val contactButtonsEnabled: Boolean = false,
     val pendingUri: String? = null,
     val reportUrl: String? = null,
-    val isLoading: Boolean = false,
+    val isLoading: Boolean = true,
     val isGeneratingReport: Boolean = false,
     val isCancelling: Boolean = false,
     val canCancel: Boolean = false,
@@ -47,7 +47,12 @@ class SchedulingDetailsViewModel : ZeraViewModel() {
     private var itemNames: List<String> = emptyList()
 
     fun load(scheduleId: String) {
-        if (scheduleId.isBlank() || scheduleId == this.disposalId) return
+        if (scheduleId.isBlank()) {
+            // Sem id não há o que carregar; evita deixar o isLoading inicial preso em true.
+            _state.value = _state.value.copy(isLoading = false)
+            return
+        }
+        if (scheduleId == this.disposalId) return
         this.disposalId = scheduleId
         _state.value = _state.value.copy(isLoading = true, errorMessage = null, reportUrl = null)
         viewModelScope.launch {

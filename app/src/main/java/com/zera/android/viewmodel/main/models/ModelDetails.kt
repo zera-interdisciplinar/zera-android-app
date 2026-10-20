@@ -31,7 +31,7 @@ data class ModelDetailsState(
     val canReview: Boolean = false,
     val canEdit: Boolean = false,
     val reviewHint: String = "",
-    val isLoading: Boolean = false,
+    val isLoading: Boolean = true,
     val isSubmitting: Boolean = false,
     val errorMessage: String? = null,
 )
@@ -51,7 +51,11 @@ class ModelDetailsViewModel : ZeraViewModel() {
     private var pendingItemId: String? = null
 
     fun loadModel(modelId: String) {
-        if (modelId.isBlank()) return
+        if (modelId.isBlank()) {
+            // Sem id não há o que carregar; evita deixar o isLoading inicial preso em true.
+            _state.value = _state.value.copy(isLoading = false)
+            return
+        }
         _state.value = _state.value.copy(isLoading = true, errorMessage = null)
         viewModelScope.launch {
             try {

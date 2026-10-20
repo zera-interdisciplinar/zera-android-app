@@ -23,7 +23,7 @@ data class ModelsState(
     val searchQuery: String = "",
     val totalModelsLabel: String = "",
     val models: List<OptionItem> = emptyList(),
-    val isLoading: Boolean = false,
+    val isLoading: Boolean = true,
     val isLoadingMore: Boolean = false,
     val errorMessage: String? = null,
     val isModelUsageSheetVisible: Boolean = false,
@@ -37,6 +37,7 @@ class ModelsViewModel : ZeraViewModel() {
     val state = _state
 
     private var loadJob: Job? = null
+    private var hasLoaded = false
     private var loadedPage: Int = -1
     private var totalPages: Int = 0
     private var loadedModels: List<ModelResponseDTO> = emptyList()
@@ -44,7 +45,7 @@ class ModelsViewModel : ZeraViewModel() {
     fun refresh() {
         loadRole()
         maybeShowUsageSheet()
-        loadModels()
+        loadModels(silent = hasLoaded)
     }
 
     fun onSearchQueryChange(query: String) {
@@ -108,12 +109,16 @@ class ModelsViewModel : ZeraViewModel() {
         }
     }
 
-    private fun loadModels(reset: Boolean = true) {
+    /**
+     * [silent] é a recarga automática (retorno à tela): não reativa `isLoading`, que só sobe na
+     * primeira carga e nas recargas provocadas pelo usuário (busca).
+     */
+    private fun loadModels(reset: Boolean = true, silent: Boolean = false) {
         if (reset) {
             loadJob?.cancel()
             loadedPage = -1
             totalPages = 0
-            _state.value = _state.value.copy(isLoading = true, isLoadingMore = false, errorMessage = null)
+            _state.value = _state.value.copy(isLoading = !silent, isLoadingMore = false, errorMessage = null)
         } else {
             _state.value = _state.value.copy(isLoadingMore = true, errorMessage = null)
         }
@@ -129,6 +134,7 @@ class ModelsViewModel : ZeraViewModel() {
                 } else {
                     appendModels(loadedModels, page.content)
                 }
+                hasLoaded = true
                 _state.value = _state.value.copy(
                     totalModelsLabel = totalModelsLabel(page.totalElements),
                     models = loadedModels.map(::optionFrom),

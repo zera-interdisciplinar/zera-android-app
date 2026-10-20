@@ -24,7 +24,7 @@ data class ConversationRowItem(
 
 data class ChatConversationsState(
     val items: List<ConversationRowItem> = emptyList(),
-    val isLoading: Boolean = false,
+    val isLoading: Boolean = true,
     val errorMessage: String? = null,
 )
 
@@ -34,11 +34,15 @@ class ChatConversationsViewModel(
     private val _state = mutableStateOf(ChatConversationsState())
     val state = _state
 
+    private var hasLoaded = false
+
+    /** Chamada a cada retorno à tela; `isLoading` só sobe na primeira carga, as seguintes são silenciosas. */
     fun load() {
-        _state.value = _state.value.copy(isLoading = true, errorMessage = null)
+        _state.value = _state.value.copy(isLoading = !hasLoaded, errorMessage = null)
         viewModelScope.launch {
             try {
                 val page = listConversations.execute()
+                hasLoaded = true
                 _state.value = ChatConversationsState(
                     items = page.items.mapNotNull(::rowFrom),
                     isLoading = false,

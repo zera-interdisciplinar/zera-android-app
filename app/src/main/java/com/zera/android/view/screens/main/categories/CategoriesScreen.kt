@@ -73,6 +73,7 @@ fun CategoriesScreen(
 fun CategoriesScreenPreview() {
     val previewViewModel = CategoriesViewModel().apply {
         state.value = CategoriesState(
+            isLoading = false,
             totalCategoriesLabel = "2 Categorias",
             categories = listOf(
                 OptionItem(name = "Informática", description = "Notebooks e monitores"),

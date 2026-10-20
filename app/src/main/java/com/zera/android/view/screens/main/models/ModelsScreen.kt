@@ -153,6 +153,7 @@ private fun ModelUsageBullet(text: String) {
 fun ModelsScreenPreview() {
     val previewViewModel = ModelsViewModel().apply {
         state.value = ModelsState(
+            isLoading = false,
             totalModelsLabel = "1.230 modelos",
             models = listOf(
                 OptionItem(description = "14 itens neste modelo", name = "Placa de vídeo"),

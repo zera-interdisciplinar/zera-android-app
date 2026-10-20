@@ -38,7 +38,7 @@ data class ItemDetailsState(
     val registeredBy: String = "",
     val registeredAt: String = "",
     val canReview: Boolean = false,
-    val isLoading: Boolean = false,
+    val isLoading: Boolean = true,
     val isSubmitting: Boolean = false,
     val errorMessage: String? = null,
 )
@@ -55,7 +55,11 @@ class ItemDetailsViewModel : ZeraViewModel() {
     private var isEmployee = false
 
     fun loadItem(itemId: String) {
-        if (itemId.isBlank()) return
+        if (itemId.isBlank()) {
+            // Sem id não há o que carregar; evita deixar o isLoading inicial preso em true.
+            _state.value = _state.value.copy(isLoading = false)
+            return
+        }
         _state.value = _state.value.copy(isLoading = true, errorMessage = null)
         viewModelScope.launch {
             try {
@@ -361,6 +365,8 @@ class ItemDetailsViewModel : ZeraViewModel() {
             item: ItemResponseDTO,
             isEmployee: Boolean = false,
         ): ItemDetailsState = ItemDetailsState(
+            // Um state montado a partir de um item já carregado nunca está em loading.
+            isLoading = false,
             itemId = item.id,
             itemName = item.name,
             itemSubtitle = item.model?.name.orEmpty(),

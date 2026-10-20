@@ -21,7 +21,7 @@ data class ModelCreationState(
     val materialOptions: List<String> = emptyList(),
     val brand: String = "",
     val notes: String = "",
-    val isLoading: Boolean = false,
+    val isLoading: Boolean = true,
     val isSaving: Boolean = false,
     val errorMessage: String? = null,
 )

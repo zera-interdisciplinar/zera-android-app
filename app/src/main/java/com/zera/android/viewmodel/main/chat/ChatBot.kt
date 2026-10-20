@@ -22,7 +22,7 @@ data class ChatBotState(
     val messages: List<Message> = emptyList(),
     val input: String = "",
     val isSendingMessage: Boolean = false,
-    val isLoading: Boolean = false,
+    val isLoading: Boolean = true,
     val suggestions: List<String> = listOf(
         "Como cadastrar um produto?",
         "Falar com o suporte",

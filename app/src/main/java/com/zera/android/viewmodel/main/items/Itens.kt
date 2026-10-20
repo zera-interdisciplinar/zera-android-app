@@ -30,7 +30,7 @@ data class ItensState(
     val selectedCategories: List<String> = emptyList(),
     val totalItemsLabel: String = "",
     val items: List<ProductItem> = emptyList(),
-    val isLoading: Boolean = false,
+    val isLoading: Boolean = true,
     val isLoadingMore: Boolean = false,
     val errorMessage: String? = null,
 )
