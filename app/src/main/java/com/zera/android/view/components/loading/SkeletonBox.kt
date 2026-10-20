@@ -4,6 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -29,7 +31,9 @@ import com.zera.android.view.theme.ZeraTheme
  *
  * Usa a lib Compose Shimmer (`Modifier.shimmer()`).
  *
- * @param height altura do bloco.
+ * @param height altura do bloco; se omitida, o bloco ocupa toda a altura disponível. Dentro de um
+ *   contêiner rolável (ex.: a `Column` do `ManagerScaffold` com `scrollable = true`) a altura é
+ *   ilimitada, então o preenchimento não tem efeito e o bloco fica invisível: informe [height].
  * @param width largura do bloco; se omitida, o bloco ocupa toda a largura disponível.
  * @param borderRadius raio dos cantos; por padrão [Radius.medium].
  * @param modifier modificador externo opcional.
@@ -37,17 +41,17 @@ import com.zera.android.view.theme.ZeraTheme
 @Composable
 fun SkeletonBox(
     modifier: Modifier = Modifier,
-    height: Dp,
+    height: Dp = Dp.Unspecified,
     width: Dp = Dp.Unspecified,
     borderRadius: Dp = Radius.medium,
 ) {
     Box(
         modifier = modifier
             .then(if (width.isSpecified) Modifier.width(width) else Modifier.fillMaxWidth())
-            .height(height)
+            .then(if (height.isSpecified) Modifier.height(height) else Modifier.fillMaxHeight())
             .shimmer()
             .background(
-                color = MaterialTheme.colorScheme.surfaceVariant,
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.25f),
                 shape = RoundedCornerShape(borderRadius),
             ),
     )
@@ -66,6 +70,14 @@ private fun SkeletonBoxPreview() {
             SkeletonBox(width = 48.dp, height = 48.dp, borderRadius = 48.dp)
             SkeletonBox(height = 16.dp)
             SkeletonBox(width = 200.dp, height = 16.dp)
+            // Sem height, o bloco acompanha a altura do contêiner (aqui, a do Row).
+            Row(
+                modifier = Modifier.height(48.dp),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.small),
+            ) {
+                SkeletonBox(width = 48.dp, borderRadius = 48.dp)
+                SkeletonBox()
+            }
         }
     }
 }
