@@ -60,3 +60,7 @@ Como Operário, quero consultar e buscar os itens do estoque, para encontrar um 
 
 - Componentes: [../03-catalogo-componentes.md](../03-catalogo-componentes.md) (`EmployeeScaffold`, `ProductList`, `ZeraChipsGroup`)
 - Specs relacionadas: [itens.md](itens.md), [item-details.md](item-details.md), [cadastro-manual-item.md](cadastro-manual-item.md)
+
+## Skeleton
+
+Mesmo comportamento da lista do gestor ([itens.md](itens.md), seção "Skeleton"): enquanto `isLoading`, só a região da lista mostra o skeleton. Busca, filtros e o botão "Adicionar novo item" ficam reais.
