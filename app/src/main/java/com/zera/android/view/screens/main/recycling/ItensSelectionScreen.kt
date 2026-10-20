@@ -16,12 +16,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zera.android.view.components.buttons.ZeraButton
 import com.zera.android.view.components.inputs.SelectBoxList
+import com.zera.android.view.components.inputs.SelectOption
 import com.zera.android.view.components.inputs.ZeraSearchInput
+import com.zera.android.view.components.loading.OptionListSkeleton
 import com.zera.android.view.components.navigation.UpperNavBar
 import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.components.texts.SubtitleText
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
+import com.zera.android.viewmodel.main.recycling.ItensSelectionState
 import com.zera.android.viewmodel.main.recycling.ItensSelectionViewModel
 import com.zera.android.viewmodel.main.recycling.formatDistanceMeters
 
@@ -84,17 +87,26 @@ fun ItensSelectionScreen(
             state.errorMessage?.let { message ->
                 CaptionText(text = message, color = MaterialTheme.colorScheme.error)
             }
-            SelectBoxList(
-                options = state.options,
-                selected = state.selectedValues,
-                onSelectedChange = viewModel::onSelectedValuesChange,
-                hasSelectAll = true,
-                onEndReached = viewModel::loadNextPage,
-                isLoadingMore = state.isLoadingMore,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
-            )
+            // Só a região da lista alterna: o cabeçalho, a busca e o botão ficam reais.
+            if (state.isLoading) {
+                OptionListSkeleton(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                )
+            } else {
+                SelectBoxList(
+                    options = state.options,
+                    selected = state.selectedValues,
+                    onSelectedChange = viewModel::onSelectedValuesChange,
+                    hasSelectAll = true,
+                    onEndReached = viewModel::loadNextPage,
+                    isLoadingMore = state.isLoadingMore,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                )
+            }
             ZeraButton(
                 text = "Continuar",
                 onClick = viewModel::onChooseDateClick,
@@ -108,12 +120,41 @@ fun ItensSelectionScreen(
 @Composable
 @Preview(heightDp = 800)
 private fun ItensSelectionScreenPreview() {
+    val previewViewModel = ItensSelectionViewModel().apply {
+        state.value = ItensSelectionState(
+            options = listOf(
+                SelectOption(name = "Notebook", value = "1", description = "ID 2659646 · Informática"),
+                SelectOption(name = "Teclado mecânico", value = "2", description = "ID 1182036 · Informática"),
+                SelectOption(name = "Monitor 24\"", value = "3", description = "ID 3300981 · Informática"),
+            ),
+            isLoading = false,
+        )
+    }
     ZeraTheme {
         ItensSelectionScreen(
             placeId = "places/ChIJ",
             placeName = "Cooperativa Recicla SP",
             placeAddress = "Rua X, 123",
             distanceMeters = 1240,
+            viewModel = previewViewModel,
+        )
+    }
+}
+
+/** A mesma tela com a carga em andamento (`isLoading` de [ItensSelectionState] nasce `true`). */
+@Composable
+@Preview(heightDp = 800)
+private fun ItensSelectionScreenLoadingPreview() {
+    val previewViewModel = ItensSelectionViewModel().apply {
+        state.value = ItensSelectionState()
+    }
+    ZeraTheme {
+        ItensSelectionScreen(
+            placeId = "places/ChIJ",
+            placeName = "Cooperativa Recicla SP",
+            placeAddress = "Rua X, 123",
+            distanceMeters = 1240,
+            viewModel = previewViewModel,
         )
     }
 }

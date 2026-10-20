@@ -57,3 +57,7 @@ Como Gestor ou Operário, quero ver os descartes da unidade e o detalhe de um re
 ## Skeleton
 
 Na lista do histórico de descartes, `isLoading` (carga inicial, busca ou filtro) mostra 6 linhas de skeleton (`OptionListSkeleton`) no lugar do spinner de antes. A busca e os chips de filtro ficam reais, para o campo não perder o foco quando a busca recarrega a lista. Convenção em [../02-padroes-e-convencoes.md](../02-padroes-e-convencoes.md), seção "Convenção de skeleton".
+
+## Skeleton dos detalhes do descarte
+
+Na tela de detalhes, `isLoading` mostra o skeleton do cabeçalho, do botão de relatório, de 3 linhas de itens e do bloco "Contato com a Recicladora", no lugar do spinner de antes. O bloco de cancelamento é condicional (`canCancel`) e não tem skeleton. Convenção em [../02-padroes-e-convencoes.md](../02-padroes-e-convencoes.md), seção "Convenção de skeleton".
