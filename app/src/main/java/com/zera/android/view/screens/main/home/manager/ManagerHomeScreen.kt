@@ -42,8 +42,6 @@ import com.zera.android.viewmodel.main.home.manager.ManagerHomeViewModel
 private val SkeletonTitleHeight = 24.dp
 private val SkeletonStockCardHeight = 120.dp
 private val SkeletonShortcutCardHeight = 112.dp
-private val SkeletonNotificationHeight = 96.dp
-private val SkeletonProductItemHeight = 80.dp
 
 @Composable
 fun ManagerHomeScreen(
@@ -103,17 +101,20 @@ fun ManagerHomeScreen(
                 )
             }
 
-            TitleText(
-                text = "Alertas importantes",
-                bold = true,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            NotificationList(
-                notifications = state.notifications,
-                onItemClick = viewModel::onAlertClick,
-                contentPadding = PaddingValues(Spacing.none),
-                modifier = Modifier.heightIn(max = 400.dp),
-            )
+            // Seção opcional, sem skeleton: entra quando os alertas chegam, sem piscar o estado vazio.
+            if (!state.isLoadingAlerts) {
+                TitleText(
+                    text = "Alertas importantes",
+                    bold = true,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                NotificationList(
+                    notifications = state.notifications,
+                    onItemClick = viewModel::onAlertClick,
+                    contentPadding = PaddingValues(Spacing.none),
+                    modifier = Modifier.heightIn(max = 400.dp),
+                )
+            }
 
             Row(
                 modifier = Modifier.fillMaxWidth(),

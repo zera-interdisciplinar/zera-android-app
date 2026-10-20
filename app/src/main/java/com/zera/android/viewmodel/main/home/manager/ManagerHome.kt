@@ -39,8 +39,12 @@ data class ManagerHomeState(
     val isLoadingEmployees: Boolean = true,
     val errorMessage: String? = null,
 ) {
+    /**
+     * Carga dos blocos que sempre aparecem na tela (e têm skeleton). Os alertas são opcionais e
+     * entram sozinhos quando chegam: a tela observa [isLoadingAlerts] para essa seção.
+     */
     val isLoading: Boolean
-        get() = isLoadingUser || isLoadingInventory || isLoadingAlerts || isLoadingEmployees
+        get() = isLoadingUser || isLoadingInventory || isLoadingEmployees
 }
 
 class ManagerHomeViewModel : ZeraViewModel() {
