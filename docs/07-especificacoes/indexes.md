@@ -88,3 +88,7 @@ O `IndexesState` tem `isLoading`, `true` desde a criação do `ViewModel` e baix
 
 - Pendente na tela: desabilitar os chips de filtro enquanto `isLoading` for verdadeiro (hoje o toque é ignorado em silêncio; há um `TODO` no `ViewModel`) e desenhar o skeleton.
 - Convenção geral em [../02-padroes-e-convencoes.md](../02-padroes-e-convencoes.md), seção "Convenção de flags de carregamento".
+
+## Skeleton dos gráficos
+
+Enquanto `isLoading` (carga inicial ou troca de filtro), os blocos abaixo dos chips de período mostram o skeleton do card de taxa de reciclagem e dos dois gráficos. Os chips ficam reais. Atualiza o item "Pendente na tela" acima: o skeleton está feito; falta só desabilitar os chips durante o carregamento, o que depende de o `ZeraChipsGroup` ganhar um parâmetro `enabled` (hoje ele não tem; o `TODO` continua no `onFilterChange` do `ViewModel`). Convenção em [../02-padroes-e-convencoes.md](../02-padroes-e-convencoes.md), seção "Convenção de skeleton".
