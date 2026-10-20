@@ -87,3 +87,7 @@ O `ManagerHomeState` tem uma flag por carga, todas `true` desde a criação do `
 - `isLoadingEmployees`: contagem de funcionários.
 
 `isLoading` é calculada e fica `true` enquanto qualquer uma delas estiver ativa. Complementa o item de critério de aceite sobre o estado de carregamento: as flags já existem no state, mas a tela ainda não desenha skeleton. Convenção geral em [../02-padroes-e-convencoes.md](../02-padroes-e-convencoes.md), seção "Convenção de flags de carregamento".
+
+## Skeleton
+
+Atualização do estado de carregamento acima: `isLoading` calculado agora considera só `isLoadingUser`, `isLoadingInventory` e `isLoadingEmployees`, os blocos que sempre aparecem. Os alertas são opcionais: a seção "Alertas importantes" só entra quando `isLoadingAlerts` fica `false`, sem skeleton. Enquanto `isLoading`, a tela mostra o skeleton de nome/cargo, card de ocupação e atalhos "Itens" e "Funcionários". Convenção em [../02-padroes-e-convencoes.md](../02-padroes-e-convencoes.md), seção "Convenção de skeleton".

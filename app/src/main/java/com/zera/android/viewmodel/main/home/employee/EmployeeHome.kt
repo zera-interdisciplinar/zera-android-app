@@ -31,8 +31,12 @@ data class EmployeeHomeState(
     val isLoadingHome: Boolean = true,
     val isLoadingPendencies: Boolean = true,
 ) {
+    /**
+     * Carga dos blocos que sempre aparecem na tela (e têm skeleton). As pendências são opcionais e
+     * entram sozinhas quando chegam: a tela observa [isLoadingPendencies] para essa seção.
+     */
     val isLoading: Boolean
-        get() = isLoadingUser || isLoadingHome || isLoadingPendencies
+        get() = isLoadingUser || isLoadingHome
 }
 
 /**

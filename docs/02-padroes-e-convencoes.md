@@ -68,6 +68,14 @@ Componentes usados por uma única feature ficam junto da tela, em `view/screens/
 - Valor inicial: `isLoading` nasce `true` nas telas que carregam ao abrir. Quando a tela recebe um id por parâmetro, o `ViewModel` baixa a flag se o id vier em branco, para ela não ficar presa em `true`. `NearbyRecyclingPlaces` e `ModelItems` mantêm `false` por padrão: a primeira só busca quando a localização chega, e a segunda ainda não carrega nada.
 - Pendente: os fluxos de login e cadastro (`SingInState`, `SignUpState`) ainda chamam `isLoading` a flag de ação do botão; pela convenção seria `isSubmitting`.
 
+## Convenção de skeleton
+
+- O skeleton indica só a **disposição** dos blocos, não reproduz o conteúdo: alturas aproximadas, sem tentar acertar textos ou quantidades. O bloco base é o `SkeletonBox` (`components/loading`); listas têm `ProductListSkeleton` e `NotificationListSkeleton`.
+- Só os blocos que **sempre** aparecem na tela têm skeleton. Seções opcionais (alertas, pendências) ficam de fora e só entram quando carregam, controladas pela flag da própria seção (ex.: `isLoadingAlerts`), para não piscar um estado vazio falso. O `isLoading` calculado do state não espera por elas.
+- Telas estáticas (homes, detalhes): todo o conteúdo do scaffold vai dentro de `if (state.isLoading) { Skeleton } else { conteúdo }`. O skeleton é emitido direto na `Column` do scaffold, para herdar o mesmo espaçamento da tela real.
+- Telas de lista com busca e filtro: o `if` envolve só a região da lista. Busca e filtros ficam reais, senão o campo perderia o foco quando a busca (que reativa `isLoading`) recarrega a lista.
+- Cada tela tem duas `@Preview`: a normal (state injetado com as flags em `false`) e a de carregamento (state padrão, com as flags em `true`).
+
 ## Inconsistências conhecidas
 
 > Registradas aqui para não serem confundidas com padrão intencional. Corrija apenas mediante decisão explícita (pode exigir migração de contrato de API) — não são "bugs simples" a arrumar de passagem.

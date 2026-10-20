@@ -75,3 +75,7 @@ O `EmployeeHomeState` tem uma flag por carga, todas `true` desde a criação do 
 - `isLoadingPendencies`: pendências do work-center.
 
 `isLoading` é calculada e fica `true` enquanto qualquer uma delas estiver ativa. A tela ainda não desenha skeleton. Convenção geral em [../02-padroes-e-convencoes.md](../02-padroes-e-convencoes.md), seção "Convenção de flags de carregamento".
+
+## Skeleton
+
+Atualização do estado de carregamento acima: `isLoading` calculado agora considera só `isLoadingUser` e `isLoadingHome`. As pendências são opcionais: a seção "Pendências" só entra quando `isLoadingPendencies` fica `false`, sem skeleton. Enquanto `isLoading`, a tela mostra o skeleton de nome/cargo, card de ocupação, botões "Escanear" e "Adicionar Modelo" e os atalhos "Manutenção" e "Descartes". Convenção em [../02-padroes-e-convencoes.md](../02-padroes-e-convencoes.md), seção "Convenção de skeleton".
