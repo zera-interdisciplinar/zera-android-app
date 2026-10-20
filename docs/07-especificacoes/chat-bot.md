@@ -61,3 +61,12 @@ Eventos: `onInputChange`, `onSend`, `onSuggestionClick`, `onBackClick`. Init hid
 ## Fora de escopo
 
 Paginação infinita, persistir thread no SQLite, streaming, PDF via chat, sugestões dinâmicas, CTA a partir do GET de mensagens.
+
+## Estado de carregamento
+
+Atualização de nomes no `ChatBotState`, seguindo a convenção em [../02-padroes-e-convencoes.md](../02-padroes-e-convencoes.md), seção "Convenção de flags de carregamento":
+
+| Campo | Papel |
+|---|---|
+| `isSendingMessage` | turno em andamento (antes `isLoadingMessage`; é a flag citada em "Turno" e na tabela acima) |
+| `isLoading` | hidratação inicial do histórico (antes `isLoadingHistory`); nasce `true` |

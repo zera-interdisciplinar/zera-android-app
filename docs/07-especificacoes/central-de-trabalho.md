@@ -68,3 +68,7 @@ Como Operário, quero ver o que está pendente no meu turno, para saber o que re
 - Spec relacionada: [employee-home.md](employee-home.md)
 - Contrato: [../contrato-dashboard/contrato-inventory-dashboard.md](../contrato-dashboard/contrato-inventory-dashboard.md)
 - Regras: [../05-regras-de-negocio/inventory-dashboard.md](../05-regras-de-negocio/inventory-dashboard.md)
+
+## Estado de carregamento
+
+O `WorkingCentralState` tem `isLoading`, `true` desde a criação do `ViewModel` e baixada ao fim da carga (sucesso ou erro; em erro a tela cai no estado vazio, como antes). A tela ainda não desenha skeleton. Convenção geral em [../02-padroes-e-convencoes.md](../02-padroes-e-convencoes.md), seção "Convenção de flags de carregamento".

@@ -81,3 +81,10 @@ Como Gestor, quero ver indicadores de reciclagem e descarte da minha unidade, pa
 - Regras de negócio: [../05-regras-de-negocio/inventory-dashboard.md](../05-regras-de-negocio/inventory-dashboard.md)
 - Contratos de API: [../06-contratos-api.md](../06-contratos-api.md), [../contrato-dashboard/contrato-inventory-dashboard.md](../contrato-dashboard/contrato-inventory-dashboard.md)
 - Catálogo: [../03-catalogo-componentes.md](../03-catalogo-componentes.md) (gráficos)
+
+## Estado de carregamento
+
+O `IndexesState` tem `isLoading`, `true` desde a criação do `ViewModel` e baixada ao fim de cada carga (sucesso ou erro). Regra particular desta tela: a flag volta a `true` a cada troca de filtro, e o skeleton dos gráficos deve reaparecer. Enquanto `isLoading` for `true`, `onFilterChange` ignora a troca, evitando cargas concorrentes.
+
+- Pendente na tela: desabilitar os chips de filtro enquanto `isLoading` for verdadeiro (hoje o toque é ignorado em silêncio; há um `TODO` no `ViewModel`) e desenhar o skeleton.
+- Convenção geral em [../02-padroes-e-convencoes.md](../02-padroes-e-convencoes.md), seção "Convenção de flags de carregamento".

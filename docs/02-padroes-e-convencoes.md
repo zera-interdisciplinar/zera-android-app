@@ -55,6 +55,19 @@ Componentes usados por uma única feature ficam junto da tela, em `view/screens/
 - Navegação pós-ação é disparada pelo próprio `ViewModel` via `ZeraNavigator`, nunca pela `Screen`.
 - Feature ainda não integrada ao backend: `ViewModel` e `State` já existem com a forma final esperada, e o método de ação fica com corpo vazio + `TODO:` (ex.: listagem de funcionários), em vez de removido ou implementado com dado fake silenciosamente.
 
+## Convenção de flags de carregamento
+
+- `isLoading`: carga inicial da tela. Nasce `true` quando o `ViewModel` carrega no `init`, para o primeiro frame já refletir "carregando", e é baixada em `finally` na função de carga (sucesso e erro).
+- `isLoadingMore`: páginas seguintes de listas paginadas.
+- `isSaving` / `isSubmitting`: ações do usuário (salvar, enviar).
+- Tela com cargas paralelas e independentes usa uma flag por seção (`isLoading<Seção>`, ex.: `isLoadingUser`), e o state expõe `isLoading` calculada (`||` das seções).
+- A flag principal vale só para a carga inicial. Recargas posteriores (retorno à tela, refresh após uma ação) não a reativam: use `isLoadingMore` ou uma flag própria. Exceção por regra de tela: `Indexes` reativa `isLoading` ao trocar o filtro, e o `ViewModel` ignora a troca enquanto carrega.
+- Telas anteriores a esta convenção (ex.: `Categories`, `Models`, `ChatConversations`) ainda reativam `isLoading` em recargas e serão alinhadas.
+- Atualização: `Categories`, `Models` e `ChatConversations` já seguem a regra. O retorno à tela (`ON_RESUME`) recarrega em silêncio e `isLoading` só sobe na primeira carga. Em listas com busca e filtro (`Models`, `Itens`, `ItensSelection`, `ScheduledDisposals`), a recarga provocada pelo usuário reativa `isLoading`, como em `Indexes`: a lista inteira é trocada, então o skeleton reaparece.
+- Flags de ação (salvar, enviar, aprovar, recusar): `isSaving` e `isSubmitting` (antes `isMutating` e `isCreatingInvite`), `isSendingMessage` no chat (antes `isLoadingMessage`) e flags específicas como `isUploadingPhoto` e `isGeneratingReport`. As flags de carga que tinham sufixo (`isLoadingModels`, `isLoadingOptions`, `isLoadingHistory`) viraram `isLoading`, pois cada tela tem uma carga só.
+- Valor inicial: `isLoading` nasce `true` nas telas que carregam ao abrir. Quando a tela recebe um id por parâmetro, o `ViewModel` baixa a flag se o id vier em branco, para ela não ficar presa em `true`. `NearbyRecyclingPlaces` e `ModelItems` mantêm `false` por padrão: a primeira só busca quando a localização chega, e a segunda ainda não carrega nada.
+- Pendente: os fluxos de login e cadastro (`SingInState`, `SignUpState`) ainda chamam `isLoading` a flag de ação do botão; pela convenção seria `isSubmitting`.
+
 ## Inconsistências conhecidas
 
 > Registradas aqui para não serem confundidas com padrão intencional. Corrija apenas mediante decisão explícita (pode exigir migração de contrato de API) — não são "bugs simples" a arrumar de passagem.

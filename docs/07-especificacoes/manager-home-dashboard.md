@@ -76,3 +76,14 @@ Como Gestor, quero ver um resumo do estoque, dos alertas pendentes e dos último
 - Catálogo de componentes usados: [../03-catalogo-componentes.md](../03-catalogo-componentes.md), seções "Cards" e "Listas"
 - Contratos: [../06-contratos-api.md](../06-contratos-api.md), [../contrato-dashboard/contrato-inventory-dashboard.md](../contrato-dashboard/contrato-inventory-dashboard.md)
 - Arquitetura / separação View-lógica: [../01-arquitetura.md](../01-arquitetura.md), seção "Separação entre View e lógica (regra estrita)"
+
+## Estado de carregamento
+
+O `ManagerHomeState` tem uma flag por carga, todas `true` desde a criação do `ViewModel` e baixadas quando a respectiva chamada termina (sucesso ou erro):
+
+- `isLoadingUser`: nome e cargo do usuário.
+- `isLoadingInventory`: card de itens, ocupação do estoque e últimos itens.
+- `isLoadingAlerts`: lista de alertas.
+- `isLoadingEmployees`: contagem de funcionários.
+
+`isLoading` é calculada e fica `true` enquanto qualquer uma delas estiver ativa. Complementa o item de critério de aceite sobre o estado de carregamento: as flags já existem no state, mas a tela ainda não desenha skeleton. Convenção geral em [../02-padroes-e-convencoes.md](../02-padroes-e-convencoes.md), seção "Convenção de flags de carregamento".

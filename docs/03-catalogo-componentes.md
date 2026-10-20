@@ -180,6 +180,7 @@ Os componentes não têm API de "adicionar mensagem": o `ViewModel` cria um novo
 3. Mensagem do assistente: `Message(role = MessageRole.Assistant, content = resposta.content, sentAt = LocalDateTime.now())`, inserida quando a resposta chega; em seguida `isLoadingMessage = false`.
 4. O loading **não é** uma `Message`: é só o flag `isLoadingMessage`.
 5. `content` é texto puro (`BodyText`); o contrato aceita 1–8000 caracteres por turno (ver [contrato-places-api/contrato-descarte.md](contrato-places-api/contrato-descarte.md), seção `process-message`).
+6. Atualização de nome: nos itens 2 a 4 e nos exemplos acima, o campo do `ChatBotState` que marca o turno em andamento hoje se chama `isSendingMessage` (era `isLoadingMessage`). O parâmetro `loadingMessage` do `ChatScroll` não mudou. `isLoading` no mesmo state é a carga inicial do histórico.
 
 ## Overlays
 
