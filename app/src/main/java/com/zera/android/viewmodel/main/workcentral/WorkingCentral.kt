@@ -16,6 +16,7 @@ import kotlinx.coroutines.launch
 data class WorkingCentralState(
     val maintenanceCount: Int = 0,
     val priorityNotifications: List<NotificationItem> = emptyList(),
+    val isLoading: Boolean = true,
 ) {
     val pendingCount: Int get() = priorityNotifications.size
 
@@ -44,11 +45,12 @@ class WorkingCentralViewModel : ZeraViewModel() {
             _state.value = WorkingCentralState(
                 maintenanceCount = workCenter.inMaintenance.toInt(),
                 priorityNotifications = priorityFrom(workCenter),
+                isLoading = false,
             )
         } catch (e: CancellationException) {
             throw e
         } catch (_: Exception) {
-            _state.value = WorkingCentralState()
+            _state.value = WorkingCentralState(isLoading = false)
         }
     }
 

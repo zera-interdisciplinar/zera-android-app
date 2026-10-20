@@ -6,6 +6,7 @@ import com.zera.android.model.usecase.inventory.GetIndicators
 import com.zera.android.view.components.graphs.BarGraphItem
 import com.zera.android.view.components.graphs.VerticalBarGraphItem
 import com.zera.android.viewmodel.ZeraViewModel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.time.LocalDate
@@ -23,6 +24,7 @@ data class IndexesState(
     val recyclingRateProgress: Float = 0f,
     val monthlyEvolution: List<VerticalBarGraphItem> = emptyList(),
     val residuesByCategory: List<BarGraphItem> = emptyList(),
+    val isLoading: Boolean = true,
     val errorMessage: String? = null,
 ) {
     companion object {
@@ -43,12 +45,15 @@ class IndexesViewModel : ZeraViewModel() {
     }
 
     fun onFilterChange(filter: String) {
+        // TODO: desabilitar os chips de filtro na tela enquanto isLoading for verdadeiro. Esta guarda
+        //  evita cargas concorrentes (a resposta antiga baixaria a flag da nova), mas ignora o toque em silêncio.
+        if (_state.value.isLoading) return
         _state.value = _state.value.copy(selectedFilter = filter)
         loadIndexes(filter)
     }
 
     private fun loadIndexes(filter: String = _state.value.selectedFilter) {
-        _state.value = _state.value.copy(errorMessage = null)
+        _state.value = _state.value.copy(isLoading = true, errorMessage = null)
         viewModelScope.launch {
             try {
                 val (from, to) = periodFor(filter)
@@ -72,8 +77,12 @@ class IndexesViewModel : ZeraViewModel() {
                     },
                     errorMessage = null,
                 )
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 _state.value = _state.value.copy(errorMessage = e.message)
+            } finally {
+                _state.value = _state.value.copy(isLoading = false)
             }
         }
     }

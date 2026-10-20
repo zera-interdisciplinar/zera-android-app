@@ -27,7 +27,13 @@ data class EmployeeHomeState(
     val discardCount: String = "0",
     val pendingNotifications: List<NotificationItem> = emptyList(),
     val latestProducts: List<ProductItem> = emptyList(),
-)
+    val isLoadingUser: Boolean = true,
+    val isLoadingHome: Boolean = true,
+    val isLoadingPendencies: Boolean = true,
+) {
+    val isLoading: Boolean
+        get() = isLoadingUser || isLoadingHome || isLoadingPendencies
+}
 
 /**
  * ViewModel da home do operário.
@@ -60,6 +66,8 @@ class EmployeeHomeViewModel : ZeraViewModel() {
             throw e
         } catch (_: Exception) {
             // A home ainda pode ser exibida sem o nome.
+        } finally {
+            _state.value = _state.value.copy(isLoadingUser = false)
         }
     }
 
@@ -78,6 +86,8 @@ class EmployeeHomeViewModel : ZeraViewModel() {
             throw e
         } catch (_: Exception) {
             // O card fica em zero e a lista cai no empty state; o restante da home continua visível.
+        } finally {
+            _state.value = _state.value.copy(isLoadingHome = false)
         }
     }
 
@@ -91,6 +101,8 @@ class EmployeeHomeViewModel : ZeraViewModel() {
             throw e
         } catch (_: Exception) {
             // A lista cai no empty state se o work-center falhar.
+        } finally {
+            _state.value = _state.value.copy(isLoadingPendencies = false)
         }
     }
 

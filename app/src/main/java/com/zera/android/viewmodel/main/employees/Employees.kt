@@ -28,12 +28,18 @@ data class EmployeesState(
     val activeEmployeesCount: Int = 0,
     val pendingInvites: List<PendingInviteCard> = emptyList(),
     val employees: List<EmployeeItem> = emptyList(),
+    val isLoadingCount: Boolean = true,
+    val isLoadingEmployees: Boolean = true,
+    val isLoadingInvites: Boolean = true,
     val showCreateInvite: Boolean = false,
     val inviteeName: String = "",
     val isCreatingInvite: Boolean = false,
     val inviteErrorMessage: String? = null,
     val errorMessage: String? = null,
-)
+) {
+    val isLoading: Boolean
+        get() = isLoadingCount || isLoadingEmployees || isLoadingInvites
+}
 
 class EmployeesViewModel : ZeraViewModel() {
     private val countActiveEmployees = CountActiveEmployees()
@@ -55,7 +61,14 @@ class EmployeesViewModel : ZeraViewModel() {
         _state.value = _state.value.copy(errorMessage = null)
         viewModelScope.launch { loadCount() }
         viewModelScope.launch { loadEmployees() }
-        viewModelScope.launch { loadPendingInvites() }
+        viewModelScope.launch {
+            // A flag só vale para a carga inicial; a recarga após criar um convite é silenciosa.
+            try {
+                loadPendingInvites()
+            } finally {
+                _state.value = _state.value.copy(isLoadingInvites = false)
+            }
+        }
     }
 
     private suspend fun loadCount() {
@@ -66,6 +79,8 @@ class EmployeesViewModel : ZeraViewModel() {
             throw e
         } catch (e: Exception) {
             _state.value = _state.value.copy(errorMessage = e.message ?: "Não foi possível carregar a equipe.")
+        } finally {
+            _state.value = _state.value.copy(isLoadingCount = false)
         }
     }
 
@@ -77,6 +92,8 @@ class EmployeesViewModel : ZeraViewModel() {
             throw e
         } catch (e: Exception) {
             _state.value = _state.value.copy(errorMessage = e.message ?: "Não foi possível carregar a equipe.")
+        } finally {
+            _state.value = _state.value.copy(isLoadingEmployees = false)
         }
     }
 

@@ -66,8 +66,8 @@ fun AlertCentralScreen(
         }
     }
     // Também roda de novo quando uma página termina de carregar e a lista ainda não encheu a tela.
-    LaunchedEffect(nearEnd, state.isLoadingMore, state.hasMore) {
-        if (nearEnd && state.hasMore && !state.isLoadingMore) viewModel.onLoadMore()
+    LaunchedEffect(nearEnd, state.isLoading, state.isLoadingMore, state.hasMore) {
+        if (nearEnd && state.hasMore && !state.isLoading && !state.isLoadingMore) viewModel.onLoadMore()
     }
 
     Scaffold(
@@ -119,7 +119,7 @@ fun AlertCentralScreen(
                 onItemClick = viewModel::onAlertClick,
             )
 
-            if (state.notifications.isEmpty() && !state.isLoadingMore) {
+            if (state.notifications.isEmpty() && !state.isLoading && !state.isLoadingMore) {
                 item(key = "empty") {
                     Box(
                         modifier = Modifier.fillMaxWidth().padding(Spacing.medium),
@@ -130,7 +130,8 @@ fun AlertCentralScreen(
                 }
             }
 
-            if (state.isLoadingMore) {
+            // TODO: na carga inicial (isLoading), trocar o spinner pelo skeleton.
+            if (state.isLoading || state.isLoadingMore) {
                 item(key = "loading-more") {
                     Box(
                         modifier = Modifier.fillMaxWidth().padding(Spacing.medium),
