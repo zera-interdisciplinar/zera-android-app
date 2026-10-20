@@ -53,3 +53,7 @@ Como Gestor ou Operário, quero ver os descartes da unidade e o detalhe de um re
 
 - [employee-descarte.md](employee-descarte.md)
 - [contrato-ai-core-api/reports.md](../contrato-ai-core-api/reports.md)
+
+## Skeleton
+
+Na lista do histórico de descartes, `isLoading` (carga inicial, busca ou filtro) mostra 6 linhas de skeleton (`OptionListSkeleton`) no lugar do spinner de antes. A busca e os chips de filtro ficam reais, para o campo não perder o foco quando a busca recarrega a lista. Convenção em [../02-padroes-e-convencoes.md](../02-padroes-e-convencoes.md), seção "Convenção de skeleton".
