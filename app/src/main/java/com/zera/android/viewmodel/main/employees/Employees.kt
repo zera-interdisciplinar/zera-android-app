@@ -37,8 +37,12 @@ data class EmployeesState(
     val inviteErrorMessage: String? = null,
     val errorMessage: String? = null,
 ) {
+    /**
+     * Carga dos blocos que sempre aparecem na tela (e têm skeleton). Os convites pendentes são
+     * opcionais e entram sozinhos quando chegam, por isso [isLoadingInvites] fica de fora.
+     */
     val isLoading: Boolean
-        get() = isLoadingCount || isLoadingEmployees || isLoadingInvites
+        get() = isLoadingCount || isLoadingEmployees
 }
 
 class EmployeesViewModel : ZeraViewModel() {
