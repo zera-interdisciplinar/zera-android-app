@@ -45,8 +45,8 @@ class IndexesViewModel : ZeraViewModel() {
     }
 
     fun onFilterChange(filter: String) {
-        // TODO: desabilitar os chips de filtro na tela enquanto isLoading for verdadeiro. Esta guarda
-        //  evita cargas concorrentes (a resposta antiga baixaria a flag da nova), mas ignora o toque em silêncio.
+        // A tela já desabilita os chips enquanto isLoading; esta guarda protege o ViewModel de cargas
+        // concorrentes (a resposta antiga baixaria a flag da nova) mesmo se outro chamador a ignorar.
         if (_state.value.isLoading) return
         _state.value = _state.value.copy(selectedFilter = filter)
         loadIndexes(filter)

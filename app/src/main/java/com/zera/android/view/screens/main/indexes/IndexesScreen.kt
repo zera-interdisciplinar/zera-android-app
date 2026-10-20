@@ -61,12 +61,14 @@ fun IndexesScreen(
             CaptionText(text = message, color = MaterialTheme.colorScheme.error)
         }
 
-        // Os filtros ficam reais: a troca de filtro reativa isLoading e o skeleton volta nos gráficos.
+        // Os filtros ficam na tela: a troca reativa isLoading e o skeleton volta nos gráficos, e
+        // durante o carregamento eles ficam desabilitados para não disparar cargas concorrentes.
         ZeraChipsGroup(
             options = state.periodFilters,
             selected = state.selectedFilter,
             onSelectedChange = viewModel::onFilterChange,
             style = ZeraColorFamily.Blue,
+            enabled = !state.isLoading,
         )
 
         if (state.isLoading) {

@@ -19,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zera.android.view.components.texts.LabelText
@@ -28,6 +29,9 @@ import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.view.theme.ZeraTheme
 import com.zera.android.view.theme.icons.ZeraIcon
 import com.zera.android.view.theme.palette
+
+/** Opacidade dos chips quando o grupo está desabilitado. */
+private const val DisabledChipAlpha = 0.5f
 
 /**
  * Grupo de chips: cada string de [options] vira um chip. Por padrão, tocar num
@@ -52,6 +56,8 @@ import com.zera.android.view.theme.palette
  * @param stacked quando `true`, os chips quebram linha (via [FlowRow]) conforme
  *   necessário. Quando `false` (padrão), ficam numa única linha rolável
  *   horizontalmente — útil quando não há espaço vertical sobrando.
+ * @param enabled quando `false`, os chips ficam esmaecidos e não respondem ao toque (ex.: enquanto
+ *   a tela recarrega os dados a partir da seleção).
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -67,6 +73,7 @@ fun ZeraChipsGroup(
     selectedValues: List<String> = emptyList(),
     onSelectedValuesChange: (List<String>) -> Unit = {},
     showX: Boolean = false,
+    enabled: Boolean = true,
 ) {
     val showSelectedX = showX || selectMany
 
@@ -89,6 +96,7 @@ fun ZeraChipsGroup(
                         selected = if (selectMany) option in selectedValues else option == selected,
                         style = style,
                         showX = showSelectedX,
+                        enabled = enabled,
                         onClick = {
                             if (selectMany) {
                                 val updatedValues = if (option in selectedValues) {
@@ -115,6 +123,7 @@ fun ZeraChipsGroup(
                         selected = if (selectMany) option in selectedValues else option == selected,
                         style = style,
                         showX = showSelectedX,
+                        enabled = enabled,
                         onClick = {
                             if (selectMany) {
                                 val updatedValues = if (option in selectedValues) {
@@ -146,6 +155,7 @@ private fun ZeraChip(
     selected: Boolean,
     style: ZeraColorFamily,
     showX: Boolean,
+    enabled: Boolean,
     onClick: () -> Unit,
 ) {
     val palette = style.palette()
@@ -155,6 +165,8 @@ private fun ZeraChip(
 
     Surface(
         onClick = onClick,
+        enabled = enabled,
+        modifier = Modifier.alpha(if (enabled) 1f else DisabledChipAlpha),
         shape = RoundedCornerShape(Radius.large),
         color = containerColor,
         contentColor = contentColor,
