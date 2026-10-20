@@ -33,7 +33,7 @@ data class EmployeesState(
     val isLoadingInvites: Boolean = true,
     val showCreateInvite: Boolean = false,
     val inviteeName: String = "",
-    val isCreatingInvite: Boolean = false,
+    val isSubmitting: Boolean = false,
     val inviteErrorMessage: String? = null,
     val errorMessage: String? = null,
 ) {
@@ -134,7 +134,7 @@ class EmployeesViewModel : ZeraViewModel() {
         _state.value = _state.value.copy(
             showCreateInvite = false,
             inviteeName = "",
-            isCreatingInvite = false,
+            isSubmitting = false,
             inviteErrorMessage = null,
         )
     }
@@ -145,14 +145,14 @@ class EmployeesViewModel : ZeraViewModel() {
             _state.value = _state.value.copy(inviteErrorMessage = "Informe o nome do convidado.")
             return
         }
-        _state.value = _state.value.copy(isCreatingInvite = true, inviteErrorMessage = null)
+        _state.value = _state.value.copy(isSubmitting = true, inviteErrorMessage = null)
         viewModelScope.launch {
             try {
                 createInvitation.execute(name)
                 _state.value = _state.value.copy(
                     showCreateInvite = false,
                     inviteeName = "",
-                    isCreatingInvite = false,
+                    isSubmitting = false,
                     inviteErrorMessage = null,
                 )
                 loadPendingInvites()
@@ -160,7 +160,7 @@ class EmployeesViewModel : ZeraViewModel() {
                 throw e
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
-                    isCreatingInvite = false,
+                    isSubmitting = false,
                     inviteErrorMessage = createInviteError(e),
                 )
             }

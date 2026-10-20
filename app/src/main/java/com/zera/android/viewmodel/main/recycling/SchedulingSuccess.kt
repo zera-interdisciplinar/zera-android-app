@@ -21,7 +21,6 @@ data class SchedulingSuccessState(
     val disposalId: String = "",
     val pendingUri: String? = null,
     val isGeneratingReport: Boolean = false,
-    val isLoading: Boolean = false,
     val errorMessage: String? = null,
 )
 

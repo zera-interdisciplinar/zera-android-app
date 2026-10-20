@@ -6,7 +6,6 @@ import com.zera.android.viewmodel.ZeraViewModel
 
 data class ItensResumeState(
     val items: List<ProductItem> = emptyList(),
-    val isLoading: Boolean = false,
     val errorMessage: String? = null,
 )
 

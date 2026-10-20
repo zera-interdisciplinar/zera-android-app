@@ -78,7 +78,7 @@ fun ChatBotScreen(
         ) {
             ChatScroll(
                 messages = state.messages,
-                loadingMessage = state.isLoadingMessage,
+                loadingMessage = state.isSendingMessage,
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth(),
@@ -99,7 +99,7 @@ fun ChatBotScreen(
                     value = state.input,
                     onValueChange = viewModel::onInputChange,
                     onSend = viewModel::onSend,
-                    enabled = !state.isLoadingMessage,
+                    enabled = !state.isSendingMessage,
                 )
             }
         }

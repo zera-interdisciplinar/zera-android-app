@@ -21,7 +21,7 @@ data class ModelCreationState(
     val materialOptions: List<String> = emptyList(),
     val brand: String = "",
     val notes: String = "",
-    val isLoadingOptions: Boolean = false,
+    val isLoading: Boolean = false,
     val isSaving: Boolean = false,
     val errorMessage: String? = null,
 )
@@ -117,7 +117,7 @@ class ModelCreationViewModel : ZeraViewModel() {
     }
 
     private fun loadOptions() {
-        _state.value = _state.value.copy(isLoadingOptions = true, errorMessage = null)
+        _state.value = _state.value.copy(isLoading = true, errorMessage = null)
         viewModelScope.launch {
             try {
                 categories = getCategories.execute()
@@ -125,13 +125,13 @@ class ModelCreationViewModel : ZeraViewModel() {
                 _state.value = _state.value.copy(
                     categoryOptions = categories.map { it.name },
                     materialOptions = materials.map { it.name },
-                    isLoadingOptions = false,
+                    isLoading = false,
                 )
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
-                    isLoadingOptions = false,
+                    isLoading = false,
                     errorMessage = e.message ?: "Não foi possível carregar categoria e material.",
                 )
             }

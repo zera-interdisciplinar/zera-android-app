@@ -83,7 +83,7 @@ fun EmployeesScreen(
                 onInviteeNameChange = viewModel::onInviteeNameChange,
                 onSubmit = viewModel::onSubmitCreateInvite,
                 onCancel = viewModel::onCancelCreateInvite,
-                isSubmitting = state.isCreatingInvite,
+                isSubmitting = state.isSubmitting,
                 errorMessage = state.inviteErrorMessage,
             )
         }

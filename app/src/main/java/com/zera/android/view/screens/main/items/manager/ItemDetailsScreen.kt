@@ -47,7 +47,7 @@ fun ItemDetailsScreen(
     val state by viewModel.state
     var showEditPopup by remember { mutableStateOf(false) }
     var showRejectPopup by remember { mutableStateOf(false) }
-    val actionsEnabled = !state.isLoading && !state.isMutating && state.itemId.isNotBlank()
+    val actionsEnabled = !state.isLoading && !state.isSubmitting && state.itemId.isNotBlank()
 
     LaunchedEffect(itemId) {
         viewModel.loadItem(itemId)
@@ -87,7 +87,7 @@ fun ItemDetailsScreen(
                             modifier = Modifier.weight(1f),
                         )
                         ZeraButton(
-                            text = if (state.isMutating) "Enviando..." else "Aprovar",
+                            text = if (state.isSubmitting) "Enviando..." else "Aprovar",
                             onClick = viewModel::onApproveClick,
                             enabled = actionsEnabled,
                             modifier = Modifier.weight(1f),

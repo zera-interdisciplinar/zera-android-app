@@ -32,7 +32,7 @@ data class ModelDetailsState(
     val canEdit: Boolean = false,
     val reviewHint: String = "",
     val isLoading: Boolean = false,
-    val isMutating: Boolean = false,
+    val isSubmitting: Boolean = false,
     val errorMessage: String? = null,
 )
 
@@ -97,7 +97,7 @@ class ModelDetailsViewModel : ZeraViewModel() {
     }
 
     fun onApproveClick() {
-        if (!_state.value.canReview || _state.value.isMutating) return
+        if (!_state.value.canReview || _state.value.isSubmitting) return
         mutateViaItem { itemId -> approveItem.execute(itemId) }
     }
 
@@ -107,7 +107,7 @@ class ModelDetailsViewModel : ZeraViewModel() {
             _state.value = _state.value.copy(errorMessage = error)
             return
         }
-        if (!_state.value.canReview || _state.value.isMutating) return
+        if (!_state.value.canReview || _state.value.isSubmitting) return
         mutateViaItem { itemId -> rejectItem.execute(itemId, reason.trim()) }
     }
 
@@ -116,13 +116,13 @@ class ModelDetailsViewModel : ZeraViewModel() {
             .getOrDefault(PagedItemsDTO())
         pendingItemId = reviewableItemId(items.content)
         _state.value = stateFrom(model, isEmployee, pendingItemId)
-            .copy(isLoading = isLoading, isMutating = false, errorMessage = null)
+            .copy(isLoading = isLoading, isSubmitting = false, errorMessage = null)
     }
 
     private fun mutateModel(block: suspend () -> ModelResponseDTO) {
         val modelId = _state.value.modelId
-        if (modelId.isBlank() || _state.value.isMutating) return
-        _state.value = _state.value.copy(isMutating = true, errorMessage = null)
+        if (modelId.isBlank() || _state.value.isSubmitting) return
+        _state.value = _state.value.copy(isSubmitting = true, errorMessage = null)
         viewModelScope.launch {
             try {
                 applyLoadedModel(block(), isLoading = false)
@@ -130,7 +130,7 @@ class ModelDetailsViewModel : ZeraViewModel() {
                 throw e
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
-                    isMutating = false,
+                    isSubmitting = false,
                     errorMessage = userFacingError(
                         e,
                         conflictMessage = "O status atual do modelo não permite esta ação.",
@@ -151,14 +151,14 @@ class ModelDetailsViewModel : ZeraViewModel() {
 
     private fun mutateViaItem(block: suspend (String) -> ItemResponseDTO) {
         val modelId = _state.value.modelId
-        if (modelId.isBlank() || _state.value.isMutating) return
-        _state.value = _state.value.copy(isMutating = true, errorMessage = null)
+        if (modelId.isBlank() || _state.value.isSubmitting) return
+        _state.value = _state.value.copy(isSubmitting = true, errorMessage = null)
         viewModelScope.launch {
             try {
                 val itemId = resolvePendingItemId(modelId)
                 if (itemId.isNullOrBlank()) {
                     _state.value = _state.value.copy(
-                        isMutating = false,
+                        isSubmitting = false,
                         errorMessage = NO_PENDING_ITEM_HINT,
                     )
                     return@launch
@@ -169,7 +169,7 @@ class ModelDetailsViewModel : ZeraViewModel() {
                 throw e
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
-                    isMutating = false,
+                    isSubmitting = false,
                     errorMessage = userFacingError(
                         e,
                         conflictMessage = "O status atual não permite esta ação.",
