@@ -1,10 +1,7 @@
 package com.zera.android.view.components.overlays
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
@@ -16,9 +13,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zera.android.view.components.buttons.ZeraButton
 import com.zera.android.view.components.buttons.ZeraButtonType
+import com.zera.android.view.components.layouts.AdaptiveRow
 import com.zera.android.view.components.texts.BodyText
 import com.zera.android.view.components.texts.TitleText
-import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.view.theme.ZeraTheme
 import com.zera.android.view.theme.icons.ZeraIcon
@@ -90,22 +87,15 @@ fun AlertPopup(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
         )
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(Spacing.medium),
-        ) {
+        AdaptiveRow {
             ZeraButton(
                 text = "Cancelar",
                 onClick = onDismissRequest,
-                modifier = Modifier.weight(1f),
-                fillMaxWidth = true,
                 type = ZeraButtonType.Secondary,
             )
             ZeraButton(
                 text = confirmButtonText,
                 onClick = onConfirm,
-                modifier = Modifier.weight(1f),
-                fillMaxWidth = true,
                 style = buttonStyle,
             )
         }
