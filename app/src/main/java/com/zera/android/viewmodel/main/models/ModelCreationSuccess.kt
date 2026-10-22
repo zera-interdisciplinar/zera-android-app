@@ -17,7 +17,7 @@ class ModelCreationSuccessViewModel : ZeraViewModel() {
     }
 
     fun onCreateAnotherClick() {
-        ZeraNavigator.pushAndPop(Route.ModelCreation, popCount = 2)
+        ZeraNavigator.pushAndPop(Route.ModelCreation)
     }
 
     fun onBackToHomeClick() {
