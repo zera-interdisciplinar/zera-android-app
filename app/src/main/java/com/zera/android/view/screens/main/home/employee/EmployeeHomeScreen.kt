@@ -19,6 +19,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zera.android.view.components.buttons.ZeraButton
 import com.zera.android.view.components.cards.ShortcutCard
 import com.zera.android.view.components.cards.StockOccupationCard
+import com.zera.android.view.components.layouts.AdaptiveRow
 import com.zera.android.view.components.lists.NotificationItem
 import com.zera.android.view.components.lists.NotificationList
 import com.zera.android.view.components.lists.ProductItem
@@ -65,20 +66,16 @@ fun EmployeeHomeScreen(
 
             StockOccupationCard(itemCount = state.stockItemCount, occupation = state.stockOccupation)
 
-            Row(horizontalArrangement = Arrangement.spacedBy(Spacing.medium)) {
+            AdaptiveRow {
                 ZeraButton(
                     text = "Escanear",
                     onClick = viewModel::onScanClick,
-                    modifier = Modifier.weight(1f),
-                    fillMaxWidth = true,
                     style = ZeraColorFamily.Yellow,
                     icon = ZeraIcon.QrCode,
                 )
                 ZeraButton(
                     text = "Adicionar Modelo",
                     onClick = viewModel::onAddModelClick,
-                    modifier = Modifier.weight(1f),
-                    fillMaxWidth = true,
                     style = ZeraColorFamily.Green,
                     icon = ZeraIcon.Plus,
                 )
@@ -89,20 +86,18 @@ fun EmployeeHomeScreen(
                 bold = true,
                 color = MaterialTheme.colorScheme.onSurface,
             )
-            Row(horizontalArrangement = Arrangement.spacedBy(Spacing.medium)) {
+            AdaptiveRow {
                 ShortcutCard(
                     label = "Manutenção",
                     value = state.maintenanceCount,
                     labelIcon = ZeraIcon.Wrench,
                     onClick = viewModel::onMaintenanceCardClick,
-                    modifier = Modifier.weight(1f),
                 )
                 ShortcutCard(
                     label = "Descartes",
                     value = state.discardCount,
                     labelIcon = ZeraIcon.Recycle,
                     onClick = viewModel::onDiscardCardClick,
-                    modifier = Modifier.weight(1f),
                 )
             }
 
