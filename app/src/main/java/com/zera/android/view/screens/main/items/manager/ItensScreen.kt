@@ -62,7 +62,6 @@ fun ItensScreen(
     ManagerScaffold(
         title = "Itens",
         currentRoute = Route.Itens(status = initialStatus),
-        goBack = true,
         scrollable = false,
     ) {
         Row(

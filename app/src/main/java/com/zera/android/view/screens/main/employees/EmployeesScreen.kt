@@ -54,7 +54,6 @@ fun EmployeesScreen(
     ManagerScaffold(
         title = "Colaboradores",
         currentRoute = Route.Employees,
-        goBack = true,
         onBackClick = viewModel::onBackClick,
     ) {
         if (state.isLoading) {
