@@ -10,7 +10,7 @@ class CategoryCreationSuccessViewModel : ZeraViewModel() {
     }
 
     fun onCreateAnotherClick() {
-        ZeraNavigator.pushAndPop(Route.CategoryCreation, popCount = 2)
+        ZeraNavigator.pushAndPop(Route.CategoryCreation)
     }
 
     fun onBackToHomeClick() {
