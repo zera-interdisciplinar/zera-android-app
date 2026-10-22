@@ -1,13 +1,11 @@
 package com.zera.android.view.screens.main.recycling
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -25,7 +23,9 @@ import com.zera.android.view.components.buttons.ZeraButton
 import com.zera.android.view.components.buttons.ZeraButtonType
 import com.zera.android.view.components.inputs.ZeraChipsGroup
 import com.zera.android.view.components.inputs.ZeraSearchInput
+import com.zera.android.view.components.lists.OptionItem
 import com.zera.android.view.components.lists.OptionList
+import com.zera.android.view.components.loading.OptionListSkeleton
 import com.zera.android.view.components.overlays.BottomSheet
 import com.zera.android.view.components.scaffolds.EmployeeScaffold
 import com.zera.android.view.components.scaffolds.ManagerScaffold
@@ -37,6 +37,7 @@ import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.view.theme.ZeraTheme
 import com.zera.android.view.theme.icons.ZeraIcon
+import com.zera.android.viewmodel.main.recycling.ScheduledDisposalsState
 import com.zera.android.viewmodel.main.recycling.ScheduledDisposalsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -87,15 +88,10 @@ fun ScheduledDisposalsScreen(
             CaptionText(text = message, color = MaterialTheme.colorScheme.error)
         }
 
-        if (state.isLoading && state.disposals.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth(),
-                contentAlignment = Alignment.Center,
-            ) {
-                CircularProgressIndicator()
-            }
+        // Só a região da lista alterna: busca e filtros ficam reais, senão o campo perderia o foco
+        // quando uma busca (que reativa isLoading) recarrega a lista.
+        if (state.isLoading) {
+            OptionListSkeleton(modifier = Modifier.weight(1f))
         } else {
             OptionList(
                 options = state.disposals,
@@ -176,7 +172,29 @@ fun ScheduledDisposalsScreen(
 @Composable
 @Preview(heightDp = 900)
 private fun ScheduledDisposalsScreenPreview() {
+    val previewViewModel = ScheduledDisposalsViewModel().apply {
+        state.value = ScheduledDisposalsState(
+            disposals = listOf(
+                OptionItem(name = "Cooperativa Verde", description = "12/10/2026 · 4 itens"),
+                OptionItem(name = "EcoPonto Centro", description = "05/10/2026 · 2 itens"),
+                OptionItem(name = "Aterro Municipal", description = "28/09/2026 · 7 itens"),
+            ),
+            isLoading = false,
+        )
+    }
     ZeraTheme {
-        ScheduledDisposalsScreen()
+        ScheduledDisposalsScreen(viewModel = previewViewModel)
+    }
+}
+
+/** A mesma tela com a carga em andamento (`isLoading` de [ScheduledDisposalsState] nasce `true`). */
+@Composable
+@Preview(heightDp = 900)
+private fun ScheduledDisposalsScreenLoadingPreview() {
+    val previewViewModel = ScheduledDisposalsViewModel().apply {
+        state.value = ScheduledDisposalsState()
+    }
+    ZeraTheme {
+        ScheduledDisposalsScreen(viewModel = previewViewModel)
     }
 }

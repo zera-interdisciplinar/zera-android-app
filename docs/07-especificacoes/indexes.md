@@ -81,3 +81,18 @@ Como Gestor, quero ver indicadores de reciclagem e descarte da minha unidade, pa
 - Regras de negócio: [../05-regras-de-negocio/inventory-dashboard.md](../05-regras-de-negocio/inventory-dashboard.md)
 - Contratos de API: [../06-contratos-api.md](../06-contratos-api.md), [../contrato-dashboard/contrato-inventory-dashboard.md](../contrato-dashboard/contrato-inventory-dashboard.md)
 - Catálogo: [../03-catalogo-componentes.md](../03-catalogo-componentes.md) (gráficos)
+
+## Estado de carregamento
+
+O `IndexesState` tem `isLoading`, `true` desde a criação do `ViewModel` e baixada ao fim de cada carga (sucesso ou erro). Regra particular desta tela: a flag volta a `true` a cada troca de filtro, e o skeleton dos gráficos deve reaparecer. Enquanto `isLoading` for `true`, `onFilterChange` ignora a troca, evitando cargas concorrentes.
+
+- Pendente na tela: desabilitar os chips de filtro enquanto `isLoading` for verdadeiro (hoje o toque é ignorado em silêncio; há um `TODO` no `ViewModel`) e desenhar o skeleton.
+- Convenção geral em [../02-padroes-e-convencoes.md](../02-padroes-e-convencoes.md), seção "Convenção de flags de carregamento".
+
+## Skeleton dos gráficos
+
+Enquanto `isLoading` (carga inicial ou troca de filtro), os blocos abaixo dos chips de período mostram o skeleton do card de taxa de reciclagem e dos dois gráficos. Os chips ficam reais. Atualiza o item "Pendente na tela" acima: o skeleton está feito; falta só desabilitar os chips durante o carregamento, o que depende de o `ZeraChipsGroup` ganhar um parâmetro `enabled` (hoje ele não tem; o `TODO` continua no `onFilterChange` do `ViewModel`). Convenção em [../02-padroes-e-convencoes.md](../02-padroes-e-convencoes.md), seção "Convenção de skeleton".
+
+### Atualização: chips desabilitados durante o carregamento
+
+Os chips de período agora ficam desabilitados enquanto `isLoading` (o `ZeraChipsGroup` ganhou o parâmetro `enabled`), resolvendo o pendente acima. A guarda no `onFilterChange` do `ViewModel` continua, como proteção contra cargas concorrentes, e o `TODO` foi trocado por um comentário.

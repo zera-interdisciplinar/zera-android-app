@@ -38,7 +38,7 @@ data class ManualRegisterState(
     val modelOptions: List<String> = emptyList(),
     val conditionOptions: List<String> = ItemDetailsViewModel.conditionOptions,
     val damageTypeOptions: List<String> = DAMAGE_LABELS,
-    val isLoadingModels: Boolean = false,
+    val isLoading: Boolean = false,
     val modelsError: String? = null,
     val isSubmitting: Boolean = false,
     val submitError: String? = null,
@@ -66,7 +66,7 @@ class ManualRegisterViewModel(
         ManualRegisterState(
             barcode = initialBarcode.orEmpty(),
             model = initialModel.orEmpty(),
-            isLoadingModels = true,
+            isLoading = true,
         )
     )
     val state = _state
@@ -152,7 +152,7 @@ class ManualRegisterViewModel(
             _state.value = _state.value.copy(
                 modelOptions = options,
                 selectedModelId = loadedModels.firstOrNull { it.name == _state.value.model }?.id,
-                isLoadingModels = false,
+                isLoading = false,
                 modelsError = null,
             )
         } catch (error: CancellationException) {
@@ -163,7 +163,7 @@ class ManualRegisterViewModel(
             _state.value = _state.value.copy(
                 modelOptions = fallback,
                 selectedModelId = null,
-                isLoadingModels = false,
+                isLoading = false,
                 modelsError = error.message ?: "Falha ao carregar modelos",
             )
         }

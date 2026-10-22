@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
@@ -24,21 +23,31 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zera.android.view.components.buttons.ZeraButton
 import com.zera.android.view.components.buttons.ZeraButtonType
 import com.zera.android.view.components.inputs.ZeraInputType
 import com.zera.android.view.components.lists.EditableFieldRow
+import com.zera.android.view.components.loading.SkeletonBox
 import com.zera.android.view.components.navigation.UpperNavBar
 import com.zera.android.view.components.outros.Avatar
 import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.components.texts.HeadlineText
+import com.zera.android.view.theme.Radius
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.view.theme.ZeraTheme
 import com.zera.android.view.theme.palette
+import com.zera.android.viewmodel.profile.ProfileState
 import com.zera.android.viewmodel.profile.ProfileViewModel
 import com.zera.android.viewmodel.profile.ProfileViewModel.Companion.roleCaption
+
+// Alturas aproximadas dos blocos reais; o esqueleto só indica a disposição.
+private val SkeletonAvatarSize = 120.dp
+private val SkeletonButtonHeight = 48.dp
+private val SkeletonFieldRowHeight = 56.dp
+private const val SkeletonFieldRowCount = 4
 
 @Composable
 fun ProfileScreen(
@@ -101,80 +110,129 @@ fun ProfileScreen(
             verticalArrangement = Arrangement.spacedBy(Spacing.medium),
         ) {
             if (state.isLoading) {
-                CircularProgressIndicator()
+                ProfileSkeleton()
+            } else {
+                state.errorMessage?.let { message ->
+                    CaptionText(text = message, color = MaterialTheme.colorScheme.error)
+                }
+
+                Avatar(
+                    initials = state.initials,
+                    photoUrl = state.photoUrl,
+                    isLoading = state.isUploadingPhoto,
+                    onClick = {
+                        if (!state.isSaving && !state.isUploadingPhoto) {
+                            photoPicker.launch(
+                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
+                            )
+                        }
+                    },
+                )
+
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(Spacing.micro),
+                ) {
+                    HeadlineText(text = state.displayName, bold = true)
+                    CaptionText(text = roleCaption(state.role, state.company))
+                }
+
+                ZeraButton(
+                    text = "Configurações",
+                    onClick = viewModel::onSettingsClick,
+                    style = ZeraColorFamily.Blue,
+                    type = ZeraButtonType.Secondary,
+                )
+
+                EditableFieldRow(
+                    label = "Nome",
+                    value = state.fullName,
+                    onEditClick = if (state.canEditName) ({}) else null,
+                    validate = { name ->
+                        if (name.trim().isNotEmpty()) null else "Nome inválido"
+                    },
+                    onConfirm = viewModel::onNameConfirm,
+                )
+                EditableFieldRow(
+                    label = "E-mail",
+                    value = state.email,
+                    inputType = ZeraInputType.Email,
+                    onEditClick = if (state.canEditEmail) ({}) else null,
+                    validate = { email ->
+                        if (email.contains("@")) null else "E-mail inválido"
+                    },
+                    onConfirm = viewModel::onEmailConfirm,
+                )
+                EditableFieldRow(
+                    label = "Telefone",
+                    value = state.phone,
+                    inputType = ZeraInputType.Phone,
+                    onEditClick = if (state.canEditPhone) ({}) else null,
+                    validate = { phone ->
+                        val digits = phone.count(Char::isDigit)
+                        if (digits in 10..11) null else "Telefone inválido"
+                    },
+                    onConfirm = viewModel::onPhoneConfirm,
+                )
+                EditableFieldRow(label = "Cargo", value = state.position)
             }
-
-            state.errorMessage?.let { message ->
-                CaptionText(text = message, color = MaterialTheme.colorScheme.error)
-            }
-
-            Avatar(
-                initials = state.initials,
-                photoUrl = state.photoUrl,
-                isLoading = state.isUploadingPhoto,
-                onClick = {
-                    if (!state.isSaving && !state.isUploadingPhoto) {
-                        photoPicker.launch(
-                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
-                        )
-                    }
-                },
-            )
-
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(Spacing.micro),
-            ) {
-                HeadlineText(text = state.displayName, bold = true)
-                CaptionText(text = roleCaption(state.role, state.company))
-            }
-
-            ZeraButton(
-                text = "Configurações",
-                onClick = viewModel::onSettingsClick,
-                style = ZeraColorFamily.Blue,
-                type = ZeraButtonType.Secondary,
-            )
-
-            EditableFieldRow(
-                label = "Nome",
-                value = state.fullName,
-                onEditClick = if (state.canEditName) ({}) else null,
-                validate = { name ->
-                    if (name.trim().isNotEmpty()) null else "Nome inválido"
-                },
-                onConfirm = viewModel::onNameConfirm,
-            )
-            EditableFieldRow(
-                label = "E-mail",
-                value = state.email,
-                inputType = ZeraInputType.Email,
-                onEditClick = if (state.canEditEmail) ({}) else null,
-                validate = { email ->
-                    if (email.contains("@")) null else "E-mail inválido"
-                },
-                onConfirm = viewModel::onEmailConfirm,
-            )
-            EditableFieldRow(
-                label = "Telefone",
-                value = state.phone,
-                inputType = ZeraInputType.Phone,
-                onEditClick = if (state.canEditPhone) ({}) else null,
-                validate = { phone ->
-                    val digits = phone.count(Char::isDigit)
-                    if (digits in 10..11) null else "Telefone inválido"
-                },
-                onConfirm = viewModel::onPhoneConfirm,
-            )
-            EditableFieldRow(label = "Cargo", value = state.position)
         }
+    }
+}
+
+/** Esqueleto do avatar, nome/cargo, botão "Configurações" e campos, emitido direto na `Column` da tela. */
+@Composable
+private fun ProfileSkeleton() {
+    SkeletonBox(
+        width = SkeletonAvatarSize,
+        height = SkeletonAvatarSize,
+        borderRadius = SkeletonAvatarSize,
+    )
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(Spacing.micro),
+    ) {
+        SkeletonBox(width = 180.dp, height = 28.dp)
+        SkeletonBox(width = 120.dp, height = 14.dp)
+    }
+
+    SkeletonBox(width = 160.dp, height = SkeletonButtonHeight, borderRadius = Radius.large)
+
+    repeat(SkeletonFieldRowCount) {
+        SkeletonBox(height = SkeletonFieldRowHeight)
     }
 }
 
 @Composable
 @Preview(heightDp = 900)
 fun ProfileScreenPreview() {
+    val previewViewModel = ProfileViewModel().apply {
+        state.value = ProfileState(
+            displayName = "Carlos Lima",
+            fullName = "Carlos Eduardo Lima",
+            role = "EMPLOYEE",
+            company = "Zera Recicla",
+            initials = "CL",
+            email = "carlos@zera.com",
+            phone = "(11) 91234-5678",
+            position = "Operador",
+            isLoading = false,
+        )
+    }
     ZeraTheme {
-        ProfileScreen()
+        ProfileScreen(viewModel = previewViewModel)
+    }
+}
+
+/** A mesma tela com a carga em andamento (`isLoading` de [ProfileState] é `true` ao abrir). */
+@Composable
+@Preview(heightDp = 900)
+fun ProfileScreenLoadingPreview() {
+    val previewViewModel = ProfileViewModel().apply {
+        state.value = ProfileState(isLoading = true)
+    }
+    ZeraTheme {
+        ProfileScreen(viewModel = previewViewModel)
     }
 }

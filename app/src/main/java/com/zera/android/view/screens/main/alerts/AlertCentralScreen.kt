@@ -24,17 +24,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.zera.android.view.components.lists.NotificationItem
 import com.zera.android.view.components.lists.notificationItems
+import com.zera.android.view.components.loading.NotificationListSkeleton
 import com.zera.android.view.components.navigation.UpperNavBar
 import com.zera.android.view.components.texts.BodyText
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.view.theme.ZeraTheme
 import com.zera.android.view.theme.palette
+import com.zera.android.viewmodel.main.alerts.AlertCentralState
 import com.zera.android.viewmodel.main.alerts.AlertCentralViewModel
 
 /** Quantos itens antes do fim da lista a próxima página começa a ser pedida. */
 private const val LoadMoreThreshold = 3
+
+/** Quantos cartões o skeleton mostra na carga inicial. */
+private const val SkeletonNotificationCount = 5
 
 /**
  * Central de Alertas: notificações do usuário (gestor ou operário). Acessada pelo botão
@@ -66,8 +72,8 @@ fun AlertCentralScreen(
         }
     }
     // Também roda de novo quando uma página termina de carregar e a lista ainda não encheu a tela.
-    LaunchedEffect(nearEnd, state.isLoadingMore, state.hasMore) {
-        if (nearEnd && state.hasMore && !state.isLoadingMore) viewModel.onLoadMore()
+    LaunchedEffect(nearEnd, state.isLoading, state.isLoadingMore, state.hasMore) {
+        if (nearEnd && state.hasMore && !state.isLoading && !state.isLoadingMore) viewModel.onLoadMore()
     }
 
     Scaffold(
@@ -114,12 +120,19 @@ fun AlertCentralScreen(
 //                )
 //            }
 
+            // Carga inicial (primeira página): skeleton no lugar da lista.
+            if (state.isLoading) {
+                item(key = "skeleton") {
+                    NotificationListSkeleton(count = SkeletonNotificationCount)
+                }
+            }
+
             notificationItems(
                 notifications = state.notifications,
                 onItemClick = viewModel::onAlertClick,
             )
 
-            if (state.notifications.isEmpty() && !state.isLoadingMore) {
+            if (state.notifications.isEmpty() && !state.isLoading && !state.isLoadingMore) {
                 item(key = "empty") {
                     Box(
                         modifier = Modifier.fillMaxWidth().padding(Spacing.medium),
@@ -130,6 +143,7 @@ fun AlertCentralScreen(
                 }
             }
 
+            // Páginas seguintes: o spinner de rodapé vale só para a paginação.
             if (state.isLoadingMore) {
                 item(key = "loading-more") {
                     Box(
@@ -147,7 +161,39 @@ fun AlertCentralScreen(
 @Composable
 @Preview(heightDp = 900)
 private fun AlertCentralScreenPreview() {
+    val previewViewModel = AlertCentralViewModel().apply {
+        state.value = AlertCentralState(
+            notifications = listOf(
+                NotificationItem(
+                    id = "1",
+                    label = "Item sem destino",
+                    text = "Mouse sem fio · aguardando destino",
+                    style = ZeraColorFamily.Yellow,
+                    resolvable = true,
+                ),
+                NotificationItem(
+                    id = "2",
+                    label = "Estoque acima de 80%",
+                    style = ZeraColorFamily.Red,
+                ),
+            ),
+            isLoading = false,
+            hasMore = false,
+        )
+    }
     ZeraTheme {
-        AlertCentralScreen()
+        AlertCentralScreen(viewModel = previewViewModel)
+    }
+}
+
+/** A mesma tela com a primeira página em andamento (`isLoading` de [AlertCentralState] nasce `true`). */
+@Composable
+@Preview(heightDp = 900)
+private fun AlertCentralScreenLoadingPreview() {
+    val previewViewModel = AlertCentralViewModel().apply {
+        state.value = AlertCentralState()
+    }
+    ZeraTheme {
+        AlertCentralScreen(viewModel = previewViewModel)
     }
 }

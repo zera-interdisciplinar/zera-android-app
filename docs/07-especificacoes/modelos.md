@@ -90,3 +90,11 @@ Como Gestor, quero preencher os dados de um modelo e ver uma confirmação do fl
 
 - Regras: [../05-regras-de-negocio/modelos.md](../05-regras-de-negocio/modelos.md)
 - Componentes: [../03-catalogo-componentes.md](../03-catalogo-componentes.md)
+
+## Skeleton
+
+- **Lista de modelos:** enquanto `isLoading` (carga inicial ou busca), só a região da lista mostra o skeleton (título e 6 linhas, `OptionListSkeleton`). A busca e o botão "Adicionar novo modelo" ficam reais. O retorno à tela recarrega em silêncio, sem reativar `isLoading`.
+- **Detalhes do modelo:** enquanto `isLoading`, o conteúdo mostra o skeleton do card-resumo e dos campos nome, marca, categoria e material. Observações e motivo da recusa são opcionais e não têm skeleton.
+- **Cadastro do modelo:** é um formulário e não usa skeleton. O `isLoading` (carga de categorias e materiais) só mantém o botão "Concluir Cadastro" desabilitado até as opções chegarem.
+
+Convenção em [../02-padroes-e-convencoes.md](../02-padroes-e-convencoes.md), seção "Convenção de skeleton".

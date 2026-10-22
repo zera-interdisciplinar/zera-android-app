@@ -18,7 +18,7 @@ data class CategoriesState(
     val searchQuery: String = "",
     val totalCategoriesLabel: String = "",
     val categories: List<OptionItem> = emptyList(),
-    val isLoading: Boolean = false,
+    val isLoading: Boolean = true,
     val errorMessage: String? = null,
 )
 
@@ -29,10 +29,11 @@ class CategoriesViewModel : ZeraViewModel() {
     val state = _state
 
     private var loadJob: Job? = null
+    private var hasLoaded = false
     private var loadedCategories: List<CategoryResponseDTO> = emptyList()
 
     fun refresh() {
-        loadCategories()
+        loadCategories(silent = hasLoaded)
     }
 
     fun onSearchQueryChange(query: String) {
@@ -44,12 +45,14 @@ class CategoriesViewModel : ZeraViewModel() {
         ZeraNavigator.push(Route.CategoryCreation)
     }
 
-    private fun loadCategories() {
+    /** [silent] é a recarga automática (retorno à tela): não reativa `isLoading`, que só sobe na primeira carga. */
+    private fun loadCategories(silent: Boolean = false) {
         loadJob?.cancel()
-        _state.value = _state.value.copy(isLoading = true, errorMessage = null)
+        _state.value = _state.value.copy(isLoading = !silent, errorMessage = null)
         loadJob = viewModelScope.launch {
             try {
                 loadedCategories = getCategories.execute()
+                hasLoaded = true
                 _state.value = _state.value.copy(isLoading = false, errorMessage = null)
                 publishList()
             } catch (e: CancellationException) {

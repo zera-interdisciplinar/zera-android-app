@@ -16,6 +16,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -24,7 +25,10 @@ import com.zera.android.view.components.buttons.ZeraButton
 import com.zera.android.view.components.buttons.ZeraButtonType
 import com.zera.android.view.components.inputs.ZeraChipsGroup
 import com.zera.android.view.components.inputs.ZeraSearchInput
+import com.zera.android.view.components.lists.ProductItem
 import com.zera.android.view.components.lists.ProductList
+import com.zera.android.view.components.loading.ProductListSkeleton
+import com.zera.android.view.components.loading.SkeletonBox
 import com.zera.android.view.components.outros.ItemStatus
 import com.zera.android.view.components.overlays.BottomSheet
 import com.zera.android.view.components.scaffolds.ManagerScaffold
@@ -36,6 +40,7 @@ import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.view.theme.ZeraTheme
 import com.zera.android.view.theme.icons.ZeraIcon
+import com.zera.android.viewmodel.main.items.ItensState
 import com.zera.android.viewmodel.main.items.ItensViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -94,17 +99,24 @@ fun ItensScreen(
         state.errorMessage?.let { message ->
             CaptionText(text = message, color = MaterialTheme.colorScheme.error)
         }
-        TitleText(text = state.totalItemsLabel, bold = true)
-        ProductList(
-            products = state.items,
-            onItemClick = { product ->
-                ZeraNavigator.push(Route.ItemDetails(itemId = product.id))
-            },
-            contentPadding = PaddingValues(vertical = Spacing.small),
-            modifier = Modifier.weight(1f),
-            onEndReached = viewModel::loadNextPage,
-            isLoadingMore = state.isLoadingMore,
-        )
+        // Só a região da lista alterna: busca e filtros ficam reais, senão o campo perderia o foco
+        // quando uma busca (que reativa isLoading) recarrega a lista.
+        if (state.isLoading) {
+            SkeletonBox(width = 100.dp, height = 24.dp)
+            ProductListSkeleton(modifier = Modifier.weight(1f))
+        } else {
+            TitleText(text = state.totalItemsLabel, bold = true)
+            ProductList(
+                products = state.items,
+                onItemClick = { product ->
+                    ZeraNavigator.push(Route.ItemDetails(itemId = product.id))
+                },
+                contentPadding = PaddingValues(vertical = Spacing.small),
+                modifier = Modifier.weight(1f),
+                onEndReached = viewModel::loadNextPage,
+                isLoadingMore = state.isLoadingMore,
+            )
+        }
     }
 
     if (showFiltersSheet) {
@@ -155,7 +167,30 @@ fun ItensScreen(
 @Composable
 @Preview(heightDp = 900)
 fun ItensScreenPreview() {
+    val previewViewModel = ItensViewModel().apply {
+        state.value = ItensState(
+            totalItemsLabel = "3 itens",
+            items = listOf(
+                ProductItem(id = "2659646", name = "Placa de vídeo", statusText = "Aprovado", statusStyle = ZeraColorFamily.Green),
+                ProductItem(id = "1182036", name = "Teclado mecânico", statusText = "Pendente", statusStyle = ZeraColorFamily.Yellow),
+                ProductItem(id = "3300981", name = "Monitor 24\"", statusText = "Recusado", statusStyle = ZeraColorFamily.Red),
+            ),
+            isLoading = false,
+        )
+    }
     ZeraTheme {
-        ItensScreen()
+        ItensScreen(viewModel = previewViewModel)
+    }
+}
+
+/** A mesma tela com a carga em andamento (`isLoading` de [ItensState] nasce `true`). */
+@Composable
+@Preview(heightDp = 900)
+fun ItensScreenLoadingPreview() {
+    val previewViewModel = ItensViewModel().apply {
+        state.value = ItensState()
+    }
+    ZeraTheme {
+        ItensScreen(viewModel = previewViewModel)
     }
 }

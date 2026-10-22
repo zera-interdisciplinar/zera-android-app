@@ -101,3 +101,7 @@ Como Gestor, quero buscar e filtrar os itens da minha unidade, para abrir o deta
 - Regras: [../05-regras-de-negocio/itens.md](../05-regras-de-negocio/itens.md)
 - Contratos: [../contrato-pdi/contrato-detalhes-itens.md](../contrato-pdi/contrato-detalhes-itens.md), [../contrato-pdi/contexto.md](../contrato-pdi/contexto.md)
 - Spec de detalhe: [item-details.md](item-details.md)
+
+## Skeleton
+
+Enquanto `isLoading` (carga inicial, busca ou filtro), a região da lista mostra um título e 6 linhas de skeleton (`ProductListSkeleton`). A busca e os chips de filtro ficam reais, para o campo não perder o foco quando a busca recarrega a lista. Isso complementa o item de fora de escopo sobre skeleton acima. Convenção em [../02-padroes-e-convencoes.md](../02-padroes-e-convencoes.md), seção "Convenção de skeleton".

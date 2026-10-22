@@ -11,7 +11,6 @@ data class ItemApprovedState(
     val itemName: String = "",
     val itemSubtitle: String = "",
     val status: ItemStatus = ItemStatus.InStock,
-    val isLoading: Boolean = false,
     val errorMessage: String? = null,
 )
 

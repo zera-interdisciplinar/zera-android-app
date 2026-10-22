@@ -132,11 +132,11 @@ fun ManualRegisterScreen(
                 onValueChange = viewModel::onModelChange,
                 label = "Modelo",
                 placeholder = when {
-                    state.isLoadingModels -> "Carregando…"
+                    state.isLoading -> "Carregando…"
                     state.modelOptions.isEmpty() -> "Nenhum modelo cadastrado"
                     else -> "Selecione o modelo"
                 },
-                enabled = !state.isLoadingModels && state.modelOptions.isNotEmpty(),
+                enabled = !state.isLoading && state.modelOptions.isNotEmpty(),
                 isError = state.modelsError != null,
                 errorMessage = state.modelsError,
             )

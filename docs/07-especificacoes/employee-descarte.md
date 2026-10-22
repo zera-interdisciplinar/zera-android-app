@@ -74,3 +74,10 @@ Como Operário, quero registrar um descarte no mapa e ver o histórico da unidad
 - Contrato: [../contrato-places-api/contrato-descarte.md](../contrato-places-api/contrato-descarte.md), [../contrato-places-api/contexto.md](../contrato-places-api/contexto.md)
 - Relatório: [../contrato-ai-core-api/reports.md](../contrato-ai-core-api/reports.md)
 - Spec relacionada: [employee-home.md](employee-home.md), [descartes-agendados.md](descartes-agendados.md)
+
+## Skeleton
+
+- **Seleção de itens:** enquanto `isLoading` (carga inicial ou busca), só a região da lista mostra o skeleton (`OptionListSkeleton`). O cabeçalho da recicladora (vem da rota), a busca e o botão "Continuar" ficam reais.
+- **Resumo do descarte:** não usa skeleton. Todo o conteúdo vem pronto pela rota; o `isLoading` do state só acompanha a busca do contato da recicladora, que a tela não exibe.
+
+Convenção em [../02-padroes-e-convencoes.md](../02-padroes-e-convencoes.md), seção "Convenção de skeleton".

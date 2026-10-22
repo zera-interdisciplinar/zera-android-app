@@ -55,7 +55,7 @@ class ManualRegisterViewModelTest {
         )
 
         assertEquals(listOf("Teclado mecânico", "Mouse sem fio"), viewModel.state.value.modelOptions)
-        assertFalse(viewModel.state.value.isLoadingModels)
+        assertFalse(viewModel.state.value.isLoading)
         assertNull(viewModel.state.value.modelsError)
     }
 

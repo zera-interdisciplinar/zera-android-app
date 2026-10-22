@@ -92,3 +92,7 @@ Como Gestor, quero ver os dados reais de um item ao abri-lo, para conferir statu
 - Regras: [../05-regras-de-negocio/itens.md](../05-regras-de-negocio/itens.md)
 - Contratos: [../contrato-pdi/contrato-detalhes-itens.md](../contrato-pdi/contrato-detalhes-itens.md), [../contrato-pdi/contexto.md](../contrato-pdi/contexto.md)
 - Spec de listagem: [itens.md](itens.md)
+
+## Skeleton
+
+Enquanto `isLoading`, o conteúdo mostra o skeleton do card-resumo e de 7 linhas de campo. Os botões da barra inferior continuam na tela, desabilitados (`actionsEnabled` considera `isLoading`). Convenção em [../02-padroes-e-convencoes.md](../02-padroes-e-convencoes.md), seção "Convenção de skeleton".

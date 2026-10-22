@@ -22,7 +22,7 @@ import java.util.Locale
 data class ScheduledDisposalsState(
     val isEmployee: Boolean = false,
     val disposals: List<OptionItem> = emptyList(),
-    val isLoading: Boolean = false,
+    val isLoading: Boolean = true,
     val isLoadingMore: Boolean = false,
     val errorMessage: String? = null,
     val searchQuery: String = "",

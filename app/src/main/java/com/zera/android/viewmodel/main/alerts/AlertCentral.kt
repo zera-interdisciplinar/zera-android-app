@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 
 data class AlertCentralState(
     val notifications: List<NotificationItem> = emptyList(),
+    val isLoading: Boolean = true,
     val isLoadingMore: Boolean = false,
     val hasMore: Boolean = true,
     val snackbarMessage: String? = null,
@@ -26,13 +27,23 @@ class AlertCentralViewModel(
     private var nextPage = 0
 
     init {
-        onLoadMore()
+        loadPage()
     }
 
     fun onLoadMore() {
         val current = _state.value
-        if (current.isLoadingMore || !current.hasMore) return
-        _state.value = current.copy(isLoadingMore = true)
+        if (current.isLoading || current.isLoadingMore || !current.hasMore) return
+        loadPage()
+    }
+
+    /** A primeira página usa [AlertCentralState.isLoading]; as seguintes, [AlertCentralState.isLoadingMore]. */
+    private fun loadPage() {
+        val current = _state.value
+        _state.value = if (nextPage == 0) {
+            current.copy(isLoading = true)
+        } else {
+            current.copy(isLoadingMore = true)
+        }
         viewModelScope.launch {
             try {
                 val alerts = getAlerts.execute(page = nextPage, size = PageSize)
@@ -42,6 +53,7 @@ class AlertCentralViewModel(
                         _state.value.notifications,
                         AlertMapping.notificationsFrom(alerts),
                     ),
+                    isLoading = false,
                     isLoadingMore = false,
                     hasMore = hasMoreAfter(alerts.size),
                 )
@@ -51,6 +63,7 @@ class AlertCentralViewModel(
                 // TODO: trocar por snackbar com "Tentar novamente". Por ora a paginação para aqui,
                 //  senão a tela pediria a mesma página de novo assim que o carregamento terminasse.
                 _state.value = _state.value.copy(
+                    isLoading = false,
                     isLoadingMore = false,
                     hasMore = false,
                     snackbarMessage = "Não foi possível carregar os alertas.",

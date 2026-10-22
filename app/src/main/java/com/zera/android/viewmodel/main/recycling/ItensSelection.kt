@@ -18,7 +18,7 @@ data class ItensSelectionState(
     val searchQuery: String = "",
     val options: List<SelectOption> = emptyList(),
     val selectedValues: Set<String> = emptySet(),
-    val isLoading: Boolean = false,
+    val isLoading: Boolean = true,
     val isLoadingMore: Boolean = false,
     val errorMessage: String? = null,
 ) {

@@ -33,8 +33,19 @@ data class ManagerHomeState(
     val employeesDescription: String? = null,
     val notifications: List<NotificationItem> = emptyList(),
     val latestProducts: List<ProductItem> = emptyList(),
+    val isLoadingUser: Boolean = true,
+    val isLoadingInventory: Boolean = true,
+    val isLoadingAlerts: Boolean = true,
+    val isLoadingEmployees: Boolean = true,
     val errorMessage: String? = null,
-)
+) {
+    /**
+     * Carga dos blocos que sempre aparecem na tela (e têm skeleton). Os alertas são opcionais e
+     * entram sozinhos quando chegam: a tela observa [isLoadingAlerts] para essa seção.
+     */
+    val isLoading: Boolean
+        get() = isLoadingUser || isLoadingInventory || isLoadingEmployees
+}
 
 class ManagerHomeViewModel : ZeraViewModel() {
     private val getSelfUser = GetSelfUser()
@@ -68,6 +79,8 @@ class ManagerHomeViewModel : ZeraViewModel() {
             throw e
         } catch (_: Exception) {
             // A home ainda pode ser preenchida sem o nome; o interceptor já tem o token/unidade. (okHttp já colocou os dados no header)
+        } finally {
+            _state.value = _state.value.copy(isLoadingUser = false)
         }
     }
 
@@ -89,6 +102,8 @@ class ManagerHomeViewModel : ZeraViewModel() {
             throw e
         } catch (e: Exception) {
             _state.value = _state.value.copy(errorMessage = e.message)
+        } finally {
+            _state.value = _state.value.copy(isLoadingInventory = false)
         }
     }
 
@@ -100,6 +115,8 @@ class ManagerHomeViewModel : ZeraViewModel() {
             throw e
         } catch (_: Exception) {
             // A home ainda pode ser preenchida se a lista de alertas falhar.
+        } finally {
+            _state.value = _state.value.copy(isLoadingAlerts = false)
         }
     }
 
@@ -111,6 +128,8 @@ class ManagerHomeViewModel : ZeraViewModel() {
             throw e
         } catch (_: Exception) {
             // O card de itens ainda pode aparecer se a contagem de time falhar.
+        } finally {
+            _state.value = _state.value.copy(isLoadingEmployees = false)
         }
     }
 

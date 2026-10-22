@@ -21,8 +21,8 @@ import java.time.LocalDateTime
 data class ChatBotState(
     val messages: List<Message> = emptyList(),
     val input: String = "",
-    val isLoadingMessage: Boolean = false,
-    val isLoadingHistory: Boolean = false,
+    val isSendingMessage: Boolean = false,
+    val isLoading: Boolean = true,
     val suggestions: List<String> = listOf(
         "Como cadastrar um produto?",
         "Falar com o suporte",
@@ -52,15 +52,15 @@ class ChatBotViewModel(
     }
 
     private fun loadHistory() {
-        _state.value = _state.value.copy(isLoadingHistory = true)
+        _state.value = _state.value.copy(isLoading = true)
         viewModelScope.launch {
             try {
                 val messages = messagesFrom(getConversation.execute(threadId))
-                _state.value = _state.value.copy(messages = messages, isLoadingHistory = false)
+                _state.value = _state.value.copy(messages = messages, isLoading = false)
             } catch (error: CancellationException) {
                 throw error
             } catch (_: Exception) {
-                _state.value = _state.value.copy(isLoadingHistory = false)
+                _state.value = _state.value.copy(isLoading = false)
             }
         }
     }
@@ -83,13 +83,13 @@ class ChatBotViewModel(
 
     private fun send(raw: String) {
         val text = raw.trim()
-        if (text.isEmpty() || state.value.isLoadingMessage) return
+        if (text.isEmpty() || state.value.isSendingMessage) return
         if (text.length > MAX_CONTENT) return
         val userMessage = Message(MessageRole.User, text, LocalDateTime.now())
         _state.value = _state.value.copy(
             messages = _state.value.messages + userMessage,
             input = "",
-            isLoadingMessage = true,
+            isSendingMessage = true,
         )
         viewModelScope.launch {
             try {
@@ -98,7 +98,7 @@ class ChatBotViewModel(
                 userRole = role
                 _state.value = _state.value.copy(
                     messages = _state.value.messages + assistantMessageFrom(response, role),
-                    isLoadingMessage = false,
+                    isSendingMessage = false,
                 )
             } catch (error: CancellationException) {
                 throw error
@@ -109,7 +109,7 @@ class ChatBotViewModel(
                         content = ProcessChatMessage.GENERIC_FAILURE,
                         sentAt = LocalDateTime.now(),
                     ),
-                    isLoadingMessage = false,
+                    isSendingMessage = false,
                 )
             }
         }

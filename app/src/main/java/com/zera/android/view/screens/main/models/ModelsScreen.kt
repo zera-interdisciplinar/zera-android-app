@@ -18,12 +18,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zera.android.view.components.buttons.ZeraButton
 import com.zera.android.view.components.inputs.ZeraSearchInput
 import com.zera.android.view.components.lists.OptionItem
 import com.zera.android.view.components.lists.OptionList
+import com.zera.android.view.components.loading.OptionListSkeleton
+import com.zera.android.view.components.loading.SkeletonBox
 import com.zera.android.view.components.overlays.BottomSheet
 import com.zera.android.view.components.scaffolds.EmployeeScaffold
 import com.zera.android.view.components.scaffolds.ManagerScaffold
@@ -34,7 +37,6 @@ import com.zera.android.view.components.texts.TitleText
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.theme.Radius
 import com.zera.android.view.theme.Spacing
-import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.view.theme.ZeraTheme
 import com.zera.android.view.theme.icons.ZeraIcon
 import com.zera.android.viewmodel.main.models.ModelsState
@@ -52,53 +54,14 @@ fun ModelsScreen(
         onPauseOrDispose { }
     }
 
-    val body: @Composable ColumnScope.() -> Unit = {
-        ZeraSearchInput(
-            value = state.searchQuery,
-            onValueChange = viewModel::onSearchQueryChange,
-            placeholder = "Pesquisar por descrição, nome ou material...",
-            onSearch = viewModel::onSearch,
-        )
-
-        ZeraButton(
-            text = "Adicionar novo modelo",
-            onClick = viewModel::onAddModelClick,
-            fillMaxWidth = true,
-            icon = ZeraIcon.Plus,
-        )
-
-        state.errorMessage?.let { message ->
-            CaptionText(text = message, color = MaterialTheme.colorScheme.error)
-        }
-        TitleText(text = state.totalModelsLabel, bold = true)
-        OptionList(
-            options = state.models,
-            onItemClick = viewModel::onModelClick,
-            contentPadding = PaddingValues(vertical = Spacing.small),
-            modifier = Modifier.weight(1f),
-            emptyContent = { BodyText(text = "Nenhum modelo encontrado") },
-            onEndReached = viewModel::loadNextPage,
-            isLoadingMore = state.isLoadingMore,
-        )
-    }
-
-    if (state.isEmployee) {
-        EmployeeScaffold(
-            title = "Modelos",
-            currentRoute = Route.Models,
-            goBack = true,
-            scrollable = false,
-            content = body,
-        )
-    } else {
-        ManagerScaffold(
-            title = "Modelos",
-            currentRoute = Route.Models,
-            goBack = true,
-            scrollable = false,
-            content = body,
-        )
-    }
+    ModelsContent(
+        state = state,
+        onSearchQueryChange = viewModel::onSearchQueryChange,
+        onSearch = viewModel::onSearch,
+        onAddModelClick = viewModel::onAddModelClick,
+        onModelClick = viewModel::onModelClick,
+        onEndReached = viewModel::loadNextPage,
+    )
 
     if (state.isModelUsageSheetVisible) {
         BottomSheet(
@@ -137,6 +100,74 @@ fun ModelsScreen(
     }
 }
 
+/**
+ * Conteúdo da tela sem o [ModelsViewModel], para as previews não dispararem o `refresh()` do
+ * retorno à tela (que reativaria `isLoading` e esconderia o estado que se quer ver).
+ */
+@Composable
+private fun ModelsContent(
+    state: ModelsState,
+    onSearchQueryChange: (String) -> Unit,
+    onSearch: () -> Unit,
+    onAddModelClick: () -> Unit,
+    onModelClick: (OptionItem) -> Unit,
+    onEndReached: () -> Unit,
+) {
+    val body: @Composable ColumnScope.() -> Unit = {
+        ZeraSearchInput(
+            value = state.searchQuery,
+            onValueChange = onSearchQueryChange,
+            placeholder = "Pesquisar por descrição, nome ou material...",
+            onSearch = onSearch,
+        )
+
+        ZeraButton(
+            text = "Adicionar novo modelo",
+            onClick = onAddModelClick,
+            fillMaxWidth = true,
+            icon = ZeraIcon.Plus,
+        )
+
+        state.errorMessage?.let { message ->
+            CaptionText(text = message, color = MaterialTheme.colorScheme.error)
+        }
+        // Só a região da lista alterna: a busca (que reativa isLoading) e o botão ficam reais.
+        if (state.isLoading) {
+            SkeletonBox(width = 120.dp, height = 24.dp)
+            OptionListSkeleton(modifier = Modifier.weight(1f))
+        } else {
+            TitleText(text = state.totalModelsLabel, bold = true)
+            OptionList(
+                options = state.models,
+                onItemClick = onModelClick,
+                contentPadding = PaddingValues(vertical = Spacing.small),
+                modifier = Modifier.weight(1f),
+                emptyContent = { BodyText(text = "Nenhum modelo encontrado") },
+                onEndReached = onEndReached,
+                isLoadingMore = state.isLoadingMore,
+            )
+        }
+    }
+
+    if (state.isEmployee) {
+        EmployeeScaffold(
+            title = "Modelos",
+            currentRoute = Route.Models,
+            goBack = true,
+            scrollable = false,
+            content = body,
+        )
+    } else {
+        ManagerScaffold(
+            title = "Modelos",
+            currentRoute = Route.Models,
+            goBack = true,
+            scrollable = false,
+            content = body,
+        )
+    }
+}
+
 @Composable
 private fun ModelUsageBullet(text: String) {
     Row(
@@ -151,18 +182,39 @@ private fun ModelUsageBullet(text: String) {
 @Composable
 @Preview(heightDp = 900)
 fun ModelsScreenPreview() {
-    val previewViewModel = ModelsViewModel().apply {
-        state.value = ModelsState(
-            totalModelsLabel = "1.230 modelos",
-            models = listOf(
-                OptionItem(description = "14 itens neste modelo", name = "Placa de vídeo"),
-                OptionItem(description = "7 itens neste modelo", name = "Placa de vídeo"),
-                OptionItem(description = "10 itens neste modelo", name = "Placa de vídeo"),
-                OptionItem(description = "8 itens neste modelo", name = "Placa de vídeo"),
+    ZeraTheme {
+        ModelsContent(
+            state = ModelsState(
+                isLoading = false,
+                totalModelsLabel = "1.230 modelos",
+                models = listOf(
+                    OptionItem(description = "14 itens neste modelo", name = "Placa de vídeo"),
+                    OptionItem(description = "7 itens neste modelo", name = "Placa de vídeo"),
+                    OptionItem(description = "10 itens neste modelo", name = "Placa de vídeo"),
+                    OptionItem(description = "8 itens neste modelo", name = "Placa de vídeo"),
+                ),
             ),
+            onSearchQueryChange = {},
+            onSearch = {},
+            onAddModelClick = {},
+            onModelClick = {},
+            onEndReached = {},
         )
     }
+}
+
+/** A mesma tela com a carga em andamento (`isLoading` de [ModelsState] nasce `true`). */
+@Composable
+@Preview(heightDp = 900)
+fun ModelsScreenLoadingPreview() {
     ZeraTheme {
-        ModelsScreen(viewModel = previewViewModel)
+        ModelsContent(
+            state = ModelsState(),
+            onSearchQueryChange = {},
+            onSearch = {},
+            onAddModelClick = {},
+            onModelClick = {},
+            onEndReached = {},
+        )
     }
 }

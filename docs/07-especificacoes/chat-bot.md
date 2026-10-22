@@ -61,3 +61,19 @@ Eventos: `onInputChange`, `onSend`, `onSuggestionClick`, `onBackClick`. Init hid
 ## Fora de escopo
 
 Paginação infinita, persistir thread no SQLite, streaming, PDF via chat, sugestões dinâmicas, CTA a partir do GET de mensagens.
+
+## Estado de carregamento
+
+Atualização de nomes no `ChatBotState`, seguindo a convenção em [../02-padroes-e-convencoes.md](../02-padroes-e-convencoes.md), seção "Convenção de flags de carregamento":
+
+| Campo | Papel |
+|---|---|
+| `isSendingMessage` | turno em andamento (antes `isLoadingMessage`; é a flag citada em "Turno" e na tabela acima) |
+| `isLoading` | hidratação inicial do histórico (antes `isLoadingHistory`); nasce `true` |
+
+## Skeleton
+
+- **Conversa:** durante a hidratação inicial do histórico (`isLoading`), a área de mensagens mostra 4 bolhas de skeleton, alternando assistente (esquerda) e usuário (direita). A barra de digitação continua real. As sugestões só aparecem com `!isLoading && messages.isEmpty()`, para não piscarem antes de o histórico chegar.
+- **Lista de conversas:** durante a primeira carga, mostra 7 linhas de skeleton (avatar e uma linha de texto). O retorno à tela recarrega em silêncio, sem reativar `isLoading`.
+
+Convenção em [../02-padroes-e-convencoes.md](../02-padroes-e-convencoes.md), seção "Convenção de skeleton".

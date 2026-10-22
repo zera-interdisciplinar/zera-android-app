@@ -65,3 +65,17 @@ Como Operário, quero ver a ocupação do estoque, meus atalhos de manutenção/
 - Spec relacionada: [manager-home-dashboard.md](manager-home-dashboard.md), [central-de-trabalho.md](central-de-trabalho.md), [employee-descarte.md](employee-descarte.md)
 - Contrato: [../contrato-dashboard/contrato-inventory-dashboard.md](../contrato-dashboard/contrato-inventory-dashboard.md) (`GET /dashboard/home` e `GET /dashboard/work-center`)
 - Regras: [../05-regras-de-negocio/inventory-dashboard.md](../05-regras-de-negocio/inventory-dashboard.md)
+
+## Estado de carregamento
+
+O `EmployeeHomeState` tem uma flag por carga, todas `true` desde a criação do `ViewModel` e baixadas quando a respectiva chamada termina (sucesso ou erro):
+
+- `isLoadingUser`: nome e cargo do usuário.
+- `isLoadingHome`: ocupação do estoque, contadores dos atalhos e últimos itens.
+- `isLoadingPendencies`: pendências do work-center.
+
+`isLoading` é calculada e fica `true` enquanto qualquer uma delas estiver ativa. A tela ainda não desenha skeleton. Convenção geral em [../02-padroes-e-convencoes.md](../02-padroes-e-convencoes.md), seção "Convenção de flags de carregamento".
+
+## Skeleton
+
+Atualização do estado de carregamento acima: `isLoading` calculado agora considera só `isLoadingUser` e `isLoadingHome`. As pendências são opcionais: a seção "Pendências" só entra quando `isLoadingPendencies` fica `false`, sem skeleton. Enquanto `isLoading`, a tela mostra o skeleton de nome/cargo, card de ocupação, botões "Escanear" e "Adicionar Modelo" e os atalhos "Manutenção" e "Descartes". Convenção em [../02-padroes-e-convencoes.md](../02-padroes-e-convencoes.md), seção "Convenção de skeleton".

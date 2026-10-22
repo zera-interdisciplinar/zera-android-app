@@ -21,6 +21,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zera.android.view.components.buttons.ZeraButton
 import com.zera.android.view.components.buttons.ZeraButtonType
@@ -29,15 +30,23 @@ import com.zera.android.view.components.inputs.ZeraChipsGroup
 import com.zera.android.view.components.inputs.ZeraInputPopup
 import com.zera.android.view.components.inputs.ZeraTextInput
 import com.zera.android.view.components.lists.EditableFieldRow
+import com.zera.android.view.components.loading.SkeletonBox
 import com.zera.android.view.components.navigation.UpperNavBar
+import com.zera.android.view.components.outros.ItemStatus
 import com.zera.android.view.components.overlays.PopupDialog
 import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.components.texts.TitleText
+import com.zera.android.view.theme.Radius
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.view.theme.ZeraTheme
 import com.zera.android.viewmodel.main.items.ItemDetailsState
 import com.zera.android.viewmodel.main.items.ItemDetailsViewModel
+
+// Alturas aproximadas dos blocos reais; o esqueleto só indica a disposição.
+private val SkeletonSummaryCardHeight = 120.dp
+private val SkeletonFieldRowHeight = 56.dp
+private const val SkeletonFieldRowCount = 7
 
 @Composable
 fun ItemDetailsScreen(
@@ -47,7 +56,7 @@ fun ItemDetailsScreen(
     val state by viewModel.state
     var showEditPopup by remember { mutableStateOf(false) }
     var showRejectPopup by remember { mutableStateOf(false) }
-    val actionsEnabled = !state.isLoading && !state.isMutating && state.itemId.isNotBlank()
+    val actionsEnabled = !state.isLoading && !state.isSubmitting && state.itemId.isNotBlank()
 
     LaunchedEffect(itemId) {
         viewModel.loadItem(itemId)
@@ -87,7 +96,7 @@ fun ItemDetailsScreen(
                             modifier = Modifier.weight(1f),
                         )
                         ZeraButton(
-                            text = if (state.isMutating) "Enviando..." else "Aprovar",
+                            text = if (state.isSubmitting) "Enviando..." else "Aprovar",
                             onClick = viewModel::onApproveClick,
                             enabled = actionsEnabled,
                             modifier = Modifier.weight(1f),
@@ -112,56 +121,60 @@ fun ItemDetailsScreen(
                 .padding(horizontal = Spacing.medium, vertical = Spacing.small),
             verticalArrangement = Arrangement.spacedBy(Spacing.medium),
         ) {
-            state.errorMessage?.let { message ->
-                CaptionText(text = message, color = MaterialTheme.colorScheme.error)
+            if (state.isLoading) {
+                ItemDetailsSkeleton()
+            } else {
+                state.errorMessage?.let { message ->
+                    CaptionText(text = message, color = MaterialTheme.colorScheme.error)
+                }
+
+                ItemSummaryCard(
+                    itemId = state.itemId,
+                    itemName = state.itemName,
+                    itemSubtitle = state.itemSubtitle,
+                    status = state.status,
+                    condition = state.condition,
+                )
+
+                EditableFieldRow(
+                    label = "Nome",
+                    value = state.itemName,
+                    onEditClick = {},
+                    onConfirm = viewModel::onNameConfirm,
+                    validate = ItemDetailsViewModel::nameValidationError,
+                )
+                EditableFieldRow(label = "Categoria", value = state.category)
+                EditableFieldRow(label = "Material", value = state.material)
+                EditableFieldRow(
+                    label = "Condição",
+                    value = state.condition,
+                    onEditClick = {},
+                    onConfirm = viewModel::onConditionConfirm,
+                    validate = { input ->
+                        if (ItemDetailsViewModel.conditionCodeFrom(input) == null) {
+                            "Use Novo, Usado, Semidanificado ou Danificado."
+                        } else {
+                            null
+                        }
+                    },
+                )
+                EditableFieldRow(
+                    label = "Número de série",
+                    value = state.serialNumber,
+                    onEditClick = {},
+                    onConfirm = viewModel::onSerialConfirm,
+                    validate = ItemDetailsViewModel::serialValidationError,
+                )
+                EditableFieldRow(
+                    label = "Observações",
+                    value = state.notes,
+                    onEditClick = {},
+                    onConfirm = viewModel::onNotesConfirm,
+                    validate = ItemDetailsViewModel::notesValidationError,
+                )
+                EditableFieldRow(label = "Cadastrado Por", value = state.registeredBy)
+                EditableFieldRow(label = "Data de Cadastro", value = state.registeredAt)
             }
-
-            ItemSummaryCard(
-                itemId = state.itemId,
-                itemName = state.itemName,
-                itemSubtitle = state.itemSubtitle,
-                status = state.status,
-                condition = state.condition,
-            )
-
-            EditableFieldRow(
-                label = "Nome",
-                value = state.itemName,
-                onEditClick = {},
-                onConfirm = viewModel::onNameConfirm,
-                validate = ItemDetailsViewModel::nameValidationError,
-            )
-            EditableFieldRow(label = "Categoria", value = state.category)
-            EditableFieldRow(label = "Material", value = state.material)
-            EditableFieldRow(
-                label = "Condição",
-                value = state.condition,
-                onEditClick = {},
-                onConfirm = viewModel::onConditionConfirm,
-                validate = { input ->
-                    if (ItemDetailsViewModel.conditionCodeFrom(input) == null) {
-                        "Use Novo, Usado, Semidanificado ou Danificado."
-                    } else {
-                        null
-                    }
-                },
-            )
-            EditableFieldRow(
-                label = "Número de série",
-                value = state.serialNumber,
-                onEditClick = {},
-                onConfirm = viewModel::onSerialConfirm,
-                validate = ItemDetailsViewModel::serialValidationError,
-            )
-            EditableFieldRow(
-                label = "Observações",
-                value = state.notes,
-                onEditClick = {},
-                onConfirm = viewModel::onNotesConfirm,
-                validate = ItemDetailsViewModel::notesValidationError,
-            )
-            EditableFieldRow(label = "Cadastrado Por", value = state.registeredBy)
-            EditableFieldRow(label = "Data de Cadastro", value = state.registeredAt)
         }
     }
 
@@ -281,10 +294,49 @@ private fun EditItemPopup(
     }
 }
 
+/** Esqueleto do card-resumo e das linhas de campos, emitido direto na `Column` da tela. */
+@Composable
+private fun ItemDetailsSkeleton() {
+    SkeletonBox(height = SkeletonSummaryCardHeight, borderRadius = Radius.large)
+    repeat(SkeletonFieldRowCount) {
+        SkeletonBox(height = SkeletonFieldRowHeight)
+    }
+}
+
+// Com itemId em branco a tela não dispara a carga real, então o state injetado é preservado.
 @Composable
 @Preview(heightDp = 900)
 fun ItemDetailsScreenPreview() {
+    val previewViewModel = ItemDetailsViewModel().apply {
+        state.value = ItemDetailsState(
+            itemId = "2659646",
+            itemName = "Placa de vídeo",
+            itemSubtitle = "RTX 3060",
+            status = ItemStatus.PendingApproval,
+            category = "Informática",
+            material = "Placa de circuito",
+            condition = "Usado",
+            serialNumber = "SN-48213",
+            notes = "Pequeno arranhão na lateral.",
+            registeredBy = "Carlos Lima",
+            registeredAt = "12/10/2026",
+            canReview = true,
+            isLoading = false,
+        )
+    }
     ZeraTheme {
-        ItemDetailsScreen(itemId = "265964")
+        ItemDetailsScreen(itemId = "", viewModel = previewViewModel)
+    }
+}
+
+/** A mesma tela com a carga em andamento (`isLoading` de [ItemDetailsState] nasce `true`). */
+@Composable
+@Preview(heightDp = 900)
+fun ItemDetailsScreenLoadingPreview() {
+    val previewViewModel = ItemDetailsViewModel().apply {
+        state.value = ItemDetailsState()
+    }
+    ZeraTheme {
+        ItemDetailsScreen(itemId = "265964", viewModel = previewViewModel)
     }
 }

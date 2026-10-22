@@ -38,8 +38,8 @@ data class ItemDetailsState(
     val registeredBy: String = "",
     val registeredAt: String = "",
     val canReview: Boolean = false,
-    val isLoading: Boolean = false,
-    val isMutating: Boolean = false,
+    val isLoading: Boolean = true,
+    val isSubmitting: Boolean = false,
     val errorMessage: String? = null,
 )
 
@@ -55,7 +55,11 @@ class ItemDetailsViewModel : ZeraViewModel() {
     private var isEmployee = false
 
     fun loadItem(itemId: String) {
-        if (itemId.isBlank()) return
+        if (itemId.isBlank()) {
+            // Sem id não há o que carregar; evita deixar o isLoading inicial preso em true.
+            _state.value = _state.value.copy(isLoading = false)
+            return
+        }
         _state.value = _state.value.copy(isLoading = true, errorMessage = null)
         viewModelScope.launch {
             try {
@@ -161,13 +165,13 @@ class ItemDetailsViewModel : ZeraViewModel() {
 
     fun onApproveClick() {
         val itemId = _state.value.itemId
-        if (itemId.isBlank() || _state.value.isMutating || !_state.value.canReview) return
-        _state.value = _state.value.copy(isMutating = true, errorMessage = null)
+        if (itemId.isBlank() || _state.value.isSubmitting || !_state.value.canReview) return
+        _state.value = _state.value.copy(isSubmitting = true, errorMessage = null)
         viewModelScope.launch {
             try {
                 val item = approveItem.execute(itemId)
                 val next = stateFrom(item)
-                _state.value = next.copy(isMutating = false, errorMessage = null)
+                _state.value = next.copy(isSubmitting = false, errorMessage = null)
                 ZeraNavigator.pushAndPop(
                     Route.ItemApproved(
                         itemId = next.itemId,
@@ -179,7 +183,7 @@ class ItemDetailsViewModel : ZeraViewModel() {
                 throw e
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
-                    isMutating = false,
+                    isSubmitting = false,
                     errorMessage = userFacingError(
                         error = e,
                         conflictMessage = "Este item não pode ser aprovado no status atual.",
@@ -194,22 +198,22 @@ class ItemDetailsViewModel : ZeraViewModel() {
     fun onRejectConfirm(reason: String) {
         val itemId = _state.value.itemId
         val trimmed = reason.trim()
-        if (itemId.isBlank() || _state.value.isMutating || !_state.value.canReview) return
+        if (itemId.isBlank() || _state.value.isSubmitting || !_state.value.canReview) return
         val reasonError = reasonValidationError(trimmed)
         if (reasonError != null) {
             _state.value = _state.value.copy(errorMessage = reasonError)
             return
         }
-        _state.value = _state.value.copy(isMutating = true, errorMessage = null)
+        _state.value = _state.value.copy(isSubmitting = true, errorMessage = null)
         viewModelScope.launch {
             try {
                 val item = rejectItem.execute(itemId, trimmed)
-                _state.value = stateFrom(item, isEmployee).copy(isMutating = false, errorMessage = null)
+                _state.value = stateFrom(item, isEmployee).copy(isSubmitting = false, errorMessage = null)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
-                    isMutating = false,
+                    isSubmitting = false,
                     errorMessage = userFacingError(
                         error = e,
                         conflictMessage = "Este item não pode ser recusado no status atual.",
@@ -223,17 +227,17 @@ class ItemDetailsViewModel : ZeraViewModel() {
 
     private fun patchItem(request: UpdateItemRequestDTO) {
         val itemId = _state.value.itemId
-        if (itemId.isBlank() || _state.value.isMutating) return
-        _state.value = _state.value.copy(isMutating = true, errorMessage = null)
+        if (itemId.isBlank() || _state.value.isSubmitting) return
+        _state.value = _state.value.copy(isSubmitting = true, errorMessage = null)
         viewModelScope.launch {
             try {
                 val item = updateItem.execute(itemId, request)
-                _state.value = stateFrom(item, isEmployee).copy(isMutating = false, errorMessage = null)
+                _state.value = stateFrom(item, isEmployee).copy(isSubmitting = false, errorMessage = null)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
-                    isMutating = false,
+                    isSubmitting = false,
                     errorMessage = userFacingError(
                         error = e,
                         conflictMessage = "Não foi possível salvar as alterações neste item.",
@@ -361,6 +365,8 @@ class ItemDetailsViewModel : ZeraViewModel() {
             item: ItemResponseDTO,
             isEmployee: Boolean = false,
         ): ItemDetailsState = ItemDetailsState(
+            // Um state montado a partir de um item já carregado nunca está em loading.
+            isLoading = false,
             itemId = item.id,
             itemName = item.name,
             itemSubtitle = item.model?.name.orEmpty(),

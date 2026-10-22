@@ -63,7 +63,7 @@ fun ModelCreationScreen(
                         viewModel.onCreateClick()
                     },
                     fillMaxWidth = true,
-                    enabled = !state.isSaving && !state.isLoadingOptions,
+                    enabled = !state.isSaving && !state.isLoading,
                 )
                 ZeraButton(
                     text = "Cancelar",

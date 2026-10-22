@@ -6,12 +6,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zera.android.view.components.buttons.ZeraButton
 import com.zera.android.view.components.inputs.ZeraSearchInput
 import com.zera.android.view.components.lists.OptionItem
 import com.zera.android.view.components.lists.OptionList
+import com.zera.android.view.components.loading.OptionListSkeleton
+import com.zera.android.view.components.loading.SkeletonBox
 import com.zera.android.view.components.scaffolds.ManagerScaffold
 import com.zera.android.view.components.texts.BodyText
 import com.zera.android.view.components.texts.CaptionText
@@ -34,6 +37,23 @@ fun CategoriesScreen(
         onPauseOrDispose { }
     }
 
+    CategoriesContent(
+        state = state,
+        onSearchQueryChange = viewModel::onSearchQueryChange,
+        onAddCategoryClick = viewModel::onAddCategoryClick,
+    )
+}
+
+/**
+ * Conteúdo da tela sem o [CategoriesViewModel], para as previews não dispararem o `refresh()` do
+ * retorno à tela (que reativaria `isLoading` e esconderia o estado que se quer ver).
+ */
+@Composable
+private fun CategoriesContent(
+    state: CategoriesState,
+    onSearchQueryChange: (String) -> Unit,
+    onAddCategoryClick: () -> Unit,
+) {
     ManagerScaffold(
         title = "Categorias",
         currentRoute = Route.Categories,
@@ -42,14 +62,14 @@ fun CategoriesScreen(
     ) {
         ZeraSearchInput(
             value = state.searchQuery,
-            onValueChange = viewModel::onSearchQueryChange,
+            onValueChange = onSearchQueryChange,
             placeholder = "Pesquisar por nome ou descrição...",
             onSearch = {},
         )
 
         ZeraButton(
             text = "Adicionar nova categoria",
-            onClick = viewModel::onAddCategoryClick,
+            onClick = onAddCategoryClick,
             fillMaxWidth = true,
             icon = ZeraIcon.Plus,
         )
@@ -57,30 +77,51 @@ fun CategoriesScreen(
         state.errorMessage?.let { message ->
             CaptionText(text = message, color = MaterialTheme.colorScheme.error)
         }
-        TitleText(text = state.totalCategoriesLabel, bold = true)
-        OptionList(
-            options = state.categories,
-            onItemClick = null,
-            contentPadding = PaddingValues(vertical = Spacing.small),
-            modifier = Modifier.weight(1f),
-            emptyContent = { BodyText(text = "Nenhuma categoria encontrada") },
-        )
+        // Só a região da lista alterna: a busca e o botão ficam reais.
+        if (state.isLoading) {
+            SkeletonBox(width = 120.dp, height = 24.dp)
+            OptionListSkeleton(modifier = Modifier.weight(1f))
+        } else {
+            TitleText(text = state.totalCategoriesLabel, bold = true)
+            OptionList(
+                options = state.categories,
+                onItemClick = null,
+                contentPadding = PaddingValues(vertical = Spacing.small),
+                modifier = Modifier.weight(1f),
+                emptyContent = { BodyText(text = "Nenhuma categoria encontrada") },
+            )
+        }
     }
 }
 
 @Composable
 @Preview(heightDp = 900)
 fun CategoriesScreenPreview() {
-    val previewViewModel = CategoriesViewModel().apply {
-        state.value = CategoriesState(
-            totalCategoriesLabel = "2 Categorias",
-            categories = listOf(
-                OptionItem(name = "Informática", description = "Notebooks e monitores"),
-                OptionItem(name = "Mobiliário", description = ""),
+    ZeraTheme {
+        CategoriesContent(
+            state = CategoriesState(
+                isLoading = false,
+                totalCategoriesLabel = "2 Categorias",
+                categories = listOf(
+                    OptionItem(name = "Informática", description = "Notebooks e monitores"),
+                    OptionItem(name = "Mobiliário", description = ""),
+                ),
             ),
+            onSearchQueryChange = {},
+            onAddCategoryClick = {},
         )
     }
+}
+
+/** A mesma tela com a carga em andamento (`isLoading` de [CategoriesState] nasce `true`). */
+@Composable
+@Preview(heightDp = 900)
+fun CategoriesScreenLoadingPreview() {
     ZeraTheme {
-        CategoriesScreen(viewModel = previewViewModel)
+        CategoriesContent(
+            state = CategoriesState(),
+            onSearchQueryChange = {},
+            onAddCategoryClick = {},
+        )
     }
 }

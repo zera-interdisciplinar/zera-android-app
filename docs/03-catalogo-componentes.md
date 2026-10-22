@@ -76,6 +76,7 @@ Arquivo: `view/components/inputs/`.
 - **`ZeraDropdownInput(values, onValueChange, modifier, value, label, placeholder, enabled, isError, errorMessage, width)`** — seletor controlado de uma opção textual; a lista é fornecida pelo chamador e o componente usa `ExposedDropdownMenuBox` com a mesma borda, fundo e rótulo visual de `ZeraTextInput`.
 - **`ZeraTokenInput(value, onValueChange, modifier, size=6, label, enabled, isError, errorMessage, onFilled)`** — campo de código/OTP: um único `BasicTextField` invisível desenhando `size` células via `decorationBox`; chama `onFilled` quando atinge `size` dígitos.
 - **`ZeraChipsGroup(options, selected, onSelectedChange, modifier, label, style, stacked, selectMany, selectedValues, onSelectedValuesChange, showX)`** — grupo controlado de chips. `selectMany = false` mantém seleção única; com `true`, o chamador fornece/recebe a lista `selectedValues` por `onSelectedValuesChange`. `showX` mostra X nos selecionados e é ativado automaticamente em seleção múltipla. `stacked = true` quebra linha (`FlowRow`); `false` (padrão) rola horizontalmente.
+  - Atualização: o `ZeraChipsGroup` ganhou `enabled: Boolean = true` (último parâmetro). Com `false`, os chips ficam esmaecidos e não respondem ao toque. Usado na `IndexesScreen` enquanto `isLoading`.
 - **`ZeraDateInput(onValueChange, modifier, value, label, placeholder, enabled, isError, errorMessage, width)`** — campo de data com a mesma estrutura visual do `ZeraTextInput`; o toque abre um `DatePickerDialog` em vez do teclado, então não há data digitada inválida. `value` e o retorno de `onValueChange` usam o formato `dd/MM/yyyy`.
 - **`ZeraSliderInput(value: Int, onValueChange: (Int) -> Unit, modifier, label, valueRange = 1..10, enabled, style, width)`** — slider numérico com paradas em cada inteiro de `valueRange`; `style` (`ZeraColorFamily`, padrão `Blue`) define a cor da trilha e da alça.
 - **`ZeraRadioButton(selected, onClick, modifier, label, style)`** — botão de seleção única: só o indicador circular, com `label` opcional acima. O estado é do chamador; selecionado, o indicador é preenchido com a cor base de `style` (padrão `Blue`). Não alterna sozinho: quem usa decide o novo valor em `onClick` (ex.: `ManualRegisterViewModel.onHasDamageChange` inverte o valor recebido).
@@ -180,6 +181,7 @@ Os componentes não têm API de "adicionar mensagem": o `ViewModel` cria um novo
 3. Mensagem do assistente: `Message(role = MessageRole.Assistant, content = resposta.content, sentAt = LocalDateTime.now())`, inserida quando a resposta chega; em seguida `isLoadingMessage = false`.
 4. O loading **não é** uma `Message`: é só o flag `isLoadingMessage`.
 5. `content` é texto puro (`BodyText`); o contrato aceita 1–8000 caracteres por turno (ver [contrato-places-api/contrato-descarte.md](contrato-places-api/contrato-descarte.md), seção `process-message`).
+6. Atualização de nome: nos itens 2 a 4 e nos exemplos acima, o campo do `ChatBotState` que marca o turno em andamento hoje se chama `isSendingMessage` (era `isLoadingMessage`). O parâmetro `loadingMessage` do `ChatScroll` não mudou. `isLoading` no mesmo state é a carga inicial do histórico.
 
 ## Overlays
 

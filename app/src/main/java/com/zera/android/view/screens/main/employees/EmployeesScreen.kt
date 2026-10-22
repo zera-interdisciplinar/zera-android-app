@@ -21,18 +21,28 @@ import com.zera.android.view.components.buttons.ZeraButton
 import com.zera.android.view.components.cards.InviteCard
 import com.zera.android.view.components.containers.ZeraBox
 import com.zera.android.view.components.forms.CreateInviteForm
+import com.zera.android.view.components.lists.EmployeeItem
 import com.zera.android.view.components.lists.EmployeeList
+import com.zera.android.view.components.loading.SkeletonBox
 import com.zera.android.view.components.scaffolds.ManagerScaffold
 import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.components.texts.HeadlineText
 import com.zera.android.view.components.texts.LabelText
 import com.zera.android.view.components.texts.TitleText
 import com.zera.android.view.navigation.Route
+import com.zera.android.view.theme.Radius
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.view.theme.ZeraTheme
 import com.zera.android.view.theme.icons.ZeraIcon
+import com.zera.android.viewmodel.main.employees.EmployeesState
 import com.zera.android.viewmodel.main.employees.EmployeesViewModel
+import com.zera.android.viewmodel.main.employees.PendingInviteCard
+
+// Alturas aproximadas dos blocos reais; o esqueleto só indica a disposição.
+private val SkeletonSummaryCardHeight = 88.dp
+private val SkeletonEmployeeItemHeight = 72.dp
+private const val SkeletonEmployeeCount = 4
 
 @Composable
 fun EmployeesScreen(
@@ -47,78 +57,126 @@ fun EmployeesScreen(
         goBack = true,
         onBackClick = viewModel::onBackClick,
     ) {
-        ZeraBox(style = ZeraColorFamily.Blue) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(Spacing.medium),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(Spacing.micro),
+        if (state.isLoading) {
+            EmployeesSkeleton()
+        } else {
+            ZeraBox(style = ZeraColorFamily.Blue) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.medium),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    LabelText(text = "Equipe ativa", color = LocalContentColor.current)
-                    HeadlineText(
-                        text = "${state.activeEmployeesCount} pessoas",
-                        bold = true,
-                        color = LocalContentColor.current,
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(Spacing.micro),
+                    ) {
+                        LabelText(text = "Equipe ativa", color = LocalContentColor.current)
+                        HeadlineText(
+                            text = "${state.activeEmployeesCount} pessoas",
+                            bold = true,
+                            color = LocalContentColor.current,
+                        )
+                    }
+                    ZeraButton(
+                        text = "Novo",
+                        onClick = viewModel::onInviteClick,
+                        style = ZeraColorFamily.Yellow,
+                        icon = ZeraIcon.Plus,
                     )
                 }
-                ZeraButton(
-                    text = "Novo",
-                    onClick = viewModel::onInviteClick,
-                    style = ZeraColorFamily.Yellow,
-                    icon = ZeraIcon.Plus,
+            }
+
+            state.errorMessage?.let { message ->
+                CaptionText(text = message, color = MaterialTheme.colorScheme.error)
+            }
+
+            if (state.showCreateInvite) {
+                CreateInviteForm(
+                    inviteeName = state.inviteeName,
+                    onInviteeNameChange = viewModel::onInviteeNameChange,
+                    onSubmit = viewModel::onSubmitCreateInvite,
+                    onCancel = viewModel::onCancelCreateInvite,
+                    isSubmitting = state.isSubmitting,
+                    errorMessage = state.inviteErrorMessage,
                 )
             }
-        }
 
-        state.errorMessage?.let { message ->
-            CaptionText(text = message, color = MaterialTheme.colorScheme.error)
-        }
-
-        if (state.showCreateInvite) {
-            CreateInviteForm(
-                inviteeName = state.inviteeName,
-                onInviteeNameChange = viewModel::onInviteeNameChange,
-                onSubmit = viewModel::onSubmitCreateInvite,
-                onCancel = viewModel::onCancelCreateInvite,
-                isSubmitting = state.isCreatingInvite,
-                errorMessage = state.inviteErrorMessage,
-            )
-        }
-
-        if (state.pendingInvites.isNotEmpty()) {
-            TitleText(
-                text = "Convites pendentes",
-                bold = true,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            state.pendingInvites.forEach { invite ->
-                InviteCard(
-                    code = invite.code,
-                    name = invite.inviteeName,
-                    expireTime = invite.expiresInHours,
-                    onCopyCodeClick = {
-                        clipboardManager.setText(AnnotatedString(invite.code))
-                    },
+            // Seção opcional, sem skeleton: entra quando os convites chegam.
+            if (state.pendingInvites.isNotEmpty()) {
+                TitleText(
+                    text = "Convites pendentes",
+                    bold = true,
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
+                state.pendingInvites.forEach { invite ->
+                    InviteCard(
+                        code = invite.code,
+                        name = invite.inviteeName,
+                        expireTime = invite.expiresInHours,
+                        onCopyCodeClick = {
+                            clipboardManager.setText(AnnotatedString(invite.code))
+                        },
+                    )
+                }
             }
-        }
 
-        EmployeeList(
-            employees = state.employees,
-            onItemClick = viewModel::onEmployeeClick,
-            contentPadding = PaddingValues(Spacing.none),
-            modifier = Modifier.heightIn(max = 400.dp),
-        )
+            EmployeeList(
+                employees = state.employees,
+                onItemClick = viewModel::onEmployeeClick,
+                contentPadding = PaddingValues(Spacing.none),
+                modifier = Modifier.heightIn(max = 400.dp),
+            )
+        }
+    }
+}
+
+/**
+ * Esqueleto do card "Equipe ativa" e da lista de colaboradores, emitido direto na `Column` do
+ * scaffold. Os convites pendentes são opcionais e ficam de fora.
+ */
+@Composable
+private fun EmployeesSkeleton() {
+    SkeletonBox(height = SkeletonSummaryCardHeight, borderRadius = Radius.large)
+
+    Column(verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
+        repeat(SkeletonEmployeeCount) {
+            SkeletonBox(height = SkeletonEmployeeItemHeight, borderRadius = Radius.large)
+        }
     }
 }
 
 @Composable
 @Preview(heightDp = 900)
 fun EmployeesScreenPreview() {
+    val previewViewModel = EmployeesViewModel().apply {
+        state.value = EmployeesState(
+            activeEmployeesCount = 8,
+            pendingInvites = listOf(
+                PendingInviteCard(code = "ZRA-4821", inviteeName = "Ana Paula", expiresInHours = 20),
+            ),
+            employees = listOf(
+                EmployeeItem(id = "invite-ZRA-4821", name = "Ana Paula", role = "Operador", isPending = true),
+                EmployeeItem(id = "1", name = "Carlos Lima", role = "Operador"),
+                EmployeeItem(id = "2", name = "Maria Souza", role = "Gestor"),
+            ),
+            isLoadingCount = false,
+            isLoadingEmployees = false,
+            isLoadingInvites = false,
+        )
+    }
     ZeraTheme {
-        EmployeesScreen()
+        EmployeesScreen(viewModel = previewViewModel)
+    }
+}
+
+/** A mesma tela com as cargas em andamento (as flags de [EmployeesState] nascem `true`). */
+@Composable
+@Preview(heightDp = 900)
+fun EmployeesScreenLoadingPreview() {
+    val previewViewModel = EmployeesViewModel().apply {
+        state.value = EmployeesState()
+    }
+    ZeraTheme {
+        EmployeesScreen(viewModel = previewViewModel)
     }
 }
