@@ -4,6 +4,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.zera.android.model.entity.user.ProfileUser
 import com.zera.android.model.entity.user.UserRole
+import com.zera.android.model.usecase.auth.SingIn
 import com.zera.android.model.usecase.telephone.GetTelephone
 import com.zera.android.model.usecase.telephone.SaveTelephone
 import com.zera.android.model.usecase.user.GetProfile
@@ -11,10 +12,13 @@ import com.zera.android.model.usecase.user.RenameUser
 import com.zera.android.model.usecase.user.UpdateUserEmail
 import com.zera.android.model.usecase.user.UpdateUserImage
 import com.zera.android.model.usecase.user.UploadAvatar
+import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.viewmodel.ZeraViewModel
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 
 data class ProfileState(
@@ -33,6 +37,8 @@ data class ProfileState(
     val isLoading: Boolean = false,
     val isSaving: Boolean = false,
     val isUploadingPhoto: Boolean = false,
+    val showLogoutDialog: Boolean = false,
+    val isLoggingOut: Boolean = false,
     val errorMessage: String? = null,
     val snackbarMessage: String? = null,
     val snackbarIsError: Boolean = true,
@@ -99,6 +105,24 @@ class ProfileViewModel(
 
     fun onSettingsClick() {
         // TODO: navegar para a tela de configurações (ainda não existe)
+    }
+
+    fun onLogoutClick() {
+        _state.value = _state.value.copy(showLogoutDialog = true)
+    }
+
+    fun onLogoutDismiss() {
+        _state.value = _state.value.copy(showLogoutDialog = false)
+    }
+
+    fun onLogoutConfirm() {
+        if (_state.value.isLoggingOut) return
+        _state.value = _state.value.copy(showLogoutDialog = false, isLoggingOut = true)
+        viewModelScope.launch {
+            // clearSession() bloqueia (runBlocking) ao desregistrar o token do aparelho.
+            withContext(Dispatchers.IO) { SingIn().clearSession() }
+            ZeraNavigator.pushAndPopAll(Route.Welcome)
+        }
     }
 
     fun onSnackbarShown() {

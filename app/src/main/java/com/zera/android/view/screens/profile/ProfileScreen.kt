@@ -6,6 +6,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
@@ -32,6 +33,7 @@ import com.zera.android.view.components.lists.EditableFieldRow
 import com.zera.android.view.components.loading.SkeletonBox
 import com.zera.android.view.components.navigation.UpperNavBar
 import com.zera.android.view.components.outros.Avatar
+import com.zera.android.view.components.overlays.AlertPopup
 import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.components.texts.HeadlineText
 import com.zera.android.view.theme.Radius
@@ -104,83 +106,118 @@ fun ProfileScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .verticalScroll(rememberScrollState())
                 .padding(horizontal = Spacing.medium, vertical = Spacing.small),
-            horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(Spacing.medium),
         ) {
+            // O conteúdo rola dentro do peso restante; o botão de sair fica sempre colado embaixo.
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(Spacing.medium),
+            ) {
+                if (state.isLoading) {
+                    ProfileSkeleton()
+                } else {
+                    state.errorMessage?.let { message ->
+                        CaptionText(text = message, color = MaterialTheme.colorScheme.error)
+                    }
+
+                    Avatar(
+                        initials = state.initials,
+                        photoUrl = state.photoUrl,
+                        isLoading = state.isUploadingPhoto,
+                        onClick = {
+                            if (!state.isSaving && !state.isUploadingPhoto) {
+                                photoPicker.launch(
+                                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
+                                )
+                            }
+                        },
+                    )
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(Spacing.micro),
+                    ) {
+                        HeadlineText(text = state.displayName, bold = true)
+                        CaptionText(text = roleCaption(state.role, state.company))
+                    }
+
+                    ZeraButton(
+                        text = "Configurações",
+                        onClick = viewModel::onSettingsClick,
+                        style = ZeraColorFamily.Blue,
+                        type = ZeraButtonType.Secondary,
+                    )
+
+                    EditableFieldRow(
+                        label = "Nome",
+                        value = state.fullName,
+                        onEditClick = if (state.canEditName) ({}) else null,
+                        validate = { name ->
+                            if (name.trim().isNotEmpty()) null else "Nome inválido"
+                        },
+                        onConfirm = viewModel::onNameConfirm,
+                    )
+                    EditableFieldRow(
+                        label = "E-mail",
+                        value = state.email,
+                        inputType = ZeraInputType.Email,
+                        onEditClick = if (state.canEditEmail) ({}) else null,
+                        validate = { email ->
+                            if (email.contains("@")) null else "E-mail inválido"
+                        },
+                        onConfirm = viewModel::onEmailConfirm,
+                    )
+                    EditableFieldRow(
+                        label = "Telefone",
+                        value = state.phone,
+                        inputType = ZeraInputType.Phone,
+                        onEditClick = if (state.canEditPhone) ({}) else null,
+                        validate = { phone ->
+                            val digits = phone.count(Char::isDigit)
+                            if (digits in 10..11) null else "Telefone inválido"
+                        },
+                        onConfirm = viewModel::onPhoneConfirm,
+                    )
+                    EditableFieldRow(label = "Cargo", value = state.position)
+                }
+            }
+
             if (state.isLoading) {
-                ProfileSkeleton()
+                SkeletonBox(height = SkeletonButtonHeight, borderRadius = Radius.large)
             } else {
-                state.errorMessage?.let { message ->
-                    CaptionText(text = message, color = MaterialTheme.colorScheme.error)
-                }
-
-                Avatar(
-                    initials = state.initials,
-                    photoUrl = state.photoUrl,
-                    isLoading = state.isUploadingPhoto,
-                    onClick = {
-                        if (!state.isSaving && !state.isUploadingPhoto) {
-                            photoPicker.launch(
-                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
-                            )
-                        }
-                    },
-                )
-
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(Spacing.micro),
-                ) {
-                    HeadlineText(text = state.displayName, bold = true)
-                    CaptionText(text = roleCaption(state.role, state.company))
-                }
-
                 ZeraButton(
-                    text = "Configurações",
-                    onClick = viewModel::onSettingsClick,
-                    style = ZeraColorFamily.Blue,
+                    text = "Sair da conta",
+                    onClick = viewModel::onLogoutClick,
+                    fillMaxWidth = true,
+                    style = ZeraColorFamily.Red,
                     type = ZeraButtonType.Secondary,
+                    enabled = !state.isSaving,
+                    loading = state.isLoggingOut,
                 )
-
-                EditableFieldRow(
-                    label = "Nome",
-                    value = state.fullName,
-                    onEditClick = if (state.canEditName) ({}) else null,
-                    validate = { name ->
-                        if (name.trim().isNotEmpty()) null else "Nome inválido"
-                    },
-                    onConfirm = viewModel::onNameConfirm,
-                )
-                EditableFieldRow(
-                    label = "E-mail",
-                    value = state.email,
-                    inputType = ZeraInputType.Email,
-                    onEditClick = if (state.canEditEmail) ({}) else null,
-                    validate = { email ->
-                        if (email.contains("@")) null else "E-mail inválido"
-                    },
-                    onConfirm = viewModel::onEmailConfirm,
-                )
-                EditableFieldRow(
-                    label = "Telefone",
-                    value = state.phone,
-                    inputType = ZeraInputType.Phone,
-                    onEditClick = if (state.canEditPhone) ({}) else null,
-                    validate = { phone ->
-                        val digits = phone.count(Char::isDigit)
-                        if (digits in 10..11) null else "Telefone inválido"
-                    },
-                    onConfirm = viewModel::onPhoneConfirm,
-                )
-                EditableFieldRow(label = "Cargo", value = state.position)
             }
         }
     }
+
+    if (state.showLogoutDialog) {
+        AlertPopup(
+            title = "Sair da conta?",
+            message = "Você precisará entrar novamente para acessar o aplicativo.",
+            confirmButtonText = "Sair",
+            onConfirm = viewModel::onLogoutConfirm,
+            onDismissRequest = viewModel::onLogoutDismiss,
+        )
+    }
 }
 
-/** Esqueleto do avatar, nome/cargo, botão "Configurações" e campos, emitido direto na `Column` da tela. */
+/**
+ * Esqueleto do avatar, nome/cargo, botão "Configurações" e campos, emitido direto na `Column` da tela.
+ * O botão "Sair da conta" fica fora da rolagem e tem seu próprio esqueleto em [ProfileScreen].
+ */
 @Composable
 private fun ProfileSkeleton() {
     SkeletonBox(
