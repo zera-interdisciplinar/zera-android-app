@@ -128,6 +128,10 @@ class ManualRegisterViewModel(
         _state.value = _state.value.copy(notes = value)
     }
 
+    fun onAddModelClick() {
+        ZeraNavigator.push(Route.ModelCreation)
+    }
+
     fun onConfirmClick() {
         val current = _state.value
         if (!current.canSubmit || current.isSubmitting) return
