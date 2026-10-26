@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zera.android.view.components.buttons.IconButton
 import com.zera.android.view.components.buttons.ZeraButton
@@ -55,6 +56,11 @@ fun ManualRegisterScreen(
 ) {
     val state by viewModel.state
     val keyboardController = LocalSoftwareKeyboardController.current
+
+    LifecycleResumeEffect(Unit) {
+        viewModel.onResume()
+        onPauseOrDispose { }
+    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,

@@ -72,6 +72,7 @@ class ManualRegisterViewModel(
     val state = _state
 
     private var loadedModels: List<ModelResponseDTO> = emptyList()
+    private var refreshModelsOnResume = false
 
     init {
         startWork { loadModels() }
@@ -129,7 +130,15 @@ class ManualRegisterViewModel(
     }
 
     fun onAddModelClick() {
+        refreshModelsOnResume = true
         ZeraNavigator.push(Route.ModelCreation)
+    }
+
+    /** Chamado quando a tela volta a ficar visível; só recarrega após ir criar um modelo. */
+    fun onResume() {
+        if (!refreshModelsOnResume) return
+        refreshModelsOnResume = false
+        startWork { refreshModels() }
     }
 
     fun onConfirmClick() {
@@ -145,20 +154,7 @@ class ManualRegisterViewModel(
 
     private suspend fun loadModels() {
         try {
-            val page = getModels.execute(page = 0, size = MODELS_PAGE_SIZE)
-            loadedModels = page.content
-            val names = page.content.mapNotNull { it.name?.takeIf(String::isNotBlank) }.distinct()
-            val options = if (initialModel.isNullOrEmpty() || initialModel in names) {
-                names
-            } else {
-                names + initialModel
-            }
-            _state.value = _state.value.copy(
-                modelOptions = options,
-                selectedModelId = loadedModels.firstOrNull { it.name == _state.value.model }?.id,
-                isLoading = false,
-                modelsError = null,
-            )
+            applyModels(getModels.execute(page = 0, size = MODELS_PAGE_SIZE).content)
         } catch (error: CancellationException) {
             throw error
         } catch (error: Exception) {
@@ -170,6 +166,36 @@ class ManualRegisterViewModel(
                 isLoading = false,
                 modelsError = error.message ?: "Falha ao carregar modelos",
             )
+        }
+    }
+
+    private fun applyModels(models: List<ModelResponseDTO>) {
+        loadedModels = models
+        val names = models.mapNotNull { it.name?.takeIf(String::isNotBlank) }.distinct()
+        val options = if (initialModel.isNullOrEmpty() || initialModel in names) {
+            names
+        } else {
+            names + initialModel
+        }
+        _state.value = _state.value.copy(
+            modelOptions = options,
+            selectedModelId = loadedModels.firstOrNull { it.name == _state.value.model }?.id,
+            isLoading = false,
+            modelsError = null,
+        )
+    }
+
+    /**
+     * Recarrega os modelos ao voltar da criação de um modelo. Diferente de [loadModels], uma
+     * falha aqui mantém a lista e a seleção atuais em vez de limpá-las.
+     */
+    private suspend fun refreshModels() {
+        try {
+            applyModels(getModels.execute(page = 0, size = MODELS_PAGE_SIZE).content)
+        } catch (error: CancellationException) {
+            throw error
+        } catch (_: Exception) {
+            // Mantém a lista atual: o usuário pode tentar de novo ao voltar à tela.
         }
     }
 
