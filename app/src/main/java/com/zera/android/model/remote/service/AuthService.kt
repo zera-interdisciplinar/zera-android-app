@@ -12,4 +12,7 @@ interface AuthService {
 
     @POST("auth/refresh")
     suspend fun refresh(@Body body: RefreshRequestDTO): SingInResponseDTO
+
+    @POST("auth/logout")
+    suspend fun logout()
 }

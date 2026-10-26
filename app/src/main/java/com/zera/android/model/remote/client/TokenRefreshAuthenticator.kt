@@ -127,7 +127,9 @@ class TokenRefreshAuthenticator(
 
     private fun isCredentialRequest(request: Request): Boolean {
         val path = request.url.encodedPath.trimEnd('/')
-        return path.endsWith("/auth/login") || path.endsWith("/auth/refresh")
+        return path.endsWith("/auth/login") ||
+            path.endsWith("/auth/refresh") ||
+            path.endsWith("/auth/logout")
     }
 
     private fun unauthorizedAttempts(response: Response): Int {

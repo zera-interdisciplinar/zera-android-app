@@ -4,7 +4,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.zera.android.model.entity.user.ProfileUser
 import com.zera.android.model.entity.user.UserRole
-import com.zera.android.model.usecase.auth.SingIn
+import com.zera.android.model.usecase.auth.SignOut
 import com.zera.android.model.usecase.telephone.GetTelephone
 import com.zera.android.model.usecase.telephone.SaveTelephone
 import com.zera.android.model.usecase.user.GetProfile
@@ -119,8 +119,7 @@ class ProfileViewModel(
         if (_state.value.isLoggingOut) return
         _state.value = _state.value.copy(showLogoutDialog = false, isLoggingOut = true)
         viewModelScope.launch {
-            // clearSession() bloqueia (runBlocking) ao desregistrar o token do aparelho.
-            withContext(Dispatchers.IO) { SingIn().clearSession() }
+            withContext(Dispatchers.IO) { SignOut().execute() }
             ZeraNavigator.pushAndPopAll(Route.Welcome)
         }
     }

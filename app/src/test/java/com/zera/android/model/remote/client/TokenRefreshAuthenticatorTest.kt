@@ -76,7 +76,7 @@ class TokenRefreshAuthenticatorTest {
     }
 
     @Test
-    fun loginAndRefreshPathsDoNotRefresh() {
+    fun credentialPathsDoNotRefresh() {
         var calls = 0
         val authenticator = authenticator(
             refresh = {
@@ -87,6 +87,7 @@ class TokenRefreshAuthenticatorTest {
 
         assertNull(authenticator.authenticate(null, unauthorized("Bearer old", path = "auth/login")))
         assertNull(authenticator.authenticate(null, unauthorized("Bearer old", path = "auth/refresh")))
+        assertNull(authenticator.authenticate(null, unauthorized("Bearer old", path = "auth/logout")))
         assertEquals(0, calls)
     }
 
@@ -201,12 +202,12 @@ class TokenRefreshAuthenticatorTest {
     }
 
     @Test
-    fun publicAuthRoutesDoNotSendTheAccessToken() {
+    fun onlyPublicRoutesSkipTheAccessToken() {
         assertEquals(false, shouldSendAccessToken("/qa/administrative/api/v1/auth/login"))
         assertEquals(false, shouldSendAccessToken("/api/v1/auth/refresh"))
-        assertEquals(false, shouldSendAccessToken("/api/v1/auth/logout"))
         assertEquals(false, shouldSendAccessToken("/api/v1/invitations/redeem"))
         assertEquals(true, shouldSendAccessToken("/api/v1/users/1"))
+        assertEquals(true, shouldSendAccessToken("/api/v1/auth/logout"))
     }
 
     @Test

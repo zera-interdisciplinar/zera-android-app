@@ -44,6 +44,10 @@ class SingIn {
                 withTimeoutOrNull(5.seconds) { UnregisterDeviceToken().execute() }
             }
         }
+        clearLocalSession()
+    }
+
+    fun clearLocalSession() {
         SqliteManager.clearSession()
         loadFlags.clear()
     }
