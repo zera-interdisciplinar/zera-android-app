@@ -30,7 +30,7 @@ Ver [06-contratos-api.md](06-contratos-api.md) (`AdmCoreClient`, `InventoryClien
 
 ## Firebase Cloud Messaging
 
-Plugin `com.google.gms.google-services` 4.5.0, `google-services.json` em `app/`, BOM `firebase-bom:34.18.0` e `firebase-messaging`. O token FCM é enviado a `POST users/me/device-tokens` depois do login (`RegisterDeviceToken`) e no `onNewToken`. Logout (`SingIn.clearSession`) chama `DELETE users/me/device-tokens`. Deep link usa `kind` do data payload (`routeForAlertKind`).
+Plugin `com.google.gms.google-services` 4.5.0, `google-services.json` em `app/`, BOM `firebase-bom:34.18.0` e `firebase-messaging`. O token FCM é enviado a `POST users/me/device-tokens` depois do login (`RegisterDeviceToken`) e no `onNewToken`. Logout (`SingIn.clearSession`) chama `DELETE users/me/device-tokens`. O logout explícito do perfil (`SignOut`) faz o mesmo `DELETE` antes de `POST auth/logout`. Deep link usa `kind` do data payload (`routeForAlertKind`).
 
 ## Testes
 

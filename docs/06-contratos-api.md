@@ -77,6 +77,9 @@ Fonte: [Confluence ms-inventory](https://zerainterdisciplinar.atlassian.net/wiki
 |---|---|---|---|---|
 | `POST` | `auth/login` | `SingInRequestDTO(email, password)` | `SingInResponseDTO` | `SingIn.execute()` |
 | `POST` | `auth/refresh` | `{ refreshToken }` | mesmo formato do login | `RefreshSession` / `TokenRefreshAuthenticator` |
+| `POST` | `auth/logout` | — | — | `SignOut.execute()` (logout no perfil) |
+
+`auth/logout` revoga o refresh token e é autenticado: leva `Authorization: Bearer`, mas um `401` nele não dispara refresh nem re-login (`isCredentialRequest`). `SignOut` desregistra o device token, chama o logout (timeout de 5s, falhas ignoradas) e só então limpa a sessão local (`SingIn.clearLocalSession`). Expiração de sessão, Splash e falhas de login continuam só com `clearSession()`, sem revogar.
 
 ## Convite (InvitationService)
 
