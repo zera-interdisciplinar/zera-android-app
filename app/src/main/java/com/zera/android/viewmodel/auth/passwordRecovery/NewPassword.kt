@@ -1,26 +1,46 @@
 package com.zera.android.viewmodel.auth.passwordRecovery
 
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.viewModelScope
+import com.zera.android.model.usecase.auth.ConfirmPasswordReset
+import com.zera.android.view.navigation.Route
+import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.viewmodel.ZeraViewModel
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.launch
+import retrofit2.HttpException
 
 data class NewPasswordState(
+    val token: String = "",
     val password: String = "",
     val confirmPassword: String = "",
     val isLoading: Boolean = false,
     val passwordError: String? = null,
-    val confirmPasswordError: String? = null
+    val confirmPasswordError: String? = null,
+    val errorMessage: String? = null
 )
 
 class NewPasswordViewModel : ZeraViewModel() {
     private val _state = mutableStateOf(NewPasswordState())
     val state = _state
 
+    private val confirmPasswordReset = ConfirmPasswordReset()
+
+    /** Token lido do deep link `zera://reset-password?token=...` do e-mail. */
+    fun onTokenReceived(token: String) {
+        _state.value = _state.value.copy(token = token, errorMessage = null)
+    }
+
     fun onPasswordChange(newPassword: String) {
-        _state.value = _state.value.copy(password = newPassword, passwordError = null)
+        _state.value = _state.value.copy(password = newPassword, passwordError = null, errorMessage = null)
     }
 
     fun onConfirmPasswordChange(newConfirmPassword: String) {
-        _state.value = _state.value.copy(confirmPassword = newConfirmPassword, confirmPasswordError = null)
+        _state.value = _state.value.copy(
+            confirmPassword = newConfirmPassword,
+            confirmPasswordError = null,
+            errorMessage = null
+        )
     }
 
     fun resetPassword() {
@@ -36,7 +56,29 @@ class NewPasswordViewModel : ZeraViewModel() {
             return
         }
 
-        // TODO: chamar use case para redefinir a senha e navegar para SignInScreen
+        if (current.token.isBlank()) {
+            _state.value = current.copy(errorMessage = INVALID_LINK_MESSAGE)
+            return
+        }
+
+        _state.value = current.copy(isLoading = true, errorMessage = null)
+        viewModelScope.launch {
+            try {
+                confirmPasswordReset.execute(current.token, current.password)
+                _state.value = _state.value.copy(isLoading = false)
+                ZeraNavigator.pushAndPopAll(Route.SignIn)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(isLoading = false, errorMessage = userFacingError(e))
+            }
+        }
+    }
+
+    private fun userFacingError(error: Exception): String {
+        // 400 não distingue token desconhecido, usado ou expirado.
+        if (error is HttpException && error.code() == 400) return INVALID_LINK_MESSAGE
+        return "Não foi possível redefinir a senha. Tente novamente."
     }
 
     private fun isStrongPassword(password: String): Boolean {
@@ -48,6 +90,8 @@ class NewPasswordViewModel : ZeraViewModel() {
     }
 
     companion object {
+        private const val INVALID_LINK_MESSAGE =
+            "Link de recuperação inválido ou expirado. Solicite um novo."
         private const val MIN_PASSWORD_LENGTH = 8
         private const val PASSWORD_RULES_MESSAGE =
             "Erro: a senha deve ter mais de 8 caracteres, tendo pelo menos um caracter especial, número, letra maiúscula e minúscula"
