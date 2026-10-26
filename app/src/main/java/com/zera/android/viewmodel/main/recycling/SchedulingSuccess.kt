@@ -87,7 +87,7 @@ class SchedulingSuccessViewModel : ZeraViewModel() {
     }
 
     fun onCloseClick() {
-        goHome()
+        ZeraNavigator.goBack()
     }
 
     fun onBackToHomeClick() {

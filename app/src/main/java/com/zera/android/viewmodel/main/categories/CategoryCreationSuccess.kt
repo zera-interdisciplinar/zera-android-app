@@ -6,7 +6,7 @@ import com.zera.android.viewmodel.ZeraViewModel
 
 class CategoryCreationSuccessViewModel : ZeraViewModel() {
     fun onCloseClick() {
-        ZeraNavigator.pushAndPopAll(Route.ManagerHome)
+        ZeraNavigator.goBack()
     }
 
     fun onCreateAnotherClick() {

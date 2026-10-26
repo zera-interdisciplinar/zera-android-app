@@ -13,7 +13,7 @@ class ModelCreationSuccessViewModel : ZeraViewModel() {
     private val getSelfUser = GetSelfUser()
 
     fun onCloseClick() {
-        goHome()
+        ZeraNavigator.goBack()
     }
 
     fun onCreateAnotherClick() {
