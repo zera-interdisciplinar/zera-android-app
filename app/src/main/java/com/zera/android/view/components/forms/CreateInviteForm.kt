@@ -2,7 +2,6 @@ package com.zera.android.view.components.forms
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.Composable
@@ -13,6 +12,7 @@ import com.zera.android.view.components.buttons.ZeraButtonType
 import com.zera.android.view.components.containers.ZeraBox
 import com.zera.android.view.components.containers.ZeraBoxType
 import com.zera.android.view.components.inputs.ZeraTextInput
+import com.zera.android.view.components.layouts.AdaptiveRow
 import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.components.texts.TitleText
 import com.zera.android.view.theme.Spacing
@@ -56,26 +56,22 @@ fun CreateInviteForm(
                 isError = !errorMessage.isNullOrBlank(),
                 errorMessage = errorMessage,
             )
-            Row(
+            AdaptiveRow(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(Spacing.small),
+                spacing = Spacing.small,
             ) {
+                ZeraButton(
+                    text = if (isSubmitting) "Enviando..." else "Gerar código",
+                    onClick = onSubmit,
+                    enabled = !isSubmitting,
+                    style = ZeraColorFamily.Yellow,
+                )
                 ZeraButton(
                     text = "Cancelar",
                     onClick = onCancel,
                     enabled = !isSubmitting,
                     style = ZeraColorFamily.Yellow,
                     type = ZeraButtonType.Tertiary,
-                    modifier = Modifier.weight(1f),
-                    fillMaxWidth = true,
-                )
-                ZeraButton(
-                    text = if (isSubmitting) "Enviando..." else "Gerar código",
-                    onClick = onSubmit,
-                    enabled = !isSubmitting,
-                    style = ZeraColorFamily.Yellow,
-                    modifier = Modifier.weight(1f),
-                    fillMaxWidth = true,
                 )
             }
             CaptionText(
