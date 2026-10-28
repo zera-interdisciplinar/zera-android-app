@@ -168,4 +168,10 @@ sealed interface Route{
 
     @Serializable
     data class ChatBot(val threadId: String) : Route
+
+    @Serializable
+    data object PasswordRecoveryEmail : Route
+
+    @Serializable
+    data object PasswordRecoveryNewPassword : Route
 }

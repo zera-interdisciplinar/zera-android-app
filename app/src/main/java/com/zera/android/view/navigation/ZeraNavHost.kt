@@ -21,6 +21,8 @@ import com.zera.android.view.screens.SplashScreen
 import com.zera.android.view.screens.auth.SignInScreen
 import com.zera.android.view.screens.auth.SignUpScreen
 import com.zera.android.view.screens.auth.WelcomeScreen
+import com.zera.android.view.screens.auth.passwordRecovery.NewPasswordScreen
+import com.zera.android.view.screens.auth.passwordRecovery.PasswordRecoveryEmailScreen
 import com.zera.android.view.screens.main.alerts.AlertCentralScreen
 import com.zera.android.view.screens.main.categories.CategoriesScreen
 import com.zera.android.view.screens.main.categories.CategoryCreationScreen
@@ -301,6 +303,12 @@ fun ZeraNavHost() {
                 composable<Route.ChatBot> { backStackEntry ->
                     val route = backStackEntry.toRoute<Route.ChatBot>()
                     ChatBotScreen(threadId = route.threadId)
+                }
+                composable<Route.PasswordRecoveryEmail> {
+                    PasswordRecoveryEmailScreen()
+                }
+                composable<Route.PasswordRecoveryNewPassword> {
+                    NewPasswordScreen()
                 }
             }
         }
