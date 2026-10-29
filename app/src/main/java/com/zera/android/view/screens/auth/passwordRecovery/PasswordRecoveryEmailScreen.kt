@@ -70,7 +70,7 @@ fun PasswordRecoveryEmailScreen(
             ZeraButton(
                 text = if (state.isLoading) "Enviando..." else "Enviar",
                 enabled = !state.isLoading,
-                onClick = { viewModel.sendEmail() }
+                onClick = viewModel::sendEmail
             )
         }
     }
