@@ -8,6 +8,7 @@ import com.zera.android.model.usecase.auth.GetSelfUser
 import com.zera.android.model.usecase.inventory.ApproveItem
 import com.zera.android.model.usecase.inventory.GetItemDetails
 import com.zera.android.model.usecase.inventory.RejectItem
+import com.zera.android.model.usecase.inventory.StartItemMaintenance
 import com.zera.android.model.usecase.inventory.UpdateItem
 import com.zera.android.view.components.outros.ItemStatus
 import com.zera.android.view.navigation.Route
@@ -41,6 +42,7 @@ data class ItemDetailsState(
     val registeredBy: String = "",
     val registeredAt: String = "",
     val canReview: Boolean = false,
+    val canSendToMaintenance: Boolean = false,
     val isLoading: Boolean = true,
     val isSubmitting: Boolean = false,
     val errorMessage: String? = null,
@@ -67,6 +69,7 @@ class ItemDetailsViewModel : ZeraViewModel() {
     private val approveItem = ApproveItem()
     private val rejectItem = RejectItem()
     private val updateItem = UpdateItem()
+    private val startItemMaintenance = StartItemMaintenance()
 
     private val _state = mutableStateOf(ItemDetailsState())
     val state = _state
@@ -228,6 +231,30 @@ class ItemDetailsViewModel : ZeraViewModel() {
         }
     }
 
+    fun onSendToMaintenanceClick() {
+        val itemId = _state.value.itemId
+        if (itemId.isBlank() || _state.value.isSubmitting || !_state.value.canSendToMaintenance) return
+        _state.value = _state.value.copy(isSubmitting = true, errorMessage = null)
+        viewModelScope.launch {
+            try {
+                val item = startItemMaintenance.execute(itemId)
+                _state.value = stateFrom(item, isEmployee).copy(isSubmitting = false, errorMessage = null)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(
+                    isSubmitting = false,
+                    errorMessage = userFacingError(
+                        error = e,
+                        conflictMessage = "Este item não pode ir para manutenção no status atual.",
+                        validationMessage = "Não foi possível colocar o item em manutenção.",
+                        fallback = "Não foi possível colocar o item em manutenção.",
+                    ),
+                )
+            }
+        }
+    }
+
     private fun patchItem(request: UpdateItemRequestDTO) {
         val itemId = _state.value.itemId
         if (itemId.isBlank() || _state.value.isSubmitting) return
@@ -326,6 +353,10 @@ class ItemDetailsViewModel : ZeraViewModel() {
         internal fun canReview(status: ItemStatus?, isEmployee: Boolean = false): Boolean =
             !isEmployee &&
                 (status == ItemStatus.PendingApproval || status == ItemStatus.AwaitingEvaluation)
+
+        // Sem status (item não carregado) o botão não aparece.
+        internal fun canSendToMaintenance(status: ItemStatus?): Boolean =
+            status != null && status != ItemStatus.InMaintenance
 
         internal fun notesValidationError(value: String): String? {
             val trimmed = value.trim()
@@ -430,6 +461,7 @@ class ItemDetailsViewModel : ZeraViewModel() {
             registeredBy = registeredByFrom(item),
             registeredAt = formatRegisteredAt(item.createdAt),
             canReview = canReview(statusFrom(item.status), isEmployee),
+            canSendToMaintenance = canSendToMaintenance(statusFrom(item.status)),
         )
 
         internal fun userFacingError(

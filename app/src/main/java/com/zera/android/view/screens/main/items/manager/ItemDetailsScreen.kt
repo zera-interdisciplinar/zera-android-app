@@ -135,6 +135,17 @@ fun ItemDetailsScreen(
                     condition = state.condition,
                 )
 
+                if (state.canSendToMaintenance) {
+                    ZeraButton(
+                        text = if (state.isSubmitting) "Enviando..." else "Colocar em manutenção",
+                        onClick = viewModel::onSendToMaintenanceClick,
+                        type = ZeraButtonType.Secondary,
+                        style = ZeraColorFamily.Yellow,
+                        enabled = actionsEnabled,
+                        fillMaxWidth = true,
+                    )
+                }
+
                 EditableFieldRow(label = "Nome", value = state.itemName)
                 EditableFieldRow(label = "Categoria", value = state.category)
                 EditableFieldRow(label = "Material", value = state.material)

@@ -164,6 +164,22 @@ class ItemDetailsMappingTest {
     }
 
     @Test
+    fun maintenanceActionHiddenOnlyWhenInMaintenanceOrUnloaded() {
+        assertEquals(true, ItemDetailsViewModel.canSendToMaintenance(ItemStatus.InStock))
+        assertEquals(true, ItemDetailsViewModel.canSendToMaintenance(ItemStatus.PendingApproval))
+        assertEquals(false, ItemDetailsViewModel.canSendToMaintenance(ItemStatus.InMaintenance))
+        assertEquals(false, ItemDetailsViewModel.canSendToMaintenance(null))
+    }
+
+    @Test
+    fun maintenanceStatusDisablesMaintenanceAction() {
+        val state = ItemDetailsViewModel.stateFrom(
+            ItemResponseDTO(id = "id-1", name = "Notebook", status = "IN_MAINTENANCE"),
+        )
+        assertEquals(false, state.canSendToMaintenance)
+    }
+
+    @Test
     fun usedConditionDoesNotEnableReview() {
         val state = ItemDetailsViewModel.stateFrom(
             ItemResponseDTO(
