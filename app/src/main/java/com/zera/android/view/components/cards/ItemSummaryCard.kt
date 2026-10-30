@@ -1,6 +1,7 @@
 package com.zera.android.view.components.cards
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -60,6 +61,8 @@ private val ThumbnailSize = 72.dp
  *   (recortada para preencher o quadrado) no lugar do [icon], com um indicador de
  *   progresso por cima enquanto ela carrega; quando `null` ou em branco (padrão),
  *   mostra o ícone.
+ * @param onPhotoClick chamado ao tocar na miniatura (ex.: para abrir a foto ampliada).
+ *   A miniatura só fica clicável quando há [photoUrl] e este callback não é `null` (padrão).
  */
 @Composable
 fun ItemSummaryCard(
@@ -70,8 +73,10 @@ fun ItemSummaryCard(
     modifier: Modifier = Modifier,
     icon: ZeraIcon? = null,
     photoUrl: String? = null,
+    onPhotoClick: (() -> Unit)? = null,
 ) {
     var isImageLoading by remember(photoUrl) { mutableStateOf(!photoUrl.isNullOrBlank()) }
+    val thumbnailClick = onPhotoClick?.takeIf { !photoUrl.isNullOrBlank() }
 
     ZeraBox(
         modifier = modifier.fillMaxWidth(),
@@ -87,7 +92,12 @@ fun ItemSummaryCard(
                 shape = RoundedCornerShape(Radius.large),
                 color = MaterialTheme.colorScheme.primaryContainer,
             ) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .let { if (thumbnailClick != null) it.clickable(onClick = thumbnailClick) else it },
+                    contentAlignment = Alignment.Center,
+                ) {
                     if (photoUrl.isNullOrBlank()) {
                         ZeraIcon(
                             icon = icon ?: ZeraIcon.Placeholder,

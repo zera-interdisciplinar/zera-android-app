@@ -41,6 +41,9 @@ data class ItemDetailsState(
     val notes: String = "",
     val registeredBy: String = "",
     val registeredAt: String = "",
+    val photoUrl: String? = null,
+    /** `true` enquanto o popup com a foto ampliada está aberto. */
+    val showPhotoViewer: Boolean = false,
     val canReview: Boolean = false,
     val canSendToMaintenance: Boolean = false,
     val isLoading: Boolean = true,
@@ -99,6 +102,21 @@ class ItemDetailsViewModel : ZeraViewModel() {
     fun onBackClick() {
         ZeraNavigator.goBack()
     }
+
+    fun onPhotoClick() {
+        if (_state.value.photoUrl == null) return
+        _state.value = _state.value.copy(showPhotoViewer = true)
+    }
+
+    fun onPhotoViewerDismiss() {
+        _state.value = _state.value.copy(showPhotoViewer = false)
+    }
+
+    // TODO: upload da nova foto — o contrato ainda não tem endpoint para gravar a foto do item.
+    fun onChangePhotoClick() = Unit
+
+    // TODO: remoção da foto — o contrato ainda não tem endpoint para remover a foto do item.
+    fun onRemovePhotoClick() = Unit
 
     fun onEditClick() {
         _state.value = _state.value.copy(editDraft = draftFrom(_state.value), errorMessage = null)
@@ -460,6 +478,7 @@ class ItemDetailsViewModel : ZeraViewModel() {
             notes = item.notes.orEmpty(),
             registeredBy = registeredByFrom(item),
             registeredAt = formatRegisteredAt(item.createdAt),
+            photoUrl = item.photoUrl?.takeIf { it.isNotBlank() },
             canReview = canReview(statusFrom(item.status), isEmployee),
             canSendToMaintenance = canSendToMaintenance(statusFrom(item.status)),
         )

@@ -34,6 +34,7 @@ import com.zera.android.view.components.loading.SkeletonBox
 import com.zera.android.view.components.navigation.UpperNavBar
 import com.zera.android.view.components.outros.ItemStatus
 import com.zera.android.view.components.overlays.BottomSheet
+import com.zera.android.view.components.overlays.PhotoViewerDialog
 import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.theme.Radius
 import com.zera.android.view.theme.Spacing
@@ -132,6 +133,8 @@ fun ItemDetailsScreen(
                     itemSubtitle = state.itemSubtitle,
                     status = state.status,
                     condition = state.condition,
+                    photoUrl = state.photoUrl,
+                    onPhotoClick = viewModel::onPhotoClick,
                 )
 
                 if (state.canSendToMaintenance) {
@@ -187,6 +190,17 @@ fun ItemDetailsScreen(
                 isSubmitting = state.isSubmitting,
             )
         }
+    }
+
+    val photoUrl = state.photoUrl
+    if (state.showPhotoViewer && photoUrl != null) {
+        PhotoViewerDialog(
+            photoUrl = photoUrl,
+            onChangeClick = viewModel::onChangePhotoClick,
+            onRemoveClick = viewModel::onRemovePhotoClick,
+            onDismissRequest = viewModel::onPhotoViewerDismiss,
+            contentDescription = state.itemName,
+        )
     }
 
     if (showRejectPopup && state.canReview) {
