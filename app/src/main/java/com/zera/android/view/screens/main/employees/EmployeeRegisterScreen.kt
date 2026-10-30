@@ -99,21 +99,10 @@ fun EmployeeRegisterScreen(
                 label = "E-mail",
                 placeholder = "nome.sobrenome@empresa.com",
                 type = ZeraInputType.Email,
-                imeAction = ImeAction.Next,
+                imeAction = ImeAction.Done,
                 enabled = !state.isSubmitting,
                 isError = state.emailError != null,
                 errorMessage = state.emailError,
-            )
-            ZeraTextInput(
-                value = state.phone,
-                onValueChange = viewModel::onPhoneChange,
-                label = "Telefone",
-                placeholder = "(00) 00000-0000",
-                type = ZeraInputType.Phone,
-                imeAction = ImeAction.Done,
-                enabled = !state.isSubmitting,
-                isError = state.phoneError != null,
-                errorMessage = state.phoneError,
             )
             ZeraDropdownInput(
                 value = state.unit,
