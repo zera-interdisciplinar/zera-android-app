@@ -22,6 +22,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -102,15 +105,23 @@ fun ZeraTokenInput(
                     }
                 },
             ),
-            decorationBox = {
-                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.small)) {
-                    repeat(size) { index ->
-                        ZeraTokenCell(
-                            digit = code.getOrNull(index)?.toString().orEmpty(),
-                            isFocused = enabled && index == code.length,
-                            isEnabled = enabled,
-                            isError = isError,
-                        )
+            cursorBrush = SolidColor(Color.Transparent),
+            decorationBox = { innerTextField ->
+                Box {
+                    Row(horizontalArrangement = Arrangement.spacedBy(Spacing.small)) {
+                        repeat(size) { index ->
+                            ZeraTokenCell(
+                                digit = code.getOrNull(index)?.toString().orEmpty(),
+                                isFocused = enabled && index == code.length,
+                                isEnabled = enabled,
+                                isError = isError,
+                            )
+                        }
+                    }
+                    // Campo real: precisa estar na composição para seleção/colar
+                    // funcionarem, mas fica invisível porque as células já desenham os dígitos.
+                    Box(modifier = Modifier.matchParentSize().alpha(0f)) {
+                        innerTextField()
                     }
                 }
             },
