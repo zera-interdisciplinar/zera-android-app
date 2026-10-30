@@ -4,6 +4,7 @@ import com.zera.android.model.dto.inventory.CategoryResponseDTO
 import com.zera.android.model.dto.inventory.ItemResponseDTO
 import com.zera.android.model.dto.inventory.MaterialResponseDTO
 import com.zera.android.model.dto.inventory.ModelResponseDTO
+import com.zera.android.model.dto.inventory.UpdateItemRequestDTO
 import com.zera.android.view.components.outros.ItemStatus
 import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals
@@ -203,5 +204,59 @@ class ItemDetailsMappingTest {
             """{"id":"id-1","name":"Notebook","createdBy":"user-uuid"}""",
         )
         assertEquals("", ItemDetailsViewModel.registeredByFrom(item))
+    }
+
+    @Test
+    fun editDraftStartsFromLoadedItem() {
+        val item = ItemResponseDTO(
+            id = "id-1",
+            name = "Placa de vídeo",
+            condition = "SEMI_DAMAGED",
+            hasDamages = true,
+            damages = listOf("OXIDATION", "MISSING_PART"),
+            usageIntensity = 4,
+            notes = "Arranhão",
+        )
+        val draft = ItemDetailsViewModel.draftFrom(ItemDetailsViewModel.stateFrom(item))
+        assertEquals(
+            ItemEditDraft(
+                name = "Placa de vídeo",
+                condition = "Semidanificado",
+                usageIntensity = 4,
+                hasDamage = true,
+                damageType = "Enferrujado",
+                notes = "Arranhão",
+            ),
+            draft,
+        )
+    }
+
+    @Test
+    fun editRequestIsNullWhenNothingChanged() {
+        val initial = ItemEditDraft(name = "Notebook", condition = "Usado", usageIntensity = 3)
+        assertNull(ItemDetailsViewModel.editRequestFrom(initial, initial.copy(name = " Notebook ")))
+    }
+
+    @Test
+    fun editRequestSendsOnlyChangedFields() {
+        val initial = ItemEditDraft(name = "Notebook", condition = "Usado", usageIntensity = 3, notes = "Velho")
+        val draft = initial.copy(condition = "Danificado", usageIntensity = 7, notes = "")
+        assertEquals(
+            UpdateItemRequestDTO(condition = "DAMAGED", usageIntensity = 7, notes = ""),
+            ItemDetailsViewModel.editRequestFrom(initial, draft),
+        )
+    }
+
+    @Test
+    fun editRequestSendsDamagesOnlyWhenTouched() {
+        val initial = ItemEditDraft(name = "Notebook", hasDamage = true, damageType = "Não liga")
+        assertEquals(
+            UpdateItemRequestDTO(hasDamages = true, damages = listOf("BROKEN_SCREEN")),
+            ItemDetailsViewModel.editRequestFrom(initial, initial.copy(damageType = "Tela quebrada")),
+        )
+        assertEquals(
+            UpdateItemRequestDTO(hasDamages = false, damages = emptyList()),
+            ItemDetailsViewModel.editRequestFrom(initial, initial.copy(hasDamage = false, damageType = "")),
+        )
     }
 }

@@ -14,14 +14,6 @@ import com.zera.android.viewmodel.main.items.ItemDetailsViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
-private val DAMAGE_LABELS = listOf(
-    "Tela quebrada",
-    "Peça faltando",
-    "Não liga",
-    "Enferrujado",
-    "Outro",
-)
-
 data class ManualRegisterState(
     val barcode: String = "",
     val serialNumber: String = "",
@@ -37,7 +29,7 @@ data class ManualRegisterState(
     val notes: String = "",
     val modelOptions: List<String> = emptyList(),
     val conditionOptions: List<String> = ItemDetailsViewModel.conditionOptions,
-    val damageTypeOptions: List<String> = DAMAGE_LABELS,
+    val damageTypeOptions: List<String> = ItemDetailsViewModel.damageOptions,
     val isLoading: Boolean = false,
     val modelsError: String? = null,
     val isSubmitting: Boolean = false,
@@ -208,7 +200,10 @@ class ManualRegisterViewModel(
         val year = current.manufacturingYear.toIntOrNull()
             ?: return failSubmit("Ano de fabricação inválido")
         val damages = if (current.hasDamage) {
-            listOf(damageCodeFrom(current.damageType) ?: return failSubmit("Tipo de dano inválido"))
+            listOf(
+                ItemDetailsViewModel.damageCodeFrom(current.damageType)
+                    ?: return failSubmit("Tipo de dano inválido"),
+            )
         } else {
             emptyList()
         }
@@ -265,15 +260,6 @@ class ManualRegisterViewModel(
                 return null
             }
             return "$year-$month-$day"
-        }
-
-        internal fun damageCodeFrom(label: String): String? = when (label) {
-            "Tela quebrada" -> "BROKEN_SCREEN"
-            "Peça faltando" -> "MISSING_PART"
-            "Não liga" -> "DOES_NOT_POWER_ON"
-            "Enferrujado" -> "OXIDATION"
-            "Outro" -> "OTHER"
-            else -> null
         }
     }
 }

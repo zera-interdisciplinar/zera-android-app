@@ -33,6 +33,9 @@ data class ItemDetailsState(
     val material: String = "",
     val condition: String = "",
     val conditionCode: String? = null,
+    val usageIntensity: Int? = null,
+    val hasDamage: Boolean = false,
+    val damageCodes: List<String> = emptyList(),
     val serialNumber: String = "",
     val notes: String = "",
     val registeredBy: String = "",
@@ -41,6 +44,21 @@ data class ItemDetailsState(
     val isLoading: Boolean = true,
     val isSubmitting: Boolean = false,
     val errorMessage: String? = null,
+    /** Rascunho do bottom sheet "Editar o item"; `null` = sheet fechado. */
+    val editDraft: ItemEditDraft? = null,
+)
+
+/** Campos do bottom sheet de edição, com os rótulos de UI (condição e tipo de dano). */
+data class ItemEditDraft(
+    val name: String = "",
+    val condition: String = "",
+    val usageIntensity: Int = ItemDetailsViewModel.DEFAULT_USAGE_INTENSITY,
+    val hasDamage: Boolean = false,
+    val damageType: String = "",
+    val notes: String = "",
+    val nameError: String? = null,
+    val damageTypeError: String? = null,
+    val notesError: String? = null,
 )
 
 class ItemDetailsViewModel : ZeraViewModel() {
@@ -117,50 +135,73 @@ class ItemDetailsViewModel : ZeraViewModel() {
         patchItem(UpdateItemRequestDTO(notes = value.trim()))
     }
 
-    fun onEditConfirm(
-        name: String,
-        conditionLabel: String,
-        serialNumber: String,
-        notes: String,
-    ) {
-        val nameError = nameValidationError(name)
-        if (nameError != null) {
-            _state.value = _state.value.copy(errorMessage = nameError)
-            return
-        }
-        val conditionCode = conditionCodeFrom(conditionLabel)
-        if (conditionCode == null) {
-            _state.value = _state.value.copy(
-                errorMessage = "Condição inválida. Use Novo, Usado, Semidanificado ou Danificado.",
+    fun onEditClick() {
+        _state.value = _state.value.copy(editDraft = draftFrom(_state.value), errorMessage = null)
+    }
+
+    fun onEditDismiss() {
+        _state.value = _state.value.copy(editDraft = null)
+    }
+
+    fun onEditNameChange(value: String) {
+        updateDraft { it.copy(name = value, nameError = null) }
+    }
+
+    fun onEditConditionChange(value: String) {
+        updateDraft { it.copy(condition = value) }
+    }
+
+    fun onEditUsageIntensityChange(value: Int) {
+        updateDraft { it.copy(usageIntensity = value) }
+    }
+
+    fun onEditHasDamageChange(selected: Boolean) {
+        val hasDamage = !selected
+        updateDraft {
+            it.copy(
+                hasDamage = hasDamage,
+                damageType = if (hasDamage) it.damageType else "",
+                damageTypeError = null,
             )
-            return
         }
-        val serialError = serialValidationError(serialNumber)
-        if (serialError != null) {
-            _state.value = _state.value.copy(errorMessage = serialError)
-            return
-        }
-        val notesError = notesValidationError(notes)
-        if (notesError != null) {
-            _state.value = _state.value.copy(errorMessage = notesError)
-            return
-        }
+    }
+
+    fun onEditDamageTypeChange(value: String) {
+        updateDraft { it.copy(damageType = value, damageTypeError = null) }
+    }
+
+    fun onEditNotesChange(value: String) {
+        updateDraft { it.copy(notes = value, notesError = null) }
+    }
+
+    /** Valida o rascunho e manda só o que mudou; o sheet fecha quando o PATCH volta com sucesso. */
+    fun onEditSave() {
         val current = _state.value
-        val request = UpdateItemRequestDTO(
-            name = name.trim().takeIf { it != current.itemName },
-            condition = conditionCode.takeIf { it != current.conditionCode },
-            serialNumber = changedOptionalText(current.serialNumber, serialNumber),
-            notes = changedOptionalText(current.notes, notes),
+        val draft = current.editDraft ?: return
+        val validated = draft.copy(
+            nameError = nameValidationError(draft.name),
+            damageTypeError = if (draft.hasDamage && damageCodeFrom(draft.damageType) == null) {
+                "Selecione o tipo de dano."
+            } else {
+                null
+            },
+            notesError = notesValidationError(draft.notes),
         )
-        if (
-            request.name == null &&
-            request.condition == null &&
-            request.serialNumber == null &&
-            request.notes == null
-        ) {
+        if (validated.nameError != null || validated.damageTypeError != null || validated.notesError != null) {
+            _state.value = current.copy(editDraft = validated)
+            return
+        }
+        val request = editRequestFrom(draftFrom(current), validated)
+        if (request == null) {
+            onEditDismiss()
             return
         }
         patchItem(request)
+    }
+
+    private fun updateDraft(transform: (ItemEditDraft) -> ItemEditDraft) {
+        val draft = _state.value.editDraft ?: return
+        _state.value = _state.value.copy(editDraft = transform(draft))
     }
 
     fun onApproveClick() {
@@ -255,7 +296,61 @@ class ItemDetailsViewModel : ZeraViewModel() {
         internal const val SERIAL_MAX_LENGTH = 120
         internal const val NOTES_MAX_LENGTH = 500
         internal const val REASON_MAX_LENGTH = 500
+        internal const val DEFAULT_USAGE_INTENSITY = 1
         internal val conditionOptions = listOf("Novo", "Usado", "Semidanificado", "Danificado")
+        internal val damageOptions = listOf("Tela quebrada", "Peça faltando", "Não liga", "Enferrujado", "Outro")
+
+        internal fun damageCodeFrom(label: String): String? = when (label) {
+            "Tela quebrada" -> "BROKEN_SCREEN"
+            "Peça faltando" -> "MISSING_PART"
+            "Não liga" -> "DOES_NOT_POWER_ON"
+            "Enferrujado" -> "OXIDATION"
+            "Outro" -> "OTHER"
+            else -> null
+        }
+
+        internal fun damageLabel(code: String?): String = when (code) {
+            "BROKEN_SCREEN" -> "Tela quebrada"
+            "MISSING_PART" -> "Peça faltando"
+            "DOES_NOT_POWER_ON" -> "Não liga"
+            "OXIDATION" -> "Enferrujado"
+            "OTHER" -> "Outro"
+            else -> ""
+        }
+
+        // O dropdown escolhe um só tipo de dano: exibe o primeiro da lista do backend.
+        internal fun draftFrom(state: ItemDetailsState): ItemEditDraft = ItemEditDraft(
+            name = state.itemName,
+            condition = state.condition,
+            usageIntensity = state.usageIntensity ?: DEFAULT_USAGE_INTENSITY,
+            hasDamage = state.hasDamage,
+            damageType = damageLabel(state.damageCodes.firstOrNull()),
+            notes = state.notes,
+        )
+
+        /**
+         * Monta o PATCH só com os campos que mudaram em relação ao rascunho [initial];
+         * `null` quando nada mudou. Danos só vão se "possui danos?" ou o tipo mudou,
+         * para não sobrescrever uma lista de vários danos que o usuário nem tocou.
+         */
+        internal fun editRequestFrom(initial: ItemEditDraft, draft: ItemEditDraft): UpdateItemRequestDTO? {
+            val damagesChanged = draft.hasDamage != initial.hasDamage || draft.damageType != initial.damageType
+            val request = UpdateItemRequestDTO(
+                name = draft.name.trim().takeIf { it != initial.name.trim() },
+                condition = conditionCodeFrom(draft.condition).takeIf { draft.condition != initial.condition },
+                usageIntensity = draft.usageIntensity.takeIf { it != initial.usageIntensity },
+                hasDamages = draft.hasDamage.takeIf { damagesChanged },
+                damages = if (!damagesChanged) {
+                    null
+                } else if (draft.hasDamage) {
+                    listOfNotNull(damageCodeFrom(draft.damageType))
+                } else {
+                    emptyList()
+                },
+                notes = changedOptionalText(initial.notes, draft.notes),
+            )
+            return request.takeIf { it != UpdateItemRequestDTO() }
+        }
 
         internal fun statusFrom(value: String?): ItemStatus? = ItemStatus.fromBackend(value)
 
@@ -375,6 +470,9 @@ class ItemDetailsViewModel : ZeraViewModel() {
             material = materialsLabel(item.model?.materials.orEmpty().map { it.name }),
             condition = conditionLabel(item.condition),
             conditionCode = item.condition,
+            usageIntensity = item.usageIntensity,
+            hasDamage = item.hasDamages ?: item.damages.isNotEmpty(),
+            damageCodes = item.damages,
             serialNumber = item.serialNumber.orEmpty(),
             notes = item.notes.orEmpty(),
             registeredBy = registeredByFrom(item),

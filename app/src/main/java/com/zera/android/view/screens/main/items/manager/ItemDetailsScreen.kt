@@ -10,8 +10,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -19,23 +21,20 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zera.android.view.components.buttons.ZeraButton
 import com.zera.android.view.components.buttons.ZeraButtonType
 import com.zera.android.view.components.cards.ItemSummaryCard
-import com.zera.android.view.components.inputs.ZeraChipsGroup
+import com.zera.android.view.components.forms.EditItemForm
 import com.zera.android.view.components.inputs.ZeraInputPopup
-import com.zera.android.view.components.inputs.ZeraTextInput
 import com.zera.android.view.components.lists.EditableFieldRow
 import com.zera.android.view.components.loading.SkeletonBox
 import com.zera.android.view.components.navigation.UpperNavBar
 import com.zera.android.view.components.outros.ItemStatus
-import com.zera.android.view.components.overlays.PopupDialog
+import com.zera.android.view.components.overlays.BottomSheet
 import com.zera.android.view.components.texts.CaptionText
-import com.zera.android.view.components.texts.TitleText
 import com.zera.android.view.theme.Radius
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraColorFamily
@@ -48,13 +47,13 @@ private val SkeletonSummaryCardHeight = 120.dp
 private val SkeletonFieldRowHeight = 56.dp
 private const val SkeletonFieldRowCount = 7
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ItemDetailsScreen(
     itemId: String,
     viewModel: ItemDetailsViewModel = viewModel()
 ) {
     val state by viewModel.state
-    var showEditPopup by remember { mutableStateOf(false) }
     var showRejectPopup by remember { mutableStateOf(false) }
     val actionsEnabled = !state.isLoading && !state.isSubmitting && state.itemId.isNotBlank()
 
@@ -105,7 +104,7 @@ fun ItemDetailsScreen(
                 }
                 ZeraButton(
                     text = "Editar",
-                    onClick = { showEditPopup = true },
+                    onClick = viewModel::onEditClick,
                     type = ZeraButtonType.Secondary,
                     enabled = actionsEnabled,
                     fillMaxWidth = true,
@@ -178,15 +177,36 @@ fun ItemDetailsScreen(
         }
     }
 
-    if (showEditPopup) {
-        EditItemPopup(
-            state = state,
-            onDismissRequest = { showEditPopup = false },
-            onConfirm = { name, condition, serial, notes ->
-                viewModel.onEditConfirm(name, condition, serial, notes)
-                showEditPopup = false
-            },
-        )
+    state.editDraft?.let { draft ->
+        BottomSheet(
+            onDismissRequest = viewModel::onEditDismiss,
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        ) {
+            EditItemForm(
+                name = draft.name,
+                onNameChange = viewModel::onEditNameChange,
+                condition = draft.condition,
+                conditionOptions = ItemDetailsViewModel.conditionOptions,
+                onConditionChange = viewModel::onEditConditionChange,
+                usageIntensity = draft.usageIntensity,
+                onUsageIntensityChange = viewModel::onEditUsageIntensityChange,
+                hasDamage = draft.hasDamage,
+                onHasDamageChange = viewModel::onEditHasDamageChange,
+                damageType = draft.damageType,
+                damageOptions = ItemDetailsViewModel.damageOptions,
+                onDamageTypeChange = viewModel::onEditDamageTypeChange,
+                notes = draft.notes,
+                onNotesChange = viewModel::onEditNotesChange,
+                onSave = viewModel::onEditSave,
+                onCancel = viewModel::onEditDismiss,
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+                nameError = draft.nameError,
+                damageTypeError = draft.damageTypeError,
+                notesError = draft.notesError,
+                errorMessage = state.errorMessage,
+                isSubmitting = state.isSubmitting,
+            )
+        }
     }
 
     if (showRejectPopup && state.canReview) {
@@ -199,97 +219,6 @@ fun ItemDetailsScreen(
                 showRejectPopup = false
             },
             validate = ItemDetailsViewModel::reasonValidationError,
-        )
-    }
-}
-
-@Composable
-private fun EditItemPopup(
-    state: ItemDetailsState,
-    onDismissRequest: () -> Unit,
-    onConfirm: (name: String, condition: String, serialNumber: String, notes: String) -> Unit,
-) {
-    var name by remember(state.itemName) { mutableStateOf(state.itemName) }
-    var condition by remember(state.condition) {
-        mutableStateOf(state.condition.ifBlank { ItemDetailsViewModel.conditionOptions.first() })
-    }
-    var serialNumber by remember(state.serialNumber) { mutableStateOf(state.serialNumber) }
-    var notes by remember(state.notes) { mutableStateOf(state.notes) }
-    var nameError by remember { mutableStateOf<String?>(null) }
-    var conditionError by remember { mutableStateOf<String?>(null) }
-    var serialError by remember { mutableStateOf<String?>(null) }
-    var notesError by remember { mutableStateOf<String?>(null) }
-
-    PopupDialog(onDismissRequest = onDismissRequest) {
-        TitleText(text = "Editar item", bold = true)
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(Spacing.small),
-        ) {
-            ZeraTextInput(
-                value = name,
-                onValueChange = {
-                    name = it
-                    nameError = null
-                },
-                label = "Nome",
-                imeAction = ImeAction.Next,
-                isError = nameError != null,
-                errorMessage = nameError,
-            )
-            ZeraChipsGroup(
-                options = ItemDetailsViewModel.conditionOptions,
-                selected = condition,
-                onSelectedChange = {
-                    condition = it
-                    conditionError = null
-                },
-                label = "Condição",
-                stacked = true,
-            )
-            conditionError?.let { CaptionText(text = it, color = MaterialTheme.colorScheme.error) }
-            ZeraTextInput(
-                value = serialNumber,
-                onValueChange = {
-                    serialNumber = it
-                    serialError = null
-                },
-                label = "Número de série",
-                imeAction = ImeAction.Next,
-                isError = serialError != null,
-                errorMessage = serialError,
-            )
-            ZeraTextInput(
-                value = notes,
-                onValueChange = {
-                    notes = it
-                    notesError = null
-                },
-                label = "Observações",
-                imeAction = ImeAction.Done,
-                isError = notesError != null,
-                errorMessage = notesError,
-            )
-        }
-        ZeraButton(
-            text = "Salvar",
-            onClick = {
-                nameError = ItemDetailsViewModel.nameValidationError(name)
-                conditionError = if (ItemDetailsViewModel.conditionCodeFrom(condition) == null) {
-                    "Selecione a condição do item."
-                } else {
-                    null
-                }
-                serialError = ItemDetailsViewModel.serialValidationError(serialNumber)
-                notesError = ItemDetailsViewModel.notesValidationError(notes)
-                if (nameError == null && conditionError == null && serialError == null && notesError == null) {
-                    onConfirm(name, condition, serialNumber, notes)
-                }
-            },
-            style = ZeraColorFamily.Green,
-            modifier = Modifier.fillMaxWidth(),
         )
     }
 }
