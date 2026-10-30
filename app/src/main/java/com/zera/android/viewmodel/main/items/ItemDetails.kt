@@ -478,6 +478,7 @@ class ItemDetailsViewModel : ZeraViewModel() {
             notes = item.notes.orEmpty(),
             registeredBy = registeredByFrom(item),
             registeredAt = formatRegisteredAt(item.createdAt),
+            // TODO: alinhar com o back-end o envio do photoUrl do item (hoje o ItemResponse pode vir sem foto).
             photoUrl = item.photoUrl?.takeIf { it.isNotBlank() },
             canReview = canReview(statusFrom(item.status), isEmployee),
             canSendToMaintenance = canSendToMaintenance(statusFrom(item.status)),

@@ -13,6 +13,7 @@ import com.zera.android.model.usecase.user.UpdateUserImage
 import com.zera.android.model.usecase.user.UploadAvatar
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
+import com.zera.android.view.transition.ScreenAnimation
 import com.zera.android.viewmodel.ZeraViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -114,7 +115,7 @@ class ProfileViewModel(
     }
 
     fun onSettingsClick() {
-        // TODO: navegar para a tela de configurações (ainda não existe)
+        ZeraNavigator.push(Route.Configurations, ScreenAnimation.SlideHorizontal)
     }
 
     fun onLogoutClick() {
