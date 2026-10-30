@@ -27,6 +27,8 @@ import com.zera.android.view.screens.main.categories.CategoryCreationScreen
 import com.zera.android.view.screens.main.categories.CategoryCreationSuccessScreen
 import com.zera.android.view.screens.main.chat.ChatBotScreen
 import com.zera.android.view.screens.main.chat.ChatConversationsScreen
+import com.zera.android.view.screens.main.employees.EmployeeDetailsScreen
+import com.zera.android.view.screens.main.employees.EmployeeRegisterScreen
 import com.zera.android.view.screens.main.employees.EmployeesScreen
 import com.zera.android.view.screens.main.home.employee.EmployeeHomeScreen
 import com.zera.android.view.screens.main.home.manager.ManagerHomeScreen
@@ -143,6 +145,13 @@ fun ZeraNavHost() {
                     CompositionLocalProvider(LocalAnimatedVisibilityScope provides this) {
                         EmployeesScreen()
                     }
+                }
+                composable<Route.EmployeeRegister> {
+                    EmployeeRegisterScreen()
+                }
+                composable<Route.EmployeeDetails> { backStackEntry ->
+                    val route = backStackEntry.toRoute<Route.EmployeeDetails>()
+                    EmployeeDetailsScreen(employeeId = route.employeeId)
                 }
                 composable<Route.ItemApproved> { backStackEntry ->
                     val route = backStackEntry.toRoute<Route.ItemApproved>()
