@@ -86,6 +86,7 @@ fun EmployeeDetailsScreen(
                 initials = state.initials,
                 photoUrl = state.photoUrl,
                 style = ZeraColorFamily.Green,
+                isLoading = state.isLoading,
             )
             Column(verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
                 EditableFieldRow(label = "Nome", value = state.name)

@@ -1,9 +1,16 @@
 package com.zera.android.viewmodel.main.employees
 
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.viewModelScope
+import com.zera.android.model.dto.user.SelfUserResponseDTO
+import com.zera.android.model.usecase.auth.GetSelfUser
+import com.zera.android.model.usecase.telephone.GetTelephone
 import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.viewmodel.ZeraViewModel
 import com.zera.android.viewmodel.profile.ProfileViewModel
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.launch
+import retrofit2.HttpException
 
 data class EmployeeDetailsState(
     val employeeId: String = "",
@@ -17,7 +24,10 @@ data class EmployeeDetailsState(
     val errorMessage: String? = null,
 )
 
-class EmployeeDetailsViewModel : ZeraViewModel() {
+class EmployeeDetailsViewModel(
+    private val getUser: GetSelfUser = GetSelfUser(),
+    private val getTelephone: GetTelephone = GetTelephone(),
+) : ZeraViewModel() {
     private val _state = mutableStateOf(EmployeeDetailsState())
     val state = _state
 
@@ -27,11 +37,31 @@ class EmployeeDetailsViewModel : ZeraViewModel() {
             _state.value = _state.value.copy(isLoading = false)
             return
         }
+        // A tela recompõe ao voltar de outra rota; não refaz a carga do mesmo operário.
+        if (employeeId == _state.value.employeeId && !_state.value.isLoading) return
         _state.value = _state.value.copy(employeeId = employeeId, isLoading = true, errorMessage = null)
-        // TODO: buscar o operário (`GET /users/{id}` + `GET /telephone/user?userId=`) e preencher
-        //  nome, e-mail, telefone, cargo e a foto (`imageUrl`) do avatar, com as iniciais via
-        //  [initialsFrom] para quando não houver foto.
-        _state.value = _state.value.copy(isLoading = false)
+        viewModelScope.launch {
+            val user = try {
+                getUser.execute(employeeId)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(isLoading = false, errorMessage = loadError(e))
+                return@launch
+            }
+            _state.value = stateFrom(user).copy(isLoading = true)
+            // Telefone é rota à parte; se falhar, a tela segue com os dados do usuário.
+            val phoneError = try {
+                val telephone = getTelephone.execute(employeeId)
+                _state.value = _state.value.copy(phone = telephone?.number.orEmpty())
+                null
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                "Não foi possível carregar o telefone."
+            }
+            _state.value = _state.value.copy(isLoading = false, errorMessage = phoneError)
+        }
     }
 
     fun onBackClick() {
@@ -39,10 +69,32 @@ class EmployeeDetailsViewModel : ZeraViewModel() {
     }
 
     fun onDeleteClick() {
-        // TODO: confirmar e excluir o perfil do operário.
+        // TODO: confirmar e excluir o perfil do operário. O adm-core ainda não expõe rota de
+        //  exclusão/desativação de usuário.
     }
 
     companion object {
         internal fun initialsFrom(name: String): String = ProfileViewModel.initialsFrom(name)
+
+        internal fun stateFrom(user: SelfUserResponseDTO): EmployeeDetailsState = EmployeeDetailsState(
+            employeeId = user.userId,
+            name = user.name,
+            initials = initialsFrom(user.name),
+            photoUrl = user.imageUrl,
+            email = user.email,
+            position = EmployeesViewModel.roleLabel(user.role),
+            isLoading = false,
+        )
+
+        internal fun loadError(error: Exception): String {
+            if (error is HttpException) {
+                return when (error.code()) {
+                    400, 404 -> "Operário não encontrado."
+                    401, 403 -> "Sem permissão para ver este operário."
+                    else -> "Não foi possível carregar o operário."
+                }
+            }
+            return error.message?.takeIf { it.isNotBlank() } ?: "Não foi possível carregar o operário."
+        }
     }
 }
