@@ -11,6 +11,7 @@ import com.zera.android.model.usecase.team.ListTeamEmployees
 import com.zera.android.view.components.lists.EmployeeItem
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
+import com.zera.android.view.transition.ScreenAnimation
 import com.zera.android.viewmodel.ZeraViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
@@ -120,7 +121,7 @@ class EmployeesViewModel : ZeraViewModel() {
 
     fun onInviteClick() {
         refreshInvitesOnResume = true
-        ZeraNavigator.push(Route.EmployeeRegister)
+        ZeraNavigator.push(Route.EmployeeRegister, ScreenAnimation.SlideHorizontal)
     }
 
     /** Chamado quando a tela volta a ficar visível; só recarrega após ir criar um convite. */
@@ -133,7 +134,7 @@ class EmployeesViewModel : ZeraViewModel() {
     fun onEmployeeClick(employee: EmployeeItem) {
         // Convite pendente ainda não tem usuário, então não há detalhe para abrir.
         if (employee.isPending) return
-        ZeraNavigator.push(Route.EmployeeDetails(employeeId = employee.id))
+        ZeraNavigator.push(Route.EmployeeDetails(employeeId = employee.id), ScreenAnimation.SlideHorizontal)
     }
 
     companion object {
