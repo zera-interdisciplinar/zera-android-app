@@ -135,42 +135,12 @@ fun ItemDetailsScreen(
                     condition = state.condition,
                 )
 
-                EditableFieldRow(
-                    label = "Nome",
-                    value = state.itemName,
-                    onEditClick = {},
-                    onConfirm = viewModel::onNameConfirm,
-                    validate = ItemDetailsViewModel::nameValidationError,
-                )
+                EditableFieldRow(label = "Nome", value = state.itemName)
                 EditableFieldRow(label = "Categoria", value = state.category)
                 EditableFieldRow(label = "Material", value = state.material)
-                EditableFieldRow(
-                    label = "Condição",
-                    value = state.condition,
-                    onEditClick = {},
-                    onConfirm = viewModel::onConditionConfirm,
-                    validate = { input ->
-                        if (ItemDetailsViewModel.conditionCodeFrom(input) == null) {
-                            "Use Novo, Usado, Semidanificado ou Danificado."
-                        } else {
-                            null
-                        }
-                    },
-                )
-                EditableFieldRow(
-                    label = "Número de série",
-                    value = state.serialNumber,
-                    onEditClick = {},
-                    onConfirm = viewModel::onSerialConfirm,
-                    validate = ItemDetailsViewModel::serialValidationError,
-                )
-                EditableFieldRow(
-                    label = "Observações",
-                    value = state.notes,
-                    onEditClick = {},
-                    onConfirm = viewModel::onNotesConfirm,
-                    validate = ItemDetailsViewModel::notesValidationError,
-                )
+                EditableFieldRow(label = "Condição", value = state.condition)
+                EditableFieldRow(label = "Número de série", value = state.serialNumber)
+                EditableFieldRow(label = "Observações", value = state.notes)
                 EditableFieldRow(label = "Cadastrado Por", value = state.registeredBy)
                 EditableFieldRow(label = "Data de Cadastro", value = state.registeredAt)
             }

@@ -97,44 +97,6 @@ class ItemDetailsViewModel : ZeraViewModel() {
         ZeraNavigator.goBack()
     }
 
-    fun onNameConfirm(name: String) {
-        val error = nameValidationError(name)
-        if (error != null) {
-            _state.value = _state.value.copy(errorMessage = error)
-            return
-        }
-        patchItem(UpdateItemRequestDTO(name = name.trim()))
-    }
-
-    fun onConditionConfirm(value: String) {
-        val code = conditionCodeFrom(value)
-        if (code == null) {
-            _state.value = _state.value.copy(
-                errorMessage = "Condição inválida. Use Novo, Usado, Semidanificado ou Danificado.",
-            )
-            return
-        }
-        patchItem(UpdateItemRequestDTO(condition = code))
-    }
-
-    fun onSerialConfirm(value: String) {
-        val error = serialValidationError(value)
-        if (error != null) {
-            _state.value = _state.value.copy(errorMessage = error)
-            return
-        }
-        patchItem(UpdateItemRequestDTO(serialNumber = value.trim()))
-    }
-
-    fun onNotesConfirm(value: String) {
-        val error = notesValidationError(value)
-        if (error != null) {
-            _state.value = _state.value.copy(errorMessage = error)
-            return
-        }
-        patchItem(UpdateItemRequestDTO(notes = value.trim()))
-    }
-
     fun onEditClick() {
         _state.value = _state.value.copy(editDraft = draftFrom(_state.value), errorMessage = null)
     }
@@ -293,7 +255,6 @@ class ItemDetailsViewModel : ZeraViewModel() {
     companion object {
         private val ptBr = Locale.forLanguageTag("pt-BR")
         internal const val NAME_MAX_LENGTH = 120
-        internal const val SERIAL_MAX_LENGTH = 120
         internal const val NOTES_MAX_LENGTH = 500
         internal const val REASON_MAX_LENGTH = 500
         internal const val DEFAULT_USAGE_INTENSITY = 1
@@ -365,15 +326,6 @@ class ItemDetailsViewModel : ZeraViewModel() {
         internal fun canReview(status: ItemStatus?, isEmployee: Boolean = false): Boolean =
             !isEmployee &&
                 (status == ItemStatus.PendingApproval || status == ItemStatus.AwaitingEvaluation)
-
-        internal fun serialValidationError(value: String): String? {
-            val trimmed = value.trim()
-            return if (trimmed.length > SERIAL_MAX_LENGTH) {
-                "O número de série deve ter no máximo $SERIAL_MAX_LENGTH caracteres."
-            } else {
-                null
-            }
-        }
 
         internal fun notesValidationError(value: String): String? {
             val trimmed = value.trim()
