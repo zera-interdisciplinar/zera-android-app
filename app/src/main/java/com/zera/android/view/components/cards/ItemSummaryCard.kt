@@ -22,7 +22,6 @@ import com.zera.android.view.components.outros.ItemStatus
 import com.zera.android.view.components.outros.ItemStatusTag
 import com.zera.android.view.components.outros.Tag
 import com.zera.android.view.components.texts.BodyText
-import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.components.texts.TitleText
 import com.zera.android.view.theme.Radius
 import com.zera.android.view.theme.Spacing
@@ -36,9 +35,8 @@ private val ThumbnailSize = 72.dp
 
 /**
  * Card de destaque no topo de uma tela de detalhe de item: miniatura à esquerda,
- * ID/nome/subtítulo do item e uma [Tag] de status à direita.
+ * nome/subtítulo do item e uma [Tag] de status à direita.
  *
- * @param itemId ID do item, exibido como "ID {itemId}".
  * @param itemName nome do item, em destaque.
  * @param itemSubtitle subtítulo complementar (ex.: o modelo do item).
  * @param status status de workflow do item (`PENDING_APPROVAL`, `IN_STOCK`, …),
@@ -51,7 +49,6 @@ private val ThumbnailSize = 72.dp
  */
 @Composable
 fun ItemSummaryCard(
-    itemId: String,
     itemName: String,
     itemSubtitle: String,
     status: ItemStatus? = null,
@@ -82,7 +79,6 @@ fun ItemSummaryCard(
                 }
             }
             Column(verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
-                CaptionText(text = "ID $itemId", color = LocalContentColor.current)
                 Column(verticalArrangement = Arrangement.spacedBy(Spacing.micro)) {
                     TitleText(text = itemName, bold = true, color = LocalContentColor.current)
                     BodyText(text = itemSubtitle, color = LocalContentColor.current)
@@ -111,7 +107,6 @@ private fun conditionTagStyle(condition: String): ZeraColorFamily = when (condit
 private fun ItemSummaryCardPreview() {
     ZeraTheme {
         ItemSummaryCard(
-            itemId = "265964",
             itemName = "Placa de vídeo",
             itemSubtitle = "Notebook Mac",
             status = ItemStatus.PendingApproval,

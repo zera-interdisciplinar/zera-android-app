@@ -115,7 +115,6 @@ fun ModelDetailsScreen(
                 }
 
                 ItemSummaryCard(
-                    itemId = state.modelId,
                     itemName = state.name.ifBlank { "Modelo" },
                     itemSubtitle = state.manufacturer,
                     status = state.status,

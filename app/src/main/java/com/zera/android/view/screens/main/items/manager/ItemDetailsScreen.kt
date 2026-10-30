@@ -128,7 +128,6 @@ fun ItemDetailsScreen(
                 }
 
                 ItemSummaryCard(
-                    itemId = state.itemId,
                     itemName = state.itemName,
                     itemSubtitle = state.itemSubtitle,
                     status = state.status,
