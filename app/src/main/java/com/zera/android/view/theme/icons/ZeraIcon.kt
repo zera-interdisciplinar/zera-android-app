@@ -24,6 +24,7 @@ enum class ZeraIcon(@DrawableRes val resId: Int) {
     Bell(R.drawable.bell),
     Box(R.drawable.box),
     Chatbot(R.drawable.chatbot),
+    ChatbotBase(R.drawable.chatbot_base),
     Check(R.drawable.check),
     Close(R.drawable.close),
     Crate(R.drawable.crate),
