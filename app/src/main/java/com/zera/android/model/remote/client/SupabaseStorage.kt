@@ -17,10 +17,13 @@ object SupabaseStorage {
     private val json = Json { ignoreUnknownKeys = true }
     private val http = OkHttpClient.Builder().zeraTimeouts().build()
 
-    fun isConfigured(environments: Environments = AppConfig.environments): Boolean =
+    fun isConfigured(
+        environments: Environments = AppConfig.environments,
+        bucket: String = environments.supabaseAvatarsBucket,
+    ): Boolean =
         environments.supabaseUrl.isNotBlank() &&
             environments.supabaseAnonKey.isNotBlank() &&
-            environments.supabaseAvatarsBucket.isNotBlank()
+            bucket.isNotBlank()
 
     fun canonicalMime(mimeType: String): String = when (mimeType.lowercase()) {
         "image/png" -> "image/png"
@@ -32,10 +35,16 @@ object SupabaseStorage {
     fun objectPath(userId: String, mimeType: String): String =
         "$userId/profile.${extensionFor(canonicalMime(mimeType))}"
 
-    fun publicUrl(environments: Environments, objectPath: String): String {
+    fun itemObjectPath(itemId: String, mimeType: String): String =
+        "$itemId/photo.${extensionFor(canonicalMime(mimeType))}"
+
+    fun publicUrl(
+        environments: Environments,
+        objectPath: String,
+        bucket: String = environments.supabaseAvatarsBucket,
+    ): String {
         val base = environments.supabaseUrl.trim().trimEnd('/')
-        val bucket = environments.supabaseAvatarsBucket.trim().trim('/')
-        return "$base/storage/v1/object/public/$bucket/$objectPath"
+        return "$base/storage/v1/object/public/${bucket.trim().trim('/')}/$objectPath"
     }
 
     suspend fun upload(
@@ -43,9 +52,10 @@ object SupabaseStorage {
         mimeType: String,
         objectPath: String,
         environments: Environments = AppConfig.environments,
+        bucket: String = environments.supabaseAvatarsBucket,
     ) = withContext(Dispatchers.IO) {
         val base = environments.supabaseUrl.trim().trimEnd('/')
-        val bucket = environments.supabaseAvatarsBucket.trim().trim('/')
+        val bucketName = bucket.trim().trim('/')
         val anonKey = environments.supabaseAnonKey.trim()
         val mime = canonicalMime(mimeType)
         val (folder, fileName) = splitObjectPath(objectPath)
@@ -53,7 +63,7 @@ object SupabaseStorage {
             .addPathSegment("storage")
             .addPathSegment("v1")
             .addPathSegment("object")
-            .addPathSegment(bucket)
+            .addPathSegment(bucketName)
             .apply {
                 if (folder != null) addPathSegment(folder)
             }
