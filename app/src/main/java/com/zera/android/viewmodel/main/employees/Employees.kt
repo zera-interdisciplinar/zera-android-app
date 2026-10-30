@@ -10,6 +10,7 @@ import com.zera.android.model.usecase.team.CreateInvitation
 import com.zera.android.model.usecase.team.ListPendingInvitations
 import com.zera.android.model.usecase.team.ListTeamEmployees
 import com.zera.android.view.components.lists.EmployeeItem
+import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.viewmodel.ZeraViewModel
 import kotlinx.coroutines.CancellationException
@@ -172,7 +173,9 @@ class EmployeesViewModel : ZeraViewModel() {
     }
 
     fun onEmployeeClick(employee: EmployeeItem) {
-        // Detalhe do colaborador ainda não tem rota no app.
+        // Convite pendente ainda não tem usuário, então não há detalhe para abrir.
+        if (employee.isPending) return
+        ZeraNavigator.push(Route.EmployeeDetails(employeeId = employee.id))
     }
 
     companion object {
