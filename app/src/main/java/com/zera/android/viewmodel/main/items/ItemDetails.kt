@@ -10,11 +10,14 @@ import com.zera.android.model.usecase.inventory.GetItemDetails
 import com.zera.android.model.usecase.inventory.RejectItem
 import com.zera.android.model.usecase.inventory.StartItemMaintenance
 import com.zera.android.model.usecase.inventory.UpdateItem
+import com.zera.android.model.usecase.inventory.UploadItemPhoto
 import com.zera.android.view.components.outros.ItemStatus
+import com.zera.android.view.media.PhotoCapture
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.viewmodel.ZeraViewModel
 import com.zera.android.viewmodel.isEmployeeRole
+import com.zera.android.viewmodel.profile.ProfileViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonObject
@@ -44,6 +47,8 @@ data class ItemDetailsState(
     val photoUrl: String? = null,
     /** `true` enquanto o popup com a foto ampliada está aberto. */
     val showPhotoViewer: Boolean = false,
+    /** `true` enquanto a foto recém-tirada está sendo enviada ao Storage. */
+    val isUploadingPhoto: Boolean = false,
     val canReview: Boolean = false,
     val canSendToMaintenance: Boolean = false,
     val isLoading: Boolean = true,
@@ -73,6 +78,7 @@ class ItemDetailsViewModel : ZeraViewModel() {
     private val rejectItem = RejectItem()
     private val updateItem = UpdateItem()
     private val startItemMaintenance = StartItemMaintenance()
+    private val uploadItemPhoto = UploadItemPhoto()
 
     private val _state = mutableStateOf(ItemDetailsState())
     val state = _state
@@ -103,7 +109,41 @@ class ItemDetailsViewModel : ZeraViewModel() {
         ZeraNavigator.goBack()
     }
 
-    fun onPhotoClick() {
+    fun onCameraPermissionDenied() {
+        _state.value = _state.value.copy(errorMessage = "Permita o uso da câmera para tirar a foto.")
+    }
+
+    /** Recebe a foto já tirada e reduzida (`null` se não deu para processá-la) e a envia ao Storage. */
+    fun onPhotoTaken(bytes: ByteArray?) {
+        val current = _state.value
+        val itemId = current.itemId
+        if (itemId.isBlank() || current.isUploadingPhoto) return
+        if (bytes == null || bytes.isEmpty()) {
+            _state.value = current.copy(errorMessage = "Não foi possível processar a foto.")
+            return
+        }
+        _state.value = current.copy(isUploadingPhoto = true, errorMessage = null)
+        viewModelScope.launch {
+            try {
+                val photoUrl = uploadItemPhoto.execute(itemId, bytes, PhotoCapture.MimeType)
+                // TODO: gravar o photoUrl no item — o contrato ainda não tem endpoint/campo para isso
+                //  (UpdateItemRequestDTO não tem foto). Até lá a URL só vale nesta sessão da tela.
+                _state.value = _state.value.copy(
+                    photoUrl = ProfileViewModel.cacheBust(photoUrl),
+                    isUploadingPhoto = false,
+                )
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(
+                    isUploadingPhoto = false,
+                    errorMessage = ProfileViewModel.photoWriteError(e),
+                )
+            }
+        }
+    }
+
+    fun onPhotoInspect() {
         if (_state.value.photoUrl == null) return
         _state.value = _state.value.copy(showPhotoViewer = true)
     }

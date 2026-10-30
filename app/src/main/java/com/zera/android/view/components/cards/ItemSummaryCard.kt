@@ -61,8 +61,12 @@ private val ThumbnailSize = 72.dp
  *   (recortada para preencher o quadrado) no lugar do [icon], com um indicador de
  *   progresso por cima enquanto ela carrega; quando `null` ou em branco (padrão),
  *   mostra o ícone.
- * @param onPhotoClick chamado ao tocar na miniatura (ex.: para abrir a foto ampliada).
- *   A miniatura só fica clicável quando há [photoUrl] e este callback não é `null` (padrão).
+ * @param onPhotoAdd chamado ao tocar na miniatura quando não há [photoUrl] (ex.: para
+ *   tirar ou escolher a foto do item). Quando `null` (padrão), a miniatura sem foto não é clicável.
+ * @param onPhotoInspect chamado ao tocar na miniatura quando há [photoUrl] (ex.: para abrir
+ *   a foto ampliada). Quando `null` (padrão), a miniatura com foto não é clicável.
+ * @param isPhotoUploading quando `true`, cobre a miniatura com o indicador de progresso
+ *   (envio da foto em andamento) e a desabilita.
  */
 @Composable
 fun ItemSummaryCard(
@@ -73,10 +77,13 @@ fun ItemSummaryCard(
     modifier: Modifier = Modifier,
     icon: ZeraIcon? = null,
     photoUrl: String? = null,
-    onPhotoClick: (() -> Unit)? = null,
+    onPhotoAdd: (() -> Unit)? = null,
+    onPhotoInspect: (() -> Unit)? = null,
+    isPhotoUploading: Boolean = false,
 ) {
     var isImageLoading by remember(photoUrl) { mutableStateOf(!photoUrl.isNullOrBlank()) }
-    val thumbnailClick = onPhotoClick?.takeIf { !photoUrl.isNullOrBlank() }
+    val thumbnailClick = (if (photoUrl.isNullOrBlank()) onPhotoAdd else onPhotoInspect)
+        ?.takeIf { !isPhotoUploading }
 
     ZeraBox(
         modifier = modifier.fillMaxWidth(),
@@ -116,7 +123,7 @@ fun ItemSummaryCard(
                         )
                     }
 
-                    if (isImageLoading) {
+                    if (isImageLoading || isPhotoUploading) {
                         Box(
                             modifier = Modifier
                                 .matchParentSize()

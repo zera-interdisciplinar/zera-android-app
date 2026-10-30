@@ -1,5 +1,9 @@
 package com.zera.android.view.screens.main.items.manager
 
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,10 +23,14 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zera.android.view.components.buttons.ZeraButton
 import com.zera.android.view.components.buttons.ZeraButtonType
@@ -36,12 +44,17 @@ import com.zera.android.view.components.outros.ItemStatus
 import com.zera.android.view.components.overlays.BottomSheet
 import com.zera.android.view.components.overlays.PhotoViewerDialog
 import com.zera.android.view.components.texts.CaptionText
+import com.zera.android.view.media.PhotoCapture
 import com.zera.android.view.theme.Radius
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.view.theme.ZeraTheme
 import com.zera.android.viewmodel.main.items.ItemDetailsState
 import com.zera.android.viewmodel.main.items.ItemDetailsViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
 
 // Alturas aproximadas dos blocos reais; o esqueleto só indica a disposição.
 private val SkeletonSummaryCardHeight = 120.dp
@@ -57,9 +70,50 @@ fun ItemDetailsScreen(
     val state by viewModel.state
     var showRejectPopup by remember { mutableStateOf(false) }
     val actionsEnabled = !state.isLoading && !state.isSubmitting && state.itemId.isNotBlank()
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    // Caminho do arquivo que a câmera está preenchendo; salvo para sobreviver à morte do processo.
+    var capturePath by rememberSaveable { mutableStateOf<String?>(null) }
 
     LaunchedEffect(itemId) {
         viewModel.loadItem(itemId)
+    }
+
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture(),
+    ) { saved ->
+        val file = capturePath?.let(::File)
+        capturePath = null
+        if (file == null) return@rememberLauncherForActivityResult
+        if (!saved) {
+            file.delete()
+            return@rememberLauncherForActivityResult
+        }
+        scope.launch {
+            val bytes = withContext(Dispatchers.IO) {
+                PhotoCapture.readCompressed(file).also { file.delete() }
+            }
+            viewModel.onPhotoTaken(bytes)
+        }
+    }
+
+    val launchCamera = {
+        val (file, uri) = PhotoCapture.newTarget(context)
+        capturePath = file.path
+        cameraLauncher.launch(uri)
+    }
+
+    // Com CAMERA declarada no manifest, o TakePicture lança SecurityException sem a permissão concedida.
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+    ) { granted ->
+        if (granted) launchCamera() else viewModel.onCameraPermissionDenied()
+    }
+
+    val onPhotoAdd = {
+        val granted = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) ==
+            PackageManager.PERMISSION_GRANTED
+        if (granted) launchCamera() else cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
     }
 
     Scaffold(
@@ -134,7 +188,9 @@ fun ItemDetailsScreen(
                     status = state.status,
                     condition = state.condition,
                     photoUrl = state.photoUrl,
-                    onPhotoClick = viewModel::onPhotoClick,
+                    onPhotoAdd = onPhotoAdd,
+                    onPhotoInspect = viewModel::onPhotoInspect,
+                    isPhotoUploading = state.isUploadingPhoto,
                 )
 
                 if (state.canSendToMaintenance) {
