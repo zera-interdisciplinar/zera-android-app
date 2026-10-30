@@ -199,6 +199,13 @@ if (showDamageSheet) {
 }
 ```
 
+## Formulários
+
+Arquivo: `view/components/forms/`. Conteúdo de bottom sheets de edição: o estado (rascunho, erros, `isSubmitting`) é todo do chamador, normalmente guardado no ViewModel da tela.
+
+- **`EditItemForm(name, condition, usageIntensity, hasDamage, damageType, notes, ..., onSave, onCancel)`** (`EditItemForm.kt`) — "Editar o item" (Detalhes do Item): nome, condição (dropdown), intensidade de uso (slider), "Possui danos?" (radio), tipo de dano (dropdown, só com `hasDamage`) e observação.
+- **`EditProfileForm(name, email, ..., nameEnabled, emailEnabled, onSave, onCancel)`** (`EditProfileForm.kt`) — "Editar perfil": nome e e-mail (o telefone não é editável por aqui). Cada `*Enabled` bloqueia o campo sem escondê-lo (só o gestor altera o nome).
+
 ## Ícones
 
 Arquivo: `view/theme/icons/`.

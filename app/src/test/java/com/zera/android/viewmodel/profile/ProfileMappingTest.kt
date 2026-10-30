@@ -34,11 +34,10 @@ class ProfileMappingTest {
         assertEquals("Operador", state.position)
         assertFalse(state.canEditName)
         assertTrue(state.canEditEmail)
-        assertFalse(state.canEditPhone)
     }
 
     @Test
-    fun managerCanEditNameAndPhone() {
+    fun managerCanEditName() {
         val profile = ProfileUser(
             userId = "user-2",
             name = "Natalia Flores",
@@ -54,20 +53,12 @@ class ProfileMappingTest {
         assertNull(state.photoUrl)
         assertTrue(state.canEditName)
         assertTrue(state.canEditEmail)
-        assertTrue(state.canEditPhone)
     }
 
     @Test
     fun roleCaptionOmitsCompanyWhenBlank() {
         assertEquals("Gestor", ProfileViewModel.roleCaption("Gestor", ""))
         assertEquals("Gestor · Empresa Zera", ProfileViewModel.roleCaption("Gestor", "Empresa Zera"))
-    }
-
-    @Test
-    fun phoneValidationAcceptsTenOrElevenDigits() {
-        assertNull(ProfileViewModel.phoneValidationError("(11) 98765-4321"))
-        assertNull(ProfileViewModel.phoneValidationError("1132654321"))
-        assertEquals("Telefone inválido", ProfileViewModel.phoneValidationError("123"))
     }
 
     @Test
@@ -97,14 +88,38 @@ class ProfileMappingTest {
     }
 
     @Test
-    fun saveTelephoneUsesCreateWhenThereIsNoId() {
-        assertTrue(ProfileViewModel.saveTelephoneUsesCreate(null))
-        assertTrue(ProfileViewModel.saveTelephoneUsesCreate(""))
-        assertFalse(ProfileViewModel.saveTelephoneUsesCreate("tel-1"))
+    fun emailWriteErrorFallsBackToGenericMessage() {
+        assertEquals("falhou", ProfileViewModel.emailWriteError(Exception("falhou")))
     }
 
     @Test
-    fun emailWriteErrorFallsBackToGenericMessage() {
-        assertEquals("falhou", ProfileViewModel.emailWriteError(Exception("falhou")))
+    fun editChangesIgnoreUnchangedFieldsAndSurroundingSpaces() {
+        val state = ProfileState(
+            fullName = "Ana Lima",
+            email = "ana@zera.com",
+            canEditName = true,
+        )
+        val draft = ProfileEditDraft(fullName = " Ana Lima ", email = "ana@zera.com")
+
+        assertFalse(ProfileViewModel.editChangesFrom(state, draft).any)
+        assertEquals(
+            ProfileEditChanges(name = false, email = true),
+            ProfileViewModel.editChangesFrom(state, draft.copy(email = "ana.lima@zera.com")),
+        )
+    }
+
+    @Test
+    fun employeeEditChangesOnlyIncludeEmail() {
+        val state = ProfileState(
+            fullName = "Caio Reis",
+            email = "caio@zera.com",
+            canEditName = false,
+        )
+        val draft = ProfileEditDraft(fullName = "Outro Nome", email = "novo@zera.com")
+
+        assertEquals(
+            ProfileEditChanges(name = false, email = true),
+            ProfileViewModel.editChangesFrom(state, draft),
+        )
     }
 }
