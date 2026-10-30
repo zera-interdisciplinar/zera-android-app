@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -27,10 +28,10 @@ import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.view.theme.ZeraTheme
 import com.zera.android.view.theme.icons.ZeraIcon
-import com.zera.android.view.theme.palette
+import com.zera.android.view.theme.zeraColors
 
 /**
- * Estrutura comum das telas de sucesso: fundo azul, botão de fechar, [SuccessIconCircle],
+ * Estrutura comum das telas de sucesso: fundo azul-escuro (`navContainer`), botão de fechar, [SuccessIconCircle],
  * [title], [message], o [content] da tela, os [actions] e o link de voltar para o início.
  * O conteúdo principal e os botões ficam a cargo de cada tela.
  *
@@ -54,12 +55,12 @@ fun SuccessScreenLayout(
     content: @Composable ColumnScope.() -> Unit = {},
     actions: @Composable ColumnScope.() -> Unit = {},
 ) {
-    val backgroundPalette = ZeraColorFamily.Blue.palette()
-
+    // navContainer em vez do primary: o primary do escuro é um azul claro, e os cards
+    // (surface) precisam de um fundo mais escuro que eles para se destacar.
     Surface(
         modifier = modifier.fillMaxSize(),
-        color = backgroundPalette.base,
-        contentColor = backgroundPalette.onBase,
+        color = MaterialTheme.zeraColors.navContainer,
+        contentColor = MaterialTheme.zeraColors.onNavContainer,
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             IconButton(
