@@ -1,9 +1,7 @@
 package com.zera.android.view.components.overlays
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,8 +25,8 @@ import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter
 import com.zera.android.view.components.buttons.ZeraButton
 import com.zera.android.view.components.buttons.ZeraButtonType
+import com.zera.android.view.components.layouts.AdaptiveRow
 import com.zera.android.view.theme.Radius
-import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.view.theme.ZeraTheme
 
@@ -101,23 +99,18 @@ fun PhotoViewerDialog(
             }
         }
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(Spacing.medium),
-        ) {
+        AdaptiveRow(modifier = Modifier.fillMaxWidth()) {
             ZeraButton(
                 text = "Trocar foto",
                 onClick = onChangeClick,
                 type = ZeraButtonType.Tertiary,
                 style = ZeraColorFamily.Blue,
-                modifier = Modifier.weight(1f),
             )
             ZeraButton(
                 text = "Remover foto",
                 onClick = onRemoveClick,
                 type = ZeraButtonType.Tertiary,
                 style = ZeraColorFamily.Red,
-                modifier = Modifier.weight(1f),
             )
         }
     }
