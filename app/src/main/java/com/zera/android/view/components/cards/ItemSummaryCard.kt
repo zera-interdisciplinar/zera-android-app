@@ -15,8 +15,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.zera.android.view.components.containers.ZeraBox
 import com.zera.android.view.components.outros.ItemStatus
 import com.zera.android.view.components.outros.ItemStatusTag
@@ -45,7 +47,10 @@ private val ThumbnailSize = 72.dp
  * @param modifier modificador externo opcional. O card já ocupa toda a largura
  *   disponível por padrão ([Modifier.fillMaxWidth]).
  * @param icon ícone do catálogo [ZeraIcon] exibido na miniatura. Quando `null`
- *   (padrão), usa [ZeraIcon.Placeholder].
+ *   (padrão), usa [ZeraIcon.Placeholder]. Ignorado quando há [photoUrl].
+ * @param photoUrl URL da foto do item. Quando informada, a miniatura mostra a foto
+ *   (recortada para preencher o quadrado) no lugar do [icon]; quando `null` ou em
+ *   branco (padrão), mostra o ícone.
  */
 @Composable
 fun ItemSummaryCard(
@@ -55,6 +60,7 @@ fun ItemSummaryCard(
     condition: String = "",
     modifier: Modifier = Modifier,
     icon: ZeraIcon? = null,
+    photoUrl: String? = null,
 ) {
     ZeraBox(
         modifier = modifier.fillMaxWidth(),
@@ -71,11 +77,20 @@ fun ItemSummaryCard(
                 color = MaterialTheme.colorScheme.primaryContainer,
             ) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    ZeraIcon(
-                        icon = icon ?: ZeraIcon.Placeholder,
-                        contentDescription = null,
-                        tint = ZeraColorFamily.Blue.palette().onContainer,
-                    )
+                    if (photoUrl.isNullOrBlank()) {
+                        ZeraIcon(
+                            icon = icon ?: ZeraIcon.Placeholder,
+                            contentDescription = null,
+                            tint = ZeraColorFamily.Blue.palette().onContainer,
+                        )
+                    } else {
+                        AsyncImage(
+                            model = photoUrl,
+                            contentDescription = itemName,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop,
+                        )
+                    }
                 }
             }
             Column(verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
