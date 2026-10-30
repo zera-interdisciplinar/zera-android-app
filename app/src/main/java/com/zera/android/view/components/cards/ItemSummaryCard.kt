@@ -1,5 +1,6 @@
 package com.zera.android.view.components.cards
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,16 +10,23 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import coil.compose.AsyncImagePainter
 import com.zera.android.view.components.containers.ZeraBox
 import com.zera.android.view.components.outros.ItemStatus
 import com.zera.android.view.components.outros.ItemStatusTag
@@ -49,8 +57,9 @@ private val ThumbnailSize = 72.dp
  * @param icon ícone do catálogo [ZeraIcon] exibido na miniatura. Quando `null`
  *   (padrão), usa [ZeraIcon.Placeholder]. Ignorado quando há [photoUrl].
  * @param photoUrl URL da foto do item. Quando informada, a miniatura mostra a foto
- *   (recortada para preencher o quadrado) no lugar do [icon]; quando `null` ou em
- *   branco (padrão), mostra o ícone.
+ *   (recortada para preencher o quadrado) no lugar do [icon], com um indicador de
+ *   progresso por cima enquanto ela carrega; quando `null` ou em branco (padrão),
+ *   mostra o ícone.
  */
 @Composable
 fun ItemSummaryCard(
@@ -62,6 +71,8 @@ fun ItemSummaryCard(
     icon: ZeraIcon? = null,
     photoUrl: String? = null,
 ) {
+    var isImageLoading by remember(photoUrl) { mutableStateOf(!photoUrl.isNullOrBlank()) }
+
     ZeraBox(
         modifier = modifier.fillMaxWidth(),
         style = ZeraColorFamily.Blue,
@@ -89,7 +100,25 @@ fun ItemSummaryCard(
                             contentDescription = itemName,
                             modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.Crop,
+                            onState = { imageState ->
+                                isImageLoading = imageState is AsyncImagePainter.State.Loading
+                            },
                         )
+                    }
+
+                    if (isImageLoading) {
+                        Box(
+                            modifier = Modifier
+                                .matchParentSize()
+                                .background(Color.Black.copy(alpha = 0.45f)),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(ThumbnailSize * 0.32f),
+                                color = Color.White,
+                                strokeWidth = 3.dp,
+                            )
+                        }
                     }
                 }
             }
