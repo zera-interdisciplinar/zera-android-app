@@ -415,9 +415,9 @@ class ItemDetailsViewModel : ZeraViewModel() {
             !isEmployee &&
                 (status == ItemStatus.PendingApproval || status == ItemStatus.AwaitingEvaluation)
 
-        // Sem status (item não carregado) o botão não aparece.
-        internal fun canSendToMaintenance(status: ItemStatus?): Boolean =
-            status != null && status != ItemStatus.InMaintenance
+        // Só o Operário manda para manutenção, e só item no estoque.
+        internal fun canSendToMaintenance(status: ItemStatus?, isEmployee: Boolean = false): Boolean =
+            isEmployee && status == ItemStatus.InStock
 
         internal fun notesValidationError(value: String): String? {
             val trimmed = value.trim()
@@ -537,7 +537,7 @@ class ItemDetailsViewModel : ZeraViewModel() {
             // TODO: alinhar com o back-end o envio do photoUrl do item (hoje o ItemResponse pode vir sem foto).
             photoUrl = item.photoUrl?.takeIf { it.isNotBlank() },
             canReview = canReview(statusFrom(item.status), isEmployee),
-            canSendToMaintenance = canSendToMaintenance(statusFrom(item.status)),
+            canSendToMaintenance = canSendToMaintenance(statusFrom(item.status), isEmployee),
         )
 
         internal fun userFacingError(
