@@ -4,7 +4,7 @@
 
 - **Feature:** Detalhe de um item (`ItemDetailsScreen`)
 - **Perfil(is) envolvido(s):** Gestor
-- **Status:** implementado (leitura + aprovar/recusar/editar nome e condição)
+- **Status:** implementado (leitura + aprovar/recusar/editar nome, condição e foto)
 - **Última atualização:** 2026-09-26
 
 ## Contexto
@@ -65,6 +65,18 @@ Como Gestor, quero ver os dados reais de um item ao abri-lo, para conferir statu
 - **When** a mutação termina
 - **Then** `errorMessage` explica que o status atual não permite a ação
 
+### Cenário: Tirar ou trocar foto
+
+- **Given** o detalhe carregou com ou sem foto
+- **When** o usuário toca na miniatura e concede a permissão da câmera
+- **Then** o app abre a câmera, comprime a captura como JPEG, envia para o bucket Supabase de itens e mostra a URL pública na sessão atual
+
+### Cenário: Configuração Supabase ausente
+
+- **Given** `supabase-url`, `supabase-anon-key` ou `supabase-items-bucket` está vazio
+- **When** o usuário tenta enviar uma foto
+- **Then** a tela informa que o envio não está disponível
+
 ## Critérios de aceite
 
 - [x] Sem mock; carga por `itemId` da rota
@@ -73,6 +85,8 @@ Como Gestor, quero ver os dados reais de um item ao abri-lo, para conferir statu
 - [x] `POST .../approve` no botão Aprovar
 - [x] `PATCH .../{id}` no botão Editar / lápis de condição (parcial: só o campo alterado)
 - [x] Botão Recusar (`POST .../reject` com `reason`)
+- [x] Captura de foto e envio ao bucket Supabase de itens
+- [x] Troca de foto pela ação do visualizador ampliado
 
 ## Edge cases considerados
 
@@ -85,6 +99,7 @@ Como Gestor, quero ver os dados reais de um item ao abri-lo, para conferir statu
 
 - Listagem (`itens.md`).
 - PATCH de categoria/material (pertencem ao modelo, não ao item).
+- Persistência definitiva e remoção de `photoUrl`: os contratos atuais não oferecem campo/endpoint para isso; o upload ao Supabase fica disponível nesta sessão da tela.
 - Chip “Pendentes” pré-selecionado ao sair de `ItemApprovedScreen`.
 
 ## Referências

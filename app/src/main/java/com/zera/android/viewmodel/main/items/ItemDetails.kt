@@ -132,13 +132,15 @@ class ItemDetailsViewModel : ZeraViewModel() {
         viewModelScope.launch {
             try {
                 val photoUrl = uploadItemPhoto.execute(itemId, bytes, PhotoCapture.MimeType)
-                // TODO: gravar o photoUrl no item — o contrato ainda não tem endpoint/campo para isso
-                //  (UpdateItemRequestDTO não tem foto). Até lá a URL só vale nesta sessão da tela.
+                // O contrato atual não persiste photoUrl em PATCH; a URL é exibida nesta sessão.
                 _state.value = _state.value.copy(
                     photoUrl = ProfileViewModel.cacheBust(photoUrl),
                     isUploadingPhoto = false,
+                    showPhotoViewer = false,
+                    errorMessage = null,
                 )
             } catch (e: CancellationException) {
+                _state.value = _state.value.copy(isUploadingPhoto = false)
                 throw e
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
@@ -158,11 +160,12 @@ class ItemDetailsViewModel : ZeraViewModel() {
         _state.value = _state.value.copy(showPhotoViewer = false)
     }
 
-    // TODO: upload da nova foto — o contrato ainda não tem endpoint para gravar a foto do item.
-    fun onChangePhotoClick() = Unit
-
-    // TODO: remoção da foto — o contrato ainda não tem endpoint para remover a foto do item.
-    fun onRemovePhotoClick() = Unit
+    fun onRemovePhotoClick() {
+        _state.value = _state.value.copy(
+            showPhotoViewer = false,
+            errorMessage = "Remover foto ainda não está disponível pelo contrato atual.",
+        )
+    }
 
     fun onEditClick() {
         _state.value = _state.value.copy(editDraft = draftFrom(_state.value), errorMessage = null)

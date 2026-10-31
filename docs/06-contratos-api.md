@@ -68,6 +68,8 @@ Fonte: [Confluence ms-inventory](https://zerainterdisciplinar.atlassian.net/wiki
 | `POST` | `api/v1/items/{id}/reject` | path `id`, `{ "reason" }` | `ItemResponseDTO` | `RejectItem.execute()` (`ItemDetailsViewModel`, `ModelDetailsViewModel`) |
 | `PATCH` | `api/v1/items/{id}` | parcial: `name`, `condition`, `hasDamages`, `damages`, `notes`, `serialNumber`, `acquiredAt`, `manufacturingYear`, `usageIntensity` | `ItemResponseDTO` | `UpdateItem.execute()` (`ItemDetailsViewModel`; a PDI só envia `name` ou `condition`) |
 
+A foto de um item é enviada diretamente ao Supabase Storage pelo `UploadItemPhoto`, usando `supabase-items-bucket` e o endereço público `<supabase-url>/storage/v1/object/public/<bucket>/<itemId>/photo.<ext>`. O contrato de item não expõe persistência de `photoUrl` nem remoção; a URL enviada é exibida nesta sessão até recarregar o detalhe.
+
 `GET /api/v1/dashboard/home` alimenta ocupação e `recentItems` na home do Gestor e na home do Operário. `GET /api/v1/dashboard/work-center` alimenta a seção Pendências da home (resumo por bucket) e a Central de Trabalho (um card por item). O recorte do work-center é o usuário do token (sem query).
 
 ## Autenticação (AuthService)

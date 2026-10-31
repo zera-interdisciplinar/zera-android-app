@@ -27,6 +27,21 @@ class SupabaseStorageTest {
     }
 
     @Test
+    fun itemObjectPathAndPublicUrlUseItemsBucket() {
+        val environmentsWithItemsBucket = environments.copy(
+            supabaseItemsBucket = "items",
+        )
+        val path = SupabaseStorage.itemObjectPath("item-1", "image/jpeg")
+
+        assertEquals("item-1/photo.jpg", path)
+        assertEquals(
+            "https://abc.supabase.co/storage/v1/object/public/items/item-1/photo.jpg",
+            SupabaseStorage.publicUrl(environmentsWithItemsBucket, path, "items"),
+        )
+        assertTrue(SupabaseStorage.isConfigured(environmentsWithItemsBucket, "items"))
+    }
+
+    @Test
     fun isConfiguredRequiresAllThreeFields() {
         assertTrue(SupabaseStorage.isConfigured(environments))
         assertFalse(

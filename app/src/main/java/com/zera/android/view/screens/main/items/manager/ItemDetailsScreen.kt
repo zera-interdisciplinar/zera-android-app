@@ -268,7 +268,10 @@ fun ItemDetailsScreen(
     if (state.showPhotoViewer && photoUrl != null) {
         PhotoViewerDialog(
             photoUrl = photoUrl,
-            onChangeClick = viewModel::onChangePhotoClick,
+            onChangeClick = {
+                viewModel.onPhotoViewerDismiss()
+                onPhotoAdd()
+            },
             onRemoveClick = viewModel::onRemovePhotoClick,
             onDismissRequest = viewModel::onPhotoViewerDismiss,
             contentDescription = state.itemName,
