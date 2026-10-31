@@ -13,7 +13,10 @@ import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.view.transition.ScreenAnimation
 import com.zera.android.viewmodel.ZeraViewModel
+import com.zera.android.view.components.navigation.SideBarItem
 import com.zera.android.viewmodel.canCancelDisposal
+import com.zera.android.viewmodel.isEmployeeRole
+import com.zera.android.viewmodel.sideBarItemsFor
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
@@ -31,6 +34,7 @@ data class SchedulingDetailsState(
     val isGeneratingReport: Boolean = false,
     val isCancelling: Boolean = false,
     val canCancel: Boolean = false,
+    val sideBarItems: List<SideBarItem> = emptyList(),
     val errorMessage: String? = null,
 )
 
@@ -58,11 +62,14 @@ class SchedulingDetailsViewModel : ZeraViewModel() {
         viewModelScope.launch {
             try {
                 val user = getSelfUser.execute()
-                _state.value = _state.value.copy(canCancel = canCancelDisposal(user.role))
+                _state.value = _state.value.copy(
+                    canCancel = canCancelDisposal(user.role),
+                    sideBarItems = sideBarItemsFor(isEmployeeRole(user.role)),
+                )
             } catch (e: CancellationException) {
                 throw e
             } catch (_: Exception) {
-                _state.value = _state.value.copy(canCancel = false)
+                _state.value = _state.value.copy(canCancel = false, sideBarItems = sideBarItemsFor(isEmployee = false))
             }
         }
         viewModelScope.launch {

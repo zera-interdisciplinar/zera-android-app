@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -39,12 +40,14 @@ import com.zera.android.view.components.forms.EditItemForm
 import com.zera.android.view.components.inputs.ZeraInputPopup
 import com.zera.android.view.components.lists.EditableFieldRow
 import com.zera.android.view.components.loading.SkeletonBox
+import com.zera.android.view.components.navigation.SideBarOverlay
 import com.zera.android.view.components.navigation.UpperNavBar
 import com.zera.android.view.components.outros.ItemStatus
 import com.zera.android.view.components.overlays.BottomSheet
 import com.zera.android.view.components.overlays.PhotoViewerDialog
 import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.media.PhotoCapture
+import com.zera.android.view.navigation.Route
 import com.zera.android.view.theme.Radius
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraColorFamily
@@ -68,6 +71,7 @@ fun ItemDetailsScreen(
     viewModel: ItemDetailsViewModel = viewModel()
 ) {
     val state by viewModel.state
+    var showSideBar by rememberSaveable { mutableStateOf(false) }
     var showRejectPopup by remember { mutableStateOf(false) }
     val actionsEnabled = !state.isLoading && !state.isSubmitting && state.itemId.isNotBlank()
     val context = LocalContext.current
@@ -116,105 +120,115 @@ fun ItemDetailsScreen(
         if (granted) launchCamera() else cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
     }
 
-    Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
-        topBar = {
-            UpperNavBar(
-                title = "Detalhes do Item",
-                goBack = true,
-                onBackClick = viewModel::onBackClick,
-                modifier = Modifier
-                    .statusBarsPadding()
-                    .padding(horizontal = Spacing.small),
-            )
-        },
-        bottomBar = {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .navigationBarsPadding()
-                    .padding(horizontal = Spacing.medium, vertical = Spacing.small),
-                verticalArrangement = Arrangement.spacedBy(Spacing.small),
-            ) {
-                if (state.canReview) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(Spacing.medium),
-                    ) {
-                        ZeraButton(
-                            text = "Recusar",
-                            onClick = { showRejectPopup = true },
-                            type = ZeraButtonType.Secondary,
-                            style = ZeraColorFamily.Red,
-                            enabled = actionsEnabled,
-                            modifier = Modifier.weight(1f),
-                        )
-                        ZeraButton(
-                            text = if (state.isSubmitting) "Enviando..." else "Aprovar",
-                            onClick = viewModel::onApproveClick,
-                            enabled = actionsEnabled,
-                            modifier = Modifier.weight(1f),
-                        )
+    Box(modifier = Modifier.fillMaxSize()) {
+        Scaffold(
+            containerColor = MaterialTheme.colorScheme.background,
+            topBar = {
+                UpperNavBar(
+                    title = "Detalhes do Item",
+                    goBack = true,
+                    onSideBarClick = { showSideBar = true },
+                    onBackClick = viewModel::onBackClick,
+                    modifier = Modifier
+                        .statusBarsPadding()
+                        .padding(horizontal = Spacing.small),
+                )
+            },
+            bottomBar = {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .navigationBarsPadding()
+                        .padding(horizontal = Spacing.medium, vertical = Spacing.small),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.small),
+                ) {
+                    if (state.canReview) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(Spacing.medium),
+                        ) {
+                            ZeraButton(
+                                text = "Recusar",
+                                onClick = { showRejectPopup = true },
+                                type = ZeraButtonType.Secondary,
+                                style = ZeraColorFamily.Red,
+                                enabled = actionsEnabled,
+                                modifier = Modifier.weight(1f),
+                            )
+                            ZeraButton(
+                                text = if (state.isSubmitting) "Enviando..." else "Aprovar",
+                                onClick = viewModel::onApproveClick,
+                                enabled = actionsEnabled,
+                                modifier = Modifier.weight(1f),
+                            )
+                        }
                     }
-                }
-                ZeraButton(
-                    text = "Editar",
-                    onClick = viewModel::onEditClick,
-                    type = ZeraButtonType.Secondary,
-                    enabled = actionsEnabled,
-                    fillMaxWidth = true,
-                )
-            }
-        },
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = Spacing.medium, vertical = Spacing.small),
-            verticalArrangement = Arrangement.spacedBy(Spacing.medium),
-        ) {
-            if (state.isLoading) {
-                ItemDetailsSkeleton()
-            } else {
-                state.errorMessage?.let { message ->
-                    CaptionText(text = message, color = MaterialTheme.colorScheme.error)
-                }
-
-                ItemSummaryCard(
-                    itemName = state.itemName,
-                    itemSubtitle = state.itemSubtitle,
-                    status = state.status,
-                    condition = state.condition,
-                    photoUrl = state.photoUrl,
-                    onPhotoAdd = onPhotoAdd,
-                    onPhotoInspect = viewModel::onPhotoInspect,
-                    isPhotoUploading = state.isUploadingPhoto,
-                )
-
-                if (state.canSendToMaintenance) {
                     ZeraButton(
-                        text = if (state.isSubmitting) "Enviando..." else "Colocar em manutenção",
-                        onClick = viewModel::onSendToMaintenanceClick,
+                        text = "Editar",
+                        onClick = viewModel::onEditClick,
                         type = ZeraButtonType.Secondary,
-                        style = ZeraColorFamily.Yellow,
                         enabled = actionsEnabled,
                         fillMaxWidth = true,
                     )
                 }
+            },
+        ) { innerPadding ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = Spacing.medium, vertical = Spacing.small),
+                verticalArrangement = Arrangement.spacedBy(Spacing.medium),
+            ) {
+                if (state.isLoading) {
+                    ItemDetailsSkeleton()
+                } else {
+                    state.errorMessage?.let { message ->
+                        CaptionText(text = message, color = MaterialTheme.colorScheme.error)
+                    }
 
-                EditableFieldRow(label = "Nome", value = state.itemName)
-                EditableFieldRow(label = "Categoria", value = state.category)
-                EditableFieldRow(label = "Material", value = state.material)
-                EditableFieldRow(label = "Condição", value = state.condition)
-                EditableFieldRow(label = "Número de série", value = state.serialNumber)
-                EditableFieldRow(label = "Data de aquisição", value = state.acquiredAt)
-                EditableFieldRow(label = "Observações", value = state.notes)
-                EditableFieldRow(label = "Cadastrado Por", value = state.registeredBy)
-                EditableFieldRow(label = "Data de Cadastro", value = state.registeredAt)
+                    ItemSummaryCard(
+                        itemName = state.itemName,
+                        itemSubtitle = state.itemSubtitle,
+                        status = state.status,
+                        condition = state.condition,
+                        photoUrl = state.photoUrl,
+                        onPhotoAdd = onPhotoAdd,
+                        onPhotoInspect = viewModel::onPhotoInspect,
+                        isPhotoUploading = state.isUploadingPhoto,
+                    )
+
+                    if (state.canSendToMaintenance) {
+                        ZeraButton(
+                            text = if (state.isSubmitting) "Enviando..." else "Colocar em manutenção",
+                            onClick = viewModel::onSendToMaintenanceClick,
+                            type = ZeraButtonType.Secondary,
+                            style = ZeraColorFamily.Yellow,
+                            enabled = actionsEnabled,
+                            fillMaxWidth = true,
+                        )
+                    }
+
+                    EditableFieldRow(label = "Nome", value = state.itemName)
+                    EditableFieldRow(label = "Categoria", value = state.category)
+                    EditableFieldRow(label = "Material", value = state.material)
+                    EditableFieldRow(label = "Condição", value = state.condition)
+                    EditableFieldRow(label = "Número de série", value = state.serialNumber)
+                    EditableFieldRow(label = "Data de aquisição", value = state.acquiredAt)
+                    EditableFieldRow(label = "Observações", value = state.notes)
+                    EditableFieldRow(label = "Cadastrado Por", value = state.registeredBy)
+                    EditableFieldRow(label = "Data de Cadastro", value = state.registeredAt)
+                }
             }
         }
+
+        SideBarOverlay(
+            visible = showSideBar,
+            onDismiss = { showSideBar = false },
+            items = state.sideBarItems,
+            currentRoute = Route.ItemDetails(itemId),
+        )
     }
 
     state.editDraft?.let { draft ->

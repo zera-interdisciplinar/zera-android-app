@@ -5,6 +5,8 @@ import com.zera.android.model.dto.inventory.ItemResponseDTO
 import com.zera.android.model.dto.inventory.MaterialResponseDTO
 import com.zera.android.model.dto.inventory.ModelResponseDTO
 import com.zera.android.model.dto.inventory.UpdateItemRequestDTO
+import com.zera.android.view.components.navigation.EmployeeSideBarItems
+import com.zera.android.view.components.navigation.ManagerSideBarItems
 import com.zera.android.view.components.outros.ItemStatus
 import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals
@@ -179,6 +181,13 @@ class ItemDetailsMappingTest {
         }
         assertEquals(false, ItemDetailsViewModel.canSendToMaintenance(null, isEmployee = true))
         assertEquals(false, ItemDetailsViewModel.canSendToMaintenance(ItemStatus.InStock, isEmployee = false))
+    }
+
+    @Test
+    fun sideBarFollowsUserRole() {
+        val item = ItemResponseDTO(id = "id-1", name = "Notebook", status = "IN_STOCK")
+        assertEquals(EmployeeSideBarItems, ItemDetailsViewModel.stateFrom(item, isEmployee = true).sideBarItems)
+        assertEquals(ManagerSideBarItems, ItemDetailsViewModel.stateFrom(item, isEmployee = false).sideBarItems)
     }
 
     @Test

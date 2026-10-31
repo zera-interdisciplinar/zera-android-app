@@ -16,7 +16,9 @@ import com.zera.android.view.media.PhotoCapture
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.viewmodel.ZeraViewModel
+import com.zera.android.view.components.navigation.SideBarItem
 import com.zera.android.viewmodel.isEmployeeRole
+import com.zera.android.viewmodel.sideBarItemsFor
 import com.zera.android.viewmodel.profile.ProfileViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
@@ -54,6 +56,7 @@ data class ItemDetailsState(
     val isUploadingPhoto: Boolean = false,
     val canReview: Boolean = false,
     val canSendToMaintenance: Boolean = false,
+    val sideBarItems: List<SideBarItem> = emptyList(),
     val isLoading: Boolean = true,
     val isSubmitting: Boolean = false,
     val errorMessage: String? = null,
@@ -538,6 +541,7 @@ class ItemDetailsViewModel : ZeraViewModel() {
             photoUrl = item.photoUrl?.takeIf { it.isNotBlank() },
             canReview = canReview(statusFrom(item.status), isEmployee),
             canSendToMaintenance = canSendToMaintenance(statusFrom(item.status), isEmployee),
+            sideBarItems = sideBarItemsFor(isEmployee),
         )
 
         internal fun userFacingError(

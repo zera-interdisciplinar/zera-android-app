@@ -14,7 +14,9 @@ import com.zera.android.model.usecase.inventory.UpdateModel
 import com.zera.android.view.components.outros.ItemStatus
 import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.viewmodel.ZeraViewModel
+import com.zera.android.view.components.navigation.SideBarItem
 import com.zera.android.viewmodel.isEmployeeRole
+import com.zera.android.viewmodel.sideBarItemsFor
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
@@ -31,6 +33,7 @@ data class ModelDetailsState(
     val canReview: Boolean = false,
     val canEdit: Boolean = false,
     val reviewHint: String = "",
+    val sideBarItems: List<SideBarItem> = emptyList(),
     val isLoading: Boolean = true,
     val isSubmitting: Boolean = false,
     val errorMessage: String? = null,
@@ -280,6 +283,7 @@ class ModelDetailsViewModel : ZeraViewModel() {
                 canReview = canReview(isEmployee, status, pendingItemId),
                 canEdit = canEdit(isEmployee),
                 reviewHint = reviewHint(isEmployee, status, pendingItemId),
+                sideBarItems = sideBarItemsFor(isEmployee),
             )
         }
     }
