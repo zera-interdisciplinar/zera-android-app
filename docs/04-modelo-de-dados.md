@@ -42,6 +42,8 @@ Pacote `model/dto/inventory/`. Só os campos que as telas usam; o restante do JS
 - **`IndicatorsResponseDTO`** — `GET /api/v1/dashboard/indicators`: `recyclingRatePercent`, `recyclingRateChangePoints?`, `monthlyWeightKg`, `weightByMaterial`.
 - **`MonthlyWeightDTO(month, weightKg)`** — `month` no formato `yyyy-MM`.
 - **`WeightByMaterialDTO(material, percent)`** — `material` é código (`PLASTIC`, `METAL`, ...).
+- **`DashboardByCategoryResponseDTO`** — `GET /api/v1/dashboard/by-category`: `categories`, `totalItems`.
+- **`CategoryInventoryDTO(categoryId?, name?, itemCount, percent)`** — `percent` em 0–100; `name` nulo = item sem categoria.
 
 Campos do contrato **não** modelados no app: `stockCapacity`, `disposalsInWindow`, `windowDays`, barcode/damages/serial da listagem.
 

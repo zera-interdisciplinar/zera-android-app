@@ -8,7 +8,7 @@
 
 ## Visão geral
 
-Regras de apresentação dos agregados devolvidos pelo `ms-inventory` (`GET /api/v1/dashboard/home` e `GET /api/v1/dashboard/indicators`). O backend já calcula os totais; o app só converte unidade, formata rótulos e decide o que entra em cada card/gráfico.
+Regras de apresentação dos agregados devolvidos pelo `ms-inventory` (`GET /api/v1/dashboard/home`, `GET /api/v1/dashboard/indicators` e `GET /api/v1/dashboard/by-category`). O backend já calcula os totais; o app só converte unidade, formata rótulos e decide o que entra em cada card/gráfico.
 
 ## Regras
 
@@ -100,6 +100,10 @@ Cada `weightByMaterial.percent` (0–100) vira `BarGraphItem.percentage` (0–1)
 | qualquer outro | o próprio código, sem tradução |
 
 Lista vazia mostra o empty state do `HorizontalBarGraph` ("Nenhum resíduo no período"), não um card em branco.
+
+### Itens por categoria
+
+Fonte: `GET /api/v1/dashboard/by-category` (`GetDashboardByCategory`). Sem `from`/`to` — o recorte é o estoque ativo da unidade, não o período dos chips. Cada `percent` (0–100) vira `BarGraphItem.percentage` (0–1). `name` nulo ou em branco vira "Sem categoria". Lista vazia mostra "Nenhum item ativo". O app não agrega `GET /items` para este gráfico.
 
 ### Unidade consultada
 
