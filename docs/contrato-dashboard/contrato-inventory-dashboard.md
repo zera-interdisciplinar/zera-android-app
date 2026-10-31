@@ -278,6 +278,38 @@ curl -X GET "https://<host>/api/v1/dashboard/indicators?from=2026-01-01&to=2026-
 
 ---
 
+## 4. `GET /api/v1/dashboard/by-category`
+
+**O que essa rota entrega:** itens **ativos** da unidade agrupados pela categoria do modelo (`itemCount` e `percent` sobre o total ativo). Sem paginação. Item sem modelo/categoria entra com `categoryId` e `name` nulos. Categorias vazias não aparecem.
+
+**Quando o cliente deve usar:** gráfico de itens por categoria na `IndexesScreen`. Não montar esse gráfico a partir de `GET /items`.
+
+### Request
+
+```
+GET /api/v1/dashboard/by-category HTTP/1.1
+Authorization: Bearer <token>
+X-Unit-Id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+```
+
+### Response — `200 OK`
+
+```json
+{
+  "categories": [
+    { "categoryId": "uuid", "name": "Notebooks", "itemCount": 3, "percent": 75.0 }
+  ],
+  "totalItems": 4
+}
+```
+
+| Campo | Tipo | Observação |
+|---|---|---|
+| `categories` | lista `{categoryId?, name?, itemCount, percent}` | `percent` em 0–100. `name` nulo = item sem categoria. |
+| `totalItems` | long | Total ativo da unidade (denominador do percentual). |
+
+---
+
 ## Enums usados nas respostas
 
 - **`ItemStatus`**: `DRAFT`, `PENDING_APPROVAL`, `REJECTED`, `IN_STOCK`, `IN_MAINTENANCE`, `AWAITING_EVALUATION`, `DISPOSED`, `REMOVED`.
@@ -292,3 +324,4 @@ curl -X GET "https://<host>/api/v1/dashboard/indicators?from=2026-01-01&to=2026-
 | Números gerais da unidade + últimos itens cadastrados (com paginação) | `/dashboard/home` |
 | O que o usuário logado precisa resolver agora (rascunhos, reprovados, danificados) | `/dashboard/work-center` |
 | Gráficos de descarte/reciclagem, com opção de período customizado | `/dashboard/indicators` |
+| Gráfico de itens ativos por categoria | `/dashboard/by-category` |

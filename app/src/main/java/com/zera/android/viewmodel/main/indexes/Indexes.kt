@@ -2,6 +2,7 @@ package com.zera.android.viewmodel.main.indexes
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
+import com.zera.android.model.usecase.inventory.GetDashboardByCategory
 import com.zera.android.model.usecase.inventory.GetIndicators
 import com.zera.android.view.components.graphs.BarGraphItem
 import com.zera.android.view.components.graphs.VerticalBarGraphItem
@@ -24,6 +25,7 @@ data class IndexesState(
     val recyclingRateProgress: Float = 0f,
     val monthlyEvolution: List<VerticalBarGraphItem> = emptyList(),
     val residuesByCategory: List<BarGraphItem> = emptyList(),
+    val itemsByCategory: List<BarGraphItem> = emptyList(),
     val isLoading: Boolean = true,
     val errorMessage: String? = null,
 ) {
@@ -36,6 +38,7 @@ data class IndexesState(
 
 class IndexesViewModel : ZeraViewModel() {
     private val getIndicators = GetIndicators()
+    private val getDashboardByCategory = GetDashboardByCategory()
 
     private val _state = mutableStateOf(IndexesState())
     val state = _state
@@ -58,6 +61,7 @@ class IndexesViewModel : ZeraViewModel() {
             try {
                 val (from, to) = periodFor(filter)
                 val indicators = getIndicators.execute(from = from, to = to)
+                val byCategory = getDashboardByCategory.execute()
                 _state.value = _state.value.copy(
                     recyclingRateLabel = formatPercent(indicators.recyclingRatePercent),
                     recyclingRateDeltaLabel = formatDeltaPoints(indicators.recyclingRateChangePoints).orEmpty(),
@@ -73,6 +77,12 @@ class IndexesViewModel : ZeraViewModel() {
                         BarGraphItem(
                             label = materialLabel(material.material),
                             percentage = (material.percent / 100.0).toFloat().coerceIn(0f, 1f),
+                        )
+                    },
+                    itemsByCategory = byCategory.categories.map { category ->
+                        BarGraphItem(
+                            label = categoryLabel(category.name),
+                            percentage = (category.percent / 100.0).toFloat().coerceIn(0f, 1f),
                         )
                     },
                     errorMessage = null,
@@ -116,6 +126,8 @@ class IndexesViewModel : ZeraViewModel() {
                 .replaceFirstChar { it.uppercase() }
                 .take(3)
         }
+
+        internal fun categoryLabel(name: String?): String = name?.takeIf { it.isNotBlank() } ?: "Sem categoria"
 
         internal fun materialLabel(code: String): String = when (code) {
             "PLASTIC" -> "Plásticos"
