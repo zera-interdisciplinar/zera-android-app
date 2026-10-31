@@ -66,7 +66,7 @@ Como usuário cadastrado (Funcionário ou Gestor), quero entrar com meu email e 
 
 ## Fora de escopo desta spec
 
-- "Esqueci minha senha" — o link existe na UI (`CaptionText` em `SignInScreen`) mas sem ação implementada (`onClick = {}`).
+- "Esqueci minha senha" está implementado pelo fluxo de solicitação e confirmação de redefinição, incluindo deep link `zera://reset-password?token=<token>`.
 - Refresh automático de token expirado — não implementado (ver "Tratamento de erros" em [06-contratos-api.md](../06-contratos-api.md)).
 - Cadastro de novo usuário — ver [cadastro-funcionario.md](cadastro-funcionario.md).
 
