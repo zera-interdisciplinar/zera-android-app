@@ -84,6 +84,8 @@ class RecyclingResumeViewModel : ZeraViewModel() {
     fun onConfirmClick() {
         val current = _state.value
         if (current.itemIds.isEmpty() || current.isConfirming) return
+
+        ZeraNavigator.navigationStatus(false)
         _state.value = current.copy(isConfirming = true, errorMessage = null)
         viewModelScope.launch {
             try {
@@ -93,6 +95,7 @@ class RecyclingResumeViewModel : ZeraViewModel() {
                     placeName = current.recyclerName,
                 )
                 _state.value = _state.value.copy(isConfirming = false)
+                ZeraNavigator.navigationStatus(true)
                 ZeraNavigator.pushAndPop(
                     Route.SchedulingSuccess(
                         recyclerName = current.recyclerName,
@@ -106,8 +109,11 @@ class RecyclingResumeViewModel : ZeraViewModel() {
                     animation = ScreenAnimation.SlideHorizontal,
                 )
             } catch (error: CancellationException) {
+                ZeraNavigator.navigationStatus(true)
+                _state.value = _state.value.copy(isConfirming = false)
                 throw error
             } catch (error: Exception) {
+                ZeraNavigator.navigationStatus(true)
                 _state.value = _state.value.copy(
                     isConfirming = false,
                     errorMessage = confirmError(error),
@@ -125,6 +131,11 @@ class RecyclingResumeViewModel : ZeraViewModel() {
             ),
             animation = ScreenAnimation.SlideHorizontal,
         )
+    }
+
+    override fun onCleared() {
+        ZeraNavigator.navigationStatus(true)
+        super.onCleared()
     }
 
     private fun loadContact(recyclingBusinessId: String, email: String) {

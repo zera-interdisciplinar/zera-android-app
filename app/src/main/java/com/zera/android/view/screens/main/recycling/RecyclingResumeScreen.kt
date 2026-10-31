@@ -12,6 +12,7 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -26,6 +27,7 @@ import com.zera.android.view.components.texts.BodyText
 import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.components.texts.OverlineText
 import com.zera.android.view.components.texts.TitleText
+import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.view.theme.ZeraTheme
@@ -57,12 +59,20 @@ fun RecyclingResumeScreen(
         )
     }
 
+    DisposableEffect(state.isConfirming) {
+        onDispose {
+            if (state.isConfirming) {
+                ZeraNavigator.navigationStatus(true)
+            }
+        }
+    }
+
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             UpperNavBar(
                 title = "Resumo de Descarte",
-                goBack = true,
+                goBack = !state.isConfirming,
                 showActions = false,
                 modifier = Modifier
                     .statusBarsPadding()
@@ -132,7 +142,8 @@ fun RecyclingResumeScreen(
                     ZeraButton(
                         text = "Visualizar Itens selecionados",
                         onClick = viewModel::onViewItemsClick,
-                        fillMaxWidth = true
+                        fillMaxWidth = true,
+                        enabled = !state.isConfirming,
                     )
                 }
 
