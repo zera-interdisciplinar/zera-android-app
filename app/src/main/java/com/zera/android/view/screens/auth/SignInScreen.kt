@@ -70,7 +70,7 @@ fun SignInScreen(
             CaptionText(
                 text = "Esqueci minha senha",
                 underline = true,
-                onClick = { viewModel::onForgotPasswordClick },
+                onClick = viewModel::onForgotPasswordClick,
                 textAlign = TextAlign.Left,
                 modifier = Modifier.fillMaxWidth().padding(Spacing.small),
             )
