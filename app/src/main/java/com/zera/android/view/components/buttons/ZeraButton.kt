@@ -11,6 +11,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -20,6 +21,9 @@ import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.view.theme.ZeraTheme
 import com.zera.android.view.theme.icons.ZeraIcon
+
+/** Opacidade do botão em carregamento: mantém as cores do estilo, só esmaecidas. */
+private const val LoadingAlpha = 0.5f
 
 /**
  * Botão padrão do app.
@@ -31,7 +35,8 @@ import com.zera.android.view.theme.icons.ZeraIcon
  * @param style família de cor do botão. Ver [ZeraColorFamily].
  * @param type hierarquia visual dentro do estilo. Ver [ZeraButtonType].
  * @param enabled habilita ou desabilita a interação.
- * @param loading quando `true`, troca o rótulo por um indicador e bloqueia o toque.
+ * @param loading quando `true`, troca o rótulo por um indicador circular e bloqueia o toque.
+ *   O botão mantém as cores do [style], só com 50% de opacidade.
  * @param icon ícone opcional do catálogo [ZeraIcon]. Quando não for `null`, é exibido
  *   logo ao lado do texto.
  * @param width largura fixa em dp. Quando informado, ignora [fillMaxWidth], [maxWidth] e [minWidth].
@@ -66,9 +71,10 @@ fun ZeraButton(
                         max = maxWidth?.dp ?: Dp.Unspecified,
                     )
                 } else Modifier
-            ),
+            )
+            .then(if (loading) Modifier.alpha(LoadingAlpha) else Modifier),
         enabled = enabled && !loading,
-        colors = buttonColors(style, type),
+        colors = buttonColors(style, type, keepColorsWhenDisabled = loading),
         border = buttonBorder(style, type),
         shape = RoundedCornerShape(Radius.large),
 
@@ -112,6 +118,20 @@ private fun ZeraButtonPreview() {
             onClick = {},
             modifier = Modifier.padding(Spacing.medium),
             style = ZeraColorFamily.Yellow,
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun ZeraButtonLoadingPreview() {
+    ZeraTheme {
+        ZeraButton(
+            text = "Continuar",
+            onClick = {},
+            modifier = Modifier.padding(Spacing.medium),
+            fillMaxWidth = true,
+            loading = true,
         )
     }
 }
