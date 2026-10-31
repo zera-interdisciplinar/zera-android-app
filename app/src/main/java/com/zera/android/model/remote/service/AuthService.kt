@@ -1,5 +1,7 @@
 package com.zera.android.model.remote.service
 
+import com.zera.android.model.dto.auth.PasswordResetConfirmDTO
+import com.zera.android.model.dto.auth.PasswordResetRequestDTO
 import com.zera.android.model.dto.auth.RefreshRequestDTO
 import com.zera.android.model.dto.auth.SingInRequestDTO
 import com.zera.android.model.dto.auth.SingInResponseDTO
@@ -15,4 +17,12 @@ interface AuthService {
 
     @POST("auth/logout")
     suspend fun logout()
+
+    // 202 sem corpo, exista a conta ou não (evita enumeração de e-mails).
+    @POST("auth/password-reset/request")
+    suspend fun requestPasswordReset(@Body body: PasswordResetRequestDTO)
+
+    // 204 sem corpo; token inválido, usado ou expirado → 400.
+    @POST("auth/password-reset/confirm")
+    suspend fun confirmPasswordReset(@Body body: PasswordResetConfirmDTO)
 }

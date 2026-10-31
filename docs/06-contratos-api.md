@@ -81,6 +81,10 @@ Fonte: [Confluence ms-inventory](https://zerainterdisciplinar.atlassian.net/wiki
 | `POST` | `auth/logout` | — | — | `SignOut.execute()` (logout no perfil) |
 
 `auth/logout` revoga o refresh token e é autenticado: leva `Authorization: Bearer`, mas um `401` nele não dispara refresh nem re-login (`isCredentialRequest`). `SignOut` desregistra o device token, chama o logout (timeout de 5s, falhas ignoradas) e só então limpa a sessão local (`SingIn.clearLocalSession`). Expiração de sessão, Splash e falhas de login continuam só com `clearSession()`, sem revogar.
+| `POST` | `auth/password-reset/request` | `PasswordResetRequestDTO(email)` | `202` sem corpo, exista a conta ou não | `RequestPasswordReset` (`PasswordRecoveryEmailViewModel`) |
+| `POST` | `auth/password-reset/confirm` | `PasswordResetConfirmDTO(token, newPassword)` | `204` sem corpo; token inválido/usado/expirado → `400` (sem distinguir o motivo) | `ConfirmPasswordReset` (`NewPasswordViewModel`) |
+
+Os dois endpoints de recuperação de senha são públicos (não enviam `Authorization`). O token vem no e-mail como deep link `zera://reset-password?token=<token>` (validade de 30 min, uso único); a confirmação revoga os refresh tokens do usuário, então o login é um passo à parte.
 
 ## Convite (InvitationService)
 
