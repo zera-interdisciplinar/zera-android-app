@@ -158,6 +158,7 @@ fun ItemDetailsScreen(
                             ZeraButton(
                                 text = if (state.isSubmitting) "Enviando..." else "Aprovar",
                                 onClick = viewModel::onApproveClick,
+                                style = ZeraColorFamily.Green,
                                 enabled = actionsEnabled,
                                 modifier = Modifier.weight(1f),
                             )
