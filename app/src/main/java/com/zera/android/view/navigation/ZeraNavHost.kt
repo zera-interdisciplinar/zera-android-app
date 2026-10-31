@@ -1,10 +1,13 @@
 package com.zera.android.view.navigation
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -21,6 +24,8 @@ import com.zera.android.view.screens.SplashScreen
 import com.zera.android.view.screens.auth.SignInScreen
 import com.zera.android.view.screens.auth.SignUpScreen
 import com.zera.android.view.screens.auth.WelcomeScreen
+import com.zera.android.view.screens.auth.passwordRecovery.NewPasswordScreen
+import com.zera.android.view.screens.auth.passwordRecovery.PasswordRecoveryEmailScreen
 import com.zera.android.view.screens.main.alerts.AlertCentralScreen
 import com.zera.android.view.screens.main.categories.CategoriesScreen
 import com.zera.android.view.screens.main.categories.CategoryCreationScreen
@@ -62,9 +67,12 @@ import com.zera.android.view.transition.ScreenAnimationRegistry
 fun ZeraNavHost() {
     val navController = rememberBootAwareNavController()
     val animations = remember { ScreenAnimationRegistry() }
+    val navigationEnabled by ZeraNavigator.navigationEnabled.collectAsState()
 
     LaunchedEffect(Unit) {
         ZeraNavigator.commands.collect { command ->
+            if (!ZeraNavigator.isNavigationEnabled()) return@collect
+
             when (command) {
                 is NavCommand.Navigate -> {
                     animations.prepare(command.animation, navController)
@@ -302,7 +310,15 @@ fun ZeraNavHost() {
                     val route = backStackEntry.toRoute<Route.ChatBot>()
                     ChatBotScreen(threadId = route.threadId)
                 }
+                composable<Route.PasswordRecoveryEmail> {
+                    PasswordRecoveryEmailScreen()
+                }
+                composable<Route.PasswordRecoveryNewPassword> { backStackEntry ->
+                    val route = backStackEntry.toRoute<Route.PasswordRecoveryNewPassword>()
+                    NewPasswordScreen(token = route.token)
+                }
             }
+            BackHandler(enabled = !navigationEnabled) { }
         }
     }
 }

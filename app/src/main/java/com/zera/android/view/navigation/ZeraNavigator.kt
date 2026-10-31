@@ -3,18 +3,34 @@ package com.zera.android.view.navigation
 import com.zera.android.view.transition.ScreenAnimation
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 
 object ZeraNavigator {
     private val _commands = Channel<NavCommand>(Channel.BUFFERED)
     val commands: Flow<NavCommand> = _commands.receiveAsFlow()
 
+    private val _navigationEnabled = MutableStateFlow(true)
+    val navigationEnabled: StateFlow<Boolean> = _navigationEnabled.asStateFlow()
+
+    fun isNavigationEnabled(): Boolean = _navigationEnabled.value
+
+    fun navigationStatus(enabled: Boolean) {
+        _navigationEnabled.value = enabled
+    }
+
     fun push(route: Route, animation: ScreenAnimation = ScreenAnimation.Fade) {
-        _commands.trySend(NavCommand.Navigate(route, animation))
+        if (isNavigationEnabled()) {
+            _commands.trySend(NavCommand.Navigate(route, animation))
+        }
     }
 
     fun goBack() {
-        _commands.trySend(NavCommand.GoBack)
+        if (isNavigationEnabled()) {
+            _commands.trySend(NavCommand.GoBack)
+        }
     }
 
     /**
@@ -27,13 +43,17 @@ object ZeraNavigator {
         popCount: Int = 1,
         animation: ScreenAnimation = ScreenAnimation.Fade,
     ) {
-        _commands.trySend(NavCommand.PushAndPop(route, popCount, animation))
+        if (isNavigationEnabled()) {
+            _commands.trySend(NavCommand.PushAndPop(route, popCount, animation))
+        }
     }
 
     /**
      * Navega para [route] e esvazia a pilha (Splash, Welcome, SignIn, SignUp, etc.).
      */
     fun pushAndPopAll(route: Route, animation: ScreenAnimation = ScreenAnimation.Fade) {
-        _commands.trySend(NavCommand.PushAndPopAll(route, animation))
+        if (isNavigationEnabled()) {
+            _commands.trySend(NavCommand.PushAndPopAll(route, animation))
+        }
     }
 }

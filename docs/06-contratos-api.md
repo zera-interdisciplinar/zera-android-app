@@ -78,6 +78,10 @@ Fonte: [Confluence ms-inventory](https://zerainterdisciplinar.atlassian.net/wiki
 |---|---|---|---|---|
 | `POST` | `auth/login` | `SingInRequestDTO(email, password)` | `SingInResponseDTO` | `SingIn.execute()` |
 | `POST` | `auth/refresh` | `{ refreshToken }` | mesmo formato do login | `RefreshSession` / `TokenRefreshAuthenticator` |
+| `POST` | `auth/password-reset/request` | `PasswordResetRequestDTO(email)` | `202` sem corpo, exista a conta ou não | `RequestPasswordReset` (`PasswordRecoveryEmailViewModel`) |
+| `POST` | `auth/password-reset/confirm` | `PasswordResetConfirmDTO(token, newPassword)` | `204` sem corpo; token inválido/usado/expirado → `400` (sem distinguir o motivo) | `ConfirmPasswordReset` (`NewPasswordViewModel`) |
+
+Os dois endpoints de recuperação de senha são públicos (não enviam `Authorization`). O token vem no e-mail como deep link `zera://reset-password?token=<token>` (validade de 30 min, uso único); a confirmação revoga os refresh tokens do usuário, então o login é um passo à parte.
 
 ## Convite (InvitationService)
 

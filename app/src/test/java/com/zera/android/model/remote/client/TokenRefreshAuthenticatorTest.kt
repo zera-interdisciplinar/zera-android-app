@@ -206,6 +206,8 @@ class TokenRefreshAuthenticatorTest {
         assertEquals(false, shouldSendAccessToken("/api/v1/auth/refresh"))
         assertEquals(false, shouldSendAccessToken("/api/v1/auth/logout"))
         assertEquals(false, shouldSendAccessToken("/api/v1/invitations/redeem"))
+        assertEquals(false, shouldSendAccessToken("/api/v1/auth/password-reset/request"))
+        assertEquals(false, shouldSendAccessToken("/api/v1/auth/password-reset/confirm"))
         assertEquals(true, shouldSendAccessToken("/api/v1/users/1"))
     }
 
