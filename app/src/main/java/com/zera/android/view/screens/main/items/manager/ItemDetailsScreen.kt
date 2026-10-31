@@ -59,7 +59,7 @@ import java.io.File
 // Alturas aproximadas dos blocos reais; o esqueleto só indica a disposição.
 private val SkeletonSummaryCardHeight = 120.dp
 private val SkeletonFieldRowHeight = 56.dp
-private const val SkeletonFieldRowCount = 7
+private const val SkeletonFieldRowCount = 9
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -209,6 +209,7 @@ fun ItemDetailsScreen(
                 EditableFieldRow(label = "Material", value = state.material)
                 EditableFieldRow(label = "Condição", value = state.condition)
                 EditableFieldRow(label = "Número de série", value = state.serialNumber)
+                EditableFieldRow(label = "Data de aquisição", value = state.acquiredAt)
                 EditableFieldRow(label = "Observações", value = state.notes)
                 EditableFieldRow(label = "Cadastrado Por", value = state.registeredBy)
                 EditableFieldRow(label = "Data de Cadastro", value = state.registeredAt)
@@ -296,6 +297,7 @@ fun ItemDetailsScreenPreview() {
             material = "Placa de circuito",
             condition = "Usado",
             serialNumber = "SN-48213",
+            acquiredAt = "1 de Jul 2026",
             notes = "Pequeno arranhão na lateral.",
             registeredBy = "Carlos Lima",
             registeredAt = "12/10/2026",

@@ -88,6 +88,12 @@ class ItemDetailsMappingTest {
     }
 
     @Test
+    fun formatsAcquisitionDateWithoutTime() {
+        assertEquals("1 de Jul 2026", ItemDetailsViewModel.formatAcquiredAt("2026-07-01"))
+        assertEquals("", ItemDetailsViewModel.formatAcquiredAt(null))
+    }
+
+    @Test
     fun mapsItemResponseToDetailsState() {
         val item = ItemResponseDTO(
             id = "9c858901-8a57-4791-81fe-4c455b099bc9",
@@ -95,6 +101,7 @@ class ItemDetailsMappingTest {
             status = "IN_STOCK",
             condition = "USED",
             serialNumber = "SN123456",
+            acquiredAt = "2026-07-01",
             notes = "Foto ok",
             createdByName = "João Silva",
             createdAt = "2026-07-01T09:00:00",
@@ -116,6 +123,7 @@ class ItemDetailsMappingTest {
         assertEquals("Usado", state.condition)
         assertEquals("USED", state.conditionCode)
         assertEquals("SN123456", state.serialNumber)
+        assertEquals("1 de Jul 2026", state.acquiredAt)
         assertEquals("Foto ok", state.notes)
         assertEquals(false, state.canReview)
         assertEquals("João Silva", state.registeredBy)

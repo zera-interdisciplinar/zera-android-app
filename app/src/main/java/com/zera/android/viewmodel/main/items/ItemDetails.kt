@@ -24,7 +24,9 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
 import retrofit2.HttpException
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.Month
 import java.time.format.TextStyle
 import java.util.Locale
 
@@ -41,6 +43,7 @@ data class ItemDetailsState(
     val hasDamage: Boolean = false,
     val damageCodes: List<String> = emptyList(),
     val serialNumber: String = "",
+    val acquiredAt: String = "",
     val notes: String = "",
     val registeredBy: String = "",
     val registeredAt: String = "",
@@ -481,17 +484,29 @@ class ItemDetailsViewModel : ZeraViewModel() {
             return ""
         }
 
+        private fun monthLabel(month: Month): String = month
+            .getDisplayName(TextStyle.SHORT, ptBr)
+            .replace(".", "")
+            .replaceFirstChar { it.uppercase() }
+            .take(3)
+
         internal fun formatRegisteredAt(iso: String?): String {
             if (iso.isNullOrBlank()) return ""
             return try {
                 val dateTime = LocalDateTime.parse(iso)
-                val month = dateTime.month
-                    .getDisplayName(TextStyle.SHORT, ptBr)
-                    .replace(".", "")
-                    .replaceFirstChar { it.uppercase() }
-                    .take(3)
                 val minute = dateTime.minute.toString().padStart(2, '0')
-                "${dateTime.dayOfMonth} de $month ${dateTime.year} - ${dateTime.hour}h$minute"
+                "${dateTime.dayOfMonth} de ${monthLabel(dateTime.month)} ${dateTime.year} - ${dateTime.hour}h$minute"
+            } catch (_: Exception) {
+                iso
+            }
+        }
+
+        // `acquiredAt` é só data (`yyyy-MM-dd`), sem hora.
+        internal fun formatAcquiredAt(iso: String?): String {
+            if (iso.isNullOrBlank()) return ""
+            return try {
+                val date = LocalDate.parse(iso)
+                "${date.dayOfMonth} de ${monthLabel(date.month)} ${date.year}"
             } catch (_: Exception) {
                 iso
             }
@@ -515,6 +530,7 @@ class ItemDetailsViewModel : ZeraViewModel() {
             hasDamage = item.hasDamages ?: item.damages.isNotEmpty(),
             damageCodes = item.damages,
             serialNumber = item.serialNumber.orEmpty(),
+            acquiredAt = formatAcquiredAt(item.acquiredAt),
             notes = item.notes.orEmpty(),
             registeredBy = registeredByFrom(item),
             registeredAt = formatRegisteredAt(item.createdAt),

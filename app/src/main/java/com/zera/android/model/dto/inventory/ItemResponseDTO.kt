@@ -19,6 +19,7 @@ data class ItemResponseDTO(
     val damages: List<String> = emptyList(),
     val usageIntensity: Int? = null,
     val serialNumber: String? = null,
+    val acquiredAt: String? = null,
     val notes: String? = null,
     val photoUrl: String? = null,
     @OptIn(ExperimentalSerializationApi::class)
