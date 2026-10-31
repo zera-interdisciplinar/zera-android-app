@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,6 +22,7 @@ import com.zera.android.view.components.inputs.ZeraInputType
 import com.zera.android.view.components.inputs.ZeraTextInput
 import com.zera.android.view.components.logo.Logo
 import com.zera.android.view.components.outros.SplashBackground
+import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.components.texts.TitleText
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
@@ -30,9 +32,14 @@ import com.zera.android.viewmodel.auth.passwordRecovery.NewPasswordViewModel
 
 @Composable
 fun NewPasswordScreen(
-    viewModel: NewPasswordViewModel = viewModel()
+    token: String = "",
+    viewModel: NewPasswordViewModel = viewModel(),
 ) {
     val state by viewModel.state
+
+    LaunchedEffect(token) {
+        viewModel.onTokenReceived(token)
+    }
 
     SplashBackground()
     Column(
@@ -74,12 +81,19 @@ fun NewPasswordScreen(
                 isError = state.confirmPasswordError != null,
                 errorMessage = state.confirmPasswordError,
             )
+            state.errorMessage?.let { message ->
+                CaptionText(
+                    text = message,
+                    color = androidx.compose.material3.MaterialTheme.colorScheme.error,
+                )
+            }
         }
         Spacer(Modifier.height(Spacing.xLarge))
         Box {
             ZeraButton(
-                text = if (state.isLoading) "Enviando..." else "Enviar",
+                text = "Enviar",
                 enabled = !state.isLoading,
+                loading = state.isLoading,
                 onClick = { viewModel.resetPassword() }
             )
         }

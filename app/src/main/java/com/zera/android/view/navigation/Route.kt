@@ -173,5 +173,5 @@ sealed interface Route{
     data object PasswordRecoveryEmail : Route
 
     @Serializable
-    data object PasswordRecoveryNewPassword : Route
+    data class PasswordRecoveryNewPassword(val token: String = "") : Route
 }

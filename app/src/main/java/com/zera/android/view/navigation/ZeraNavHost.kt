@@ -1,10 +1,13 @@
 package com.zera.android.view.navigation
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -64,9 +67,12 @@ import com.zera.android.view.transition.ScreenAnimationRegistry
 fun ZeraNavHost() {
     val navController = rememberBootAwareNavController()
     val animations = remember { ScreenAnimationRegistry() }
+    val navigationEnabled by ZeraNavigator.navigationEnabled.collectAsState()
 
     LaunchedEffect(Unit) {
         ZeraNavigator.commands.collect { command ->
+            if (!ZeraNavigator.isNavigationEnabled()) return@collect
+
             when (command) {
                 is NavCommand.Navigate -> {
                     animations.prepare(command.animation, navController)
@@ -307,10 +313,12 @@ fun ZeraNavHost() {
                 composable<Route.PasswordRecoveryEmail> {
                     PasswordRecoveryEmailScreen()
                 }
-                composable<Route.PasswordRecoveryNewPassword> {
-                    NewPasswordScreen()
+                composable<Route.PasswordRecoveryNewPassword> { backStackEntry ->
+                    val route = backStackEntry.toRoute<Route.PasswordRecoveryNewPassword>()
+                    NewPasswordScreen(token = route.token)
                 }
             }
+            BackHandler(enabled = !navigationEnabled) { }
         }
     }
 }

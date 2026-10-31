@@ -2,6 +2,7 @@ package com.zera.android.viewmodel.auth.passwordRecovery
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
+import com.zera.android.model.local.SqliteManager
 import com.zera.android.model.usecase.auth.ConfirmPasswordReset
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
@@ -62,17 +63,28 @@ class NewPasswordViewModel : ZeraViewModel() {
         }
 
         _state.value = current.copy(isLoading = true, errorMessage = null)
+        ZeraNavigator.navigationStatus(false)
         viewModelScope.launch {
             try {
                 confirmPasswordReset.execute(current.token, current.password)
+                SqliteManager.clearSession()
                 _state.value = _state.value.copy(isLoading = false)
+                ZeraNavigator.navigationStatus(true)
                 ZeraNavigator.pushAndPopAll(Route.SignIn)
             } catch (e: CancellationException) {
+                ZeraNavigator.navigationStatus(true)
+                _state.value = _state.value.copy(isLoading = false)
                 throw e
             } catch (e: Exception) {
+                ZeraNavigator.navigationStatus(true)
                 _state.value = _state.value.copy(isLoading = false, errorMessage = userFacingError(e))
             }
         }
+    }
+
+    override fun onCleared() {
+        ZeraNavigator.navigationStatus(true)
+        super.onCleared()
     }
 
     private fun userFacingError(error: Exception): String {
@@ -94,6 +106,6 @@ class NewPasswordViewModel : ZeraViewModel() {
             "Link de recuperação inválido ou expirado. Solicite um novo."
         private const val MIN_PASSWORD_LENGTH = 8
         private const val PASSWORD_RULES_MESSAGE =
-            "Erro: a senha deve ter mais de 8 caracteres, tendo pelo menos um caracter especial, número, letra maiúscula e minúscula"
+            "A senha deve ter 8 caracteres ou mais, incluindo letra maiúscula, letra minúscula, número e caractere especial."
     }
 }

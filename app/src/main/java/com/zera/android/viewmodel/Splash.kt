@@ -7,6 +7,7 @@ import com.zera.android.model.usecase.config.Boot
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.view.navigation.consumePendingAlertDeepLink
+import com.zera.android.view.navigation.consumePendingPasswordResetDeepLink
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -28,6 +29,9 @@ class SplashViewModel : ViewModel() {
     }
 
     private suspend fun navigateAfterBoot() {
+        if (consumePendingPasswordResetDeepLink()) {
+            return
+        }
         if (!restoreSession.hasSavedLogin()) {
             ZeraNavigator.pushAndPop(Route.Welcome)
             return
