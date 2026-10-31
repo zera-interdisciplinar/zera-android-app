@@ -102,11 +102,23 @@ fun ManagerHomeScreen(
 
             // Seção opcional, sem skeleton: entra quando os alertas chegam, sem piscar o estado vazio.
             if (!state.isLoadingAlerts) {
-                TitleText(
-                    text = "Alertas importantes",
-                    bold = true,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    TitleText(
+                        text = "Alertas importantes",
+                        bold = true,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.weight(1f),
+                    )
+                    LabelText(
+                        text = "Ver Todos",
+                        bold = true,
+                        color = MaterialTheme.colorScheme.primary,
+                        onClick = viewModel::onSeeAllAlertsClick,
+                    )
+                }
                 NotificationList(
                     notifications = state.notifications,
                     onItemClick = viewModel::onAlertClick,
