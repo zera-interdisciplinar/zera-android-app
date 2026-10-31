@@ -11,12 +11,13 @@ model
 ├── entity/config/Environments.kt          ms-inventory-url e ms-inventory-api-key (boot)
 ├── dto/inventory/                         DTOs slimados do dashboard
 ├── remote/client/InventoryClient.kt       Retrofit próprio do ms-inventory
-├── remote/service/InventoryService.kt     GET dashboard/home, work-center, indicators
+├── remote/service/InventoryService.kt     GET dashboard/home, work-center, indicators, by-category
 └── usecase/inventory/
     ├── GetManagerHome.kt                  home do gestor
     ├── GetEmployeeHome.kt                 ocupação e últimos itens da home do operário
     ├── GetEmployeePendencies.kt           pendências da home do operário
-    └── GetIndicators.kt                   tela de indicadores
+    ├── GetIndicators.kt                   tela de indicadores
+    └── GetDashboardByCategory.kt          itens ativos por categoria
 ```
 
 `Boot.execute()` chama `ScrapyClient.boot()`, grava em `AppConfig` e inicializa `AdmCoreClient` **e** `InventoryClient` com as URLs/keys do boot.
@@ -36,6 +37,7 @@ O `unitId` é persistido em `SqliteManager.saveUnitId` depois de `GET users/{id}
 | `GET /api/v1/dashboard/home` | `GetManagerHome`, `GetEmployeeHome` | `ManagerHomeScreen`, `EmployeeHomeScreen` |
 | `GET /api/v1/dashboard/work-center` | `GetEmployeePendencies` | `EmployeeHomeScreen` (resumo), `WorkingCentralScreen` (lista) |
 | `GET /api/v1/dashboard/indicators` | `GetIndicators` | `IndexesScreen` |
+| `GET /api/v1/dashboard/by-category` | `GetDashboardByCategory` | `IndexesScreen` |
 
 Os DTOs no app só declaram os campos que as telas usam; o restante do JSON é ignorado (`ignoreUnknownKeys`).
 

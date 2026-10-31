@@ -23,6 +23,7 @@ import com.zera.android.view.components.graphs.VerticalBarGraphItem
 import com.zera.android.view.components.inputs.ZeraChipsGroup
 import com.zera.android.view.components.loading.SkeletonBox
 import com.zera.android.view.components.scaffolds.ManagerScaffold
+import com.zera.android.view.components.texts.BodyText
 import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.components.texts.HeadlineText
 import com.zera.android.view.components.texts.LabelText
@@ -128,11 +129,21 @@ fun IndexesScreen(
                 color = MaterialTheme.colorScheme.onSurface,
             )
             HorizontalBarGraph(items = state.residuesByCategory)
+
+            TitleText(
+                text = "Itens por categoria",
+                bold = true,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            HorizontalBarGraph(
+                items = state.itemsByCategory,
+                emptyContent = { BodyText(text = "Nenhum item ativo") },
+            )
         }
     }
 }
 
-/** Esqueleto do card de taxa de reciclagem e dos dois gráficos, emitido direto na `Column` do scaffold. */
+/** Esqueleto do card de taxa de reciclagem e dos três gráficos, emitido direto na `Column` do scaffold. */
 @Composable
 private fun IndexesSkeleton() {
     SkeletonBox(height = SkeletonRateCardHeight, borderRadius = Radius.large)
@@ -142,10 +153,13 @@ private fun IndexesSkeleton() {
 
     SkeletonBox(width = 180.dp, height = SkeletonTitleHeight)
     SkeletonBox(height = SkeletonCategoryGraphHeight, borderRadius = Radius.large)
+
+    SkeletonBox(width = 180.dp, height = SkeletonTitleHeight)
+    SkeletonBox(height = SkeletonCategoryGraphHeight, borderRadius = Radius.large)
 }
 
 @Composable
-@Preview(heightDp = 900)
+@Preview(heightDp = 1100)
 fun IndexesScreenPreview() {
     val previewViewModel = IndexesViewModel().apply {
         state.value = IndexesState(
@@ -161,6 +175,10 @@ fun IndexesScreenPreview() {
                 BarGraphItem(label = "Plásticos", percentage = 0.45f),
                 BarGraphItem(label = "Metal", percentage = 0.3f),
                 BarGraphItem(label = "Placas", percentage = 0.15f),
+            ),
+            itemsByCategory = listOf(
+                BarGraphItem(label = "Notebooks", percentage = 0.75f),
+                BarGraphItem(label = "Sem categoria", percentage = 0.25f),
             ),
             isLoading = false,
         )

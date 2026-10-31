@@ -9,7 +9,7 @@
 
 ## Contexto
 
-Tela `Route.Indexes` ("Indicadores" na barra inferior). Mostra taxa de reciclagem, evolução mensal de peso descartado e distribuição de resíduos por material, a partir de `GET /api/v1/dashboard/indicators`.
+Tela `Route.Indexes` ("Indicadores" na barra inferior). Mostra taxa de reciclagem, evolução mensal de peso descartado e distribuição de resíduos por material (`GET /api/v1/dashboard/indicators`), e itens ativos por categoria (`GET /api/v1/dashboard/by-category`).
 
 ## User story
 
@@ -21,7 +21,7 @@ Como Gestor, quero ver indicadores de reciclagem e descarte da minha unidade, pa
 
 - **Given** o Gestor está autenticado e abre `Route.Indexes`
 - **When** `GetIndicators.execute()` responde com sucesso (filtro padrão "Todos", sem `from`/`to`)
-- **Then** o `state` preenche taxa de reciclagem, gráfico mensal e resíduos por categoria
+- **Then** o `state` preenche taxa de reciclagem, gráfico mensal, resíduos por material e itens por categoria
 
 ### Cenário: Filtro "Este mês"
 
@@ -47,6 +47,12 @@ Como Gestor, quero ver indicadores de reciclagem e descarte da minha unidade, pa
 - **When** o gráfico de evolução mensal é exibido
 - **Then** a faixa de barras rola na horizontal e começa no fim da série (mês mais recente visível)
 
+### Cenário: Sem itens ativos por categoria
+
+- **Given** `categories` vem vazio
+- **When** a seção "Itens por categoria" é exibida
+- **Then** o `HorizontalBarGraph` mostra "Nenhum item ativo"
+
 ### Cenário: Falha ao carregar
 
 - **Given** a chamada de indicadores falha (rede, 401, 400 sem `X-Unit-Id`, etc.)
@@ -55,9 +61,10 @@ Como Gestor, quero ver indicadores de reciclagem e descarte da minha unidade, pa
 
 ## Critérios de aceite
 
-- [x] Dados vêm de `GetIndicators` / `InventoryService.getIndicators`, não de mock
-- [x] Taxa de reciclagem, evolução mensal e resíduos por categoria mapeados no `IndexesViewModel`
+- [x] Dados vêm de `GetIndicators` / `InventoryService.getIndicators` e `GetDashboardByCategory`, não de mock
+- [x] Taxa de reciclagem, evolução mensal, resíduos por material e itens por categoria mapeados no `IndexesViewModel`
 - [x] Empty state de resíduos por categoria
+- [x] Empty state de itens por categoria
 - [x] Scroll horizontal da evolução mensal, padrão no mês mais recente
 - [x] Erro de rede/API visível na tela
 - [x] Chip "Este mês" altera o período da query

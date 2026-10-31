@@ -29,6 +29,13 @@ class IndexesMappingTest {
     }
 
     @Test
+    fun categoryLabelFallsBackWhenNameIsMissing() {
+        assertEquals("Notebooks", IndexesViewModel.categoryLabel("Notebooks"))
+        assertEquals("Sem categoria", IndexesViewModel.categoryLabel(null))
+        assertEquals("Sem categoria", IndexesViewModel.categoryLabel("  "))
+    }
+
+    @Test
     fun materialLabelMapsKnownCodes() {
         assertEquals("Plásticos", IndexesViewModel.materialLabel("PLASTIC"))
         assertEquals("Placas", IndexesViewModel.materialLabel("CIRCUIT_BOARD"))

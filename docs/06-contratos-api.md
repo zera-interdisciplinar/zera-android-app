@@ -51,6 +51,7 @@ Fonte: [Confluence ms-inventory](https://zerainterdisciplinar.atlassian.net/wiki
 | `GET` | `api/v1/dashboard/home` | `page` (default 0), `size` (default 5) | `DashboardHomeResponseDTO` | `GetManagerHome.execute()` (`ManagerHomeViewModel`), `GetEmployeeHome.execute()` (`EmployeeHomeViewModel`) |
 | `GET` | `api/v1/dashboard/work-center` | — | `WorkCenterResponseDTO` | `GetEmployeePendencies.execute()` (`EmployeeHomeViewModel`, `WorkingCentralViewModel`) |
 | `GET` | `api/v1/dashboard/indicators` | `from`/`to` opcionais (`yyyy-MM-dd`) | `IndicatorsResponseDTO` | `GetIndicators.execute()` (`IndexesViewModel`) |
+| `GET` | `api/v1/dashboard/by-category` | — | `DashboardByCategoryResponseDTO` | `GetDashboardByCategory.execute()` (`IndexesViewModel`) |
 | `GET` | `api/v1/items` | `status` (omitir = **ativos**, não “todos”), `categoryId`, `modelId`, `q` (o app manda `q`; o texto Confluence às vezes diz `query`), `page`, `size` | `PagedItemsDTO` | `GetItems.execute()` (`ItensViewModel`), `GetModelItems.execute()` (`ModelDetailsViewModel`) |
 | `GET` | `api/v1/items/{id}` | path `id` | `ItemResponseDTO` | `GetItemDetails.execute()` (`ItemDetailsViewModel`) |
 | `GET` | `api/v1/items/by-barcode/{barcode}` | path `barcode` | `ItemResponseDTO` | `GetItemByBarcode.execute()` (`ScanViewModel`) |
