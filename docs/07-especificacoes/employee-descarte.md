@@ -5,7 +5,7 @@
 - **Feature:** Fluxo de descarte do Operário (mapa, registro e histórico)
 - **Perfil(is) envolvido(s):** Operário (funcionário)
 - **Status:** implementado
-- **Última atualização:** 2026-10-11
+- **Última atualização:** 2026-10-31
 
 ## Contexto
 
@@ -41,6 +41,18 @@ Como Operário, quero registrar um descarte no mapa e ver o histórico da unidad
 - **When** a tela de sucesso é fechada ou "voltar para o início"
 - **Then** `pushAndPopAll` vai para `Route.EmployeeHome`
 
+### Cenário: Bloquear navegação enquanto confirma o descarte
+
+- **Given** o Operário está em `Route.RecyclingResume` com pelo menos um item selecionado
+- **When** toca em "Confirmar descarte"
+- **Then** o botão entra em carregamento; `ZeraNavigator.navigationStatus(false)` bloqueia navegação por comando, botão voltar da interface e voltar nativo/gestual; os botões "Voltar" e "Visualizar itens selecionados" ficam indisponíveis
+
+### Cenário: Restaurar navegação após confirmar
+
+- **Given** a confirmação está em carregamento
+- **When** `CreateDisposal` termina com sucesso, erro ou cancelamento
+- **Then** o estado de carregamento é encerrado e `ZeraNavigator.navigationStatus(true)` restaura todas as navegações; em sucesso, navega para `Route.SchedulingSuccess`; em erro, permanece na tela de resumo exibindo a mensagem
+
 ### Cenário: Detalhe sem cancelar
 
 - **Given** o Operário abre `Route.SchedulingDetails`
@@ -56,11 +68,16 @@ Como Operário, quero registrar um descarte no mapa e ver o histórico da unidad
 - [x] Sucesso volta para a home do Operário
 - [x] Operário não vê cancelar descarte
 - [x] Relatório e contato da recicladora permanecem
+- [x] Durante a confirmação do descarte, nenhuma navegação é permitida, inclusive com o voltar nativo/gestual
+- [x] O estado de carregamento desbloqueia a navegação em sucesso, erro e cancelamento
+- [x] O ViewModel restaura a navegação ao ser encerrado, evitando bloqueio permanente
 
 ## Edge cases considerados
 
 - Papel ainda não carregado: casca do gestor até `GetSelfUser` responder (sem tela extra).
 - Falha de `GetSelfUser` no sucesso: cai em `Route.ManagerHome` (mesmo fallback do login).
+- Erro ou cancelamento da confirmação: a navegação é reabilitada e o usuário permanece em `Route.RecyclingResume`, podendo tentar novamente ou voltar.
+- O ViewModel pode ser destruído enquanto aguarda a API: `onCleared()` garante que o status global não fique bloqueado.
 
 ## Fora de escopo desta spec
 
