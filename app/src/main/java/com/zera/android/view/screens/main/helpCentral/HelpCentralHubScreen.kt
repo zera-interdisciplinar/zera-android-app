@@ -20,7 +20,6 @@ import com.zera.android.view.components.containers.ZeraBoxType
 import com.zera.android.view.components.inputs.ZeraSearchInput
 import com.zera.android.view.components.lists.OptionItem
 import com.zera.android.view.components.lists.OptionList
-import com.zera.android.view.components.loading.OptionListSkeleton
 import com.zera.android.view.components.scaffolds.EmployeeScaffold
 import com.zera.android.view.components.texts.BodyText
 import com.zera.android.view.components.texts.CaptionText
@@ -69,8 +68,8 @@ fun HelpCentralHubScreen(
                 ZeraSearchInput(
                     value = state.searchQuery,
                     onValueChange = viewModel::onSearchQueryChange,
-                    placeholder = "Pesquisar por ID, Nome ou Material...",
-                    onSearch = viewModel::onSearch,
+                    placeholder = "Pesquisar por título ou assunto...",
+                    onSearch = {},
                 )
             }
         }
@@ -106,20 +105,13 @@ fun HelpCentralHubScreen(
             bold = true,
             color = MaterialTheme.colorScheme.onSurface,
         )
-        state.errorMessage?.let { message ->
-            CaptionText(text = message, color = MaterialTheme.colorScheme.error)
-        }
-        if (state.isLoading) {
-            OptionListSkeleton(modifier = Modifier.weight(1f))
-        } else {
-            OptionList(
-                options = state.documents,
-                onItemClick = viewModel::onDocumentClick,
-                contentPadding = PaddingValues(vertical = Spacing.small),
-                modifier = Modifier.weight(1f),
-                emptyContent = { BodyText(text = "Nenhum documento encontrado") },
-            )
-        }
+        OptionList(
+            options = state.documents,
+            onItemClick = viewModel::onDocumentClick,
+            contentPadding = PaddingValues(vertical = Spacing.small),
+            modifier = Modifier.weight(1f),
+            emptyContent = { BodyText(text = "Nenhum documento encontrado") },
+        )
     }
 }
 
@@ -130,14 +122,16 @@ fun HelpCentralHubScreenPreview() {
         state.value = HelpCentralHubState(
             documents = listOf(
                 OptionItem(
-                    name = "Como cadastrar um item",
-                    description = "Passo a passo do cadastro manual e por scan",
+                    id = "category_eletronicos",
+                    name = "Eletrônicos",
+                    description = "Leve a um ponto de coleta especializado",
                     icon = ZeraIcon.InfoCircle,
                 ),
                 OptionItem(
-                    name = "Descarte de eletrônicos",
-                    description = "Materiais aceitos e como agendar a coleta",
-                    icon = ZeraIcon.Recycle,
+                    id = "category_vidro",
+                    name = "Vidro",
+                    description = "Separe, embale e identifique",
+                    icon = ZeraIcon.InfoCircle,
                 ),
             ),
         )

@@ -88,7 +88,7 @@ Como Operário, quero buscar e ler os documentos de ajuda, para resolver dúvida
 
 - `HelpCentralHubViewModel`
   - Carrega os documentos de `GetHelpDocuments` no `init` (leitura em memória, sem loading).
-  - `HelpCentralHubState`: `searchQuery`, `documents: List<OptionItem>` (`id` = chave, `name` = título, `description` = subtítulo). Saem `isLoading` e `errorMessage`, que não têm mais uso.
+  - `HelpCentralHubState`: `searchQuery`, `documents: List<OptionItem>` (`id` = chave, `name` = título, `description` = subtítulo, `icon` = `InfoCircle`). Saem `isLoading` e `errorMessage`, que não têm mais uso.
   - `onSearchQueryChange` filtra localmente (função pura `visibleDocuments(documents, query)` no `companion`).
   - `onDocumentClick` → `ZeraNavigator.push(Route.HelpDocument(documentKey = option.id))`.
   - `onSearch` deixa de existir; a busca já filtra ao digitar.
@@ -111,7 +111,7 @@ Como Operário, quero buscar e ler os documentos de ajuda, para resolver dúvida
 - [x] Dependência de markdown adicionada e `MarkdownText` criado em `view/components/texts`
 - [x] `HelpDocument.fromEntry` separa título, subtítulo e corpo
 - [x] `GetHelpDocuments` lê só as chaves `category_*` com valor string, ordenadas pelo título
-- [ ] Central de Ajuda lista os documentos reais e filtra pela busca
+- [x] Central de Ajuda lista os documentos reais e filtra pela busca
 - [ ] Tocar num documento abre `HelpDocumentScreen` com título e corpo em markdown
 - [ ] Testes unitários do parse, do filtro de chaves e da busca
 - [ ] Docs atualizadas (catálogo de componentes, stack, contexto do Scrapy)
@@ -145,6 +145,6 @@ Uma etapa por vez, com revisão antes da próxima.
 1. [x] Dependência de markdown + componente `MarkdownText`
 2. [x] `HelpDocument` (entity + `fromEntry`) + testes
 3. [x] `GetHelpDocuments` (use case + `documentsFrom`) + testes
-4. [ ] Ligar `HelpCentralHubViewModel`/`HelpCentralHubScreen` aos documentos + teste da busca
+4. [x] Ligar `HelpCentralHubViewModel`/`HelpCentralHubScreen` aos documentos + teste da busca
 5. [ ] `Route.HelpDocument` + `HelpDocumentViewModel` + `HelpDocumentScreen` + `ZeraNavHost`
 6. [ ] Atualizar docs (`03-catalogo-componentes.md`, `09-stack-e-dependencias.md`, `contrato-scrapy/contexto.md`, status desta spec)
