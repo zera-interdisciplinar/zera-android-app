@@ -1,13 +1,13 @@
 package com.zera.android.view.navigation
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
+import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -32,6 +32,8 @@ import com.zera.android.view.screens.main.categories.CategoryCreationScreen
 import com.zera.android.view.screens.main.categories.CategoryCreationSuccessScreen
 import com.zera.android.view.screens.main.chat.ChatBotScreen
 import com.zera.android.view.screens.main.chat.ChatConversationsScreen
+import com.zera.android.view.screens.main.employees.EmployeeDetailsScreen
+import com.zera.android.view.screens.main.employees.EmployeeRegisterScreen
 import com.zera.android.view.screens.main.employees.EmployeesScreen
 import com.zera.android.view.screens.main.home.employee.EmployeeHomeScreen
 import com.zera.android.view.screens.main.home.manager.ManagerHomeScreen
@@ -151,6 +153,13 @@ fun ZeraNavHost() {
                     CompositionLocalProvider(LocalAnimatedVisibilityScope provides this) {
                         EmployeesScreen()
                     }
+                }
+                composable<Route.EmployeeRegister> {
+                    EmployeeRegisterScreen()
+                }
+                composable<Route.EmployeeDetails> { backStackEntry ->
+                    val route = backStackEntry.toRoute<Route.EmployeeDetails>()
+                    EmployeeDetailsScreen(employeeId = route.employeeId)
                 }
                 composable<Route.ItemApproved> { backStackEntry ->
                     val route = backStackEntry.toRoute<Route.ItemApproved>()

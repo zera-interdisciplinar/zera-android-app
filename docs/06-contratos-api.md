@@ -68,6 +68,8 @@ Fonte: [Confluence ms-inventory](https://zerainterdisciplinar.atlassian.net/wiki
 | `POST` | `api/v1/items/{id}/reject` | path `id`, `{ "reason" }` | `ItemResponseDTO` | `RejectItem.execute()` (`ItemDetailsViewModel`, `ModelDetailsViewModel`) |
 | `PATCH` | `api/v1/items/{id}` | parcial: `name`, `condition`, `hasDamages`, `damages`, `notes`, `serialNumber`, `acquiredAt`, `manufacturingYear`, `usageIntensity` | `ItemResponseDTO` | `UpdateItem.execute()` (`ItemDetailsViewModel`; a PDI só envia `name` ou `condition`) |
 
+A foto de um item é enviada diretamente ao Supabase Storage pelo `UploadItemPhoto`, usando `supabase-items-bucket` e o endereço público `<supabase-url>/storage/v1/object/public/<bucket>/<itemId>/photo.<ext>`. O contrato de item não expõe persistência de `photoUrl` nem remoção; a URL enviada é exibida nesta sessão até recarregar o detalhe.
+
 `GET /api/v1/dashboard/home` alimenta ocupação e `recentItems` na home do Gestor e na home do Operário. `GET /api/v1/dashboard/work-center` alimenta a seção Pendências da home (resumo por bucket) e a Central de Trabalho (um card por item). O recorte do work-center é o usuário do token (sem query).
 
 ## Autenticação (AuthService)
@@ -78,6 +80,9 @@ Fonte: [Confluence ms-inventory](https://zerainterdisciplinar.atlassian.net/wiki
 |---|---|---|---|---|
 | `POST` | `auth/login` | `SingInRequestDTO(email, password)` | `SingInResponseDTO` | `SingIn.execute()` |
 | `POST` | `auth/refresh` | `{ refreshToken }` | mesmo formato do login | `RefreshSession` / `TokenRefreshAuthenticator` |
+| `POST` | `auth/logout` | — | — | `SignOut.execute()` (logout no perfil) |
+
+`auth/logout` revoga o refresh token e é autenticado: leva `Authorization: Bearer`, mas um `401` nele não dispara refresh nem re-login (`isCredentialRequest`). `SignOut` desregistra o device token, chama o logout (timeout de 5s, falhas ignoradas) e só então limpa a sessão local (`SingIn.clearLocalSession`). Expiração de sessão, Splash e falhas de login continuam só com `clearSession()`, sem revogar.
 | `POST` | `auth/password-reset/request` | `PasswordResetRequestDTO(email)` | `202` sem corpo, exista a conta ou não | `RequestPasswordReset` (`PasswordRecoveryEmailViewModel`) |
 | `POST` | `auth/password-reset/confirm` | `PasswordResetConfirmDTO(token, newPassword)` | `204` sem corpo; token inválido/usado/expirado → `400` (sem distinguir o motivo) | `ConfirmPasswordReset` (`NewPasswordViewModel`) |
 

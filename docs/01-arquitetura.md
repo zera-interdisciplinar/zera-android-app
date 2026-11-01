@@ -89,8 +89,11 @@ A navegação usa **Jetpack Navigation Compose** com rotas tipadas (`sealed inte
 - `ZeraNavigator.pushAndPop(route, popCount, animation)` — substitui a tela atual pela nova (`PushAndPop`), usado por exemplo ao sair da Splash ou redirecionar após o login.
 - `ZeraNavigator.pushAndPopAll(route, animation)` — limpa toda a pilha de navegação, deixando só a nova rota (`PushAndPopAll`).
 - `ZeraNavigator.goBack()` — volta uma tela (`GoBack`); não recebe animação, ela é derivada da tela removida (ver abaixo).
+- `ZeraNavigator.navigationStatus(true|false)` — habilita ou bloqueia globalmente os quatro tipos de navegação. `false` impede navegação programática, botão voltar da interface e botão voltar nativo/gestual; `true` restaura o comportamento normal.
 
 O parâmetro `animation` é um `ScreenAnimation` e é opcional (padrão `Fade`).
+
+Operações assíncronas que não podem ser interrompidas por navegação devem chamar `navigationStatus(false)` antes de iniciar o carregamento e restaurar `navigationStatus(true)` em todo encerramento da operação (`sucesso`, `erro` e `cancelamento`). O estado também deve ser restaurado pelo ciclo de vida da tela/ViewModel para evitar bloqueio permanente. `ZeraNavHost` possui uma defesa adicional e o Android `BackHandler` consome o gesto de voltar enquanto a navegação estiver desabilitada.
 
 Qualquer camada (tipicamente o `ViewModel`, mas também `Screens` simples como `WelcomeScreen`) pode chamar `ZeraNavigator` diretamente, sem precisar de referência ao `NavHostController`. Isso desacopla `ViewModels` de Compose/Navigation-Compose, mas também significa que a navegação não é unit-testável isoladamente sem observar o `Flow` de comandos.
 

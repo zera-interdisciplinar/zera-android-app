@@ -4,6 +4,9 @@ import com.zera.android.model.dto.inventory.CategoryResponseDTO
 import com.zera.android.model.dto.inventory.ItemResponseDTO
 import com.zera.android.model.dto.inventory.MaterialResponseDTO
 import com.zera.android.model.dto.inventory.ModelResponseDTO
+import com.zera.android.model.dto.inventory.UpdateItemRequestDTO
+import com.zera.android.view.components.navigation.EmployeeSideBarItems
+import com.zera.android.view.components.navigation.ManagerSideBarItems
 import com.zera.android.view.components.outros.ItemStatus
 import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals
@@ -87,6 +90,12 @@ class ItemDetailsMappingTest {
     }
 
     @Test
+    fun formatsAcquisitionDateWithoutTime() {
+        assertEquals("1 de Jul 2026", ItemDetailsViewModel.formatAcquiredAt("2026-07-01"))
+        assertEquals("", ItemDetailsViewModel.formatAcquiredAt(null))
+    }
+
+    @Test
     fun mapsItemResponseToDetailsState() {
         val item = ItemResponseDTO(
             id = "9c858901-8a57-4791-81fe-4c455b099bc9",
@@ -94,6 +103,7 @@ class ItemDetailsMappingTest {
             status = "IN_STOCK",
             condition = "USED",
             serialNumber = "SN123456",
+            acquiredAt = "2026-07-01",
             notes = "Foto ok",
             createdByName = "João Silva",
             createdAt = "2026-07-01T09:00:00",
@@ -115,6 +125,7 @@ class ItemDetailsMappingTest {
         assertEquals("Usado", state.condition)
         assertEquals("USED", state.conditionCode)
         assertEquals("SN123456", state.serialNumber)
+        assertEquals("1 de Jul 2026", state.acquiredAt)
         assertEquals("Foto ok", state.notes)
         assertEquals(false, state.canReview)
         assertEquals("João Silva", state.registeredBy)
@@ -163,6 +174,38 @@ class ItemDetailsMappingTest {
     }
 
     @Test
+    fun maintenanceActionOnlyForEmployeeOnInStockItem() {
+        assertEquals(true, ItemDetailsViewModel.canSendToMaintenance(ItemStatus.InStock, isEmployee = true))
+        ItemStatus.entries.filter { it != ItemStatus.InStock }.forEach { status ->
+            assertEquals(false, ItemDetailsViewModel.canSendToMaintenance(status, isEmployee = true))
+        }
+        assertEquals(false, ItemDetailsViewModel.canSendToMaintenance(null, isEmployee = true))
+        assertEquals(false, ItemDetailsViewModel.canSendToMaintenance(ItemStatus.InStock, isEmployee = false))
+    }
+
+    @Test
+    fun sideBarFollowsUserRole() {
+        val item = ItemResponseDTO(id = "id-1", name = "Notebook", status = "IN_STOCK")
+        assertEquals(EmployeeSideBarItems, ItemDetailsViewModel.stateFrom(item, isEmployee = true).sideBarItems)
+        assertEquals(ManagerSideBarItems, ItemDetailsViewModel.stateFrom(item, isEmployee = false).sideBarItems)
+    }
+
+    @Test
+    fun inStockItemEnablesMaintenanceOnlyForEmployee() {
+        val item = ItemResponseDTO(id = "id-1", name = "Notebook", status = "IN_STOCK")
+        assertEquals(true, ItemDetailsViewModel.stateFrom(item, isEmployee = true).canSendToMaintenance)
+        assertEquals(false, ItemDetailsViewModel.stateFrom(item, isEmployee = false).canSendToMaintenance)
+    }
+
+    @Test
+    fun maintenanceStatusDisablesMaintenanceAction() {
+        val state = ItemDetailsViewModel.stateFrom(
+            ItemResponseDTO(id = "id-1", name = "Notebook", status = "IN_MAINTENANCE"),
+        )
+        assertEquals(false, state.canSendToMaintenance)
+    }
+
+    @Test
     fun usedConditionDoesNotEnableReview() {
         val state = ItemDetailsViewModel.stateFrom(
             ItemResponseDTO(
@@ -203,5 +246,59 @@ class ItemDetailsMappingTest {
             """{"id":"id-1","name":"Notebook","createdBy":"user-uuid"}""",
         )
         assertEquals("", ItemDetailsViewModel.registeredByFrom(item))
+    }
+
+    @Test
+    fun editDraftStartsFromLoadedItem() {
+        val item = ItemResponseDTO(
+            id = "id-1",
+            name = "Placa de vídeo",
+            condition = "SEMI_DAMAGED",
+            hasDamages = true,
+            damages = listOf("OXIDATION", "MISSING_PART"),
+            usageIntensity = 4,
+            notes = "Arranhão",
+        )
+        val draft = ItemDetailsViewModel.draftFrom(ItemDetailsViewModel.stateFrom(item))
+        assertEquals(
+            ItemEditDraft(
+                name = "Placa de vídeo",
+                condition = "Semidanificado",
+                usageIntensity = 4,
+                hasDamage = true,
+                damageType = "Enferrujado",
+                notes = "Arranhão",
+            ),
+            draft,
+        )
+    }
+
+    @Test
+    fun editRequestIsNullWhenNothingChanged() {
+        val initial = ItemEditDraft(name = "Notebook", condition = "Usado", usageIntensity = 3)
+        assertNull(ItemDetailsViewModel.editRequestFrom(initial, initial.copy(name = " Notebook ")))
+    }
+
+    @Test
+    fun editRequestSendsOnlyChangedFields() {
+        val initial = ItemEditDraft(name = "Notebook", condition = "Usado", usageIntensity = 3, notes = "Velho")
+        val draft = initial.copy(condition = "Danificado", usageIntensity = 7, notes = "")
+        assertEquals(
+            UpdateItemRequestDTO(condition = "DAMAGED", usageIntensity = 7, notes = ""),
+            ItemDetailsViewModel.editRequestFrom(initial, draft),
+        )
+    }
+
+    @Test
+    fun editRequestSendsDamagesOnlyWhenTouched() {
+        val initial = ItemEditDraft(name = "Notebook", hasDamage = true, damageType = "Não liga")
+        assertEquals(
+            UpdateItemRequestDTO(hasDamages = true, damages = listOf("BROKEN_SCREEN")),
+            ItemDetailsViewModel.editRequestFrom(initial, initial.copy(damageType = "Tela quebrada")),
+        )
+        assertEquals(
+            UpdateItemRequestDTO(hasDamages = false, damages = emptyList()),
+            ItemDetailsViewModel.editRequestFrom(initial, initial.copy(hasDamage = false, damageType = "")),
+        )
     }
 }

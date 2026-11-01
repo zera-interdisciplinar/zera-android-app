@@ -1,5 +1,6 @@
 package com.zera.android.view.components.scaffolds
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -10,11 +11,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -24,11 +28,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.zera.android.view.components.buttons.IconButton
 import com.zera.android.view.components.containers.ZeraGradientBox
 import com.zera.android.view.components.navigation.EmployeeBottomNavBar
 import com.zera.android.view.components.navigation.EmployeeSideBarItems
@@ -71,6 +75,8 @@ private val BottomFadeHeight = 25.dp
  *   na [UpperNavBar]. Use `false` em telas que só precisam do "Voltar" (ex.: "Scanear item").
  * @param fabIcon ícone do botão flutuante. Quando `null`, nenhum FAB é exibido. O FAB sempre
  *   abre uma conversa nova com o assistente ([Route.ChatBot]); a ação não é configurável.
+ *   O ícone é desenhado sem tint, preenchendo o botão inteiro recortado em círculo — use
+ *   um drawable que já traga o próprio fundo (ex.: [ZeraIcon.ChatbotBase]).
  * @param scrollable quando `true` (padrão), a [Column] do conteúdo rola inteira. Use
  *   `false` quando [content] já tiver seu próprio elemento rolável.
  * @param contentPadding espaçamento horizontal do conteúdo.
@@ -88,7 +94,7 @@ fun EmployeeScaffold(
     goBack: Boolean = false,
     onBackClick: () -> Unit = { ZeraNavigator.goBack() },
     showActions: Boolean = true,
-    fabIcon: ZeraIcon? = ZeraIcon.Chatbot,
+    fabIcon: ZeraIcon? = ZeraIcon.ChatbotBase,
     scrollable: Boolean = true,
     contentPadding: Dp = Spacing.medium,
     backgroundVariant: Boolean = false,
@@ -133,14 +139,20 @@ fun EmployeeScaffold(
             },
             floatingActionButton = {
                 if (fabIcon != null) {
-                    IconButton(
-                        icon = fabIcon,
+                    Surface(
                         onClick = {
                             ZeraNavigator.push(Route.ChatBot(UUID.randomUUID().toString()), ScreenAnimation.SlideVertical)
                         },
-                        contentDescription = "Assistente virtual",
-                        size = 56.dp,
-                    )
+                        shape = CircleShape,
+                        modifier = Modifier.size(56.dp),
+                    ) {
+                        Image(
+                            painter = fabIcon.painter(),
+                            contentDescription = "Assistente virtual",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize(),
+                        )
+                    }
                 }
             },
         ) { innerPadding ->

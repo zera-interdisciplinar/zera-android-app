@@ -16,11 +16,11 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zera.android.view.components.buttons.ZeraButton
 import com.zera.android.view.components.cards.InviteCard
 import com.zera.android.view.components.containers.ZeraBox
-import com.zera.android.view.components.forms.CreateInviteForm
 import com.zera.android.view.components.lists.EmployeeItem
 import com.zera.android.view.components.lists.EmployeeList
 import com.zera.android.view.components.loading.SkeletonBox
@@ -51,10 +51,14 @@ fun EmployeesScreen(
     val state by viewModel.state
     val clipboardManager = LocalClipboardManager.current
 
+    LifecycleResumeEffect(Unit) {
+        viewModel.onResume()
+        onPauseOrDispose { }
+    }
+
     ManagerScaffold(
         title = "Colaboradores",
         currentRoute = Route.Employees,
-        goBack = true,
         onBackClick = viewModel::onBackClick,
     ) {
         if (state.isLoading) {
@@ -88,17 +92,6 @@ fun EmployeesScreen(
 
             state.errorMessage?.let { message ->
                 CaptionText(text = message, color = MaterialTheme.colorScheme.error)
-            }
-
-            if (state.showCreateInvite) {
-                CreateInviteForm(
-                    inviteeName = state.inviteeName,
-                    onInviteeNameChange = viewModel::onInviteeNameChange,
-                    onSubmit = viewModel::onSubmitCreateInvite,
-                    onCancel = viewModel::onCancelCreateInvite,
-                    isSubmitting = state.isSubmitting,
-                    errorMessage = state.inviteErrorMessage,
-                )
             }
 
             // Seção opcional, sem skeleton: entra quando os convites chegam.

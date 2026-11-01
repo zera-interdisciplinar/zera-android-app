@@ -1,6 +1,7 @@
 package com.zera.android.viewmodel.main.home.manager
 
 import com.zera.android.model.dto.inventory.DashboardHomeResponseDTO
+import com.zera.android.model.dto.notification.AlertResponseDTO
 import com.zera.android.model.entity.user.UserRole
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -8,6 +9,25 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ManagerHomeMappingTest {
+    @Test
+    fun homeShowsOnlyFirstThreeAlerts() {
+        val alerts = (1..5).map { index ->
+            AlertResponseDTO(
+                alertId = "alert-$index",
+                kind = "STOCK_QUANTITY_LIMIT",
+                severity = "HIGH",
+                status = "OPEN",
+                description = "Alerta $index",
+                unitId = "unit",
+                occurredAt = "2026-09-20T03:15:00",
+                createdAt = "2026-09-20T03:15:01",
+                updatedAt = "2026-09-20T03:15:01",
+            )
+        }
+        val notifications = ManagerHomeViewModel.homeAlertsFrom(alerts)
+        assertEquals(listOf("alert-1", "alert-2", "alert-3"), notifications.map { it.id })
+    }
+
     @Test
     fun occupationConvertsPercentToFraction() {
         val home = DashboardHomeResponseDTO(

@@ -37,9 +37,11 @@ model
 ViewModels:
 
 - `ManagerHomeViewModel` — `ManagerHomeScreen` (`Route.ManagerHome`): preenche o atalho "Funcionários"
-- `EmployeesViewModel` — `EmployeesScreen` (`Route.Employees`): header, pendentes, lista, criar convite
+- `EmployeesViewModel` — `EmployeesScreen` (`Route.Employees`): header, pendentes, lista
+- `EmployeeRegisterViewModel` — `EmployeeRegisterScreen` (`Route.EmployeeRegister`): criar convite
+- `EmployeeDetailsViewModel` — `EmployeeDetailsScreen` (`Route.EmployeeDetails`): dados do operário
 
-UI extra: `CreateInviteForm` (campo `inviteeName`). `InviteCard` e `EmployeeList` já existiam.
+`InviteCard`, `EmployeeList` e `Avatar` já existiam.
 
 ## Endpoints consumidos
 
@@ -48,7 +50,9 @@ UI extra: `CreateInviteForm` (campo `inviteeName`). `InviteCard` e `EmployeeList
 | `GET /api/v1/users/count-by-manager` | `CountActiveEmployees` | home (card) e header "Equipe ativa" |
 | `GET /api/v1/users?role=EMPLOYEE&status=ACTIVE&managerId=` | `ListTeamEmployees` | lista de colaboradores |
 | `GET /api/v1/invitations/pending?managerId=` | `ListPendingInvitations` | `InviteCard` + linhas "Pendente" |
-| `POST /api/v1/invitations` | `CreateInvitation` | botão "Novo" → `CreateInviteForm` |
+| `POST /api/v1/invitations` | `CreateInvitation` | botão "Novo" → `EmployeeRegisterScreen` |
+| `GET /api/v1/users/{id}` | `GetSelfUser` | `EmployeeDetailsScreen` |
+| `GET /api/v1/telephone/user?userId=` | `GetTelephone` | `EmployeeDetailsScreen` (`404` = sem telefone) |
 | `POST /api/v1/invitations/redeem` | `InvitationUseCase` | `SignUpScreen` (não é fluxo do gestor) |
 
 O microserviço em si não valida `apiKey`; o interceptor do app ainda manda o header por causa do gateway. Paths Retrofit **não** prefixam `api/v1` — a base URL do boot já inclui esse sufixo (`users`, `invitations/pending`, …).
@@ -67,8 +71,9 @@ O microserviço em si não valida `apiKey`; o interceptor do app ainda manda o h
 - **Pendentes.** `GET /invitations/pending` (não `GET /invitations?status=`). O back já filtra `PENDING` com `expiresAt` no futuro. Payload só `code`, `inviteeName`, `expiresAt`. Vários itens → vários `InviteCard`.
 - **"Expira em Nh".** `expiresAt` (ISO `LocalDateTime` sem timezone) menos `now()`, em horas inteiras, mínimo 0.
 - **Composição.** `isPending` **não** vem de status de usuário. Convites viram linhas "Pendente" (`id = invite-{code}`) **antes** dos funcionários ativos. Não existe user `INACTIVE` esperando redeem.
-- **Criar convite.** "Novo +" abre `CreateInviteForm` na mesma tela (não há rota nova). Único campo de UI: `inviteeName`. `managerId` sai da sessão. TTL 7 dias é constante do back. Sucesso fecha o form e recarrega pendentes. `400`/`404` viram mensagem no form.
-- **Copiar código.** `InviteCard` usa a clipboard do Compose. Clique no item da lista ainda não navega (não há tela de detalhe de colaborador).
+- **Criar convite.** "Novo +" abre `EmployeeRegisterScreen`. A tela pede nome, e-mail e unidade, mas o contrato só recebe `inviteeName`: os outros campos ficam como TODO até o back aceitá-los, e o dropdown de unidade fica vazio (não há rota de listagem de unidades). `managerId` sai da sessão. TTL 7 dias é constante do back. Sucesso volta para a lista, que recarrega os pendentes no `onResume`. `400`/`404` viram mensagem no form.
+- **Copiar código.** `InviteCard` usa a clipboard do Compose.
+- **Detalhe do operário.** Clique num ativo abre `EmployeeDetailsScreen` (linha pendente não navega, não há usuário). `GET /users/{id}` preenche nome, e-mail, cargo e foto; telefone vem de `GET /telephone/user` e, se falhar, a tela mostra o resto com aviso. "Excluir perfil" é TODO: não há rota de exclusão/desativação de usuário.
 
 ## Testes
 

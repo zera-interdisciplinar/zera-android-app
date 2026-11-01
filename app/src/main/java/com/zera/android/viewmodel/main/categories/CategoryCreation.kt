@@ -45,7 +45,7 @@ class CategoryCreationViewModel : ZeraViewModel() {
                     name = form.name.trim(),
                     description = form.description.trim().takeIf { it.isNotEmpty() },
                 )
-                ZeraNavigator.push(
+                ZeraNavigator.pushAndPop(
                     Route.CategoryCreationSuccess(
                         name = created.name.ifBlank { form.name.trim() },
                         description = created.description.orEmpty(),

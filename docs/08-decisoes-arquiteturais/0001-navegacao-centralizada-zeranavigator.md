@@ -10,7 +10,7 @@ Jetpack Navigation Compose exige uma referência ao `NavHostController` para dis
 
 ## Decisão
 
-Centralizar toda navegação em `ZeraNavigator` (`view/navigation/ZeraNavigator.kt`), um `object` que expõe operações simples (`push`, `pushAndPop`, `pushAndPopAll`, `goBack`) e internamente envia um `NavCommand` para um `Channel`. `ZeraNavHost` é o único ponto que de fato possui o `NavHostController`: ele coleta o `Flow<NavCommand>` (`ZeraNavigator.commands`) num `LaunchedEffect(Unit)` e traduz cada comando numa chamada real de `navController.navigate(...)`/`popBackStack()`.
+Centralizar toda navegação em `ZeraNavigator` (`view/navigation/ZeraNavigator.kt`), um `object` que expõe operações simples (`push`, `pushAndPop`, `pushAndPopAll`, `goBack`) e internamente envia um `NavCommand` para um `Channel`. Também expõe uma variável de estado `navigationEnabled`, alterada por `navigationStatus(boolean)`, para impedir todos os tipos de navegação durante estados transitórios críticos. `ZeraNavHost` é o único ponto que de fato possui o `NavHostController`: ele coleta o `Flow<NavCommand>` (`ZeraNavigator.commands`) num `LaunchedEffect(Unit)` e traduz cada comando numa chamada real de `navController.navigate(...)`/`popBackStack()`.
 
 Qualquer camada — tipicamente o `ViewModel`, e excepcionalmente uma `View` sem lógica associada (`SplashScreen`, `WelcomeScreen`) — pode chamar `ZeraNavigator` diretamente, sem receber o `NavHostController` por parâmetro ou injeção.
 
@@ -26,3 +26,4 @@ Qualquer camada — tipicamente o `ViewModel`, e excepcionalmente uma `View` sem
 - Introduz uma camada de indireção (`NavCommand`) que precisa ser mantida em paralelo às definições de `Route`.
 - Comandos enviados quando `ZeraNavHost` ainda não está compondo (ou não há coletor ativo) podem ser perdidos — o `Channel` é `BUFFERED`, mas depende de haver exatamente um coletor vivo.
 - A navegação não é diretamente verificável num teste unitário de `ViewModel` sem também observar o `Flow` de comandos (não há um "fake NavHostController" simples de inspecionar).
+- `navigationStatus(false)` bloqueia os comandos enviados pelo app e o botão voltar nativo/gestual através de `BackHandler`. É responsabilidade do fluxo chamador restaurar `navigationStatus(true)` em toda saída, inclusive erro, cancelamento e encerramento do ViewModel. Comandos programáticos já enviados antes do bloqueio são ignorados no consumidor de comandos.

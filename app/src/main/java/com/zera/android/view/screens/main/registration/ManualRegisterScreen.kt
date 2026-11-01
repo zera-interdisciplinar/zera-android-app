@@ -2,6 +2,7 @@ package com.zera.android.view.screens.main.registration
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -18,7 +19,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.zera.android.view.components.buttons.IconButton
 import com.zera.android.view.components.buttons.ZeraButton
 import com.zera.android.view.components.buttons.ZeraButtonType
 import com.zera.android.view.components.inputs.ZeraDateInput
@@ -32,6 +35,7 @@ import com.zera.android.view.components.texts.BodyText
 import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
+import com.zera.android.view.theme.icons.ZeraIcon
 import com.zera.android.viewmodel.main.registration.ManualRegisterViewModel
 
 /**
@@ -52,6 +56,11 @@ fun ManualRegisterScreen(
 ) {
     val state by viewModel.state
     val keyboardController = LocalSoftwareKeyboardController.current
+
+    LifecycleResumeEffect(Unit) {
+        viewModel.onResume()
+        onPauseOrDispose { }
+    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -126,20 +135,32 @@ fun ManualRegisterScreen(
                 placeholder = "Nome do item",
                 imeAction = ImeAction.Next,
             )
-            ZeraDropdownInput(
-                value = state.model,
-                values = state.modelOptions,
-                onValueChange = viewModel::onModelChange,
-                label = "Modelo",
-                placeholder = when {
-                    state.isLoading -> "Carregando…"
-                    state.modelOptions.isEmpty() -> "Nenhum modelo cadastrado"
-                    else -> "Selecione o modelo"
-                },
-                enabled = !state.isLoading && state.modelOptions.isNotEmpty(),
-                isError = state.modelsError != null,
-                errorMessage = state.modelsError,
-            )
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(Spacing.small),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                ZeraDropdownInput(
+                    value = state.model,
+                    values = state.modelOptions,
+                    onValueChange = viewModel::onModelChange,
+                    modifier = Modifier.weight(1f),
+                    label = "Modelo",
+                    placeholder = when {
+                        state.isLoading -> "Carregando…"
+                        state.modelOptions.isEmpty() -> "Nenhum modelo cadastrado"
+                        else -> "Selecione o modelo"
+                    },
+                    enabled = !state.isLoading && state.modelOptions.isNotEmpty(),
+                    isError = state.modelsError != null,
+                    errorMessage = state.modelsError,
+                )
+                IconButton(
+                    icon = ZeraIcon.Plus,
+                    onClick = viewModel::onAddModelClick,
+                    contentDescription = "Cadastrar modelo",
+                    type = ZeraButtonType.Base,
+                )
+            }
             ZeraTextInput(
                 value = state.manufacturingYear,
                 onValueChange = viewModel::onManufacturingYearChange,

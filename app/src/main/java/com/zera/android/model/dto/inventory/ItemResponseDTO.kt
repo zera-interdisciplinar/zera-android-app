@@ -15,7 +15,11 @@ data class ItemResponseDTO(
     @JsonNames("itemStatus", "approvalStatus")
     val status: String? = null,
     val condition: String? = null,
+    val hasDamages: Boolean? = null,
+    val damages: List<String> = emptyList(),
+    val usageIntensity: Int? = null,
     val serialNumber: String? = null,
+    val acquiredAt: String? = null,
     val notes: String? = null,
     val photoUrl: String? = null,
     @OptIn(ExperimentalSerializationApi::class)

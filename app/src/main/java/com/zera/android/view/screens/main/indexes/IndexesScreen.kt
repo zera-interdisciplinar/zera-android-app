@@ -54,7 +54,6 @@ fun IndexesScreen(
     ManagerScaffold(
         title = "Indicadores",
         currentRoute = Route.Indexes,
-        goBack = true,
     ) {
         SubtitleText(text = "Acompanhe desempenho e impacto")
 

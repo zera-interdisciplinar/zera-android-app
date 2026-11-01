@@ -142,6 +142,11 @@ interface InventoryService {
         @Body body: RejectItemRequestDTO,
     ): ItemResponseDTO
 
+    @POST("api/v1/items/{id}/maintenance/start")
+    suspend fun startItemMaintenance(
+        @Path("id") id: String,
+    ): ItemResponseDTO
+
     @PATCH("api/v1/items/{id}")
     suspend fun updateItem(
         @Path("id") id: String,

@@ -29,6 +29,9 @@ data class Environments(
     @SerialName("supabase-avatars-bucket")
     val supabaseAvatarsBucket: String = "",
 
+    @SerialName("supabase-items-bucket")
+    val supabaseItemsBucket: String = "",
+
     @SerialName("ms-ai-url")
     @JsonNames("ms-ai-core")
     val aiApiUrl: String = "",

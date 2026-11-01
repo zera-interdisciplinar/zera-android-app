@@ -3,6 +3,7 @@ package com.zera.android.viewmodel.main.home.manager
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.zera.android.model.dto.inventory.DashboardHomeResponseDTO
+import com.zera.android.model.dto.notification.AlertResponseDTO
 import com.zera.android.model.entity.user.UserRole
 import com.zera.android.model.usecase.auth.GetSelfUser
 import com.zera.android.model.usecase.inventory.GetManagerHome
@@ -13,6 +14,7 @@ import com.zera.android.view.components.lists.ProductItem
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.view.navigation.routeForAlertKind
+import com.zera.android.view.transition.ScreenAnimation
 import com.zera.android.viewmodel.ZeraViewModel
 import com.zera.android.viewmodel.main.alerts.AlertMapping
 import kotlinx.coroutines.CancellationException
@@ -110,7 +112,7 @@ class ManagerHomeViewModel : ZeraViewModel() {
     private suspend fun loadAlerts() {
         try {
             val alerts = getAlerts.execute(status = "OPEN")
-            _state.value = _state.value.copy(notifications = AlertMapping.notificationsFrom(alerts))
+            _state.value = _state.value.copy(notifications = homeAlertsFrom(alerts))
         } catch (e: CancellationException) {
             throw e
         } catch (_: Exception) {
@@ -150,8 +152,18 @@ class ManagerHomeViewModel : ZeraViewModel() {
         ZeraNavigator.push(route)
     }
 
+    fun onSeeAllAlertsClick() {
+        ZeraNavigator.push(Route.AlertCentral, animation = ScreenAnimation.SlideHorizontal)
+    }
+
     companion object {
         private val ptBr = Locale.forLanguageTag("pt-BR")
+
+        /** A home mostra só os primeiros alertas; o resto fica na central de alertas. */
+        internal const val HOME_ALERTS_LIMIT = 3
+
+        internal fun homeAlertsFrom(alerts: List<AlertResponseDTO>): List<NotificationItem> =
+            AlertMapping.notificationsFrom(alerts).take(HOME_ALERTS_LIMIT)
 
         internal fun occupationFrom(home: DashboardHomeResponseDTO): Float {
             val percent = home.occupancyPercent ?: return 0f

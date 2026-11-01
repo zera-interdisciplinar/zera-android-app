@@ -15,6 +15,9 @@ interface AuthService {
     @POST("auth/refresh")
     suspend fun refresh(@Body body: RefreshRequestDTO): SingInResponseDTO
 
+    @POST("auth/logout")
+    suspend fun logout()
+
     // 202 sem corpo, exista a conta ou não (evita enumeração de e-mails).
     @POST("auth/password-reset/request")
     suspend fun requestPasswordReset(@Body body: PasswordResetRequestDTO)

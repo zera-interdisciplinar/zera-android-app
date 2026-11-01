@@ -92,7 +92,7 @@ class ModelCreationViewModel : ZeraViewModel() {
                     .filter { it.isNotBlank() }
                     .joinToString(", ")
                     .ifBlank { form.material }
-                ZeraNavigator.push(
+                ZeraNavigator.pushAndPop(
                     Route.ModelCreationSuccess(
                         modelName = created.name?.takeIf { it.isNotBlank() } ?: form.modelName.trim(),
                         material = materialLabel,

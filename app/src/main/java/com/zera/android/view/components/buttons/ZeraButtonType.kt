@@ -65,15 +65,28 @@ internal fun buttonBorder(
  *
  * @param style família de cor. Ver [ZeraColorFamily].
  * @param type hierarquia visual dentro do estilo. Ver [ZeraButtonType].
+ * @param keepColorsWhenDisabled quando `true`, o estado desabilitado usa as mesmas cores do
+ *   habilitado em vez do cinza padrão do Material (ex.: botão em carregamento, que só fica
+ *   translúcido).
  */
 @Composable
 internal fun buttonColors(
     style: ZeraColorFamily,
     type: ZeraButtonType,
+    keepColorsWhenDisabled: Boolean = false,
 ): ButtonColors {
     val (container, content) = buttonColorPair(style, type)
-    return ButtonDefaults.buttonColors(
-        containerColor = container,
-        contentColor = content,
-    )
+    return if (keepColorsWhenDisabled) {
+        ButtonDefaults.buttonColors(
+            containerColor = container,
+            contentColor = content,
+            disabledContainerColor = container,
+            disabledContentColor = content,
+        )
+    } else {
+        ButtonDefaults.buttonColors(
+            containerColor = container,
+            contentColor = content,
+        )
+    }
 }

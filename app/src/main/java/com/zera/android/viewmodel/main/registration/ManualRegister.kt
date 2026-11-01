@@ -14,14 +14,6 @@ import com.zera.android.viewmodel.main.items.ItemDetailsViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
-private val DAMAGE_LABELS = listOf(
-    "Tela quebrada",
-    "Peça faltando",
-    "Não liga",
-    "Enferrujado",
-    "Outro",
-)
-
 data class ManualRegisterState(
     val barcode: String = "",
     val serialNumber: String = "",
@@ -37,7 +29,7 @@ data class ManualRegisterState(
     val notes: String = "",
     val modelOptions: List<String> = emptyList(),
     val conditionOptions: List<String> = ItemDetailsViewModel.conditionOptions,
-    val damageTypeOptions: List<String> = DAMAGE_LABELS,
+    val damageTypeOptions: List<String> = ItemDetailsViewModel.damageOptions,
     val isLoading: Boolean = false,
     val modelsError: String? = null,
     val isSubmitting: Boolean = false,
@@ -72,6 +64,7 @@ class ManualRegisterViewModel(
     val state = _state
 
     private var loadedModels: List<ModelResponseDTO> = emptyList()
+    private var refreshModelsOnResume = false
 
     init {
         startWork { loadModels() }
@@ -128,6 +121,18 @@ class ManualRegisterViewModel(
         _state.value = _state.value.copy(notes = value)
     }
 
+    fun onAddModelClick() {
+        refreshModelsOnResume = true
+        ZeraNavigator.push(Route.ModelCreation)
+    }
+
+    /** Chamado quando a tela volta a ficar visível; só recarrega após ir criar um modelo. */
+    fun onResume() {
+        if (!refreshModelsOnResume) return
+        refreshModelsOnResume = false
+        startWork { refreshModels() }
+    }
+
     fun onConfirmClick() {
         val current = _state.value
         if (!current.canSubmit || current.isSubmitting) return
@@ -141,20 +146,7 @@ class ManualRegisterViewModel(
 
     private suspend fun loadModels() {
         try {
-            val page = getModels.execute(page = 0, size = MODELS_PAGE_SIZE)
-            loadedModels = page.content
-            val names = page.content.mapNotNull { it.name?.takeIf(String::isNotBlank) }.distinct()
-            val options = if (initialModel.isNullOrEmpty() || initialModel in names) {
-                names
-            } else {
-                names + initialModel
-            }
-            _state.value = _state.value.copy(
-                modelOptions = options,
-                selectedModelId = loadedModels.firstOrNull { it.name == _state.value.model }?.id,
-                isLoading = false,
-                modelsError = null,
-            )
+            applyModels(getModels.execute(page = 0, size = MODELS_PAGE_SIZE).content)
         } catch (error: CancellationException) {
             throw error
         } catch (error: Exception) {
@@ -169,6 +161,36 @@ class ManualRegisterViewModel(
         }
     }
 
+    private fun applyModels(models: List<ModelResponseDTO>) {
+        loadedModels = models
+        val names = models.mapNotNull { it.name?.takeIf(String::isNotBlank) }.distinct()
+        val options = if (initialModel.isNullOrEmpty() || initialModel in names) {
+            names
+        } else {
+            names + initialModel
+        }
+        _state.value = _state.value.copy(
+            modelOptions = options,
+            selectedModelId = loadedModels.firstOrNull { it.name == _state.value.model }?.id,
+            isLoading = false,
+            modelsError = null,
+        )
+    }
+
+    /**
+     * Recarrega os modelos ao voltar da criação de um modelo. Diferente de [loadModels], uma
+     * falha aqui mantém a lista e a seleção atuais em vez de limpá-las.
+     */
+    private suspend fun refreshModels() {
+        try {
+            applyModels(getModels.execute(page = 0, size = MODELS_PAGE_SIZE).content)
+        } catch (error: CancellationException) {
+            throw error
+        } catch (_: Exception) {
+            // Mantém a lista atual: o usuário pode tentar de novo ao voltar à tela.
+        }
+    }
+
     private suspend fun submit(current: ManualRegisterState) {
         val modelId = current.selectedModelId ?: return
         val condition = ItemDetailsViewModel.conditionCodeFrom(current.condition)
@@ -178,7 +200,10 @@ class ManualRegisterViewModel(
         val year = current.manufacturingYear.toIntOrNull()
             ?: return failSubmit("Ano de fabricação inválido")
         val damages = if (current.hasDamage) {
-            listOf(damageCodeFrom(current.damageType) ?: return failSubmit("Tipo de dano inválido"))
+            listOf(
+                ItemDetailsViewModel.damageCodeFrom(current.damageType)
+                    ?: return failSubmit("Tipo de dano inválido"),
+            )
         } else {
             emptyList()
         }
@@ -235,15 +260,6 @@ class ManualRegisterViewModel(
                 return null
             }
             return "$year-$month-$day"
-        }
-
-        internal fun damageCodeFrom(label: String): String? = when (label) {
-            "Tela quebrada" -> "BROKEN_SCREEN"
-            "Peça faltando" -> "MISSING_PART"
-            "Não liga" -> "DOES_NOT_POWER_ON"
-            "Enferrujado" -> "OXIDATION"
-            "Outro" -> "OTHER"
-            else -> null
         }
     }
 }

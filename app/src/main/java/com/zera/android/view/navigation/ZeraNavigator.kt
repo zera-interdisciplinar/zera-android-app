@@ -17,6 +17,13 @@ object ZeraNavigator {
 
     fun isNavigationEnabled(): Boolean = _navigationEnabled.value
 
+    /**
+     * Bloqueia ou habilita globalmente os comandos de navegação.
+     *
+     * Enquanto [enabled] for `false`, `push`, `pushAndPop`, `pushAndPopAll` e `goBack`
+     * são ignorados. Chama este método com `true` antes de retomar uma navegação
+     * explícita ou ao encerrar o carregamento que exigiu o bloqueio.
+     */
     fun navigationStatus(enabled: Boolean) {
         _navigationEnabled.value = enabled
     }

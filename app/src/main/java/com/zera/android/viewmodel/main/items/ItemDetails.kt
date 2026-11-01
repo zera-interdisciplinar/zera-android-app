@@ -8,19 +8,27 @@ import com.zera.android.model.usecase.auth.GetSelfUser
 import com.zera.android.model.usecase.inventory.ApproveItem
 import com.zera.android.model.usecase.inventory.GetItemDetails
 import com.zera.android.model.usecase.inventory.RejectItem
+import com.zera.android.model.usecase.inventory.StartItemMaintenance
 import com.zera.android.model.usecase.inventory.UpdateItem
+import com.zera.android.model.usecase.inventory.UploadItemPhoto
 import com.zera.android.view.components.outros.ItemStatus
+import com.zera.android.view.media.PhotoCapture
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.viewmodel.ZeraViewModel
+import com.zera.android.view.components.navigation.SideBarItem
 import com.zera.android.viewmodel.isEmployeeRole
+import com.zera.android.viewmodel.sideBarItemsFor
+import com.zera.android.viewmodel.profile.ProfileViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
 import retrofit2.HttpException
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.Month
 import java.time.format.TextStyle
 import java.util.Locale
 
@@ -33,14 +41,40 @@ data class ItemDetailsState(
     val material: String = "",
     val condition: String = "",
     val conditionCode: String? = null,
+    val usageIntensity: Int? = null,
+    val hasDamage: Boolean = false,
+    val damageCodes: List<String> = emptyList(),
     val serialNumber: String = "",
+    val acquiredAt: String = "",
     val notes: String = "",
     val registeredBy: String = "",
     val registeredAt: String = "",
+    val photoUrl: String? = null,
+    /** `true` enquanto o popup com a foto ampliada está aberto. */
+    val showPhotoViewer: Boolean = false,
+    /** `true` enquanto a foto recém-tirada está sendo enviada ao Storage. */
+    val isUploadingPhoto: Boolean = false,
     val canReview: Boolean = false,
+    val canSendToMaintenance: Boolean = false,
+    val sideBarItems: List<SideBarItem> = emptyList(),
     val isLoading: Boolean = true,
     val isSubmitting: Boolean = false,
     val errorMessage: String? = null,
+    /** Rascunho do bottom sheet "Editar o item"; `null` = sheet fechado. */
+    val editDraft: ItemEditDraft? = null,
+)
+
+/** Campos do bottom sheet de edição, com os rótulos de UI (condição e tipo de dano). */
+data class ItemEditDraft(
+    val name: String = "",
+    val condition: String = "",
+    val usageIntensity: Int = ItemDetailsViewModel.DEFAULT_USAGE_INTENSITY,
+    val hasDamage: Boolean = false,
+    val damageType: String = "",
+    val notes: String = "",
+    val nameError: String? = null,
+    val damageTypeError: String? = null,
+    val notesError: String? = null,
 )
 
 class ItemDetailsViewModel : ZeraViewModel() {
@@ -49,6 +83,8 @@ class ItemDetailsViewModel : ZeraViewModel() {
     private val approveItem = ApproveItem()
     private val rejectItem = RejectItem()
     private val updateItem = UpdateItem()
+    private val startItemMaintenance = StartItemMaintenance()
+    private val uploadItemPhoto = UploadItemPhoto()
 
     private val _state = mutableStateOf(ItemDetailsState())
     val state = _state
@@ -79,88 +115,125 @@ class ItemDetailsViewModel : ZeraViewModel() {
         ZeraNavigator.goBack()
     }
 
-    fun onNameConfirm(name: String) {
-        val error = nameValidationError(name)
-        if (error != null) {
-            _state.value = _state.value.copy(errorMessage = error)
-            return
-        }
-        patchItem(UpdateItemRequestDTO(name = name.trim()))
+    fun onCameraPermissionDenied() {
+        _state.value = _state.value.copy(errorMessage = "Permita o uso da câmera para tirar a foto.")
     }
 
-    fun onConditionConfirm(value: String) {
-        val code = conditionCodeFrom(value)
-        if (code == null) {
-            _state.value = _state.value.copy(
-                errorMessage = "Condição inválida. Use Novo, Usado, Semidanificado ou Danificado.",
-            )
-            return
-        }
-        patchItem(UpdateItemRequestDTO(condition = code))
-    }
-
-    fun onSerialConfirm(value: String) {
-        val error = serialValidationError(value)
-        if (error != null) {
-            _state.value = _state.value.copy(errorMessage = error)
-            return
-        }
-        patchItem(UpdateItemRequestDTO(serialNumber = value.trim()))
-    }
-
-    fun onNotesConfirm(value: String) {
-        val error = notesValidationError(value)
-        if (error != null) {
-            _state.value = _state.value.copy(errorMessage = error)
-            return
-        }
-        patchItem(UpdateItemRequestDTO(notes = value.trim()))
-    }
-
-    fun onEditConfirm(
-        name: String,
-        conditionLabel: String,
-        serialNumber: String,
-        notes: String,
-    ) {
-        val nameError = nameValidationError(name)
-        if (nameError != null) {
-            _state.value = _state.value.copy(errorMessage = nameError)
-            return
-        }
-        val conditionCode = conditionCodeFrom(conditionLabel)
-        if (conditionCode == null) {
-            _state.value = _state.value.copy(
-                errorMessage = "Condição inválida. Use Novo, Usado, Semidanificado ou Danificado.",
-            )
-            return
-        }
-        val serialError = serialValidationError(serialNumber)
-        if (serialError != null) {
-            _state.value = _state.value.copy(errorMessage = serialError)
-            return
-        }
-        val notesError = notesValidationError(notes)
-        if (notesError != null) {
-            _state.value = _state.value.copy(errorMessage = notesError)
-            return
-        }
+    /** Recebe a foto já tirada e reduzida (`null` se não deu para processá-la) e a envia ao Storage. */
+    fun onPhotoTaken(bytes: ByteArray?) {
         val current = _state.value
-        val request = UpdateItemRequestDTO(
-            name = name.trim().takeIf { it != current.itemName },
-            condition = conditionCode.takeIf { it != current.conditionCode },
-            serialNumber = changedOptionalText(current.serialNumber, serialNumber),
-            notes = changedOptionalText(current.notes, notes),
+        val itemId = current.itemId
+        if (itemId.isBlank() || current.isUploadingPhoto) return
+        if (bytes == null || bytes.isEmpty()) {
+            _state.value = current.copy(errorMessage = "Não foi possível processar a foto.")
+            return
+        }
+        _state.value = current.copy(isUploadingPhoto = true, errorMessage = null)
+        viewModelScope.launch {
+            try {
+                val photoUrl = uploadItemPhoto.execute(itemId, bytes, PhotoCapture.MimeType)
+                // O contrato atual não persiste photoUrl em PATCH; a URL é exibida nesta sessão.
+                _state.value = _state.value.copy(
+                    photoUrl = ProfileViewModel.cacheBust(photoUrl),
+                    isUploadingPhoto = false,
+                    showPhotoViewer = false,
+                    errorMessage = null,
+                )
+            } catch (e: CancellationException) {
+                _state.value = _state.value.copy(isUploadingPhoto = false)
+                throw e
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(
+                    isUploadingPhoto = false,
+                    errorMessage = ProfileViewModel.photoWriteError(e),
+                )
+            }
+        }
+    }
+
+    fun onPhotoInspect() {
+        if (_state.value.photoUrl == null) return
+        _state.value = _state.value.copy(showPhotoViewer = true)
+    }
+
+    fun onPhotoViewerDismiss() {
+        _state.value = _state.value.copy(showPhotoViewer = false)
+    }
+
+    fun onRemovePhotoClick() {
+        _state.value = _state.value.copy(
+            showPhotoViewer = false,
+            errorMessage = "Remover foto ainda não está disponível pelo contrato atual.",
         )
-        if (
-            request.name == null &&
-            request.condition == null &&
-            request.serialNumber == null &&
-            request.notes == null
-        ) {
+    }
+
+    fun onEditClick() {
+        _state.value = _state.value.copy(editDraft = draftFrom(_state.value), errorMessage = null)
+    }
+
+    fun onEditDismiss() {
+        _state.value = _state.value.copy(editDraft = null)
+    }
+
+    fun onEditNameChange(value: String) {
+        updateDraft { it.copy(name = value, nameError = null) }
+    }
+
+    fun onEditConditionChange(value: String) {
+        updateDraft { it.copy(condition = value) }
+    }
+
+    fun onEditUsageIntensityChange(value: Int) {
+        updateDraft { it.copy(usageIntensity = value) }
+    }
+
+    fun onEditHasDamageChange(selected: Boolean) {
+        val hasDamage = !selected
+        updateDraft {
+            it.copy(
+                hasDamage = hasDamage,
+                damageType = if (hasDamage) it.damageType else "",
+                damageTypeError = null,
+            )
+        }
+    }
+
+    fun onEditDamageTypeChange(value: String) {
+        updateDraft { it.copy(damageType = value, damageTypeError = null) }
+    }
+
+    fun onEditNotesChange(value: String) {
+        updateDraft { it.copy(notes = value, notesError = null) }
+    }
+
+    /** Valida o rascunho e manda só o que mudou; o sheet fecha quando o PATCH volta com sucesso. */
+    fun onEditSave() {
+        val current = _state.value
+        val draft = current.editDraft ?: return
+        val validated = draft.copy(
+            nameError = nameValidationError(draft.name),
+            damageTypeError = if (draft.hasDamage && damageCodeFrom(draft.damageType) == null) {
+                "Selecione o tipo de dano."
+            } else {
+                null
+            },
+            notesError = notesValidationError(draft.notes),
+        )
+        if (validated.nameError != null || validated.damageTypeError != null || validated.notesError != null) {
+            _state.value = current.copy(editDraft = validated)
+            return
+        }
+        val request = editRequestFrom(draftFrom(current), validated)
+        if (request == null) {
+            onEditDismiss()
             return
         }
         patchItem(request)
+    }
+
+    private fun updateDraft(transform: (ItemEditDraft) -> ItemEditDraft) {
+        val draft = _state.value.editDraft ?: return
+        _state.value = _state.value.copy(editDraft = transform(draft))
     }
 
     fun onApproveClick() {
@@ -225,6 +298,30 @@ class ItemDetailsViewModel : ZeraViewModel() {
         }
     }
 
+    fun onSendToMaintenanceClick() {
+        val itemId = _state.value.itemId
+        if (itemId.isBlank() || _state.value.isSubmitting || !_state.value.canSendToMaintenance) return
+        _state.value = _state.value.copy(isSubmitting = true, errorMessage = null)
+        viewModelScope.launch {
+            try {
+                val item = startItemMaintenance.execute(itemId)
+                _state.value = stateFrom(item, isEmployee).copy(isSubmitting = false, errorMessage = null)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(
+                    isSubmitting = false,
+                    errorMessage = userFacingError(
+                        error = e,
+                        conflictMessage = "Este item não pode ir para manutenção no status atual.",
+                        validationMessage = "Não foi possível colocar o item em manutenção.",
+                        fallback = "Não foi possível colocar o item em manutenção.",
+                    ),
+                )
+            }
+        }
+    }
+
     private fun patchItem(request: UpdateItemRequestDTO) {
         val itemId = _state.value.itemId
         if (itemId.isBlank() || _state.value.isSubmitting) return
@@ -252,10 +349,63 @@ class ItemDetailsViewModel : ZeraViewModel() {
     companion object {
         private val ptBr = Locale.forLanguageTag("pt-BR")
         internal const val NAME_MAX_LENGTH = 120
-        internal const val SERIAL_MAX_LENGTH = 120
         internal const val NOTES_MAX_LENGTH = 500
         internal const val REASON_MAX_LENGTH = 500
+        internal const val DEFAULT_USAGE_INTENSITY = 1
         internal val conditionOptions = listOf("Novo", "Usado", "Semidanificado", "Danificado")
+        internal val damageOptions = listOf("Tela quebrada", "Peça faltando", "Não liga", "Enferrujado", "Outro")
+
+        internal fun damageCodeFrom(label: String): String? = when (label) {
+            "Tela quebrada" -> "BROKEN_SCREEN"
+            "Peça faltando" -> "MISSING_PART"
+            "Não liga" -> "DOES_NOT_POWER_ON"
+            "Enferrujado" -> "OXIDATION"
+            "Outro" -> "OTHER"
+            else -> null
+        }
+
+        internal fun damageLabel(code: String?): String = when (code) {
+            "BROKEN_SCREEN" -> "Tela quebrada"
+            "MISSING_PART" -> "Peça faltando"
+            "DOES_NOT_POWER_ON" -> "Não liga"
+            "OXIDATION" -> "Enferrujado"
+            "OTHER" -> "Outro"
+            else -> ""
+        }
+
+        // O dropdown escolhe um só tipo de dano: exibe o primeiro da lista do backend.
+        internal fun draftFrom(state: ItemDetailsState): ItemEditDraft = ItemEditDraft(
+            name = state.itemName,
+            condition = state.condition,
+            usageIntensity = state.usageIntensity ?: DEFAULT_USAGE_INTENSITY,
+            hasDamage = state.hasDamage,
+            damageType = damageLabel(state.damageCodes.firstOrNull()),
+            notes = state.notes,
+        )
+
+        /**
+         * Monta o PATCH só com os campos que mudaram em relação ao rascunho [initial];
+         * `null` quando nada mudou. Danos só vão se "possui danos?" ou o tipo mudou,
+         * para não sobrescrever uma lista de vários danos que o usuário nem tocou.
+         */
+        internal fun editRequestFrom(initial: ItemEditDraft, draft: ItemEditDraft): UpdateItemRequestDTO? {
+            val damagesChanged = draft.hasDamage != initial.hasDamage || draft.damageType != initial.damageType
+            val request = UpdateItemRequestDTO(
+                name = draft.name.trim().takeIf { it != initial.name.trim() },
+                condition = conditionCodeFrom(draft.condition).takeIf { draft.condition != initial.condition },
+                usageIntensity = draft.usageIntensity.takeIf { it != initial.usageIntensity },
+                hasDamages = draft.hasDamage.takeIf { damagesChanged },
+                damages = if (!damagesChanged) {
+                    null
+                } else if (draft.hasDamage) {
+                    listOfNotNull(damageCodeFrom(draft.damageType))
+                } else {
+                    emptyList()
+                },
+                notes = changedOptionalText(initial.notes, draft.notes),
+            )
+            return request.takeIf { it != UpdateItemRequestDTO() }
+        }
 
         internal fun statusFrom(value: String?): ItemStatus? = ItemStatus.fromBackend(value)
 
@@ -271,14 +421,9 @@ class ItemDetailsViewModel : ZeraViewModel() {
             !isEmployee &&
                 (status == ItemStatus.PendingApproval || status == ItemStatus.AwaitingEvaluation)
 
-        internal fun serialValidationError(value: String): String? {
-            val trimmed = value.trim()
-            return if (trimmed.length > SERIAL_MAX_LENGTH) {
-                "O número de série deve ter no máximo $SERIAL_MAX_LENGTH caracteres."
-            } else {
-                null
-            }
-        }
+        // Só o Operário manda para manutenção, e só item no estoque.
+        internal fun canSendToMaintenance(status: ItemStatus?, isEmployee: Boolean = false): Boolean =
+            isEmployee && status == ItemStatus.InStock
 
         internal fun notesValidationError(value: String): String? {
             val trimmed = value.trim()
@@ -345,17 +490,29 @@ class ItemDetailsViewModel : ZeraViewModel() {
             return ""
         }
 
+        private fun monthLabel(month: Month): String = month
+            .getDisplayName(TextStyle.SHORT, ptBr)
+            .replace(".", "")
+            .replaceFirstChar { it.uppercase() }
+            .take(3)
+
         internal fun formatRegisteredAt(iso: String?): String {
             if (iso.isNullOrBlank()) return ""
             return try {
                 val dateTime = LocalDateTime.parse(iso)
-                val month = dateTime.month
-                    .getDisplayName(TextStyle.SHORT, ptBr)
-                    .replace(".", "")
-                    .replaceFirstChar { it.uppercase() }
-                    .take(3)
                 val minute = dateTime.minute.toString().padStart(2, '0')
-                "${dateTime.dayOfMonth} de $month ${dateTime.year} - ${dateTime.hour}h$minute"
+                "${dateTime.dayOfMonth} de ${monthLabel(dateTime.month)} ${dateTime.year} - ${dateTime.hour}h$minute"
+            } catch (_: Exception) {
+                iso
+            }
+        }
+
+        // `acquiredAt` é só data (`yyyy-MM-dd`), sem hora.
+        internal fun formatAcquiredAt(iso: String?): String {
+            if (iso.isNullOrBlank()) return ""
+            return try {
+                val date = LocalDate.parse(iso)
+                "${date.dayOfMonth} de ${monthLabel(date.month)} ${date.year}"
             } catch (_: Exception) {
                 iso
             }
@@ -375,11 +532,19 @@ class ItemDetailsViewModel : ZeraViewModel() {
             material = materialsLabel(item.model?.materials.orEmpty().map { it.name }),
             condition = conditionLabel(item.condition),
             conditionCode = item.condition,
+            usageIntensity = item.usageIntensity,
+            hasDamage = item.hasDamages ?: item.damages.isNotEmpty(),
+            damageCodes = item.damages,
             serialNumber = item.serialNumber.orEmpty(),
+            acquiredAt = formatAcquiredAt(item.acquiredAt),
             notes = item.notes.orEmpty(),
             registeredBy = registeredByFrom(item),
             registeredAt = formatRegisteredAt(item.createdAt),
+            // TODO: alinhar com o back-end o envio do photoUrl do item (hoje o ItemResponse pode vir sem foto).
+            photoUrl = item.photoUrl?.takeIf { it.isNotBlank() },
             canReview = canReview(statusFrom(item.status), isEmployee),
+            canSendToMaintenance = canSendToMaintenance(statusFrom(item.status), isEmployee),
+            sideBarItems = sideBarItemsFor(isEmployee),
         )
 
         internal fun userFacingError(

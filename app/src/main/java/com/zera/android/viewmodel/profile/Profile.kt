@@ -4,17 +4,21 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.zera.android.model.entity.user.ProfileUser
 import com.zera.android.model.entity.user.UserRole
+import com.zera.android.model.usecase.auth.SignOut
 import com.zera.android.model.usecase.telephone.GetTelephone
-import com.zera.android.model.usecase.telephone.SaveTelephone
 import com.zera.android.model.usecase.user.GetProfile
 import com.zera.android.model.usecase.user.RenameUser
 import com.zera.android.model.usecase.user.UpdateUserEmail
 import com.zera.android.model.usecase.user.UpdateUserImage
 import com.zera.android.model.usecase.user.UploadAvatar
+import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
+import com.zera.android.view.transition.ScreenAnimation
 import com.zera.android.viewmodel.ZeraViewModel
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 
 data class ProfileState(
@@ -29,21 +33,37 @@ data class ProfileState(
     val position: String = "",
     val canEditName: Boolean = false,
     val canEditEmail: Boolean = true,
-    val canEditPhone: Boolean = false,
     val isLoading: Boolean = false,
     val isSaving: Boolean = false,
     val isUploadingPhoto: Boolean = false,
+    val showLogoutDialog: Boolean = false,
+    val isLoggingOut: Boolean = false,
     val errorMessage: String? = null,
     val snackbarMessage: String? = null,
     val snackbarIsError: Boolean = true,
+    /** Rascunho do bottom sheet "Editar perfil"; `null` = sheet fechado. */
+    val editDraft: ProfileEditDraft? = null,
 )
+
+data class ProfileEditDraft(
+    val fullName: String = "",
+    val email: String = "",
+    val nameError: String? = null,
+    val emailError: String? = null,
+    /** Erro do último "Salvar", mostrado dentro do sheet (o snackbar da tela fica atrás dele). */
+    val submitError: String? = null,
+)
+
+/** Quais campos do rascunho diferem do perfil atual e o usuário pode alterar. */
+internal data class ProfileEditChanges(val name: Boolean, val email: Boolean) {
+    val any: Boolean get() = name || email
+}
 
 class ProfileViewModel(
     private val getProfile: GetProfile = GetProfile(),
     private val getTelephone: GetTelephone = GetTelephone(),
     private val renameUser: RenameUser = RenameUser(),
     private val updateUserEmail: UpdateUserEmail = UpdateUserEmail(),
-    private val saveTelephone: SaveTelephone = SaveTelephone(),
     private val uploadAvatar: UploadAvatar = UploadAvatar(),
     private val updateUserImage: UpdateUserImage = UpdateUserImage(),
 ) : ZeraViewModel() {
@@ -51,7 +71,6 @@ class ProfileViewModel(
     val state = _state
 
     private var apiRole: String = ""
-    private var telephoneId: String? = null
 
     init {
         loadProfile()
@@ -66,7 +85,6 @@ class ProfileViewModel(
                 var loaded = profile
                 try {
                     val telephone = getTelephone.execute(profile.userId)
-                    telephoneId = telephone?.telephoneId
                     loaded = profile.copy(
                         telephoneId = telephone?.telephoneId,
                         phone = telephone?.number.orEmpty(),
@@ -74,7 +92,6 @@ class ProfileViewModel(
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
-                    telephoneId = null
                     _state.value = stateFrom(profile, apiRole).copy(
                         isLoading = false,
                         errorMessage = e.message ?: "Não foi possível carregar o telefone.",
@@ -98,7 +115,24 @@ class ProfileViewModel(
     }
 
     fun onSettingsClick() {
-        // TODO: navegar para a tela de configurações (ainda não existe)
+        ZeraNavigator.push(Route.Configurations, ScreenAnimation.SlideHorizontal)
+    }
+
+    fun onLogoutClick() {
+        _state.value = _state.value.copy(showLogoutDialog = true)
+    }
+
+    fun onLogoutDismiss() {
+        _state.value = _state.value.copy(showLogoutDialog = false)
+    }
+
+    fun onLogoutConfirm() {
+        if (_state.value.isLoggingOut) return
+        _state.value = _state.value.copy(showLogoutDialog = false, isLoggingOut = true)
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) { SignOut().execute() }
+            ZeraNavigator.pushAndPopAll(Route.Welcome)
+        }
     }
 
     fun onSnackbarShown() {
@@ -149,84 +183,95 @@ class ProfileViewModel(
         }
     }
 
-    fun onNameConfirm(name: String) {
-        if (!canEditName(apiRole) || _state.value.isSaving) return
-        val error = nameValidationError(name)
-        if (error != null) {
-            showSnackbar(error, isError = true)
+    fun onEditClick() {
+        val current = _state.value
+        _state.value = current.copy(
+            editDraft = ProfileEditDraft(
+                fullName = current.fullName,
+                email = current.email,
+            ),
+        )
+    }
+
+    fun onEditDismiss() {
+        if (_state.value.isSaving) return
+        _state.value = _state.value.copy(editDraft = null)
+    }
+
+    fun onEditNameChange(value: String) {
+        updateDraft { it.copy(fullName = value, nameError = null, submitError = null) }
+    }
+
+    fun onEditEmailChange(value: String) {
+        updateDraft { it.copy(email = value, emailError = null, submitError = null) }
+    }
+
+    /**
+     * Valida o rascunho e grava só o que mudou (o nome só para gestor). Cada campo é um
+     * endpoint: se um falhar, os anteriores já ficam salvos no state e o sheet continua aberto
+     * com o erro, e um novo "Salvar" reenvia apenas o que falta.
+     */
+    fun onEditSave() {
+        val current = _state.value
+        val draft = current.editDraft ?: return
+        if (current.isSaving) return
+
+        val changes = editChangesFrom(current, draft)
+        val validated = draft.copy(
+            nameError = if (changes.name) nameValidationError(draft.fullName) else null,
+            emailError = if (changes.email) emailValidationError(draft.email) else null,
+            submitError = null,
+        )
+        if (validated.nameError != null || validated.emailError != null) {
+            _state.value = current.copy(editDraft = validated)
             return
         }
-        val trimmed = name.trim()
+        if (!changes.any) {
+            _state.value = current.copy(editDraft = null)
+            return
+        }
+
+        _state.value = current.copy(isSaving = true, errorMessage = null, editDraft = validated)
         viewModelScope.launch {
-            _state.value = _state.value.copy(isSaving = true, errorMessage = null)
+            var writingEmail = false
             try {
-                renameUser.execute(trimmed)
+                if (changes.name) {
+                    val name = draft.fullName.trim()
+                    renameUser.execute(name)
+                    _state.value = _state.value.copy(
+                        displayName = name,
+                        fullName = name,
+                        initials = initialsFrom(name),
+                    )
+                }
+                if (changes.email) {
+                    val email = draft.email.trim()
+                    writingEmail = true
+                    updateUserEmail.execute(email)
+                    writingEmail = false
+                    _state.value = _state.value.copy(email = email)
+                }
                 _state.value = _state.value.copy(
-                    displayName = trimmed,
-                    fullName = trimmed,
-                    initials = initialsFrom(trimmed),
                     isSaving = false,
-                    snackbarMessage = "Nome atualizado.",
+                    editDraft = null,
+                    snackbarMessage = "Perfil atualizado.",
                     snackbarIsError = false,
                 )
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                showSnackbar(profileWriteError(e), isError = true, isSaving = false)
+                val message = if (writingEmail) emailWriteError(e) else profileWriteError(e)
+                _state.value = _state.value.copy(
+                    isSaving = false,
+                    editDraft = _state.value.editDraft?.copy(submitError = message),
+                )
             }
         }
     }
 
-    fun onEmailConfirm(email: String) {
-        if (!canEditEmail() || _state.value.isSaving) return
-        val error = emailValidationError(email)
-        if (error != null) {
-            showSnackbar(error, isError = true)
-            return
-        }
-        val trimmed = email.trim()
-        viewModelScope.launch {
-            _state.value = _state.value.copy(isSaving = true, errorMessage = null)
-            try {
-                updateUserEmail.execute(trimmed)
-                _state.value = _state.value.copy(
-                    email = trimmed,
-                    isSaving = false,
-                    snackbarMessage = "E-mail atualizado.",
-                    snackbarIsError = false,
-                )
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                showSnackbar(emailWriteError(e), isError = true, isSaving = false)
-            }
-        }
-    }
-
-    fun onPhoneConfirm(phone: String) {
-        if (!canEditPhone(apiRole) || _state.value.isSaving) return
-        val error = phoneValidationError(phone)
-        if (error != null) {
-            showSnackbar(error, isError = true)
-            return
-        }
-        viewModelScope.launch {
-            _state.value = _state.value.copy(isSaving = true, errorMessage = null)
-            try {
-                val saved = saveTelephone.execute(telephoneId, phone)
-                telephoneId = saved.telephoneId
-                _state.value = _state.value.copy(
-                    phone = saved.number,
-                    isSaving = false,
-                    snackbarMessage = "Telefone atualizado.",
-                    snackbarIsError = false,
-                )
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                showSnackbar(profileWriteError(e), isError = true, isSaving = false)
-            }
-        }
+    private fun updateDraft(transform: (ProfileEditDraft) -> ProfileEditDraft) {
+        val draft = _state.value.editDraft ?: return
+        _state.value = _state.value.copy(editDraft = transform(draft))
     }
 
     companion object {
@@ -252,15 +297,17 @@ class ProfileViewModel(
                 position = roleLabel,
                 canEditName = canEditName(role),
                 canEditEmail = canEditEmail(),
-                canEditPhone = canEditPhone(role),
             )
         }
+
+        internal fun editChangesFrom(state: ProfileState, draft: ProfileEditDraft) = ProfileEditChanges(
+            name = state.canEditName && draft.fullName.trim() != state.fullName.trim(),
+            email = state.canEditEmail && draft.email.trim() != state.email.trim(),
+        )
 
         internal fun canEditName(role: String): Boolean = role == UserRole.MANAGER
 
         internal fun canEditEmail(): Boolean = true
-
-        internal fun canEditPhone(role: String): Boolean = role == UserRole.MANAGER
 
         internal fun roleLabel(role: String): String = when (role) {
             UserRole.MANAGER -> "Gestor"
@@ -284,11 +331,6 @@ class ProfileViewModel(
 
         internal fun emailValidationError(email: String): String? =
             if (email.contains("@")) null else "E-mail inválido"
-
-        internal fun phoneValidationError(phone: String): String? {
-            val digits = phone.count(Char::isDigit)
-            return if (digits in 10..11) null else "Telefone inválido"
-        }
 
         internal fun photoValidationError(bytes: ByteArray, mimeType: String): String? {
             if (mimeType.lowercase() !in AllowedPhotoMimes) {
@@ -318,8 +360,6 @@ class ProfileViewModel(
                 else -> "Não foi possível enviar a foto. Tente novamente."
             }
         }
-
-        internal fun saveTelephoneUsesCreate(telephoneId: String?): Boolean = telephoneId.isNullOrBlank()
 
         internal fun cacheBust(url: String): String {
             val separator = if (url.contains("?")) "&" else "?"

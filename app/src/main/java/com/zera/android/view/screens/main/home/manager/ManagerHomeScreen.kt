@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zera.android.view.components.cards.ShortcutCard
 import com.zera.android.view.components.cards.StockOccupationCard
+import com.zera.android.view.components.layouts.AdaptiveRow
 import com.zera.android.view.components.lists.NotificationItem
 import com.zera.android.view.components.lists.NotificationList
 import com.zera.android.view.components.lists.ProductItem
@@ -76,13 +77,12 @@ fun ManagerHomeScreen(
                 bold = true,
                 color = MaterialTheme.colorScheme.onSurface,
             )
-            Row(horizontalArrangement = Arrangement.spacedBy(Spacing.medium)) {
+            AdaptiveRow {
                 ShortcutCard(
                     label = "Itens",
                     value = state.totalItems,
                     labelIcon = ZeraIcon.Box,
                     onClick = viewModel::onItemCardClick,
-                    modifier = Modifier.weight(1f),
                     description = state.itemsChangeLabel.takeIf { it.isNotBlank() },
                     descriptionColor = if (state.itemsChangePositive) {
                         MaterialTheme.colorScheme.tertiary
@@ -95,7 +95,6 @@ fun ManagerHomeScreen(
                     value = state.totalEmployees,
                     labelIcon = ZeraIcon.Group,
                     onClick = viewModel::onEmployeesCardClick,
-                    modifier = Modifier.weight(1f),
                     description = state.employeesDescription,
                     descriptionColor = MaterialTheme.colorScheme.secondary,
                 )
@@ -103,11 +102,23 @@ fun ManagerHomeScreen(
 
             // Seção opcional, sem skeleton: entra quando os alertas chegam, sem piscar o estado vazio.
             if (!state.isLoadingAlerts) {
-                TitleText(
-                    text = "Alertas importantes",
-                    bold = true,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    TitleText(
+                        text = "Alertas importantes",
+                        bold = true,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.weight(1f),
+                    )
+                    LabelText(
+                        text = "Ver Todos",
+                        bold = true,
+                        color = MaterialTheme.colorScheme.primary,
+                        onClick = viewModel::onSeeAllAlertsClick,
+                    )
+                }
                 NotificationList(
                     notifications = state.notifications,
                     onItemClick = viewModel::onAlertClick,
