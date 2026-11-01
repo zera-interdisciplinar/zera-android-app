@@ -71,7 +71,7 @@ Como funcionário ou gestor, quero ver uma mensagem clara quando algo dá errado
 
 - **Given** o usuário está em `ConnectionError` e continua sem internet
 - **When** toca em "Tentar novamente"
-- **Then** a Splash falha de novo no boot e volta para `ConnectionError`
+- **Then** o app checa a conexão (com loading no botão), vê que continua offline e **permanece** em `ConnectionError`, sem navegar
 
 ### Cenário: falha de servidor no boot
 
@@ -103,7 +103,8 @@ Como funcionário ou gestor, quero ver uma mensagem clara quando algo dá errado
 
 - **Given** o usuário está em `ConnectionError`, aberta durante o uso
 - **When** toca em "Tentar novamente" ou no voltar do sistema
-- **Then** o app volta para a tela anterior, que mantém o que já estava preenchido
+- **Then** o app checa a conexão antes de sair; ainda offline, continua em `ConnectionError`
+- **And** com a conexão de volta, o app volta para a tela anterior, que mantém o que já estava preenchido
 - **And** o usuário repete a ação na tela (a chamada que falhou não é refeita sozinha)
 
 ### Cenário: falha ao enviar formulário
@@ -137,7 +138,7 @@ Fora de escopo desta spec (ver [Fora de escopo](#fora-de-escopo-desta-spec)).
 2. **Splash:** `try/catch` no `boot.execute()`. Conexão → `pushAndPop(Route.ConnectionError(fromBoot = true))`; demais falhas → `pushAndPop(Route.FatalError)`. Em `navigateAfterBoot`, falha de conexão → `ConnectionError(fromBoot = true)` sem limpar a sessão; 401/403 seguem limpando e indo para o Welcome.
 3. **Telas de erro:**
    - `Route.ConnectionError` vira `data class ConnectionError(val fromBoot: Boolean = false)`.
-   - "Tentar novamente": `fromBoot = true` → `pushAndPopAll(Route.Splash)`; `fromBoot = false` → `goBack()`. O voltar do sistema faz o mesmo que "Tentar novamente" quando `fromBoot = false`; com `fromBoot = true`, fecha o app (pilha vazia, comportamento atual).
+   - "Tentar novamente": primeiro checa a conexão (`NetworkStatus.isOnline`: rede ativa com `NET_CAPABILITY_INTERNET` e `NET_CAPABILITY_VALIDATED`, permissão `ACCESS_NETWORK_STATE`), com loading no botão; ainda offline, a tela continua. Online: `fromBoot = true` → `pushAndPopAll(Route.Splash)`; `fromBoot = false` → `goBack()`. O voltar do sistema faz o mesmo que "Tentar novamente" quando `fromBoot = false`; com `fromBoot = true`, fecha o app (pilha vazia, comportamento atual).
    - Texto da `ConnectionError`: trocar "Seus dados serão enviados quando a conexão voltar." (não existe fila offline) por "Verifique sua conexão com a internet e tente novamente."
    - `FatalError`: "Ok, entendi" e o voltar do sistema fecham o app (mesmo mecanismo do `shouldExitApp` da `ConnectionError`).
 4. **Interceptor de conexão:** `ConnectionErrorInterceptor` compartilhado. Captura `IOException` de conexão, libera a navegação (`navigationStatus(true)`), faz `push(Route.ConnectionError())` e relança a exceção. Uma trava atômica (`ConnectionErrorGate`) garante uma tela só; ela é liberada no `onCleared` do `ConnectionErrorViewModel`. Adicionado em `AdmCoreClient` (cliente principal e `refreshClient`), `InventoryClient`, `AiClient`, `ScrapyClient` e `SupabaseStorage`. O boot também passa por ele, mas a Splash suprime o interceptor (`gate.suppress(true)`) enquanto roda o boot e o restore, e ela mesma navega com `fromBoot = true`. A trava é liberada no `onCleared` da `ConnectionError` aberta pelo interceptor.
@@ -149,8 +150,8 @@ Fora de escopo desta spec (ver [Fora de escopo](#fora-de-escopo-desta-spec)).
 
 - [x] **Escopo:** Splash, telas de erro, interceptor e popup de erro. Handler de crash fica para depois, junto com uma ferramenta de crash report.
 - [x] **Conexão durante o uso:** tela cheia `ConnectionError`, uma vez só, sem popup na tela de origem.
-- [x] **Interceptor vs. `NetworkCallback`:** só o interceptor.
-- [x] **"Tentar novamente":** pela Splash quando a tela veio do boot; `goBack()` quando veio do uso.
+- [x] **Interceptor vs. `NetworkCallback`:** só o interceptor para detectar a queda; o "Tentar novamente" faz uma checagem pontual com `ConnectivityManager` antes de sair da tela.
+- [x] **"Tentar novamente":** só sai da tela com a conexão de volta; pela Splash quando a tela veio do boot; `goBack()` quando veio do uso.
 - [x] **"Ok, entendi" (FatalError):** fecha o app.
 - [x] **Botão voltar do sistema:** `ConnectionError` do uso → igual a "Tentar novamente"; `ConnectionError` do boot e `FatalError` → fecham o app.
 - [x] **Modo offline:** não existe; ajustar o texto da `ConnectionError`.
