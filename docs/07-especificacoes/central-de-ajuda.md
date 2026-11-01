@@ -112,8 +112,8 @@ Como Operário, quero buscar e ler os documentos de ajuda, para resolver dúvida
 - [x] `HelpDocument.fromEntry` separa título, subtítulo e corpo
 - [x] `GetHelpDocuments` lê só as chaves `category_*` com valor string, ordenadas pelo título
 - [x] Central de Ajuda lista os documentos reais e filtra pela busca
-- [ ] Tocar num documento abre `HelpDocumentScreen` com título e corpo em markdown
-- [ ] Testes unitários do parse, do filtro de chaves e da busca
+- [x] Tocar num documento abre `HelpDocumentScreen` com título e corpo em markdown
+- [x] Testes unitários do parse, do filtro de chaves e da busca
 - [ ] Docs atualizadas (catálogo de componentes, stack, contexto do Scrapy)
 
 ## Edge cases considerados
@@ -146,5 +146,5 @@ Uma etapa por vez, com revisão antes da próxima.
 2. [x] `HelpDocument` (entity + `fromEntry`) + testes
 3. [x] `GetHelpDocuments` (use case + `documentsFrom`) + testes
 4. [x] Ligar `HelpCentralHubViewModel`/`HelpCentralHubScreen` aos documentos + teste da busca
-5. [ ] `Route.HelpDocument` + `HelpDocumentViewModel` + `HelpDocumentScreen` + `ZeraNavHost`
+5. [x] `Route.HelpDocument` + `HelpDocumentViewModel` + `HelpDocumentScreen` + `ZeraNavHost`
 6. [ ] Atualizar docs (`03-catalogo-componentes.md`, `09-stack-e-dependencias.md`, `contrato-scrapy/contexto.md`, status desta spec)

@@ -40,7 +40,8 @@ class HelpCentralHubViewModel : ZeraViewModel() {
     }
 
     fun onDocumentClick(document: OptionItem) {
-        // TODO: abrir o detalhe do documento (item 5 da spec)
+        val key = document.id ?: return
+        ZeraNavigator.push(Route.HelpDocument(documentKey = key))
     }
 
     fun onChatClick() {

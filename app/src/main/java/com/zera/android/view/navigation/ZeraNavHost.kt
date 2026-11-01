@@ -36,6 +36,7 @@ import com.zera.android.view.screens.main.employees.EmployeeDetailsScreen
 import com.zera.android.view.screens.main.employees.EmployeeRegisterScreen
 import com.zera.android.view.screens.main.employees.EmployeesScreen
 import com.zera.android.view.screens.main.helpCentral.HelpCentralHubScreen
+import com.zera.android.view.screens.main.helpCentral.HelpDocumentScreen
 import com.zera.android.view.screens.main.home.employee.EmployeeHomeScreen
 import com.zera.android.view.screens.main.home.manager.ManagerHomeScreen
 import com.zera.android.view.screens.main.indexes.IndexesScreen
@@ -299,6 +300,10 @@ fun ZeraNavHost() {
                 }
                 composable<Route.HelpCentralHub> {
                     HelpCentralHubScreen()
+                }
+                composable<Route.HelpDocument> { backStackEntry ->
+                    val route = backStackEntry.toRoute<Route.HelpDocument>()
+                    HelpDocumentScreen(documentKey = route.documentKey)
                 }
                 composable<Route.ManualRegister> { backStackEntry ->
                     val route = backStackEntry.toRoute<Route.ManualRegister>()
