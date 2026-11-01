@@ -35,6 +35,7 @@ import com.zera.android.view.screens.main.chat.ChatConversationsScreen
 import com.zera.android.view.screens.main.employees.EmployeeDetailsScreen
 import com.zera.android.view.screens.main.employees.EmployeeRegisterScreen
 import com.zera.android.view.screens.main.employees.EmployeesScreen
+import com.zera.android.view.screens.main.helpCentral.HelpCentralHubScreen
 import com.zera.android.view.screens.main.home.employee.EmployeeHomeScreen
 import com.zera.android.view.screens.main.home.manager.ManagerHomeScreen
 import com.zera.android.view.screens.main.indexes.IndexesScreen
@@ -295,6 +296,9 @@ fun ZeraNavHost() {
                 }
                 composable<Route.WorkingCentral> {
                     WorkingCentralScreen()
+                }
+                composable<Route.HelpCentralHub> {
+                    HelpCentralHubScreen()
                 }
                 composable<Route.ManualRegister> { backStackEntry ->
                     val route = backStackEntry.toRoute<Route.ManualRegister>()

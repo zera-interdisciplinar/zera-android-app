@@ -151,6 +151,9 @@ sealed interface Route{
     data object WorkingCentral : Route
 
     @Serializable
+    data object HelpCentralHub : Route
+
+    @Serializable
     data class ManualRegister(
         val modelName: String? = null,
         val barcode: String? = null,
