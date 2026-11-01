@@ -16,6 +16,7 @@
 - `androidx-lifecycle-viewmodel-compose` / `androidx-lifecycle-runtime-ktx` (2.9.3) — integração do `ViewModel` com Compose (`viewModel()`, `viewModelScope`).
 - `androidx-activity-compose` (1.13.0) — `ComponentActivity.setContent`.
 - Fonte customizada **Inter** (`res/font/`), aplicada via `Type.kt` sobre o type scale padrão do Material 3.
+- **multiplatform-markdown-renderer-m3** (`com.mikepenz:multiplatform-markdown-renderer-m3:0.28.0`) — renderização de markdown, usada só pelo componente `MarkdownText`. Fixada na 0.28.0 por ser a última compilada com Kotlin 2.0.x (as seguintes exigem Kotlin 2.1+).
 
 ## Networking e serialização
 
