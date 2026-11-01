@@ -15,6 +15,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.Locale
@@ -139,17 +140,21 @@ class ItensViewModel(
                     )
                     return@launch
                 }
-                val pages = queries.map { query ->
-                    async {
-                        getItems.execute(
-                            status = query.status,
-                            categoryId = query.categoryId,
-                            q = query.q,
-                            page = pageIndex,
-                            size = PAGE_SIZE,
-                        )
-                    }
-                }.awaitAll()
+                // coroutineScope: a falha de um async sai por aqui e cai no catch. Direto no launch,
+                // ela cancelaria o launch e chegaria ao viewModelScope sem tratamento (crash).
+                val pages = coroutineScope {
+                    queries.map { query ->
+                        async {
+                            getItems.execute(
+                                status = query.status,
+                                categoryId = query.categoryId,
+                                q = query.q,
+                                page = pageIndex,
+                                size = PAGE_SIZE,
+                            )
+                        }
+                    }.awaitAll()
+                }
                 val page = mergePages(pages)
                 loadedPage = page.page
                 totalPages = page.totalPages
