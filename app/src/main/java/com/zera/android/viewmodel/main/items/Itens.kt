@@ -13,6 +13,8 @@ import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.viewmodel.ZeraViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.Locale
@@ -138,14 +140,16 @@ class ItensViewModel(
                     return@launch
                 }
                 val pages = queries.map { query ->
-                    getItems.execute(
-                        status = query.status,
-                        categoryId = query.categoryId,
-                        q = query.q,
-                        page = pageIndex,
-                        size = PAGE_SIZE,
-                    )
-                }
+                    async {
+                        getItems.execute(
+                            status = query.status,
+                            categoryId = query.categoryId,
+                            q = query.q,
+                            page = pageIndex,
+                            size = PAGE_SIZE,
+                        )
+                    }
+                }.awaitAll()
                 val page = mergePages(pages)
                 loadedPage = page.page
                 totalPages = page.totalPages
@@ -186,6 +190,17 @@ class ItensViewModel(
             "Descartado" to "DISPOSED",
         )
 
+        /**
+         * Status buscados quando nenhum filtro de status está marcado. `DRAFT` nunca aparece;
+         * `REJECTED` e `DISPOSED` só aparecem pelo filtro deles.
+         */
+        private val DEFAULT_STATUS_API_VALUES = listOf(
+            "PENDING_APPROVAL",
+            "IN_STOCK",
+            "IN_MAINTENANCE",
+            "AWAITING_EVALUATION",
+        )
+
         internal fun productFrom(item: ItemResponseDTO): ProductItem {
             val status = ItemStatus.fromBackend(item.status)
             return ProductItem(
@@ -209,7 +224,7 @@ class ItensViewModel(
         ): List<ItemsQuery> {
             val q = searchQuery.trim().takeIf { it.isNotEmpty() }
             val statusValues = if (selectedStatuses.isEmpty()) {
-                listOf(null)
+                DEFAULT_STATUS_API_VALUES
             } else {
                 selectedStatuses.mapNotNull(STATUS_API_VALUES::get)
             }

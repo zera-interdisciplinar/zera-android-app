@@ -4,7 +4,7 @@
 
 - **Domínio:** Inventário (listagem e PDI)
 - **Perfil(is) envolvido(s):** Gestor
-- **Última atualização:** 2026-10-03
+- **Última atualização:** 2026-11-01
 
 ## Visão geral
 
@@ -24,7 +24,7 @@ Catálogo = `GET /api/v1/items`. Não usar `dashboard/home.recentItems` nem `das
 
 Os filtros são escolhidos no BottomSheet aberto pelo botão de filtro. Status e Categoria permitem seleção múltipla. Os chips exibidos abaixo da busca representam somente filtros aplicados; tocar em um chip remove aquele valor e recarrega a lista. Abrir e fechar o BottomSheet sem aplicar descarta o rascunho de seleção.
 
-Seleções dentro do mesmo grupo usam OR; Status e Categoria combinados usam AND. Como `GET /api/v1/items` aceita um `status` e um `categoryId` por chamada, o app consulta cada combinação do produto cartesiano entre os valores escolhidos e mescla as páginas por `id`. Sem seleção em um grupo, esse parâmetro fica ausente. Sem nenhum filtro, a consulta omite `status` e `categoryId`: o back-end devolve **ativos** (não `DISPOSED`/`REMOVED`). Para ver descartados, o chip manda `status=DISPOSED`.
+Seleções dentro do mesmo grupo usam OR; Status e Categoria combinados usam AND. Como `GET /api/v1/items` aceita um `status` e um `categoryId` por chamada, o app consulta cada combinação do produto cartesiano entre os valores escolhidos, em paralelo, e mescla as páginas por `id`. Sem seleção de Categoria, `categoryId` fica ausente. Sem seleção de Status, o app consulta os status padrão `PENDING_APPROVAL`, `IN_STOCK`, `IN_MAINTENANCE` e `AWAITING_EVALUATION` (uma chamada por status): `DRAFT` nunca aparece no catálogo, e `REJECTED`/`DISPOSED` só aparecem quando o chip do status é selecionado.
 
 O grupo Status usa os valores visíveis de `ItemStatus`: Pendente, Recusado, Aprovado, Em manutenção, Em aprovação e Descartado. O grupo Categoria usa os nomes obtidos por `GET /api/v1/categories`, convertidos para seus UUIDs em `categoryId`. A seção Situação ainda não tem opções nem regra e não aparece no filtro ativo.
 
