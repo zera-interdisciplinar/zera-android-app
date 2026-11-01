@@ -10,6 +10,10 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: [QA, PROD]
     steps:
       - uses: actions/checkout@v4
 
@@ -21,22 +25,33 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
 
       - name: Criar local.properties
+        env:
+          SCRAPY_API_KEY_QA: ${{ secrets.SCRAPY_API_KEY_QA }}
+          SCRAPY_API_KEY_PROD: ${{ secrets.SCRAPY_API_KEY_PROD }}
+          SCRAPY_API_URL: ${{ secrets.SCRAPY_API_URL }}
+          MAPS_API_KEY: ${{ secrets.MAPS_API_KEY }}
         run: |
+          if [ "${{ matrix.environment }}" = "QA" ]; then
+            SCRAPY_KEY="$SCRAPY_API_KEY_QA"
+          else
+            SCRAPY_KEY="$SCRAPY_API_KEY_PROD"
+          fi
+
           cat > local.properties <<EOF
-          scrapy.api.url=${{ secrets.SCRAPY_API_URL }}
-          scrapy.api.key=${{ secrets.SCRAPY_API_KEY }}
-          maps.api.key=${{ secrets.MAPS_API_KEY }}
+          scrapy.api.url=$SCRAPY_API_URL
+          scrapy.api.key=$SCRAPY_KEY
+          maps.api.key=$MAPS_API_KEY
           EOF
 
       - name: Build APK (debug)
         run: |
           chmod +x gradlew
-          ./gradlew assembleDebug
+          ./gradlew clean assembleDebug
 
       - name: Anexar APK na release
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.event.release.tag_name }}
         run: |
-          mv app/build/outputs/apk/debug/app-debug.apk "zera-$TAG-debug.apk"
-          gh release upload "$TAG" "zera-$TAG-debug.apk" --clobber
+          mv app/build/outputs/apk/debug/app-debug.apk "zera-$TAG-debug-${{ matrix.environment }}.apk"
+          gh release upload "$TAG" "zera-$TAG-debug-${{ matrix.environment }}.apk" --clobber
