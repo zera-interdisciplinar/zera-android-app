@@ -197,7 +197,7 @@ Uma etapa por vez, com revisão antes da próxima.
 
 1. [x] Atualizar esta spec com as decisões e o checklist
 2. [x] `Throwable.isConnectionError()` + testes
-3. [ ] Telas de erro: `Route.ConnectionError(fromBoot)`, "Tentar novamente" e voltar do sistema, texto da `ConnectionError`, `FatalError` fechando o app
+3. [x] Telas de erro: `Route.ConnectionError(fromBoot)`, "Tentar novamente" e voltar do sistema, texto da `ConnectionError`, `FatalError` fechando o app
 4. [ ] Splash: `try/catch` no boot e separação de conexão vs. 401/403 no restore
 5. [ ] `ConnectionErrorInterceptor` + `ConnectionErrorGate` nos clientes HTTP + testes
 6. [ ] Componente `ErrorFeedbackPopup`

@@ -337,8 +337,9 @@ fun ZeraNavHost() {
                     val route = backStackEntry.toRoute<Route.PasswordRecoveryNewPassword>()
                     NewPasswordScreen(token = route.token)
                 }
-                composable<Route.ConnectionError> {
-                    ConnectionErrorScreen()
+                composable<Route.ConnectionError> { backStackEntry ->
+                    val route = backStackEntry.toRoute<Route.ConnectionError>()
+                    ConnectionErrorScreen(fromBoot = route.fromBoot)
                 }
                 composable<Route.FatalError> {
                     FatalErrorScreen()

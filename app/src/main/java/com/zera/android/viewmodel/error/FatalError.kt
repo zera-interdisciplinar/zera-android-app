@@ -1,13 +1,18 @@
 package com.zera.android.viewmodel.error
 
-import com.zera.android.view.navigation.Route
-import com.zera.android.view.navigation.ZeraNavigator
+import androidx.compose.runtime.mutableStateOf
 import com.zera.android.viewmodel.ZeraViewModel
 
-class FatalErrorViewModel : ZeraViewModel() {
+data class FatalErrorState(
+    val shouldExitApp: Boolean = false,
+)
 
-    /** Reinicia o app pela Splash, que refaz o boot e restaura a sessão. */
+class FatalErrorViewModel : ZeraViewModel() {
+    private val _state = mutableStateOf(FatalErrorState())
+    val state = _state
+
+    /** Sinaliza para a tela fechar a Activity, já que o ViewModel não conhece a View. */
     fun onConfirmClick() {
-        ZeraNavigator.pushAndPopAll(Route.Splash)
+        _state.value = _state.value.copy(shouldExitApp = true)
     }
 }

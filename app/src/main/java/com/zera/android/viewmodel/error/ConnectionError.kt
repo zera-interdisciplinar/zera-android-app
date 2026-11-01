@@ -9,13 +9,22 @@ data class ConnectionErrorState(
     val shouldExitApp: Boolean = false,
 )
 
-class ConnectionErrorViewModel : ZeraViewModel() {
+/**
+ * @param fromBoot `true` quando a tela veio da Splash: tentar de novo refaz o boot. `false` quando
+ *   veio do uso: tentar de novo volta para a tela anterior, que mantém o que já estava preenchido.
+ */
+class ConnectionErrorViewModel(
+    private val fromBoot: Boolean = false,
+) : ZeraViewModel() {
     private val _state = mutableStateOf(ConnectionErrorState())
     val state = _state
 
-    /** Reinicia o app pela Splash, que refaz o boot e restaura a sessão. */
     fun onRetryClick() {
-        ZeraNavigator.pushAndPopAll(Route.Splash)
+        if (fromBoot) {
+            ZeraNavigator.pushAndPopAll(Route.Splash)
+        } else {
+            ZeraNavigator.goBack()
+        }
     }
 
     /** Sinaliza para a tela fechar a Activity, já que o ViewModel não conhece a View. */

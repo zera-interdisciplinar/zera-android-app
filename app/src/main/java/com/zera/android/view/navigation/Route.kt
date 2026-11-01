@@ -188,8 +188,9 @@ sealed interface Route{
     data class PasswordRecoveryNewPassword(val token: String = "") : Route
 
     // ROTAS DE ERRO
+    /** [fromBoot] diz se a tela veio da Splash (refaz o boot) ou do uso (volta para a tela anterior). */
     @Serializable
-    data object ConnectionError : Route
+    data class ConnectionError(val fromBoot: Boolean = false) : Route
 
     @Serializable
     data object FatalError : Route
