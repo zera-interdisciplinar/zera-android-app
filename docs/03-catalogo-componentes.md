@@ -41,6 +41,8 @@ TitleText(text = "Últimos Itens", bold = true, color = MaterialTheme.colorSchem
 LabelText(text = "Ver Todos", bold = true, onClick = { /* navegar */ })
 ```
 
+**`MarkdownText(text, modifier, color)`** (`MarkdownText.kt`) — renderiza markdown (títulos, negrito, itálico, listas, links, citações, código) com a biblioteca `multiplatform-markdown-renderer-m3`, usando o type scale e as cores do app: parágrafos e listas como `BodyText`, `#` como `HeadlineText`, `##` como `TitleText`, `###` em diante como `SubtitleText` (negrito). Cor padrão `primary`. Desenha numa `Column` comum (não lazy), então pode ficar dentro do conteúdo rolável de um scaffold. Primeiro uso: `HelpDocumentScreen` (corpo dos documentos da Central de Ajuda).
+
 ## Botões
 
 Arquivo: `view/components/buttons/`.
