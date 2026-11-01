@@ -29,6 +29,7 @@ object AiClient {
         if (url.isEmpty()) return
         val apiKey = resolveApiKey(environments)
         val okHttpClient = OkHttpClient.Builder()
+            .addInterceptor(ConnectionLoss.interceptor)
             .addInterceptor { chain ->
                 val request = authenticatedRequest(
                     original = chain.request(),

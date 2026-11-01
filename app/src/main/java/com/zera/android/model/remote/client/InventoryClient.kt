@@ -21,6 +21,7 @@ object InventoryClient {
     fun init(environments: Environments) {
         val apiKey = resolveApiKey(environments)
         val okHttpClient = OkHttpClient.Builder()
+            .addInterceptor(ConnectionLoss.interceptor)
             .addInterceptor { chain ->
                 chain.proceed(
                     authenticatedRequest(

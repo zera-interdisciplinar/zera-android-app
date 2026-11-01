@@ -31,6 +31,7 @@ object AdmCoreClient {
         }
         val converter = json.asConverterFactory("application/json".toMediaType())
         val refreshClient = OkHttpClient.Builder()
+            .addInterceptor(ConnectionLoss.interceptor)
             .addInterceptor { chain ->
                 chain.proceed(
                     chain.request().newBuilder()
@@ -48,6 +49,7 @@ object AdmCoreClient {
             .create(AuthService::class.java)
 
         val okHttpClient = OkHttpClient.Builder()
+            .addInterceptor(ConnectionLoss.interceptor)
             .addInterceptor { chain ->
                 val requestBuilder = chain.request().newBuilder()
                     .header("apiKey", environments.admCoreApiKey)

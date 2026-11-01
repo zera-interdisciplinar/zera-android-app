@@ -16,6 +16,7 @@ object ScrapyClient {
     private val json = Json { ignoreUnknownKeys = true }
 
     private val okHttpClient = OkHttpClient.Builder()
+        .addInterceptor(ConnectionLoss.interceptor)
         .addInterceptor { chain ->
             val request = chain.request().newBuilder()
                 .header("apikey", BuildConfig.SCRAPY_API_KEY)

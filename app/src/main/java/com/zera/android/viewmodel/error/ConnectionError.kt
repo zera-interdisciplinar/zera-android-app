@@ -1,6 +1,7 @@
 package com.zera.android.viewmodel.error
 
 import androidx.compose.runtime.mutableStateOf
+import com.zera.android.model.remote.client.ConnectionLoss
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.viewmodel.ZeraViewModel
@@ -30,5 +31,11 @@ class ConnectionErrorViewModel(
     /** Sinaliza para a tela fechar a Activity, já que o ViewModel não conhece a View. */
     fun onExitAppClick() {
         _state.value = _state.value.copy(shouldExitApp = true)
+    }
+
+    /** A tela saiu da pilha: o interceptor pode abrir outra na próxima falha de conexão. */
+    override fun onCleared() {
+        // A tela vinda da Splash não ocupou a trava (a Splash suprime o interceptor).
+        if (!fromBoot) ConnectionLoss.gate.release()
     }
 }

@@ -2,6 +2,7 @@ package com.zera.android.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.zera.android.model.remote.client.ConnectionLoss
 import com.zera.android.model.remote.client.isConnectionError
 import com.zera.android.model.usecase.auth.RestoreSession
 import com.zera.android.model.usecase.config.Boot
@@ -11,6 +12,7 @@ import com.zera.android.view.navigation.consumePendingAlertDeepLink
 import com.zera.android.view.navigation.consumePendingPasswordResetDeepLink
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
@@ -23,19 +25,29 @@ class SplashViewModel : ViewModel() {
 
     init {
         viewModelScope.launch {
-            val minSplash = async { delay(2_000.milliseconds) }
+            // A Splash mesma navega para a tela de conexão; o interceptor não abre outra.
+            ConnectionLoss.gate.suppress(true)
             try {
-                boot.execute()
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                minSplash.await()
-                ZeraNavigator.pushAndPop(bootErrorRoute(e))
-                return@launch
+                bootAndNavigate()
+            } finally {
+                ConnectionLoss.gate.suppress(false)
             }
-            minSplash.await()
-            navigateAfterBoot()
         }
+    }
+
+    private suspend fun bootAndNavigate() = coroutineScope {
+        val minSplash = async { delay(2_000.milliseconds) }
+        try {
+            boot.execute()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            minSplash.await()
+            ZeraNavigator.pushAndPop(bootErrorRoute(e))
+            return@coroutineScope
+        }
+        minSplash.await()
+        navigateAfterBoot()
     }
 
     private suspend fun navigateAfterBoot() {

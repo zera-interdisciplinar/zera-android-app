@@ -140,7 +140,7 @@ Fora de escopo desta spec (ver [Fora de escopo](#fora-de-escopo-desta-spec)).
    - "Tentar novamente": `fromBoot = true` → `pushAndPopAll(Route.Splash)`; `fromBoot = false` → `goBack()`. O voltar do sistema faz o mesmo que "Tentar novamente" quando `fromBoot = false`; com `fromBoot = true`, fecha o app (pilha vazia, comportamento atual).
    - Texto da `ConnectionError`: trocar "Seus dados serão enviados quando a conexão voltar." (não existe fila offline) por "Verifique sua conexão com a internet e tente novamente."
    - `FatalError`: "Ok, entendi" e o voltar do sistema fecham o app (mesmo mecanismo do `shouldExitApp` da `ConnectionError`).
-4. **Interceptor de conexão:** `ConnectionErrorInterceptor` compartilhado. Captura `IOException` de conexão, libera a navegação (`navigationStatus(true)`), faz `push(Route.ConnectionError())` e relança a exceção. Uma trava atômica (`ConnectionErrorGate`) garante uma tela só; ela é liberada no `onCleared` do `ConnectionErrorViewModel`. Adicionado em `AdmCoreClient` (cliente principal e `refreshClient`), `InventoryClient`, `AiClient`, `ScrapyClient` e `SupabaseStorage`. O boot também passa por ele, mas a Splash navega com `fromBoot = true`; o interceptor não abre a tela enquanto a Splash está no boot (a trava é ocupada pela Splash).
+4. **Interceptor de conexão:** `ConnectionErrorInterceptor` compartilhado. Captura `IOException` de conexão, libera a navegação (`navigationStatus(true)`), faz `push(Route.ConnectionError())` e relança a exceção. Uma trava atômica (`ConnectionErrorGate`) garante uma tela só; ela é liberada no `onCleared` do `ConnectionErrorViewModel`. Adicionado em `AdmCoreClient` (cliente principal e `refreshClient`), `InventoryClient`, `AiClient`, `ScrapyClient` e `SupabaseStorage`. O boot também passa por ele, mas a Splash suprime o interceptor (`gate.suppress(true)`) enquanto roda o boot e o restore, e ela mesma navega com `fromBoot = true`. A trava é liberada no `onCleared` da `ConnectionError` aberta pelo interceptor.
 5. **`ErrorFeedbackPopup`:** componente em `view/components/feedback/` sobre o `FeedbackPopup`, com título fixo "Algo deu errado", ícone `Exclamation` e cor `Red`; recebe só a descrição e o `onDismissRequest`. Cada `ViewModel` migrado ganha `onErrorDismiss()`, que limpa o erro.
 6. **Paginação:** `ProductList`, `OptionList`, `SelectBoxList` e `AlertCentralScreen` passam a chamar `onEndReached` só na transição "longe do fim" → "perto do fim". Depois de uma página carregada com sucesso, se o usuário continua no fim, a próxima é pedida (como hoje).
 7. **Migração das telas:** por área, trocando o `CaptionText` de erro (e o snackbar de erro do Perfil e da Central de alertas) pelo `ErrorFeedbackPopup`, revisando as mensagens para não expor `e.message`/códigos e ignorando erros de conexão.
@@ -199,7 +199,7 @@ Uma etapa por vez, com revisão antes da próxima.
 2. [x] `Throwable.isConnectionError()` + testes
 3. [x] Telas de erro: `Route.ConnectionError(fromBoot)`, "Tentar novamente" e voltar do sistema, texto da `ConnectionError`, `FatalError` fechando o app
 4. [x] Splash: `try/catch` no boot e separação de conexão vs. 401/403 no restore
-5. [ ] `ConnectionErrorInterceptor` + `ConnectionErrorGate` nos clientes HTTP + testes
+5. [x] `ConnectionErrorInterceptor` + `ConnectionErrorGate` nos clientes HTTP + testes
 6. [ ] Componente `ErrorFeedbackPopup`
 7. [ ] Paginação sem loop em `ProductList`, `OptionList`, `SelectBoxList` e `AlertCentralScreen`
 8. [ ] Migração — Categorias (`CategoriesScreen`, `CategoryCreationScreen`)
