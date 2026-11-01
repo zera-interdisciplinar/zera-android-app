@@ -4,7 +4,7 @@
 
 - **Feature:** Central de Ajuda (`HelpCentralHubScreen`) e detalhe de documento (`HelpDocumentScreen`)
 - **Perfil(is) envolvido(s):** Operário (funcionário)
-- **Status:** planejado
+- **Status:** implementado
 - **Última atualização:** 2026-11-01
 
 ## Contexto
@@ -114,7 +114,7 @@ Como Operário, quero buscar e ler os documentos de ajuda, para resolver dúvida
 - [x] Central de Ajuda lista os documentos reais e filtra pela busca
 - [x] Tocar num documento abre `HelpDocumentScreen` com título e corpo em markdown
 - [x] Testes unitários do parse, do filtro de chaves e da busca
-- [ ] Docs atualizadas (catálogo de componentes, stack, contexto do Scrapy)
+- [x] Docs atualizadas (catálogo de componentes, stack, contexto do Scrapy)
 
 ## Edge cases considerados
 
@@ -147,4 +147,4 @@ Uma etapa por vez, com revisão antes da próxima.
 3. [x] `GetHelpDocuments` (use case + `documentsFrom`) + testes
 4. [x] Ligar `HelpCentralHubViewModel`/`HelpCentralHubScreen` aos documentos + teste da busca
 5. [x] `Route.HelpDocument` + `HelpDocumentViewModel` + `HelpDocumentScreen` + `ZeraNavHost`
-6. [ ] Atualizar docs (`03-catalogo-componentes.md`, `09-stack-e-dependencias.md`, `contrato-scrapy/contexto.md`, status desta spec)
+6. [x] Atualizar docs (`03-catalogo-componentes.md`, `09-stack-e-dependencias.md`, `contrato-scrapy/contexto.md`, status desta spec)
