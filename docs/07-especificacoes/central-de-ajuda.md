@@ -75,7 +75,7 @@ Como Operário, quero buscar e ler os documentos de ajuda, para resolver dúvida
   - `companion object { const val KEY_PREFIX = "category_"; fun fromEntry(key: String, value: String): HelpDocument? }`
   - `fromEntry` separa as linhas: 1ª = título, 2ª = subtítulo, resto = corpo (`trim` em cada parte). Linhas em branco antes do título e do subtítulo são puladas, e um `#` de cabeçalho no começo deles é removido. Título em branco → `null` (entry descartada). Sem 2ª linha → subtítulo e corpo vazios.
 - `model/usecase/helpCentral/GetHelpDocuments.kt`
-  - `execute(): List<HelpDocument>` — lê `AppConfig.flags` e devolve os documentos ordenados pelo título.
+  - `execute(): List<HelpDocument>` — lê `AppConfig.flags` e devolve os documentos ordenados pelo título (ordem alfabética pt-BR, sem diferenciar acento e maiúscula). As flags vêm de um parâmetro `readFlags` (padrão `AppConfig.flags`), para os testes.
   - `find(key: String): HelpDocument?` — um documento pela chave.
   - `companion object { internal fun documentsFrom(flags: JsonObject): List<HelpDocument> }` — função pura (testável): filtra chaves com `KEY_PREFIX`, aceita só valores `JsonPrimitive` string e ignora o resto (bool, número, objeto).
 
@@ -110,7 +110,7 @@ Como Operário, quero buscar e ler os documentos de ajuda, para resolver dúvida
 
 - [x] Dependência de markdown adicionada e `MarkdownText` criado em `view/components/texts`
 - [x] `HelpDocument.fromEntry` separa título, subtítulo e corpo
-- [ ] `GetHelpDocuments` lê só as chaves `category_*` com valor string, ordenadas pelo título
+- [x] `GetHelpDocuments` lê só as chaves `category_*` com valor string, ordenadas pelo título
 - [ ] Central de Ajuda lista os documentos reais e filtra pela busca
 - [ ] Tocar num documento abre `HelpDocumentScreen` com título e corpo em markdown
 - [ ] Testes unitários do parse, do filtro de chaves e da busca
@@ -144,7 +144,7 @@ Uma etapa por vez, com revisão antes da próxima.
 
 1. [x] Dependência de markdown + componente `MarkdownText`
 2. [x] `HelpDocument` (entity + `fromEntry`) + testes
-3. [ ] `GetHelpDocuments` (use case + `documentsFrom`) + testes
+3. [x] `GetHelpDocuments` (use case + `documentsFrom`) + testes
 4. [ ] Ligar `HelpCentralHubViewModel`/`HelpCentralHubScreen` aos documentos + teste da busca
 5. [ ] `Route.HelpDocument` + `HelpDocumentViewModel` + `HelpDocumentScreen` + `ZeraNavHost`
 6. [ ] Atualizar docs (`03-catalogo-componentes.md`, `09-stack-e-dependencias.md`, `contrato-scrapy/contexto.md`, status desta spec)
