@@ -35,7 +35,7 @@ import com.zera.android.view.components.lists.EditableFieldRow
 import com.zera.android.view.components.loading.SkeletonBox
 import com.zera.android.view.components.navigation.UpperNavBar
 import com.zera.android.view.components.outros.Avatar
-import com.zera.android.view.components.overlays.AlertPopup
+import com.zera.android.view.components.overlays.ConfirmationPopup
 import com.zera.android.view.components.overlays.BottomSheet
 import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.components.texts.HeadlineText
@@ -212,7 +212,7 @@ fun ProfileScreen(
     }
 
     if (state.showLogoutDialog) {
-        AlertPopup(
+        ConfirmationPopup(
             title = "Sair da conta?",
             message = "Você precisará entrar novamente para acessar o aplicativo.",
             confirmButtonText = "Sair",

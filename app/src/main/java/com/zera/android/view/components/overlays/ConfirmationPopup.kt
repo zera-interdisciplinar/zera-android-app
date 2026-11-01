@@ -32,7 +32,7 @@ private val IconSize = 40.dp
  * confirmação à direita (ex.: "Excluir"). Construído sobre o [PopupDialog], sem o X de
  * fechar — tocar fora, apertar voltar ou tocar em "Cancelar" chamam [onDismissRequest].
  *
- * O chamador controla a visibilidade e só compõe o [AlertPopup] com `if (...) { ... }`,
+ * O chamador controla a visibilidade e só compõe o [ConfirmationPopup] com `if (...) { ... }`,
  * mesma convenção do [PopupDialog]. O popup não se fecha sozinho ao confirmar: feche-o
  * em [onConfirm].
  *
@@ -47,7 +47,7 @@ private val IconSize = 40.dp
  * @param modifier modificador externo opcional.
  */
 @Composable
-fun AlertPopup(
+fun ConfirmationPopup(
     modifier: Modifier = Modifier,
     title: String,
     message: String,
@@ -104,9 +104,9 @@ fun AlertPopup(
 
 @Preview
 @Composable
-private fun AlertPopupPreview() {
+private fun ConfirmationPopupPreview() {
     ZeraTheme {
-        AlertPopup(
+        ConfirmationPopup(
             title = "Excluir esse item?",
             message = "Essa decisão poderá ser revisada pelo gestor.",
             confirmButtonText = "Excluir",
