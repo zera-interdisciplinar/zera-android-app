@@ -180,4 +180,11 @@ sealed interface Route{
 
     @Serializable
     data class PasswordRecoveryNewPassword(val token: String = "") : Route
+
+    // ROTAS DE ERRO
+    @Serializable
+    data object ConnectionError : Route
+
+    @Serializable
+    data object FatalError : Route
 }
