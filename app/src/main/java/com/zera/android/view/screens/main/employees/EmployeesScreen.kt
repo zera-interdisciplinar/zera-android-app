@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -113,7 +112,6 @@ fun EmployeesScreen(
                 employees = state.employees,
                 onItemClick = viewModel::onEmployeeClick,
                 contentPadding = PaddingValues(Spacing.none),
-                modifier = Modifier.heightIn(max = 400.dp),
                 emptyContent = {
                     if (!state.employeesLoadFailed) BodyText(text = "Nenhum colaborador encontrado")
                 },
