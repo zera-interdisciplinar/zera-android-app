@@ -66,6 +66,7 @@ import com.zera.android.view.screens.preferences.ConfigurationsScreen
 import com.zera.android.view.screens.profile.ProfileScreen
 import com.zera.android.view.transition.LocalAnimatedVisibilityScope
 import com.zera.android.view.transition.LocalSharedTransitionScope
+import com.zera.android.view.transition.ReduceAnimationsManager
 import com.zera.android.view.transition.ScreenAnimationRegistry
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -119,10 +120,11 @@ fun ZeraNavHost() {
             NavHost(
                 navController = navController,
                 startDestination = Route.Splash,
-                enterTransition = { animations.of(targetState).enter() },
-                exitTransition = { animations.of(targetState).exit() },
-                popEnterTransition = { animations.of(initialState).popEnter() },
-                popExitTransition = { animations.of(initialState).popExit() },
+                // O registro roda sempre, para a tela guardar a animação caso a preferência seja desligada depois.
+                enterTransition = { animations.of(targetState).orNone(ReduceAnimationsManager.enabled).enter() },
+                exitTransition = { animations.of(targetState).orNone(ReduceAnimationsManager.enabled).exit() },
+                popEnterTransition = { animations.of(initialState).orNone(ReduceAnimationsManager.enabled).popEnter() },
+                popExitTransition = { animations.of(initialState).orNone(ReduceAnimationsManager.enabled).popExit() },
             ) {
                 composable<Route.Splash> {
                     CompositionLocalProvider(LocalAnimatedVisibilityScope provides this) {

@@ -2,6 +2,7 @@ package com.zera.android.viewmodel.preferences
 
 import androidx.compose.runtime.mutableStateOf
 import com.zera.android.view.navigation.ZeraNavigator
+import com.zera.android.view.transition.ReduceAnimationsManager
 import com.zera.android.viewmodel.ZeraViewModel
 
 enum class AcessibilityTextSize(val label: String) {
@@ -14,13 +15,15 @@ enum class AcessibilityTextSize(val label: String) {
 data class AcessibilityState(
     val textSize: AcessibilityTextSize = AcessibilityTextSize.Default,
     val highContrast: Boolean = false,
-    val reduceAnimations: Boolean = true,
+    val reduceAnimations: Boolean = false,
     val voiceReading: Boolean = false,
     val confirmBeforeDelete: Boolean = true,
 )
 
 class AcessibilityViewModel : ZeraViewModel() {
-    private val _state = mutableStateOf(AcessibilityState())
+    private val _state = mutableStateOf(
+        AcessibilityState(reduceAnimations = ReduceAnimationsManager.enabled),
+    )
     val state = _state
 
     fun onBackClick() {
@@ -56,6 +59,8 @@ class AcessibilityViewModel : ZeraViewModel() {
     }
 
     fun onSaveClick() {
-        // TODO: persistir as preferências de acessibilidade
+        ReduceAnimationsManager.apply(_state.value.reduceAnimations)
+        // TODO: persistir as demais preferências de acessibilidade
+        ZeraNavigator.goBack()
     }
 }

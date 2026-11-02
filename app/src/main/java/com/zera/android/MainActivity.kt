@@ -24,6 +24,7 @@ import com.zera.android.view.navigation.consumePendingItemDeepLink
 import com.zera.android.view.navigation.consumePendingPasswordResetDeepLink
 import com.zera.android.view.theme.ThemeManager
 import com.zera.android.view.theme.ZeraTheme
+import com.zera.android.view.transition.ReduceAnimationsManager
 import com.zera.android.viewmodel.preferences.AppThemeOption
 
 class MainActivity : ComponentActivity() {
@@ -31,6 +32,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         SqliteManager.init(this)
         ThemeManager.load()
+        ReduceAnimationsManager.load()
         PendingAlertDeepLink.stash(intent)
         PendingPasswordResetDeepLink.stash(intent)
         PendingItemDeepLink.stash(intent)
