@@ -109,6 +109,7 @@ class RecyclingResumeViewModel : ZeraViewModel() {
                         itemNames = current.itemNames,
                         disposalId = disposalId,
                     ),
+                    popCount = 2,
                     animation = ScreenAnimation.SlideHorizontal,
                 )
             } catch (error: CancellationException) {
