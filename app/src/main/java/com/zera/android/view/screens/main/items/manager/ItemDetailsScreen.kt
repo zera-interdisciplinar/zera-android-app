@@ -44,6 +44,7 @@ import com.zera.android.view.components.navigation.SideBarOverlay
 import com.zera.android.view.components.navigation.UpperNavBar
 import com.zera.android.view.components.outros.ItemStatus
 import com.zera.android.view.components.overlays.BottomSheet
+import com.zera.android.view.components.overlays.ConfirmationPopup
 import com.zera.android.view.components.overlays.DenyReasonPopup
 import com.zera.android.view.components.overlays.PhotoViewerDialog
 import com.zera.android.view.media.PhotoCapture
@@ -217,6 +218,17 @@ fun ItemDetailsScreen(
                     EditableFieldRow(label = "Observações", value = state.notes)
                     EditableFieldRow(label = "Cadastrado Por", value = state.registeredBy)
                     EditableFieldRow(label = "Data de Cadastro", value = state.registeredAt)
+
+                    if (state.canDelete) {
+                        ZeraButton(
+                            text = "Excluir item",
+                            onClick = viewModel::onDeleteClick,
+                            type = ZeraButtonType.Secondary,
+                            style = ZeraColorFamily.Red,
+                            enabled = actionsEnabled,
+                            fillMaxWidth = true,
+                        )
+                    }
                 }
             }
         }
@@ -282,6 +294,16 @@ fun ItemDetailsScreen(
                 showRejectPopup = false
             },
             validate = ItemDetailsViewModel::reasonValidationError,
+        )
+    }
+
+    if (state.showDeleteConfirmation) {
+        ConfirmationPopup(
+            title = "Excluir esse item?",
+            message = "O item sairá das listagens e do estoque.",
+            confirmButtonText = "Excluir",
+            onConfirm = viewModel::onDeleteConfirm,
+            onDismissRequest = viewModel::onDeleteDismiss,
         )
     }
 

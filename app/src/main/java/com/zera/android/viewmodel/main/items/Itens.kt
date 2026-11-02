@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.zera.android.model.dto.inventory.CategoryResponseDTO
 import com.zera.android.model.dto.inventory.ItemResponseDTO
 import com.zera.android.model.dto.inventory.PagedItemsDTO
+import com.zera.android.model.usecase.inventory.DeletedItems
 import com.zera.android.model.usecase.inventory.GetCategories
 import com.zera.android.model.usecase.inventory.GetItems
 import com.zera.android.view.components.lists.ProductItem
@@ -18,6 +19,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.Locale
@@ -59,6 +61,10 @@ class ItensViewModel(
     init {
         loadCategories()
         loadItems()
+        // Recarrega do início: tirar só o card deslocaria as páginas e a próxima pularia um item.
+        viewModelScope.launch {
+            DeletedItems.ids.drop(1).collect { loadItems() }
+        }
     }
 
     fun onSearchQueryChange(query: String) {

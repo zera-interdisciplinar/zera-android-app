@@ -8,6 +8,7 @@ import com.zera.android.model.dto.inventory.UpdateItemRequestDTO
 import com.zera.android.model.usecase.auth.GetSelfUser
 import com.zera.android.model.usecase.inventory.ApproveItem
 import com.zera.android.model.usecase.inventory.GetItemDetails
+import com.zera.android.model.usecase.inventory.DeleteItem
 import com.zera.android.model.usecase.inventory.RejectItem
 import com.zera.android.model.usecase.inventory.StartItemMaintenance
 import com.zera.android.model.usecase.inventory.UpdateItem
@@ -59,6 +60,9 @@ data class ItemDetailsState(
     val isUploadingPhoto: Boolean = false,
     val canReview: Boolean = false,
     val canSendToMaintenance: Boolean = false,
+    val canDelete: Boolean = false,
+    /** `true` enquanto o popup "Excluir esse item?" está aberto. */
+    val showDeleteConfirmation: Boolean = false,
     val sideBarItems: List<SideBarItem> = emptyList(),
     val isLoading: Boolean = true,
     val isSubmitting: Boolean = false,
@@ -88,6 +92,7 @@ class ItemDetailsViewModel : ZeraViewModel() {
     private val updateItem = UpdateItem()
     private val startItemMaintenance = StartItemMaintenance()
     private val uploadItemPhoto = UploadItemPhoto()
+    private val deleteItem = DeleteItem()
 
     private val _state = mutableStateOf(ItemDetailsState())
     val state = _state
@@ -335,6 +340,43 @@ class ItemDetailsViewModel : ZeraViewModel() {
         }
     }
 
+    fun onDeleteClick() {
+        if (!_state.value.canDelete) return
+        _state.value = _state.value.copy(showDeleteConfirmation = true)
+    }
+
+    fun onDeleteDismiss() {
+        _state.value = _state.value.copy(showDeleteConfirmation = false)
+    }
+
+    fun onDeleteConfirm() {
+        val itemId = _state.value.itemId
+        if (itemId.isBlank() || _state.value.isSubmitting || !_state.value.canDelete) return
+        _state.value = _state.value.copy(
+            showDeleteConfirmation = false,
+            isSubmitting = true,
+            errorMessage = null,
+        )
+        viewModelScope.launch {
+            try {
+                deleteItem.execute(itemId)
+                ZeraNavigator.goBack()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(
+                    isSubmitting = false,
+                    errorMessage = userFacingError(
+                        error = e,
+                        conflictMessage = "Este item não pode ser excluído no status atual.",
+                        validationMessage = "Não foi possível excluir o item.",
+                        fallback = "Não foi possível excluir o item.",
+                    ),
+                )
+            }
+        }
+    }
+
     private fun patchItem(request: UpdateItemRequestDTO) {
         val itemId = _state.value.itemId
         if (itemId.isBlank() || _state.value.isSubmitting) return
@@ -451,6 +493,10 @@ class ItemDetailsViewModel : ZeraViewModel() {
         // Só o Operário manda para manutenção, e só item no estoque.
         internal fun canSendToMaintenance(status: ItemStatus?, isEmployee: Boolean = false): Boolean =
             isEmployee && status == ItemStatus.InStock
+
+        // Só o Gestor exclui pelo app. Item descartado a API recusa com 409, e sem status conhecido não há o que oferecer.
+        internal fun canDelete(status: ItemStatus?, isEmployee: Boolean = false): Boolean =
+            !isEmployee && status != null && status != ItemStatus.Disposed
 
         internal fun notesValidationError(value: String): String? {
             val trimmed = value.trim()
@@ -570,6 +616,7 @@ class ItemDetailsViewModel : ZeraViewModel() {
             photoUrl = item.photoUrl?.takeIf { it.isNotBlank() },
             canReview = canReview(statusFrom(item.status), isEmployee),
             canSendToMaintenance = canSendToMaintenance(statusFrom(item.status), isEmployee),
+            canDelete = canDelete(statusFrom(item.status), isEmployee),
             sideBarItems = sideBarItemsFor(isEmployee),
         )
 

@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.zera.android.model.dto.inventory.DashboardHomeResponseDTO
 import com.zera.android.model.entity.user.UserRole
 import com.zera.android.model.usecase.auth.GetSelfUser
+import com.zera.android.model.usecase.inventory.DeletedItems
 import com.zera.android.model.usecase.inventory.GetManagerHome
 import com.zera.android.model.usecase.notification.DismissAlert
 import com.zera.android.model.usecase.notification.DismissedAlerts
@@ -21,6 +22,7 @@ import com.zera.android.viewmodel.errorDescription
 import com.zera.android.viewmodel.loadErrorDescription
 import com.zera.android.viewmodel.main.alerts.AlertMapping
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.Locale
@@ -75,6 +77,10 @@ class ManagerHomeViewModel : ZeraViewModel() {
                     notifications = homeAlertsFrom(loadedAlerts, dismissedIds),
                 )
             }
+        }
+        // Totais, ocupação e últimos itens mudam quando um item é excluído no detalhe.
+        viewModelScope.launch {
+            DeletedItems.ids.drop(1).collect { loadInventoryHome() }
         }
         loadDashboard()
     }

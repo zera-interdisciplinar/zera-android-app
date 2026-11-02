@@ -24,6 +24,7 @@ import com.zera.android.model.dto.inventory.PagedDisposalsDTO
 import com.zera.android.model.dto.inventory.WorkCenterResponseDTO
 import okhttp3.MultipartBody
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Multipart
 import retrofit2.http.PATCH
@@ -151,6 +152,11 @@ interface InventoryService {
         @Path("id") id: String,
         @Body body: RejectItemRequestDTO,
     ): ItemResponseDTO
+
+    @DELETE("api/v1/items/{id}")
+    suspend fun deleteItem(
+        @Path("id") id: String,
+    )
 
     @POST("api/v1/items/{id}/maintenance/start")
     suspend fun startItemMaintenance(
