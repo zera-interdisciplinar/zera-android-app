@@ -4,7 +4,7 @@
 
 - **Feature:** Testes de comportamento dos componentes de `view/components`, com Compose UI Test e Robolectric, sem emulador
 - **Perfil(is) envolvido(s):** Não se aplica (qualidade interna; quem usa é o time de desenvolvimento)
-- **Status:** em progresso (item 11 de 19)
+- **Status:** em progresso (item 12 de 19)
 - **Última atualização:** 2026-11-02
 
 ## Contexto
@@ -197,7 +197,7 @@ Um item por vez, um commit por item (`test: ...`), parando para revisão.
 ### Componentes com lógica
 
 - [x] **11. `AdaptiveRow`.** Filhos que cabem ficam na mesma linha e com a mesma largura; filho largo demais empilha todos; ordem preservada.
-- [ ] **12. Popups.** `FeedbackPopup`: título e subtítulo opcional. `ErrorFeedbackPopup`: título fixo e descrição. `ConfirmationPopup`: textos, confirmar e cancelar. `DenyReasonPopup` ficou fora: ver [Limitações encontradas](#limitações-encontradas).
+- [x] **12. Popups.** `FeedbackPopup`: título e subtítulo opcional. `ErrorFeedbackPopup`: título fixo e descrição. `ConfirmationPopup`: textos, confirmar e cancelar. `DenyReasonPopup` ficou fora: ver [Limitações encontradas](#limitações-encontradas).
 - [ ] **13. Formulários simples.** `CreateInviteForm`, `EditCategoryForm`, `EditModelForm` e `SelectMaterialsForm`: mostram os valores; edição chama o callback certo; erros por campo; salvar e cancelar; estado enviando; confirmar seleção de materiais.
 - [ ] **14. `EditProfileForm` e `EditItemForm`.** Perfil: `*Enabled` bloqueia só o campo indicado; erros por campo; `errorMessage`; estado enviando. Item: tipo de dano só com `hasDamage`; `onHasDamageChange` recebe o valor atual; erros; estado enviando. Problema conhecido 2 como teste com `@Ignore`.
 - [ ] **15. `ProductList` e `OptionList`.** Itens e toque com o item certo; lista vazia com o conteúdo padrão e customizado; `isLoadingMore`; `statusText` troca a seta pela tag; `ProductListItem` mostra `ID` com 7 caracteres; `OptionListItem` sem ícone e sem descrição em branco. Problema conhecido 3 como teste com `@Ignore`.
