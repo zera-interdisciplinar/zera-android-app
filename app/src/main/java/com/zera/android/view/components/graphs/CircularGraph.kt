@@ -25,6 +25,8 @@ fun CircularGraph(
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colorScheme.primary
 ){
+    val fill = rememberGraphFill(progress().coerceIn(0f, 1f))
+
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -34,7 +36,7 @@ fun CircularGraph(
             contentAlignment = Alignment.Center
         ){
             CircularProgressIndicator(
-                progress = progress,
+                progress = { fill.value },
                 modifier = Modifier.size(size = 84.dp),
                 strokeWidth = 12.dp,
                 strokeCap = StrokeCap.Butt,

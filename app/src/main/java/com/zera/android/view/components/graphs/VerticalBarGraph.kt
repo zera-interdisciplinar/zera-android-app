@@ -18,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -134,6 +135,8 @@ private fun VerticalBarGraphColumn(
     maxBarHeight: Dp,
 ) {
     val palette = style.palette()
+    val targetFraction = heightFraction.coerceIn(0f, 1f)
+    val fill by rememberGraphFill(targetFraction)
     val displayValue = if (item.value == item.value.toInt().toFloat()) {
         item.value.toInt().toString()
     } else {
@@ -145,13 +148,20 @@ private fun VerticalBarGraphColumn(
         verticalArrangement = Arrangement.spacedBy(Spacing.small),
     ) {
         CaptionText(text = displayValue, color = palette.base, bold = true)
-        // TODO: animar a altura (ex.: animateDpAsState) quando a barra entrar em tela.
+        // A caixa externa já ocupa a altura final, para o card não crescer e empurrar a tela durante a animação.
         Box(
             modifier = Modifier
                 .width(barWidth)
-                .height(maxBarHeight * heightFraction.coerceIn(0f, 1f))
-                .background(color = palette.base, shape = RoundedCornerShape(Radius.medium)),
-        )
+                .height(maxBarHeight * targetFraction),
+            contentAlignment = Alignment.BottomCenter,
+        ) {
+            Box(
+                modifier = Modifier
+                    .width(barWidth)
+                    .height(maxBarHeight * fill)
+                    .background(color = palette.base, shape = RoundedCornerShape(Radius.medium)),
+            )
+        }
         CaptionText(text = item.label)
     }
 }
