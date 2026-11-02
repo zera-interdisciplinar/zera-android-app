@@ -5,7 +5,7 @@
 - **Feature:** Detalhe de um item (`ItemDetailsScreen`)
 - **Perfil(is) envolvido(s):** Gestor
 - **Status:** implementado (leitura + aprovar/recusar/editar nome, condição e foto)
-- **Última atualização:** 2026-09-26
+- **Última atualização:** 2026-11-02
 
 ## Contexto
 
@@ -69,13 +69,25 @@ Como Gestor, quero ver os dados reais de um item ao abri-lo, para conferir statu
 
 - **Given** o detalhe carregou com ou sem foto
 - **When** o usuário toca na miniatura e concede a permissão da câmera
-- **Then** o app abre a câmera, comprime a captura como JPEG, envia para o bucket Supabase de itens e mostra a URL pública na sessão atual
+- **Then** o app abre a câmera, comprime a captura como JPEG, envia com `POST /items/{id}/photo` e mostra o `photoUrl` da resposta; a foto continua lá ao reabrir o item
 
-### Cenário: Configuração Supabase ausente
+### Cenário: Envio de foto recusado
 
-- **Given** `supabase-url`, `supabase-anon-key` ou `supabase-items-bucket` está vazio
-- **When** o usuário tenta enviar uma foto
-- **Then** a tela informa que o envio não está disponível
+- **Given** o usuário enviou uma foto
+- **When** a API responde `413` ou `503`
+- **Then** o popup de erro informa o limite de 5 MB ou que o envio está indisponível; o item não muda
+
+### Cenário: Foto enviada sem URL para exibir
+
+- **Given** o envio foi aceito
+- **When** a resposta traz `photoUrl` nulo
+- **Then** a miniatura fica sem foto e o popup informa que a foto foi enviada, mas não pôde ser exibida agora
+
+### Cenário: Processo encerrado com a câmera aberta
+
+- **Given** o Android encerrou o app enquanto a câmera estava aberta
+- **When** a captura termina e a tela volta
+- **Then** a foto é enviada com o `itemId` da rota, sem esperar o detalhe carregar
 
 ## Critérios de aceite
 
@@ -85,8 +97,9 @@ Como Gestor, quero ver os dados reais de um item ao abri-lo, para conferir statu
 - [x] `POST .../approve` no botão Aprovar
 - [x] `PATCH .../{id}` no botão Editar / lápis de condição (parcial: só o campo alterado)
 - [x] Botão Recusar (`POST .../reject` com `reason`)
-- [x] Captura de foto e envio ao bucket Supabase de itens
+- [x] Captura de foto e envio por `POST /items/{id}/photo`
 - [x] Troca de foto pela ação do visualizador ampliado
+- [ ] Validar com um envio real que a foto continua ao reabrir o item e que a troca não mostra a imagem antiga em cache
 
 ## Edge cases considerados
 
@@ -99,7 +112,7 @@ Como Gestor, quero ver os dados reais de um item ao abri-lo, para conferir statu
 
 - Listagem (`itens.md`).
 - PATCH de categoria/material (pertencem ao modelo, não ao item).
-- Persistência definitiva e remoção de `photoUrl`: os contratos atuais não oferecem campo/endpoint para isso; o upload ao Supabase fica disponível nesta sessão da tela.
+- Remoção da foto: a API não tem rota para isso; "Remover foto" no visualizador só mostra um aviso.
 - Chip “Pendentes” pré-selecionado ao sair de `ItemApprovedScreen`.
 
 ## Referências

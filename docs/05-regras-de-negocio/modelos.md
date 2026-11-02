@@ -4,11 +4,11 @@
 
 - **Domínio:** Inventário (modelos)
 - **Perfil(is) envolvido(s):** Gestor e Operário
-- **Última atualização:** 2026-10-03
+- **Última atualização:** 2026-11-02
 
 ## Visão geral
 
-Este documento descreve o fluxo de consulta e cadastro de modelos disponível na interface do Gestor. A integração de criação com o backend ainda não está implementada.
+Este documento descreve o fluxo de consulta e cadastro de modelos disponível na interface do Gestor.
 
 ## Regras
 
@@ -18,13 +18,16 @@ A tela de modelos apresenta a orientação “Como usar o Modelo”, controlada 
 
 ### Campos do cadastro
 
-O formulário mantém localmente nome do modelo, material, marca e observação. Material é selecionado em um dropdown; a lista atual (`Plastico`, `Ferro`, `Aço`, `Seila`) é temporária e deve ser substituída por opções definidas pelo produto ou fornecidas pelo backend.
+O formulário pede nome do modelo, categoria, materiais, marca e observação. As opções de categoria e de material vêm da API (`GET /categories`, `GET /materials`). O modelo tem ao menos um material, escolhido em um bottom sheet de seleção múltipla.
+
+Efeitos de escolher vários materiais, definidos no back-end ([Domínio](https://zerainterdisciplinar.atlassian.net/wiki/spaces/Backend/pages/55541769)):
+
+- O modelo é perigoso quando qualquer material dele for perigoso (`BATTERY`, `CIRCUIT_BOARD`, `SCREEN`).
+- Nos indicadores, o peso do item é dividido igualmente entre os materiais do modelo.
 
 ### Confirmação
 
-Ao concluir, a interface navega para a tela de sucesso levando os valores preenchidos. “Registrar outro modelo” abre um formulário novo; “Ir para home” e o botão de fechar limpam a pilha e retornam ao início do Gestor.
-
-**Limitação atual:** a confirmação é somente visual. Não há validação de negócio, chamada de API, persistência do modelo nem aprovação real; a mensagem de sucesso não deve ser interpretada como confirmação do backend.
+Ao concluir, o app valida os campos e chama `POST /models`. Com sucesso, navega para a tela de confirmação com os valores devolvidos pela API. “Registrar outro modelo” abre um formulário novo; “Ir para home” e o botão de fechar limpam a pilha e retornam ao início do Gestor.
 
 ## Relacionamento com perfis
 

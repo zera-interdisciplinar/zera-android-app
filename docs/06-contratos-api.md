@@ -56,7 +56,10 @@ Fonte: [Confluence ms-inventory](https://zerainterdisciplinar.atlassian.net/wiki
 | `GET` | `api/v1/items/{id}` | path `id` | `ItemResponseDTO` | `GetItemDetails.execute()` (`ItemDetailsViewModel`) |
 | `GET` | `api/v1/items/by-barcode/{barcode}` | path `barcode` | `ItemResponseDTO` | `GetItemByBarcode.execute()` (`ScanViewModel`) |
 | `POST` | `api/v1/items` | `name`, `modelId`, `barcode?`, `serialNumber`, `condition`, `hasDamages`, `damages`, `notes?`, `acquiredAt`, `manufacturingYear`, `usageIntensity` | `ItemResponseDTO` | `CreateItem.execute()` (`ManualRegisterViewModel`) |
+| `POST` | `api/v1/items/{id}/photo` | path `id`, `multipart/form-data` com o campo `photo` | `ItemResponseDTO` | `UploadItemPhoto.execute()` (`ItemDetailsViewModel`) |
 | `GET` | `api/v1/models` | `q`, `page`, `size` (default 20) | `PagedModelsDTO` | `GetModels.execute()` (`ModelsViewModel`, `ManualRegisterViewModel`) |
+| `POST` | `api/v1/models` | `name`, `manufacturer`, `categoryId`, `materials` (ao menos um código do catálogo), `notes?` | `ModelResponseDTO` | `CreateModel.execute()` (`ModelCreationViewModel`) |
+| `GET` | `api/v1/materials` | — | `List<MaterialCatalogDTO>` | `GetMaterials.execute()` (`ModelCreationViewModel`) |
 | `GET` | `api/v1/models/{id}` | path `id` | `ModelResponseDTO` | `GetModel.execute()` (`ModelDetailsViewModel`) |
 | `GET` | `api/v1/models/{id}/items` | path `id`, `page`, `size` | `PagedItemsDTO` | `GetModelItems.execute()` (`ModelDetailsViewModel`; fallback `GET /items?modelId=&status=PENDING_APPROVAL`) |
 | `PATCH` | `api/v1/models/{id}/name` | `{ "name" }` | `ModelResponseDTO` | `UpdateModel.rename()` |
@@ -68,7 +71,7 @@ Fonte: [Confluence ms-inventory](https://zerainterdisciplinar.atlassian.net/wiki
 | `POST` | `api/v1/items/{id}/reject` | path `id`, `{ "reason" }` | `ItemResponseDTO` | `RejectItem.execute()` (`ItemDetailsViewModel`, `ModelDetailsViewModel`) |
 | `PATCH` | `api/v1/items/{id}` | parcial: `name`, `condition`, `hasDamages`, `damages`, `notes`, `serialNumber`, `acquiredAt`, `manufacturingYear`, `usageIntensity` | `ItemResponseDTO` | `UpdateItem.execute()` (`ItemDetailsViewModel`; a PDI só envia `name` ou `condition`) |
 
-A foto de um item é enviada diretamente ao Supabase Storage pelo `UploadItemPhoto`, usando `supabase-items-bucket` e o endereço público `<supabase-url>/storage/v1/object/public/<bucket>/<itemId>/photo.<ext>`. O contrato de item não expõe persistência de `photoUrl` nem remoção; a URL enviada é exibida nesta sessão até recarregar o detalhe.
+A foto de um item é enviada ao `ms-inventory`, que guarda a imagem no próprio armazenamento: o app não fala com o Supabase nesse fluxo (o Supabase Storage segue só para o avatar do perfil). O `photoUrl` vem resolvido em cada resposta de item e é nulo quando não há foto servível. Limite de 5 MB (`413`); sem armazenamento configurado, a API responde `503` e o item segue válido, porque a foto é opcional. A OpenAPI não tem rota para remover a foto.
 
 `GET /api/v1/dashboard/home` alimenta ocupação e `recentItems` na home do Gestor e na home do Operário. `GET /api/v1/dashboard/work-center` alimenta a seção Pendências da home (resumo por bucket) e a Central de Trabalho (um card por item). O recorte do work-center é o usuário do token (sem query).
 
@@ -108,6 +111,18 @@ Depois do redeem, o cadastro chama `SingIn.execute` para persistir tokens, `unit
 | `POST` | `users/me/device-tokens` | `{ token, platform: "ANDROID" }` | `RegisterDeviceToken` — login e `onNewToken` |
 | `DELETE` | `users/me/device-tokens` | `{ token }` | `UnregisterDeviceToken` — `SingIn.clearSession` |
 
+## Telefone (TelephoneService)
+
+`model/remote/service/TelephoneService.kt`. Contrato: [contrato-adm-core-membros/contrato-team-management.md](contrato-adm-core-membros/contrato-team-management.md), seção 4.4.
+
+| Método | Endpoint | Body | Resposta | Usado por |
+|---|---|---|---|---|
+| `GET` | `telephone/user?userId=` | — | `TelephoneResponseDTO` (`404` = sem telefone) | `GetTelephone` — perfil e detalhe do operário |
+| `POST` | `telephone/user` | `{ userId, number }` | `TelephoneResponseDTO` | `SaveTelephone` — primeiro telefone, em `ProfileViewModel` |
+| `PATCH` | `telephone/{telephoneId}/number` | `{ number }` | `204` | `SaveTelephone` — troca de número, em `ProfileViewModel` |
+
+As escritas são só de `MANAGER`. O número tem 10 ou 11 dígitos.
+
 ## Alertas (NotificationsService)
 
 `model/remote/service/NotificationsService.kt`. Contrato completo: [contrato-adm-core-alertas/contrato.md](contrato-adm-core-alertas/contrato.md).
@@ -125,4 +140,4 @@ Refresh no 401: [refresh-de-sessao.md](07-especificacoes/refresh-de-sessao.md). 
 
 ## O que o Confluence descreve e o app ainda não chama
 
-Não é backlog de produto inventado: a API v1 já tem, o app pode não ter tela. Exemplos: `POST /items/{id}/submit`, foto, manutenção, `GET /materials`, `GET /unit-settings`, regras `/rules`, `GET /disposals/{id}/report`, analytics do adm-core. Não documentar `POST /users` — usuário entra só por convite.
+Não é backlog de produto inventado: a API v1 já tem, o app pode não ter tela. Exemplos: `POST /items/{id}/submit`, manutenção, `GET /unit-settings`, regras `/rules`, `GET /disposals/{id}/report`, analytics do adm-core. Não documentar `POST /users` — usuário entra só por convite.
