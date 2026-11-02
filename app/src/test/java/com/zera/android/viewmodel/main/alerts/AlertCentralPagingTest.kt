@@ -27,5 +27,20 @@ class AlertCentralPagingTest {
         assertEquals(listOf("a", "b", "c"), merged.map { it.id })
     }
 
+    @Test
+    fun pageFollowsTheVisibleCount() {
+        val pageSize = AlertCentralViewModel.PageSize
+        assertEquals(0, AlertCentralViewModel.pageFor(0))
+        assertEquals(1, AlertCentralViewModel.pageFor(pageSize))
+        assertEquals(2, AlertCentralViewModel.pageFor(pageSize * 2))
+    }
+
+    @Test
+    fun dismissingGoesBackAPageSoNoAlertIsSkipped() {
+        val pageSize = AlertCentralViewModel.PageSize
+        assertEquals(0, AlertCentralViewModel.pageFor(pageSize - 5))
+        assertEquals(1, AlertCentralViewModel.pageFor(pageSize * 2 - 1))
+    }
+
     private fun item(id: String) = NotificationItem(id = id, label = id)
 }

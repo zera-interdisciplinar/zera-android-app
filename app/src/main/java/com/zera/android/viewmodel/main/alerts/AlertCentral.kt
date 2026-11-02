@@ -2,10 +2,12 @@ package com.zera.android.viewmodel.main.alerts
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
+import com.zera.android.model.usecase.notification.DismissAlert
+import com.zera.android.model.usecase.notification.DismissedAlerts
 import com.zera.android.model.usecase.notification.GetAlerts
 import com.zera.android.view.components.lists.NotificationItem
 import com.zera.android.view.navigation.ZeraNavigator
-import com.zera.android.view.navigation.routeForAlertKind
+import com.zera.android.view.navigation.routeForAlert
 import com.zera.android.viewmodel.ZeraViewModel
 import com.zera.android.viewmodel.errorDescription
 import com.zera.android.viewmodel.loadErrorDescription
@@ -24,13 +26,23 @@ data class AlertCentralState(
 
 class AlertCentralViewModel(
     private val getAlerts: GetAlerts = GetAlerts(),
+    private val dismissAlert: DismissAlert = DismissAlert(),
 ) : ZeraViewModel() {
     private val _state = mutableStateOf(AlertCentralState())
     val state = _state
 
-    private var nextPage = 0
+    /** Tudo o que já foi carregado; a tela mostra estes alertas menos os dispensados. */
+    private var loadedAlerts = emptyList<NotificationItem>()
 
     init {
+        viewModelScope.launch {
+            DismissedAlerts.ids.collect { dismissedIds ->
+                _state.value = _state.value.copy(
+                    notifications = AlertMapping.visibleAlerts(loadedAlerts, dismissedIds),
+                )
+                loadMoreIfEmptied()
+            }
+        }
         loadPage()
     }
 
@@ -43,25 +55,29 @@ class AlertCentralViewModel(
     /** A primeira página usa [AlertCentralState.isLoading]; as seguintes, [AlertCentralState.isLoadingMore]. */
     private fun loadPage() {
         val current = _state.value
-        _state.value = if (nextPage == 0) {
+        _state.value = if (loadedAlerts.isEmpty()) {
             current.copy(isLoading = true)
         } else {
             current.copy(isLoadingMore = true)
         }
+        val page = pageFor(current.notifications.size)
         viewModelScope.launch {
             try {
-                val alerts = getAlerts.execute(page = nextPage, size = PageSize)
-                nextPage++
+                val alerts = getAlerts.execute(status = "OPEN", page = page, size = PageSize)
+                val previousCount = loadedAlerts.size
+                loadedAlerts = appendPage(loadedAlerts, AlertMapping.notificationsFrom(alerts))
                 _state.value = _state.value.copy(
-                    notifications = appendPage(
-                        _state.value.notifications,
-                        AlertMapping.notificationsFrom(alerts),
+                    notifications = AlertMapping.visibleAlerts(
+                        loadedAlerts,
+                        DismissedAlerts.ids.value,
                     ),
                     isLoading = false,
                     isLoadingMore = false,
                     hasMore = hasMoreAfter(alerts.size),
                     loadFailed = false,
                 )
+                // Só insiste se a página trouxe algo novo: repetir a mesma não muda o resultado.
+                if (loadedAlerts.size > previousCount) loadMoreIfEmptied()
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -77,9 +93,37 @@ class AlertCentralViewModel(
         }
     }
 
+    /** O `LoadMoreEffect` não dispara com a lista vazia, então o próprio ViewModel pede a página. */
+    private fun loadMoreIfEmptied() {
+        if (_state.value.notifications.isEmpty() && loadedAlerts.isNotEmpty()) onLoadMore()
+    }
+
+    fun onAlertDismiss(notification: NotificationItem) {
+        viewModelScope.launch {
+            try {
+                dismissAlert.execute(notification.id)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(
+                    errorMessage = errorDescription(e, AlertMapping.DismissErrorDescription),
+                )
+            }
+        }
+    }
+
     fun onAlertClick(notification: NotificationItem) {
-        val route = routeForAlertKind(notification.kind) ?: return
+        val route = routeForAlert(notification.kind, notification.eventId) ?: return
         ZeraNavigator.push(route)
+        viewModelScope.launch {
+            try {
+                dismissAlert.execute(notification.id)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                // O usuário já seguiu para a ação: o alerta só volta para a lista.
+            }
+        }
     }
 
     fun onErrorDismiss() {
@@ -91,6 +135,12 @@ class AlertCentralViewModel(
 
         /** Sem total na resposta: uma página incompleta significa que era a última. */
         internal fun hasMoreAfter(pageSize: Int): Boolean = pageSize >= PageSize
+
+        /**
+         * Fechar alertas desloca os seguintes para páginas anteriores. Calcular a página pelo que
+         * ainda está visível evita pular itens; os repetidos são descartados em [appendPage].
+         */
+        internal fun pageFor(visibleCount: Int): Int = visibleCount / PageSize
 
         /**
          * Junta a página nova ao fim da lista. Alertas criados entre um pedido e outro deslocam

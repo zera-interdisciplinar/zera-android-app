@@ -2,6 +2,8 @@ package com.zera.android.model.remote.service
 
 import com.zera.android.model.dto.notification.AlertResponseDTO
 import retrofit2.http.GET
+import retrofit2.http.PATCH
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface NotificationsService {
@@ -11,4 +13,9 @@ interface NotificationsService {
         @Query("page") page: Int = 0,
         @Query("size") size: Int = 20,
     ): List<AlertResponseDTO>
+
+    @PATCH("notifications/alerts/{alertId}")
+    suspend fun closeAlert(
+        @Path("alertId") alertId: String,
+    )
 }

@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zera.android.view.components.cards.ShortcutCard
 import com.zera.android.view.components.cards.StockOccupationCard
@@ -50,6 +51,11 @@ fun ManagerHomeScreen(
     viewModel: ManagerHomeViewModel = viewModel()
 ) {
     val state by viewModel.state
+
+    LifecycleResumeEffect(Unit) {
+        viewModel.onScreenResume()
+        onPauseOrDispose { }
+    }
 
     ManagerScaffold(
         title = "Visão geral",
@@ -115,6 +121,7 @@ fun ManagerHomeScreen(
                 NotificationList(
                     notifications = state.notifications,
                     onItemClick = viewModel::onAlertClick,
+                    onItemDismiss = viewModel::onAlertDismiss,
                     contentPadding = PaddingValues(Spacing.none),
                     modifier = Modifier.heightIn(max = 400.dp),
                 )

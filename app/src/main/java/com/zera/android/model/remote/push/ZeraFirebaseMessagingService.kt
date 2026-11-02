@@ -35,6 +35,7 @@ class ZeraFirebaseMessagingService : FirebaseMessagingService() {
             alertId = message.data[PendingAlertDeepLink.ExtraAlertId],
             kind = message.data[PendingAlertDeepLink.ExtraKind],
             severity = message.data[PendingAlertDeepLink.ExtraSeverity],
+            deepLink = message.data[PendingAlertDeepLink.ExtraDeepLink],
         )
     }
 
@@ -49,6 +50,7 @@ class ZeraFirebaseMessagingService : FirebaseMessagingService() {
         alertId: String?,
         kind: String?,
         severity: String?,
+        deepLink: String?,
     ) {
         val manager = getSystemService(NotificationManager::class.java)
         manager.createNotificationChannel(
@@ -63,6 +65,7 @@ class ZeraFirebaseMessagingService : FirebaseMessagingService() {
             putExtra(PendingAlertDeepLink.ExtraAlertId, alertId)
             putExtra(PendingAlertDeepLink.ExtraKind, kind)
             putExtra(PendingAlertDeepLink.ExtraSeverity, severity)
+            putExtra(PendingAlertDeepLink.ExtraDeepLink, deepLink)
         }
         val pending = PendingIntent.getActivity(
             this,

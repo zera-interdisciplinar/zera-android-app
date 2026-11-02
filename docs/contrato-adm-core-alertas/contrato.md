@@ -2,7 +2,7 @@
 
 Documentação de contrato das rotas do `ms-administrative-core` relacionadas a **alertas**: ingestão serviço-a-serviço (ms-inventory, IA core) e emissão do token necessário para chamá-las.
 
-**Escopo HTTP hoje:** ingestão serviço-a-serviço (`POST /api/v1/notifications/alerts`) e **listagem do próprio usuário** (`GET /api/v1/notifications/alerts`). Não há `PATCH` nem `DELETE` — o app não fecha alerta por esta API; `CLOSED` entra na ingestão ou na manutenção (`POST /api/v1/maintenance/alerts/close-stale`).
+**Escopo HTTP hoje:** ingestão serviço-a-serviço (`POST /api/v1/notifications/alerts`), **listagem do próprio usuário** (`GET /api/v1/notifications/alerts`) e **fechamento pelo próprio usuário** (`PATCH /api/v1/notifications/alerts/{alertId}`). Não há `DELETE`. Alertas que ninguém fechou são limpos pela manutenção (`POST /api/v1/maintenance/alerts/close-stale`).
 
 ---
 
@@ -206,6 +206,29 @@ Não há `404` nesta rota: usuário autenticado sem alertas é lista vazia, não
 
 ---
 
+## 4. `PATCH /api/v1/notifications/alerts/{alertId}` — fechar alerta do usuário autenticado
+
+Rota do **app** (usuário logado). Fecha o alerta do `sub` do JWT, que passa a `CLOSED`. Não há corpo nem status de "lido".
+
+O `{alertId}` é o campo `alertId` do `GET`, não o `eventId` (que é o item ou a unidade no inventory).
+
+```
+PATCH /api/v1/notifications/alerts/11111111-1111-1111-1111-111111111111 HTTP/1.1
+Authorization: Bearer <user_access_token>
+```
+
+| Status | Quando |
+|---|---|
+| `200` | Alerta fechado, ou já estava fechado. |
+| `401` | Sem token ou token inválido. |
+| `404` | Id inexistente ou de outro usuário. |
+
+Fechar libera a idempotência `(ruleId, eventId, userId)`: se a regra ainda vale, o próximo job cria outro alerta, com outro id.
+
+**Push:** para o toque na notificação fechar o alerta, o app lê `alertId` em `message.data`. Esse campo ainda não é enviado pelo back-end nem está documentado no Confluence, que só cita `data.deepLink`. Comportamento do app: [../07-especificacoes/dispensa-de-alertas.md](../07-especificacoes/dispensa-de-alertas.md).
+
+---
+
 ## Deduplicação (`eventId` + `ruleId`)
 
 - **Com deduplicação:** enviar **os dois** `eventId` e `ruleId` preenchidos. Se já existir alerta **`OPEN`** com o mesmo par, o backend **não cria outro registro** — atualiza o existente:
@@ -279,5 +302,5 @@ Contrato completo de usuários: [`team-management-api-contract.md`](team-managem
 | Evitar spam da mesma regra no mesmo evento | Repetir `POST` com o **mesmo** `ruleId` + `eventId` enquanto o alerta estiver `OPEN` |
 | Notificação única (aprovação/reprovação de item) | `POST /notifications/alerts` **sem** `ruleId`/`eventId` (ou só um deles null) |
 | Listar alertas do usuário no app | `GET /notifications/alerts` com JWT de usuário (`status`, `page`, `size` opcionais) |
-| Fechar alerta pelo app | **Não disponível** — sem `PATCH`/`DELETE` |
+| Fechar alerta pelo app | `PATCH /notifications/alerts/{alertId}` com JWT de usuário, sem corpo |
 | Achar `userId` do gestor da unidade antes de alertar | `GET /users?role=MANAGER&unitId=` (contrato em team-management) |

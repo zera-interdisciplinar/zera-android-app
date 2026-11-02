@@ -108,6 +108,15 @@ Depois do redeem, o cadastro chama `SingIn.execute` para persistir tokens, `unit
 | `POST` | `users/me/device-tokens` | `{ token, platform: "ANDROID" }` | `RegisterDeviceToken` — login e `onNewToken` |
 | `DELETE` | `users/me/device-tokens` | `{ token }` | `UnregisterDeviceToken` — `SingIn.clearSession` |
 
+## Alertas (NotificationsService)
+
+`model/remote/service/NotificationsService.kt`. Contrato completo: [contrato-adm-core-alertas/contrato.md](contrato-adm-core-alertas/contrato.md).
+
+| Método | Endpoint | Resposta | Usado por |
+|---|---|---|---|
+| `GET` | `notifications/alerts?status=OPEN&page&size` | `List<AlertResponseDTO>` | `GetAlerts` — Central de Alertas e home do gestor |
+| `PATCH` | `notifications/alerts/{alertId}` | sem corpo | `DismissAlert` — deslize, X, "Resolver agora" e toque no push. `404` conta como sucesso. Ver [07-especificacoes/dispensa-de-alertas.md](07-especificacoes/dispensa-de-alertas.md) |
+
 ## Tratamento de erros
 
 Inventory/adm-core usam RFC 9457 `ProblemDetail`. O app em geral ainda não desserializa esse corpo: `HttpException`/`IOException` no ViewModel. `409` em item = transição inválida (recarregar). `422` no submit traz `missingFields`.
