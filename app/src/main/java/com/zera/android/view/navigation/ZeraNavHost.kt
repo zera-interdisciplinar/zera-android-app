@@ -32,6 +32,7 @@ import com.zera.android.view.screens.main.alerts.AlertCentralScreen
 import com.zera.android.view.screens.main.categories.CategoriesScreen
 import com.zera.android.view.screens.main.categories.CategoryCreationScreen
 import com.zera.android.view.screens.main.categories.CategoryCreationSuccessScreen
+import com.zera.android.view.screens.main.categories.CategoryDetailsScreen
 import com.zera.android.view.screens.main.chat.ChatBotScreen
 import com.zera.android.view.screens.main.chat.ChatConversationsScreen
 import com.zera.android.view.screens.main.employees.EmployeeDetailsScreen
@@ -252,6 +253,10 @@ fun ZeraNavHost() {
                 }
                 composable<Route.Categories> {
                     CategoriesScreen()
+                }
+                composable<Route.CategoryDetails> { backStackEntry ->
+                    val route = backStackEntry.toRoute<Route.CategoryDetails>()
+                    CategoryDetailsScreen(categoryId = route.categoryId)
                 }
                 composable<Route.CategoryCreation> {
                     CategoryCreationScreen()

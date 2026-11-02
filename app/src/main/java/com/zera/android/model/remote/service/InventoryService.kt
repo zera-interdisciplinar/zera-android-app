@@ -15,6 +15,8 @@ import com.zera.android.model.dto.inventory.ModelResponseDTO
 import com.zera.android.model.dto.inventory.PagedItemsDTO
 import com.zera.android.model.dto.inventory.PagedModelsDTO
 import com.zera.android.model.dto.inventory.RejectItemRequestDTO
+import com.zera.android.model.dto.inventory.UpdateCategoryDescriptionRequestDTO
+import com.zera.android.model.dto.inventory.UpdateCategoryNameRequestDTO
 import com.zera.android.model.dto.inventory.UpdateItemRequestDTO
 import com.zera.android.model.dto.inventory.UpdateModelManufacturerRequestDTO
 import com.zera.android.model.dto.inventory.UpdateModelMaterialsRequestDTO
@@ -95,6 +97,23 @@ interface InventoryService {
     @POST("api/v1/categories")
     suspend fun createCategory(
         @Body body: CreateCategoryRequestDTO,
+    ): CategoryResponseDTO
+
+    @GET("api/v1/categories/{id}")
+    suspend fun getCategory(
+        @Path("id") id: String,
+    ): CategoryResponseDTO
+
+    @PATCH("api/v1/categories/{id}/name")
+    suspend fun updateCategoryName(
+        @Path("id") id: String,
+        @Body body: UpdateCategoryNameRequestDTO,
+    ): CategoryResponseDTO
+
+    @PATCH("api/v1/categories/{id}/description")
+    suspend fun updateCategoryDescription(
+        @Path("id") id: String,
+        @Body body: UpdateCategoryDescriptionRequestDTO,
     ): CategoryResponseDTO
 
     @GET("api/v1/models")

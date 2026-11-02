@@ -39,6 +39,7 @@ fun CategoriesScreen(
     CategoriesContent(
         state = state,
         onSearchQueryChange = viewModel::onSearchQueryChange,
+        onCategoryClick = viewModel::onCategoryClick,
         onAddCategoryClick = viewModel::onAddCategoryClick,
         onErrorDismiss = viewModel::onErrorDismiss,
     )
@@ -52,6 +53,7 @@ fun CategoriesScreen(
 private fun CategoriesContent(
     state: CategoriesState,
     onSearchQueryChange: (String) -> Unit,
+    onCategoryClick: (OptionItem) -> Unit,
     onAddCategoryClick: () -> Unit,
     onErrorDismiss: () -> Unit,
 ) {
@@ -83,7 +85,7 @@ private fun CategoriesContent(
             TitleText(text = state.totalCategoriesLabel, bold = true)
             OptionList(
                 options = state.categories,
-                onItemClick = null,
+                onItemClick = onCategoryClick,
                 contentPadding = PaddingValues(vertical = Spacing.small),
                 modifier = Modifier.weight(1f),
                 emptyContent = {
@@ -112,6 +114,7 @@ fun CategoriesScreenPreview() {
                 ),
             ),
             onSearchQueryChange = {},
+            onCategoryClick = {},
             onAddCategoryClick = {},
             onErrorDismiss = {},
         )
@@ -126,6 +129,7 @@ fun CategoriesScreenLoadingPreview() {
         CategoriesContent(
             state = CategoriesState(),
             onSearchQueryChange = {},
+            onCategoryClick = {},
             onAddCategoryClick = {},
             onErrorDismiss = {},
         )

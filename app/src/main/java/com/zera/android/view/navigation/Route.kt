@@ -106,6 +106,9 @@ sealed interface Route{
     data object Categories : Route
 
     @Serializable
+    data class CategoryDetails(val categoryId: String) : Route
+
+    @Serializable
     data object CategoryCreation : Route
 
     @Serializable

@@ -12,6 +12,7 @@ class CategoriesMappingTest {
             CategoryResponseDTO(id = "c1", name = "Informática", description = "Notebooks e monitores"),
         )
 
+        assertEquals("c1", option.id)
         assertEquals("Informática", option.name)
         assertEquals("Notebooks e monitores", option.description)
     }

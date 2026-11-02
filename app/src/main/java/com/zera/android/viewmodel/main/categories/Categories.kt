@@ -45,6 +45,11 @@ class CategoriesViewModel : ZeraViewModel() {
         publishList()
     }
 
+    fun onCategoryClick(category: OptionItem) {
+        val id = category.id?.takeIf { it.isNotBlank() } ?: return
+        ZeraNavigator.push(Route.CategoryDetails(id))
+    }
+
     fun onAddCategoryClick() {
         ZeraNavigator.push(Route.CategoryCreation)
     }
@@ -93,6 +98,7 @@ class CategoriesViewModel : ZeraViewModel() {
 
         internal fun optionFrom(category: CategoryResponseDTO): OptionItem {
             return OptionItem(
+                id = category.id,
                 name = category.name,
                 description = category.description.orEmpty(),
             )
