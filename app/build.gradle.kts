@@ -61,9 +61,12 @@ android {
         buildConfig = true
     }
     testOptions {
-        unitTests.all {
-            // O SDK 36 do Robolectric usa esse pacote interno da JDK.
-            it.jvmArgs("--add-exports=java.base/jdk.internal.access=ALL-UNNAMED")
+        unitTests {
+            isIncludeAndroidResources = true
+            all {
+                // O SDK 36 do Robolectric usa esse pacote interno da JDK.
+                it.jvmArgs("--add-exports=java.base/jdk.internal.access=ALL-UNNAMED")
+            }
         }
     }
 }
@@ -80,6 +83,8 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     testImplementation(libs.junit)
     testImplementation(libs.robolectric)
+    testImplementation(platform(libs.androidx.compose.bom))
+    testImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))

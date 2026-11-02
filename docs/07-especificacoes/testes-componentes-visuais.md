@@ -4,7 +4,7 @@
 
 - **Feature:** Testes de comportamento dos componentes de `view/components`, com Compose UI Test e Robolectric, sem emulador
 - **Perfil(is) envolvido(s):** Não se aplica (qualidade interna; quem usa é o time de desenvolvimento)
-- **Status:** planejado
+- **Status:** em progresso (item 1 de 19)
 - **Última atualização:** 2026-11-02
 
 ## Contexto
@@ -66,7 +66,7 @@ Como desenvolvedor, quero testes que verifiquem o comportamento dos componentes 
 - Cada arquivo espelha o pacote do componente: `view/components/buttons/ZeraButton.kt` é testado em `src/test/.../view/components/buttons/ZeraButtonTest.kt`.
 - Métodos em inglês e camelCase, como nos testes atuais (`disablesClickWhileLoading`).
 - Componentes são renderizados dentro do `ZeraTheme`, por meio de um helper único (`setZeraContent`).
-- Comando padrão: `gradlew testDebugUnitTest`. O `ui-test-manifest` só existe na variante debug, então os testes de componente não devem rodar em `testReleaseUnitTest`.
+- Comando padrão: `gradlew testDebugUnitTest`. O projeto não tem `testReleaseUnitTest`: no AGP 9, os testes unitários só existem na variante debug, a mesma do `ui-test-manifest`.
 
 ### Configuração do Robolectric
 
@@ -76,7 +76,7 @@ Valores globais em `app/src/test/resources/robolectric.properties`:
 |---|---|---|
 | `application` | `android.app.Application` | Evita o `ZeraApp`, que inicializa o `SqliteManager`, algo de que os componentes não precisam |
 | `sdk` | `36` | Igual ao `targetSdk`. Se a JDK local não suportar, usar `35` e registrar aqui |
-| `qualifiers` | Tela fixa de celular (ex.: `w411dp-h891dp`) | A tela padrão do Robolectric é pequena e deixaria formulários e botões fora da área visível |
+| `qualifiers` | `w411dp-h891dp`, tela fixa de celular | A tela padrão do Robolectric é pequena e deixaria formulários e botões fora da área visível |
 
 ### O que testar
 
@@ -99,7 +99,8 @@ Valores globais em `app/src/test/resources/robolectric.properties`:
 | Ícones com descrição | `onNodeWithContentDescription` |
 | Campos de texto | Pelo texto atual, usando valores únicos em cada teste. O rótulo não é associado ao campo |
 | Campos desabilitados | Pelo texto atual. Campo desabilitado não expõe a ação de `SetText`, então `hasSetTextAction()` não o encontra |
-| Botão em carregamento | `hasProgressBarRangeInfo(ProgressBarRangeInfo.Indeterminate)` |
+| Botão em carregamento | `hasClickAction()`, já que o texto some |
+| Indicador de progresso | `hasProgressBarRangeInfo(ProgressBarRangeInfo.Indeterminate)`. É um nó separado do botão, então o estado desabilitado não aparece nele |
 | `ZeraRadioButton` | `isSelectable()` |
 | `SelectBoxItem` e "Selecionar todos" | Pelo texto, com `assertIsOn` e `assertIsOff` |
 | Slider | `SemanticsActions.SetProgress` e `assertRangeInfoEquals` |
@@ -148,9 +149,9 @@ Validar nos itens 1 e 2 do checklist, antes de escrever o restante:
 
 | Risco | Como tratar |
 |---|---|
-| Compatibilidade do Robolectric com AGP 9 e SDK 36 | **Validada sem Compose:** Robolectric 4.17 roda o `AlertDeepLinkTest`. Falta validar com Compose no item 1 |
+| Compatibilidade do Robolectric com AGP 9 e SDK 36 | **Validada** no item 1: Robolectric 4.17 roda o Compose UI Test |
 | JDK para o SDK 36 | **Validada na JDK 25**, com `--add-exports=java.base/jdk.internal.access=ALL-UNNAMED` na JVM de teste. Ainda não testada na JDK 21 do Android Studio nem na 17 do workflow de release, o que precisará ser revisto quando os testes forem para o CI |
-| `ContentProvider`s de Firebase e ML Kit no manifesto mesclado, inicializados pelo Robolectric | Verificar no item 1. Se falharem, discutir a solução antes de mexer no manifesto |
+| `ContentProvider`s de Firebase e ML Kit no manifesto mesclado, inicializados pelo Robolectric | **Sem impacto** no item 1, que já roda com `isIncludeAndroidResources = true` |
 | `Dialog`, menu do `ExposedDropdownMenuBox`, `ModalBottomSheet` e `DatePicker` | Validar `Dialog` e `ModalBottomSheet` no item 2 e os demais nos itens de cada componente |
 | Primeiro uso baixa o `android-all` do Maven | Precisa de rede só na primeira execução |
 
@@ -160,7 +161,7 @@ Validar nos itens 1 e 2 do checklist, antes de escrever o restante:
 - [ ] Nenhum teste usa `Thread.sleep` nem depende de rede, exceto o download inicial do Robolectric.
 - [ ] Nenhuma alteração em código de produção vem junto com os testes.
 - [ ] Todo componente do escopo cobre os casos listados no checklist, ou tem a ausência justificada em [Limitações encontradas](#limitações-encontradas).
-- [ ] No item 1, o `ZeraButtonTest` é visto falhando ao quebrar o componente temporariamente, sem commitar essa quebra.
+- [x] No item 1, o `ZeraButtonTest` é visto falhando ao quebrar o componente temporariamente, sem commitar essa quebra.
 - [ ] `docs/09-stack-e-dependencias.md` descreve a nova stack e o comando para rodar os testes.
 
 ## Edge cases considerados
@@ -177,8 +178,7 @@ Um item por vez, um commit por item (`test: ...`), parando para revisão.
 
 ### Preparação
 
-- [ ] **1. Stack e `ZeraButton`.** Adicionar `testImplementation` de Compose BOM e `ui-test-junit4`, `isIncludeAndroidResources = true`, `qualifiers` no `robolectric.properties` e o helper `setZeraContent`. Robolectric e `robolectric.properties` já foram adicionados na correção da linha de base. `ZeraButtonTest`: mostra o texto; toque chama `onClick`; desabilitado não chama; `loading` esconde o texto, mostra o progresso e bloqueia o toque. Registrar o comportamento de `gradlew test`.
-- [ ] **2. `PopupDialog` e `BottomSheet`.** Valida as janelas no Robolectric. `PopupDialog`: mostra o conteúdo; o X chama `onDismissRequest`; `hasDismissButton = false` esconde o X. `BottomSheet`: mostra o conteúdo.
+- [x] **1. Stack e `ZeraButton`.** Adicionar `testImplementation` de Compose BOM e `ui-test-junit4`, `isIncludeAndroidResources = true`, `qualifiers` no `robolectric.properties` e o helper `setZeraContent`. Robolectric e `robolectric.properties` já foram adicionados na correção da linha de base. `ZeraButtonTest`: mostra o texto; toque chama `onClick`; desabilitado não chama; `loading` esconde o texto, mostra o progresso e bloqueia o toque.- [ ] **2. `PopupDialog` e `BottomSheet`.** Valida as janelas no Robolectric. `PopupDialog`: mostra o conteúdo; o X chama `onDismissRequest`; `hasDismissButton = false` esconde o X. `BottomSheet`: mostra o conteúdo.
 
 ### Componentes base
 
