@@ -30,4 +30,49 @@ class AlertDeepLinkTest {
         assertNull(routeForItemDeepLink("zera://reset-password"))
         assertNull(routeForItemDeepLink(null))
     }
+
+    @Test
+    fun dismissesThePendingAlertOnlyOnce() {
+        val dismissed = mutableListOf<String>()
+        PendingAlertDeepLink.rememberAlertId("alert-1")
+
+        dismissPendingAlert(canDismiss = { true }, dismiss = { dismissed += it })
+        dismissPendingAlert(canDismiss = { true }, dismiss = { dismissed += it })
+
+        assertEquals(listOf("alert-1"), dismissed)
+    }
+
+    @Test
+    fun keepsThePendingAlertUntilItCanBeDismissed() {
+        val dismissed = mutableListOf<String>()
+        PendingAlertDeepLink.rememberAlertId("alert-1")
+
+        dismissPendingAlert(canDismiss = { false }, dismiss = { dismissed += it })
+        assertEquals(emptyList<String>(), dismissed)
+
+        dismissPendingAlert(canDismiss = { true }, dismiss = { dismissed += it })
+        assertEquals(listOf("alert-1"), dismissed)
+    }
+
+    @Test
+    fun missingOrBlankAlertIdDoesNotReplaceThePendingOne() {
+        val dismissed = mutableListOf<String>()
+        PendingAlertDeepLink.rememberAlertId("alert-1")
+        PendingAlertDeepLink.rememberAlertId(null)
+        PendingAlertDeepLink.rememberAlertId(" ")
+
+        dismissPendingAlert(canDismiss = { true }, dismiss = { dismissed += it })
+
+        assertEquals(listOf("alert-1"), dismissed)
+    }
+
+    @Test
+    fun nothingPendingDismissesNothing() {
+        PendingAlertDeepLink.takeAlertId()
+        val dismissed = mutableListOf<String>()
+
+        dismissPendingAlert(canDismiss = { true }, dismiss = { dismissed += it })
+
+        assertEquals(emptyList<String>(), dismissed)
+    }
 }

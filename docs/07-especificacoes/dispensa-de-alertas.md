@@ -164,7 +164,7 @@ Como usuário que recebe alertas, quero que um alerta saia da lista quando eu in
 Uma etapa por vez, com revisão antes da próxima.
 
 1. [x] `closeAlert` + `DismissedAlerts` + `DismissAlert` + testes
-2. [ ] Dispensa pelo push em `PendingAlertDeepLink` (`alertId` provisório) + testes
+2. [x] Dispensa pelo push em `PendingAlertDeepLink` (`alertId` provisório) + testes
 3. [ ] `AlertCentralViewModel`: filtro `OPEN`, `DismissedAlerts`, paginação, `onAlertDismiss` e `onAlertClick` + testes
 4. [ ] `ManagerHomeViewModel`: `DismissedAlerts`, limite da home, recarga, `onAlertDismiss` e `onAlertClick` + testes
 5. [ ] `Notification` com X + `DismissibleNotification`

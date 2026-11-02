@@ -3,7 +3,14 @@ package com.zera.android.view.navigation
 import android.content.Intent
 import android.net.Uri
 import com.zera.android.model.entity.notification.AlertKind
+import com.zera.android.model.local.SqliteManager
+import com.zera.android.model.remote.client.AdmCoreClient
+import com.zera.android.model.usecase.notification.DismissAlert
 import com.zera.android.view.components.outros.ItemStatus
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 
 object PendingAlertDeepLink {
     const val ExtraAlertId = "alertId"
@@ -12,18 +19,34 @@ object PendingAlertDeepLink {
     const val ExtraDeepLink = "deepLink"
 
     @Volatile
+    private var alertId: String? = null
+
+    @Volatile
     private var kind: String? = null
 
     @Volatile
     private var deepLink: String? = null
 
     fun stash(intent: Intent?) {
+        rememberAlertId(intent?.getStringExtra(ExtraAlertId))
         val nextLink = intent?.getStringExtra(ExtraDeepLink)?.takeIf { it.isNotBlank() }
         if (nextLink != null) {
             deepLink = nextLink
         }
         val nextKind = intent?.getStringExtra(ExtraKind)?.takeIf { it.isNotBlank() } ?: return
         kind = nextKind
+    }
+
+    internal fun rememberAlertId(next: String?) {
+        if (!next.isNullOrBlank()) {
+            alertId = next
+        }
+    }
+
+    fun takeAlertId(): String? {
+        val current = alertId
+        alertId = null
+        return current
     }
 
     fun takeKind(): String? {
@@ -62,7 +85,29 @@ fun routeForAlertKind(kind: String?): Route? = when (AlertKind.from(kind.orEmpty
     else -> null
 }
 
+private val alertDismissalScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+/**
+ * Fecha o alerta do push tocado. Sem sessão ou com o client ainda não iniciado, o id fica pendente
+ * até o próximo consumo (Splash, login ou cadastro). A falha é silenciosa: o alerta só continua
+ * na lista.
+ */
+internal fun dismissPendingAlert(
+    canDismiss: () -> Boolean = {
+        AdmCoreClient.isReady() && !SqliteManager.getAccessToken().isNullOrBlank()
+    },
+    dismiss: (String) -> Unit = { alertId ->
+        alertDismissalScope.launch {
+            runCatching { DismissAlert().execute(alertId) }
+        }
+    },
+) {
+    if (!canDismiss()) return
+    PendingAlertDeepLink.takeAlertId()?.let(dismiss)
+}
+
 fun consumePendingAlertDeepLink() {
+    dismissPendingAlert()
     val link = PendingAlertDeepLink.takeDeepLink()
     val kind = PendingAlertDeepLink.takeKind()
     val route = routeForItemDeepLink(link) ?: routeForAlertKind(kind) ?: return
