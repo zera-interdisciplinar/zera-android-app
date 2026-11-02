@@ -38,13 +38,13 @@ import com.zera.android.view.components.buttons.ZeraButtonType
 import com.zera.android.view.components.cards.ItemSummaryCard
 import com.zera.android.view.components.feedback.ErrorFeedbackPopup
 import com.zera.android.view.components.forms.EditItemForm
-import com.zera.android.view.components.inputs.ZeraInputPopup
 import com.zera.android.view.components.lists.EditableFieldRow
 import com.zera.android.view.components.loading.SkeletonBox
 import com.zera.android.view.components.navigation.SideBarOverlay
 import com.zera.android.view.components.navigation.UpperNavBar
 import com.zera.android.view.components.outros.ItemStatus
 import com.zera.android.view.components.overlays.BottomSheet
+import com.zera.android.view.components.overlays.DenyReasonPopup
 import com.zera.android.view.components.overlays.PhotoViewerDialog
 import com.zera.android.view.media.PhotoCapture
 import com.zera.android.view.navigation.Route
@@ -275,9 +275,7 @@ fun ItemDetailsScreen(
     }
 
     if (showRejectPopup && state.canReview) {
-        ZeraInputPopup(
-            label = "Motivo da recusa",
-            value = "",
+        DenyReasonPopup(
             onDismissRequest = { showRejectPopup = false },
             onConfirm = { reason ->
                 viewModel.onRejectConfirm(reason)

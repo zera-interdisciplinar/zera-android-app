@@ -77,7 +77,7 @@ fun ManagerBottomNavBar(
             label = "Itens",
             contentDescription = "Botão para Itens",
             onClick = { viewModel.onItensClick(currentRoute) },
-            icon = ZeraIcon.Bell,
+            icon = ZeraIcon.Crate,
             selected = currentRoute is Route.Itens,
         )
     }
