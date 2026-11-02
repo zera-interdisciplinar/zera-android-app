@@ -36,6 +36,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zera.android.view.components.buttons.ZeraButton
 import com.zera.android.view.components.buttons.ZeraButtonType
 import com.zera.android.view.components.cards.ItemSummaryCard
+import com.zera.android.view.components.feedback.ErrorFeedbackPopup
 import com.zera.android.view.components.forms.EditItemForm
 import com.zera.android.view.components.inputs.ZeraInputPopup
 import com.zera.android.view.components.lists.EditableFieldRow
@@ -45,7 +46,6 @@ import com.zera.android.view.components.navigation.UpperNavBar
 import com.zera.android.view.components.outros.ItemStatus
 import com.zera.android.view.components.overlays.BottomSheet
 import com.zera.android.view.components.overlays.PhotoViewerDialog
-import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.media.PhotoCapture
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.theme.Radius
@@ -185,9 +185,6 @@ fun ItemDetailsScreen(
                 if (state.isLoading) {
                     ItemDetailsSkeleton()
                 } else {
-                    state.errorMessage?.let { message ->
-                        CaptionText(text = message, color = MaterialTheme.colorScheme.error)
-                    }
 
                     ItemSummaryCard(
                         itemName = state.itemName,
@@ -258,7 +255,6 @@ fun ItemDetailsScreen(
                 nameError = draft.nameError,
                 damageTypeError = draft.damageTypeError,
                 notesError = draft.notesError,
-                errorMessage = state.errorMessage,
                 isSubmitting = state.isSubmitting,
             )
         }
@@ -289,6 +285,10 @@ fun ItemDetailsScreen(
             },
             validate = ItemDetailsViewModel::reasonValidationError,
         )
+    }
+
+    state.errorMessage?.let { message ->
+        ErrorFeedbackPopup(description = message, onDismissRequest = viewModel::onErrorDismiss)
     }
 }
 

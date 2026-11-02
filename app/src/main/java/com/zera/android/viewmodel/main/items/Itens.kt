@@ -11,6 +11,8 @@ import com.zera.android.view.components.lists.ProductItem
 import com.zera.android.view.components.outros.ItemStatus
 import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.viewmodel.ZeraViewModel
+import com.zera.android.viewmodel.errorDescription
+import com.zera.android.viewmodel.loadErrorDescription
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -35,6 +37,8 @@ data class ItensState(
     val items: List<ProductItem> = emptyList(),
     val isLoading: Boolean = true,
     val isLoadingMore: Boolean = false,
+    /** A última carga falhou: a lista vazia não mostra "Nenhum produto encontrado". */
+    val loadFailed: Boolean = false,
     val errorMessage: String? = null,
 )
 
@@ -63,6 +67,10 @@ class ItensViewModel(
         if (query.isEmpty() && previous.isNotEmpty()) {
             loadItems()
         }
+    }
+
+    fun onErrorDismiss() {
+        _state.value = _state.value.copy(errorMessage = null)
     }
 
     fun onSearch() {
@@ -136,6 +144,7 @@ class ItensViewModel(
                         items = emptyList(),
                         isLoading = false,
                         isLoadingMore = false,
+                        loadFailed = false,
                         errorMessage = null,
                     )
                     return@launch
@@ -168,6 +177,7 @@ class ItensViewModel(
                     items = items,
                     isLoading = false,
                     isLoadingMore = false,
+                    loadFailed = false,
                     errorMessage = null,
                 )
             } catch (e: CancellationException) {
@@ -176,7 +186,8 @@ class ItensViewModel(
                 _state.value = _state.value.copy(
                     isLoading = false,
                     isLoadingMore = false,
-                    errorMessage = e.message,
+                    loadFailed = true,
+                    errorMessage = errorDescription(e, loadErrorDescription("os itens")),
                 )
             }
         }
