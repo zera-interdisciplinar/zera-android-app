@@ -2,11 +2,14 @@ package com.zera.android.viewmodel.main.employees
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
+import com.zera.android.model.remote.client.isConnectionError
 import com.zera.android.model.dto.user.SelfUserResponseDTO
 import com.zera.android.model.usecase.auth.GetSelfUser
 import com.zera.android.model.usecase.telephone.GetTelephone
 import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.viewmodel.ZeraViewModel
+import com.zera.android.viewmodel.errorDescription
+import com.zera.android.viewmodel.loadErrorDescription
 import com.zera.android.viewmodel.profile.ProfileViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
@@ -58,10 +61,14 @@ class EmployeeDetailsViewModel(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                "Não foi possível carregar o telefone."
+                errorDescription(e, loadErrorDescription("o telefone"))
             }
             _state.value = _state.value.copy(isLoading = false, errorMessage = phoneError)
         }
+    }
+
+    fun onErrorDismiss() {
+        _state.value = _state.value.copy(errorMessage = null)
     }
 
     fun onBackClick() {
@@ -86,7 +93,9 @@ class EmployeeDetailsViewModel(
             isLoading = false,
         )
 
-        internal fun loadError(error: Exception): String {
+        /** Descrição do popup para a falha ao carregar o operário; `null` quando é falta de conexão. */
+        internal fun loadError(error: Exception): String? {
+            if (error.isConnectionError()) return null
             if (error is HttpException) {
                 return when (error.code()) {
                     400, 404 -> "Operário não encontrado."
@@ -94,7 +103,7 @@ class EmployeeDetailsViewModel(
                     else -> "Não foi possível carregar o operário."
                 }
             }
-            return error.message?.takeIf { it.isNotBlank() } ?: "Não foi possível carregar o operário."
+            return "Não foi possível carregar o operário."
         }
     }
 }

@@ -2,6 +2,7 @@ package com.zera.android.viewmodel.main.employees
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
+import com.zera.android.model.remote.client.isConnectionError
 import com.zera.android.model.usecase.team.CreateInvitation
 import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.viewmodel.ZeraViewModel
@@ -38,6 +39,10 @@ class EmployeeRegisterViewModel(
     fun onBackClick() {
         if (_state.value.isSubmitting) return
         ZeraNavigator.goBack()
+    }
+
+    fun onErrorDismiss() {
+        _state.value = _state.value.copy(errorMessage = null)
     }
 
     fun onNameChange(value: String) {
@@ -84,7 +89,9 @@ class EmployeeRegisterViewModel(
     }
 
     companion object {
-        internal fun createInviteError(error: Exception): String {
+        /** Descrição do popup para a falha ao criar o convite; `null` quando é falta de conexão. */
+        internal fun createInviteError(error: Exception): String? {
+            if (error.isConnectionError()) return null
             if (error is HttpException) {
                 return when (error.code()) {
                     400 -> "Nome inválido ou gestor não reconhecido."
@@ -93,8 +100,7 @@ class EmployeeRegisterViewModel(
                     else -> "Não foi possível criar o convite. Tente novamente."
                 }
             }
-            return error.message?.takeIf { it.isNotBlank() }
-                ?: "Não foi possível criar o convite. Tente novamente."
+            return "Não foi possível criar o convite. Tente novamente."
         }
 
         internal fun nameValidationError(value: String): String? =
