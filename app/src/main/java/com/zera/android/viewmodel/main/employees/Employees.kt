@@ -13,6 +13,8 @@ import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.view.transition.ScreenAnimation
 import com.zera.android.viewmodel.ZeraViewModel
+import com.zera.android.viewmodel.errorDescription
+import com.zera.android.viewmodel.loadErrorDescription
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
@@ -31,6 +33,8 @@ data class EmployeesState(
     val isLoadingCount: Boolean = true,
     val isLoadingEmployees: Boolean = true,
     val isLoadingInvites: Boolean = true,
+    /** A carga da lista falhou: a lista vazia não mostra "Nenhum colaborador encontrado". */
+    val employeesLoadFailed: Boolean = false,
     val errorMessage: String? = null,
 ) {
     /**
@@ -78,7 +82,7 @@ class EmployeesViewModel : ZeraViewModel() {
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            _state.value = _state.value.copy(errorMessage = e.message ?: "Não foi possível carregar a equipe.")
+            showError(errorDescription(e, loadErrorDescription("a equipe")))
         } finally {
             _state.value = _state.value.copy(isLoadingCount = false)
         }
@@ -87,11 +91,13 @@ class EmployeesViewModel : ZeraViewModel() {
     private suspend fun loadEmployees() {
         try {
             loadedEmployees = listTeamEmployees.execute()
+            _state.value = _state.value.copy(employeesLoadFailed = false)
             publishRoster()
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            _state.value = _state.value.copy(errorMessage = e.message ?: "Não foi possível carregar a equipe.")
+            _state.value = _state.value.copy(employeesLoadFailed = true)
+            showError(errorDescription(e, loadErrorDescription("os colaboradores")))
         } finally {
             _state.value = _state.value.copy(isLoadingEmployees = false)
         }
@@ -104,8 +110,17 @@ class EmployeesViewModel : ZeraViewModel() {
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            _state.value = _state.value.copy(errorMessage = e.message ?: "Não foi possível carregar os convites.")
+            showError(errorDescription(e, loadErrorDescription("os convites")))
         }
+    }
+
+    /** As três cargas rodam em paralelo; uma falha de conexão (`null`) não apaga o erro de outra. */
+    private fun showError(description: String?) {
+        if (description != null) _state.value = _state.value.copy(errorMessage = description)
+    }
+
+    fun onErrorDismiss() {
+        _state.value = _state.value.copy(errorMessage = null)
     }
 
     private fun publishRoster() {

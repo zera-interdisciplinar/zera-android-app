@@ -3,7 +3,22 @@ package com.zera.android.model.remote.client
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
+import java.net.ConnectException
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
 import java.util.concurrent.TimeUnit
+
+/**
+ * Falha de rede (sem internet, servidor inalcançável ou timeout), olhando também as causas.
+ * O app mostra a tela cheia de conexão para esses erros, e não o popup da tela.
+ * Timeout entra aqui mesmo podendo ser servidor lento (ver spec `telas-de-erro.md`).
+ */
+fun Throwable.isConnectionError(): Boolean =
+    generateSequence(this) { it.cause }
+        .take(MAX_CAUSE_DEPTH)
+        .any { it is UnknownHostException || it is ConnectException || it is SocketTimeoutException }
+
+private const val MAX_CAUSE_DEPTH = 10
 
 internal fun OkHttpClient.Builder.zeraTimeouts(): OkHttpClient.Builder =
     connectTimeout(15, TimeUnit.SECONDS)

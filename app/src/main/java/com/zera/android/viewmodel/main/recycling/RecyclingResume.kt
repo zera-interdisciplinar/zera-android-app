@@ -9,6 +9,9 @@ import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.view.transition.ScreenAnimation
 import com.zera.android.viewmodel.ZeraViewModel
+import com.zera.android.viewmodel.appMessageOrFallback
+import com.zera.android.viewmodel.errorDescription
+import com.zera.android.viewmodel.loadErrorDescription
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
@@ -122,6 +125,10 @@ class RecyclingResumeViewModel : ZeraViewModel() {
         }
     }
 
+    fun onErrorDismiss() {
+        _state.value = _state.value.copy(errorMessage = null)
+    }
+
     fun onViewItemsClick() {
         val current = _state.value
         ZeraNavigator.push(
@@ -153,7 +160,11 @@ class RecyclingResumeViewModel : ZeraViewModel() {
                 val current = _state.value
                 _state.value = current.copy(
                     isLoading = false,
-                    errorMessage = if (current.isConfirming) current.errorMessage else error.message,
+                    errorMessage = if (current.isConfirming) {
+                        current.errorMessage
+                    } else {
+                        errorDescription(error, loadErrorDescription("o contato da recicladora"))
+                    },
                 )
             }
         }
@@ -176,19 +187,18 @@ class RecyclingResumeViewModel : ZeraViewModel() {
             return "${now.dayOfMonth} de $month · %02d:%02d".format(now.hour, now.minute)
         }
 
-        internal fun confirmError(error: Exception): String {
+        /** Descrição do popup para a falha ao registrar o descarte; `null` quando é falta de conexão. */
+        internal fun confirmError(error: Exception): String? {
             if (error is HttpException) {
                 return when (error.code()) {
                     400 -> "Não foi possível registrar o descarte. Confira os itens e o destino."
                     403 -> "Você não tem permissão para registrar o descarte."
                     404 -> "Item não encontrado para este descarte."
                     409 -> "Um ou mais itens não podem ser descartados agora."
-                    else -> error.message?.takeIf { it.isNotBlank() }
-                        ?: "Não foi possível registrar o descarte."
+                    else -> "Não foi possível registrar o descarte."
                 }
             }
-            return error.message?.takeIf { it.isNotBlank() }
-                ?: "Não foi possível registrar o descarte."
+            return appMessageOrFallback(error, "Não foi possível registrar o descarte.")
         }
     }
 }

@@ -134,7 +134,7 @@ class NearbyRecyclingPlacesViewModel : ZeraViewModel() {
                     isLoading = false,
                     places = emptyList(),
                     selectedPlaceId = null,
-                    statusMessage = error.message ?: "Nao foi possivel buscar recicladoras proximas.",
+                    statusMessage = "Nao foi possivel buscar recicladoras proximas.",
                     canRetry = true,
                 )
             }

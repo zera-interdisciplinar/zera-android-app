@@ -11,8 +11,13 @@ import com.zera.android.view.components.lists.ProductItem
 import com.zera.android.view.components.outros.ItemStatus
 import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.viewmodel.ZeraViewModel
+import com.zera.android.viewmodel.errorDescription
+import com.zera.android.viewmodel.loadErrorDescription
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.Locale
@@ -32,6 +37,8 @@ data class ItensState(
     val items: List<ProductItem> = emptyList(),
     val isLoading: Boolean = true,
     val isLoadingMore: Boolean = false,
+    /** A última carga falhou: a lista vazia não mostra "Nenhum produto encontrado". */
+    val loadFailed: Boolean = false,
     val errorMessage: String? = null,
 )
 
@@ -60,6 +67,10 @@ class ItensViewModel(
         if (query.isEmpty() && previous.isNotEmpty()) {
             loadItems()
         }
+    }
+
+    fun onErrorDismiss() {
+        _state.value = _state.value.copy(errorMessage = null)
     }
 
     fun onSearch() {
@@ -133,18 +144,25 @@ class ItensViewModel(
                         items = emptyList(),
                         isLoading = false,
                         isLoadingMore = false,
+                        loadFailed = false,
                         errorMessage = null,
                     )
                     return@launch
                 }
-                val pages = queries.map { query ->
-                    getItems.execute(
-                        status = query.status,
-                        categoryId = query.categoryId,
-                        q = query.q,
-                        page = pageIndex,
-                        size = PAGE_SIZE,
-                    )
+                // coroutineScope: a falha de um async sai por aqui e cai no catch. Direto no launch,
+                // ela cancelaria o launch e chegaria ao viewModelScope sem tratamento (crash).
+                val pages = coroutineScope {
+                    queries.map { query ->
+                        async {
+                            getItems.execute(
+                                status = query.status,
+                                categoryId = query.categoryId,
+                                q = query.q,
+                                page = pageIndex,
+                                size = PAGE_SIZE,
+                            )
+                        }
+                    }.awaitAll()
                 }
                 val page = mergePages(pages)
                 loadedPage = page.page
@@ -159,6 +177,7 @@ class ItensViewModel(
                     items = items,
                     isLoading = false,
                     isLoadingMore = false,
+                    loadFailed = false,
                     errorMessage = null,
                 )
             } catch (e: CancellationException) {
@@ -167,7 +186,8 @@ class ItensViewModel(
                 _state.value = _state.value.copy(
                     isLoading = false,
                     isLoadingMore = false,
-                    errorMessage = e.message,
+                    loadFailed = true,
+                    errorMessage = errorDescription(e, loadErrorDescription("os itens")),
                 )
             }
         }
@@ -184,6 +204,17 @@ class ItensViewModel(
             MAINTENANCE_STATUS_LABEL to "IN_MAINTENANCE",
             "Em aprovação" to "AWAITING_EVALUATION",
             "Descartado" to "DISPOSED",
+        )
+
+        /**
+         * Status buscados quando nenhum filtro de status está marcado. `DRAFT` nunca aparece;
+         * `REJECTED` e `DISPOSED` só aparecem pelo filtro deles.
+         */
+        private val DEFAULT_STATUS_API_VALUES = listOf(
+            "PENDING_APPROVAL",
+            "IN_STOCK",
+            "IN_MAINTENANCE",
+            "AWAITING_EVALUATION",
         )
 
         internal fun productFrom(item: ItemResponseDTO): ProductItem {
@@ -209,7 +240,7 @@ class ItensViewModel(
         ): List<ItemsQuery> {
             val q = searchQuery.trim().takeIf { it.isNotEmpty() }
             val statusValues = if (selectedStatuses.isEmpty()) {
-                listOf(null)
+                DEFAULT_STATUS_API_VALUES
             } else {
                 selectedStatuses.mapNotNull(STATUS_API_VALUES::get)
             }

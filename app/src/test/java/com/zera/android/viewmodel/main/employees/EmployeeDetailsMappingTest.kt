@@ -4,7 +4,9 @@ import com.zera.android.model.dto.user.SelfUserResponseDTO
 import com.zera.android.model.entity.user.UserRole
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Test
+import java.net.UnknownHostException
 
 class EmployeeDetailsMappingTest {
     private val user = SelfUserResponseDTO(
@@ -38,5 +40,10 @@ class EmployeeDetailsMappingTest {
             "Não foi possível carregar o operário.",
             EmployeeDetailsViewModel.loadError(IllegalStateException("")),
         )
+    }
+
+    @Test
+    fun loadErrorHasNoPopupWithoutConnection() {
+        assertNull(EmployeeDetailsViewModel.loadError(UnknownHostException("adm")))
     }
 }

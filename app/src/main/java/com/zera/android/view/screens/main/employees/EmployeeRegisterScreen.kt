@@ -19,6 +19,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zera.android.view.components.buttons.ZeraButton
+import com.zera.android.view.components.feedback.ErrorFeedbackPopup
 import com.zera.android.view.components.inputs.ZeraDropdownInput
 import com.zera.android.view.components.inputs.ZeraInputType
 import com.zera.android.view.components.inputs.ZeraTextInput
@@ -80,9 +81,6 @@ fun EmployeeRegisterScreen(
                 text = "Convide uma pessoa para sua equipe",
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            state.errorMessage?.let { message ->
-                CaptionText(text = message, color = MaterialTheme.colorScheme.error)
-            }
             ZeraTextInput(
                 value = state.name,
                 onValueChange = viewModel::onNameChange,
@@ -113,6 +111,10 @@ fun EmployeeRegisterScreen(
                 enabled = !state.isSubmitting,
             )
         }
+    }
+
+    state.errorMessage?.let { message ->
+        ErrorFeedbackPopup(description = message, onDismissRequest = viewModel::onErrorDismiss)
     }
 }
 

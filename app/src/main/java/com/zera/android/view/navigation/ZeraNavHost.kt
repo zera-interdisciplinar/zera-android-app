@@ -26,6 +26,8 @@ import com.zera.android.view.screens.auth.SignUpScreen
 import com.zera.android.view.screens.auth.WelcomeScreen
 import com.zera.android.view.screens.auth.passwordRecovery.NewPasswordScreen
 import com.zera.android.view.screens.auth.passwordRecovery.PasswordRecoveryEmailScreen
+import com.zera.android.view.screens.error.ConnectionErrorScreen
+import com.zera.android.view.screens.error.FatalErrorScreen
 import com.zera.android.view.screens.main.alerts.AlertCentralScreen
 import com.zera.android.view.screens.main.categories.CategoriesScreen
 import com.zera.android.view.screens.main.categories.CategoryCreationScreen
@@ -334,6 +336,13 @@ fun ZeraNavHost() {
                 composable<Route.PasswordRecoveryNewPassword> { backStackEntry ->
                     val route = backStackEntry.toRoute<Route.PasswordRecoveryNewPassword>()
                     NewPasswordScreen(token = route.token)
+                }
+                composable<Route.ConnectionError> { backStackEntry ->
+                    val route = backStackEntry.toRoute<Route.ConnectionError>()
+                    ConnectionErrorScreen(fromBoot = route.fromBoot)
+                }
+                composable<Route.FatalError> {
+                    FatalErrorScreen()
                 }
             }
             BackHandler(enabled = !navigationEnabled) { }

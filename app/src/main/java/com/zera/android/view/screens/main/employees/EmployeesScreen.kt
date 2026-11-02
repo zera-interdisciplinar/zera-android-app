@@ -21,11 +21,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zera.android.view.components.buttons.ZeraButton
 import com.zera.android.view.components.cards.InviteCard
 import com.zera.android.view.components.containers.ZeraBox
+import com.zera.android.view.components.feedback.ErrorFeedbackPopup
 import com.zera.android.view.components.lists.EmployeeItem
 import com.zera.android.view.components.lists.EmployeeList
 import com.zera.android.view.components.loading.SkeletonBox
 import com.zera.android.view.components.scaffolds.ManagerScaffold
-import com.zera.android.view.components.texts.CaptionText
+import com.zera.android.view.components.texts.BodyText
 import com.zera.android.view.components.texts.HeadlineText
 import com.zera.android.view.components.texts.LabelText
 import com.zera.android.view.components.texts.TitleText
@@ -90,10 +91,6 @@ fun EmployeesScreen(
                 }
             }
 
-            state.errorMessage?.let { message ->
-                CaptionText(text = message, color = MaterialTheme.colorScheme.error)
-            }
-
             // Seção opcional, sem skeleton: entra quando os convites chegam.
             if (state.pendingInvites.isNotEmpty()) {
                 TitleText(
@@ -118,8 +115,15 @@ fun EmployeesScreen(
                 onItemClick = viewModel::onEmployeeClick,
                 contentPadding = PaddingValues(Spacing.none),
                 modifier = Modifier.heightIn(max = 400.dp),
+                emptyContent = {
+                    if (!state.employeesLoadFailed) BodyText(text = "Nenhum colaborador encontrado")
+                },
             )
         }
+    }
+
+    state.errorMessage?.let { message ->
+        ErrorFeedbackPopup(description = message, onDismissRequest = viewModel::onErrorDismiss)
     }
 }
 

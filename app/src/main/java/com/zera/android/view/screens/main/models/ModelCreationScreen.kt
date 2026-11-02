@@ -21,11 +21,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zera.android.view.components.buttons.ZeraButton
 import com.zera.android.view.components.buttons.ZeraButtonType
+import com.zera.android.view.components.feedback.ErrorFeedbackPopup
 import com.zera.android.view.components.inputs.ZeraDropdownInput
 import com.zera.android.view.components.inputs.ZeraTextInput
 import com.zera.android.view.components.navigation.UpperNavBar
 import com.zera.android.view.components.texts.BodyText
-import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
 import com.zera.android.viewmodel.main.models.ModelCreationViewModel
@@ -86,15 +86,14 @@ fun ModelCreationScreen(
                 text = "Preencha os dados essenciais para que possa ser reutilizado nos próximos itens",
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            state.errorMessage?.let { message ->
-                CaptionText(text = message, color = MaterialTheme.colorScheme.error)
-            }
             ZeraTextInput(
                 value = state.modelName,
                 onValueChange = viewModel::onModelNameChange,
                 label = "Modelo",
                 placeholder = "Nome do modelo",
                 imeAction = ImeAction.Next,
+                isError = state.nameError != null,
+                errorMessage = state.nameError,
             )
             ZeraDropdownInput(
                 value = state.category,
@@ -102,6 +101,8 @@ fun ModelCreationScreen(
                 onValueChange = viewModel::onCategoryChange,
                 label = "Categoria",
                 placeholder = "Selecione uma categoria",
+                isError = state.categoryError != null,
+                errorMessage = state.categoryError,
             )
             ZeraDropdownInput(
                 value = state.material,
@@ -109,6 +110,8 @@ fun ModelCreationScreen(
                 onValueChange = viewModel::onMaterialChange,
                 label = "Material",
                 placeholder = "Selecione um material",
+                isError = state.materialError != null,
+                errorMessage = state.materialError,
             )
             ZeraTextInput(
                 value = state.brand,
@@ -116,6 +119,8 @@ fun ModelCreationScreen(
                 label = "Marca",
                 placeholder = "Ex: Eletrônico, mecânico, chip",
                 imeAction = ImeAction.Next,
+                isError = state.brandError != null,
+                errorMessage = state.brandError,
             )
             ZeraTextInput(
                 value = state.notes,
@@ -123,8 +128,14 @@ fun ModelCreationScreen(
                 label = "Observação",
                 placeholder = "Detalhes opcionais",
                 imeAction = ImeAction.Done,
+                isError = state.notesError != null,
+                errorMessage = state.notesError,
             )
         }
+    }
+
+    state.errorMessage?.let { message ->
+        ErrorFeedbackPopup(description = message, onDismissRequest = viewModel::onErrorDismiss)
     }
 }
 

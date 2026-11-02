@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -21,6 +20,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zera.android.view.components.buttons.IconButton
 import com.zera.android.view.components.buttons.ZeraButton
 import com.zera.android.view.components.buttons.ZeraButtonType
+import com.zera.android.view.components.feedback.ErrorFeedbackPopup
 import com.zera.android.view.components.inputs.ZeraChipsGroup
 import com.zera.android.view.components.inputs.ZeraSearchInput
 import com.zera.android.view.components.lists.OptionItem
@@ -30,7 +30,6 @@ import com.zera.android.view.components.overlays.BottomSheet
 import com.zera.android.view.components.scaffolds.EmployeeScaffold
 import com.zera.android.view.components.scaffolds.ManagerScaffold
 import com.zera.android.view.components.texts.BodyText
-import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.components.texts.TitleText
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.theme.Spacing
@@ -84,10 +83,6 @@ fun ScheduledDisposalsScreen(
             )
         }
 
-        state.errorMessage?.let { message ->
-            CaptionText(text = message, color = MaterialTheme.colorScheme.error)
-        }
-
         // Só a região da lista alterna: busca e filtros ficam reais, senão o campo perderia o foco
         // quando uma busca (que reativa isLoading) recarrega a lista.
         if (state.isLoading) {
@@ -100,7 +95,9 @@ fun ScheduledDisposalsScreen(
                 modifier = Modifier.weight(1f),
                 onEndReached = viewModel::loadNextPage,
                 isLoadingMore = state.isLoadingMore,
-                emptyContent = { BodyText(text = "Nenhum descarte") },
+                emptyContent = {
+                    if (!state.loadFailed) BodyText(text = "Nenhum descarte")
+                },
             )
         }
     }
@@ -166,6 +163,10 @@ fun ScheduledDisposalsScreen(
                 )
             }
         }
+    }
+
+    state.errorMessage?.let { message ->
+        ErrorFeedbackPopup(description = message, onDismissRequest = viewModel::onErrorDismiss)
     }
 }
 

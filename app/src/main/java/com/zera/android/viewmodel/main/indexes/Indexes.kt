@@ -7,6 +7,8 @@ import com.zera.android.model.usecase.inventory.GetIndicators
 import com.zera.android.view.components.graphs.BarGraphItem
 import com.zera.android.view.components.graphs.VerticalBarGraphItem
 import com.zera.android.viewmodel.ZeraViewModel
+import com.zera.android.viewmodel.errorDescription
+import com.zera.android.viewmodel.loadErrorDescription
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
@@ -27,6 +29,8 @@ data class IndexesState(
     val residuesByCategory: List<BarGraphItem> = emptyList(),
     val itemsByCategory: List<BarGraphItem> = emptyList(),
     val isLoading: Boolean = true,
+    /** A última carga falhou: os gráficos vazios não mostram "Nenhum item ativo". */
+    val loadFailed: Boolean = false,
     val errorMessage: String? = null,
 ) {
     companion object {
@@ -45,6 +49,10 @@ class IndexesViewModel : ZeraViewModel() {
 
     init {
         loadIndexes()
+    }
+
+    fun onErrorDismiss() {
+        _state.value = _state.value.copy(errorMessage = null)
     }
 
     fun onFilterChange(filter: String) {
@@ -85,12 +93,16 @@ class IndexesViewModel : ZeraViewModel() {
                             percentage = (category.percent / 100.0).toFloat().coerceIn(0f, 1f),
                         )
                     },
+                    loadFailed = false,
                     errorMessage = null,
                 )
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                _state.value = _state.value.copy(errorMessage = e.message)
+                _state.value = _state.value.copy(
+                    loadFailed = true,
+                    errorMessage = errorDescription(e, loadErrorDescription("os índices")),
+                )
             } finally {
                 _state.value = _state.value.copy(isLoading = false)
             }

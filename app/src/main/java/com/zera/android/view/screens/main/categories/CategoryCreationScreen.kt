@@ -21,10 +21,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zera.android.view.components.buttons.ZeraButton
 import com.zera.android.view.components.buttons.ZeraButtonType
+import com.zera.android.view.components.feedback.ErrorFeedbackPopup
 import com.zera.android.view.components.inputs.ZeraTextInput
 import com.zera.android.view.components.navigation.UpperNavBar
 import com.zera.android.view.components.texts.BodyText
-import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
 import com.zera.android.viewmodel.main.categories.CategoryCreationViewModel
@@ -85,15 +85,14 @@ fun CategoryCreationScreen(
                 text = "Preencha os dados da categoria para usá-la no cadastro de modelos",
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            state.errorMessage?.let { message ->
-                CaptionText(text = message, color = MaterialTheme.colorScheme.error)
-            }
             ZeraTextInput(
                 value = state.name,
                 onValueChange = viewModel::onNameChange,
                 label = "Categoria",
                 placeholder = "Nome da categoria",
                 imeAction = ImeAction.Next,
+                isError = state.nameError != null,
+                errorMessage = state.nameError,
             )
             ZeraTextInput(
                 value = state.description,
@@ -103,6 +102,10 @@ fun CategoryCreationScreen(
                 imeAction = ImeAction.Done,
             )
         }
+    }
+
+    state.errorMessage?.let { message ->
+        ErrorFeedbackPopup(description = message, onDismissRequest = viewModel::onErrorDismiss)
     }
 }
 

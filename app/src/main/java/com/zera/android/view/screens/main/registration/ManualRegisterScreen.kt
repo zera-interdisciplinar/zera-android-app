@@ -24,6 +24,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zera.android.view.components.buttons.IconButton
 import com.zera.android.view.components.buttons.ZeraButton
 import com.zera.android.view.components.buttons.ZeraButtonType
+import com.zera.android.view.components.feedback.ErrorFeedbackPopup
 import com.zera.android.view.components.inputs.ZeraDateInput
 import com.zera.android.view.components.inputs.ZeraDropdownInput
 import com.zera.android.view.components.inputs.ZeraInputType
@@ -32,7 +33,6 @@ import com.zera.android.view.components.inputs.ZeraSliderInput
 import com.zera.android.view.components.inputs.ZeraTextInput
 import com.zera.android.view.components.navigation.UpperNavBar
 import com.zera.android.view.components.texts.BodyText
-import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
 import com.zera.android.view.theme.icons.ZeraIcon
@@ -81,9 +81,6 @@ fun ManualRegisterScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(Spacing.small),
             ) {
-                state.submitError?.let { message ->
-                    CaptionText(text = message, color = MaterialTheme.colorScheme.error)
-                }
                 ZeraButton(
                     text = if (state.isSubmitting) "Cadastrando…" else "Concluir Cadastro",
                     onClick = {
@@ -151,8 +148,6 @@ fun ManualRegisterScreen(
                         else -> "Selecione o modelo"
                     },
                     enabled = !state.isLoading && state.modelOptions.isNotEmpty(),
-                    isError = state.modelsError != null,
-                    errorMessage = state.modelsError,
                 )
                 IconButton(
                     icon = ZeraIcon.Plus,
@@ -209,6 +204,10 @@ fun ManualRegisterScreen(
                 imeAction = ImeAction.Done,
             )
         }
+    }
+
+    (state.submitError ?: state.modelsError)?.let { message ->
+        ErrorFeedbackPopup(description = message, onDismissRequest = viewModel::onErrorDismiss)
     }
 }
 

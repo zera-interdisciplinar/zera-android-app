@@ -10,6 +10,9 @@ import com.zera.android.model.usecase.inventory.SubmitItem
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.viewmodel.ZeraViewModel
+import com.zera.android.viewmodel.appMessageOrFallback
+import com.zera.android.viewmodel.errorDescription
+import com.zera.android.viewmodel.loadErrorDescription
 import com.zera.android.viewmodel.main.items.ItemDetailsViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
@@ -140,6 +143,10 @@ class ManualRegisterViewModel(
         startWork { submit(_state.value) }
     }
 
+    fun onErrorDismiss() {
+        _state.value = _state.value.copy(submitError = null, modelsError = null)
+    }
+
     fun onCancelClick() {
         ZeraNavigator.goBack()
     }
@@ -156,7 +163,7 @@ class ManualRegisterViewModel(
                 modelOptions = fallback,
                 selectedModelId = null,
                 isLoading = false,
-                modelsError = error.message ?: "Falha ao carregar modelos",
+                modelsError = errorDescription(error, loadErrorDescription("os modelos")),
             )
         }
     }
@@ -233,11 +240,12 @@ class ManualRegisterViewModel(
         } catch (error: CancellationException) {
             throw error
         } catch (error: Exception) {
-            failSubmit(error.message ?: "Falha ao cadastrar item")
+            failSubmit(appMessageOrFallback(error, "Não conseguimos cadastrar o item. Tente novamente."))
         }
     }
 
-    private fun failSubmit(message: String) {
+    /** [message] é `null` quando a falha foi de conexão: a tela cheia de conexão já aparece. */
+    private fun failSubmit(message: String?) {
         _state.value = _state.value.copy(isSubmitting = false, submitError = message)
     }
 

@@ -42,7 +42,7 @@ class ItensMappingTest {
     }
 
     @Test
-    fun noSelectedFiltersRequestsAllItems() {
+    fun noSelectedFiltersRequestsDefaultStatuses() {
         val queries = ItensViewModel.queriesFor(
             selectedStatuses = emptyList(),
             selectedCategories = emptyList(),
@@ -50,7 +50,15 @@ class ItensMappingTest {
             categories = emptyList(),
         )
 
-        assertEquals(listOf(ItemsQuery()), queries)
+        assertEquals(
+            listOf(
+                ItemsQuery(status = "PENDING_APPROVAL"),
+                ItemsQuery(status = "IN_STOCK"),
+                ItemsQuery(status = "IN_MAINTENANCE"),
+                ItemsQuery(status = "AWAITING_EVALUATION"),
+            ),
+            queries,
+        )
     }
 
     @Test
@@ -85,7 +93,15 @@ class ItensMappingTest {
             categories = listOf(CategoryResponseDTO(id = "c1", name = "Informática")),
         )
 
-        assertEquals(listOf(ItemsQuery(categoryId = "c1")), queries)
+        assertEquals(
+            listOf(
+                ItemsQuery(status = "PENDING_APPROVAL", categoryId = "c1"),
+                ItemsQuery(status = "IN_STOCK", categoryId = "c1"),
+                ItemsQuery(status = "IN_MAINTENANCE", categoryId = "c1"),
+                ItemsQuery(status = "AWAITING_EVALUATION", categoryId = "c1"),
+            ),
+            queries,
+        )
     }
 
     @Test

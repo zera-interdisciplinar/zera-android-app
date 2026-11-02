@@ -8,6 +8,8 @@ import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.view.transition.ScreenAnimation
 import com.zera.android.viewmodel.ZeraViewModel
+import com.zera.android.viewmodel.errorDescription
+import com.zera.android.viewmodel.loadErrorDescription
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import java.time.Instant
@@ -49,13 +51,17 @@ class ChatConversationsViewModel(
                 )
             } catch (error: CancellationException) {
                 throw error
-            } catch (_: Exception) {
+            } catch (error: Exception) {
                 _state.value = _state.value.copy(
                     isLoading = false,
-                    errorMessage = "Não foi possível carregar as conversas.",
+                    errorMessage = errorDescription(error, loadErrorDescription("as conversas")),
                 )
             }
         }
+    }
+
+    fun onErrorDismiss() {
+        _state.value = _state.value.copy(errorMessage = null)
     }
 
     fun onConversationClick(threadId: String) {

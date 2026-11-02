@@ -2,6 +2,7 @@ package com.zera.android.viewmodel.auth.passwordRecovery
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
+import com.zera.android.model.remote.client.isConnectionError
 import com.zera.android.model.usecase.auth.RequestPasswordReset
 import com.zera.android.viewmodel.ZeraViewModel
 import kotlinx.coroutines.CancellationException
@@ -50,7 +51,9 @@ class PasswordRecoveryEmailViewModel : ZeraViewModel() {
         }
     }
 
-    private fun userFacingError(error: Exception): String {
+    /** Mensagem inline; `null` quando é falta de conexão (a tela cheia já aparece). */
+    private fun userFacingError(error: Exception): String? {
+        if (error.isConnectionError()) return null
         if (error is HttpException && error.code() == 400) return "Informe um e-mail válido."
         return "Não foi possível enviar o e-mail. Tente novamente."
     }

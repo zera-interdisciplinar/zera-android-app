@@ -2,6 +2,7 @@ package com.zera.android.viewmodel.main.items
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
+import com.zera.android.model.remote.client.isConnectionError
 import com.zera.android.model.dto.inventory.ItemResponseDTO
 import com.zera.android.model.dto.inventory.UpdateItemRequestDTO
 import com.zera.android.model.usecase.auth.GetSelfUser
@@ -16,6 +17,8 @@ import com.zera.android.view.media.PhotoCapture
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.viewmodel.ZeraViewModel
+import com.zera.android.viewmodel.errorDescription
+import com.zera.android.viewmodel.loadErrorDescription
 import com.zera.android.view.components.navigation.SideBarItem
 import com.zera.android.viewmodel.isEmployeeRole
 import com.zera.android.viewmodel.sideBarItemsFor
@@ -106,7 +109,10 @@ class ItemDetailsViewModel : ZeraViewModel() {
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                _state.value = _state.value.copy(isLoading = false, errorMessage = e.message)
+                _state.value = _state.value.copy(
+                    isLoading = false,
+                    errorMessage = errorDescription(e, loadErrorDescription("o item")),
+                )
             }
         }
     }
@@ -145,7 +151,7 @@ class ItemDetailsViewModel : ZeraViewModel() {
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
                     isUploadingPhoto = false,
-                    errorMessage = ProfileViewModel.photoWriteError(e),
+                    errorMessage = errorDescription(e, ProfileViewModel.photoWriteError(e)),
                 )
             }
         }
@@ -154,6 +160,10 @@ class ItemDetailsViewModel : ZeraViewModel() {
     fun onPhotoInspect() {
         if (_state.value.photoUrl == null) return
         _state.value = _state.value.copy(showPhotoViewer = true)
+    }
+
+    fun onErrorDismiss() {
+        _state.value = _state.value.copy(errorMessage = null)
     }
 
     fun onPhotoViewerDismiss() {
@@ -547,22 +557,24 @@ class ItemDetailsViewModel : ZeraViewModel() {
             sideBarItems = sideBarItemsFor(isEmployee),
         )
 
+        /** Descrição do popup para a falha de uma ação no item; `null` quando é falta de conexão. */
         internal fun userFacingError(
             error: Exception,
             conflictMessage: String,
             validationMessage: String,
             fallback: String,
-        ): String {
+        ): String? {
+            if (error.isConnectionError()) return null
             if (error is HttpException) {
                 return when (error.code()) {
                     400 -> validationMessage
                     403 -> "Você não tem permissão para esta ação."
                     404 -> "Item não encontrado."
                     409 -> conflictMessage
-                    else -> error.message?.takeIf { it.isNotBlank() } ?: fallback
+                    else -> fallback
                 }
             }
-            return error.message?.takeIf { it.isNotBlank() } ?: fallback
+            return fallback
         }
     }
 }

@@ -9,6 +9,8 @@ import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.view.transition.ScreenAnimation
 import com.zera.android.viewmodel.ZeraViewModel
+import com.zera.android.viewmodel.errorDescription
+import com.zera.android.viewmodel.loadErrorDescription
 import com.zera.android.viewmodel.main.items.ItensViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
@@ -20,6 +22,8 @@ data class ItensSelectionState(
     val selectedValues: Set<String> = emptySet(),
     val isLoading: Boolean = true,
     val isLoadingMore: Boolean = false,
+    /** A última carga falhou: a lista vazia não mostra "Nenhuma opção disponível". */
+    val loadFailed: Boolean = false,
     val errorMessage: String? = null,
 ) {
     val canChooseDate: Boolean
@@ -72,6 +76,10 @@ class ItensSelectionViewModel : ZeraViewModel() {
         this.openingHourLabels = openingHourLabels
         this.recyclingBusinessId = recyclingBusinessId
         this.contactEmail = contactEmail
+    }
+
+    fun onErrorDismiss() {
+        _state.value = _state.value.copy(errorMessage = null)
     }
 
     fun onSearchQueryChange(value: String) {
@@ -155,6 +163,7 @@ class ItensSelectionViewModel : ZeraViewModel() {
                     options = options,
                     isLoading = false,
                     isLoadingMore = false,
+                    loadFailed = false,
                     errorMessage = null,
                 )
             } catch (e: CancellationException) {
@@ -163,7 +172,8 @@ class ItensSelectionViewModel : ZeraViewModel() {
                 _state.value = _state.value.copy(
                     isLoading = false,
                     isLoadingMore = false,
-                    errorMessage = e.message,
+                    loadFailed = true,
+                    errorMessage = errorDescription(e, loadErrorDescription("os itens")),
                 )
             }
         }

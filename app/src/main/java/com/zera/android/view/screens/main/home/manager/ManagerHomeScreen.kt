@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zera.android.view.components.cards.ShortcutCard
 import com.zera.android.view.components.cards.StockOccupationCard
+import com.zera.android.view.components.feedback.ErrorFeedbackPopup
 import com.zera.android.view.components.layouts.AdaptiveRow
 import com.zera.android.view.components.lists.NotificationItem
 import com.zera.android.view.components.lists.NotificationList
@@ -60,14 +61,6 @@ fun ManagerHomeScreen(
             Column(modifier = Modifier.padding(horizontal = Spacing.small)) {
                 BodyText(text = state.userName, bold = true)
                 CaptionText(text = state.userRole)
-            }
-
-            state.errorMessage?.let { message ->
-                CaptionText(
-                    text = message,
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.padding(horizontal = Spacing.small),
-                )
             }
 
             StockOccupationCard(itemCount = state.stockItemCount, occupation = state.stockOccupation)
@@ -151,8 +144,15 @@ fun ManagerHomeScreen(
                 },
                 contentPadding = PaddingValues(Spacing.none),
                 modifier = Modifier.heightIn(max = 600.dp),
+                emptyContent = {
+                    if (!state.inventoryLoadFailed) BodyText(text = "Nenhum produto encontrado")
+                },
             )
         }
+    }
+
+    state.errorMessage?.let { message ->
+        ErrorFeedbackPopup(description = message, onDismissRequest = viewModel::onErrorDismiss)
     }
 }
 

@@ -13,6 +13,9 @@ import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.view.transition.ScreenAnimation
 import com.zera.android.viewmodel.ZeraViewModel
+import com.zera.android.viewmodel.appMessageOrFallback
+import com.zera.android.viewmodel.errorDescription
+import com.zera.android.viewmodel.loadErrorDescription
 import com.zera.android.view.components.navigation.SideBarItem
 import com.zera.android.viewmodel.canCancelDisposal
 import com.zera.android.viewmodel.isEmployeeRole
@@ -78,12 +81,19 @@ class SchedulingDetailsViewModel : ZeraViewModel() {
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                _state.value = _state.value.copy(isLoading = false, errorMessage = e.message)
+                _state.value = _state.value.copy(
+                    isLoading = false,
+                    errorMessage = errorDescription(e, loadErrorDescription("o descarte")),
+                )
             }
         }
         viewModelScope.launch {
             lookupReport(scheduleId)
         }
+    }
+
+    fun onErrorDismiss() {
+        _state.value = _state.value.copy(errorMessage = null)
     }
 
     fun onItemsClick() {
@@ -119,7 +129,7 @@ class SchedulingDetailsViewModel : ZeraViewModel() {
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
                     isGeneratingReport = false,
-                    errorMessage = e.message ?: "Não foi possível gerar o relatório.",
+                    errorMessage = appMessageOrFallback(e, "Não foi possível gerar o relatório."),
                 )
             }
         }
@@ -191,13 +201,14 @@ class SchedulingDetailsViewModel : ZeraViewModel() {
         )
     }
 
-    private fun cancelError(error: Exception): String {
+    /** Descrição do popup para a falha ao cancelar; `null` quando é falta de conexão. */
+    private fun cancelError(error: Exception): String? {
         if (error is HttpException && error.code() == 403) {
             return "Só o gestor pode cancelar um descarte."
         }
         if (error is HttpException && error.code() == 409) {
             return "Esse descarte já foi cancelado."
         }
-        return error.message ?: "Não foi possível cancelar o descarte."
+        return appMessageOrFallback(error, "Não foi possível cancelar o descarte.")
     }
 }

@@ -11,6 +11,8 @@ import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.view.transition.ScreenAnimation
 import com.zera.android.viewmodel.ZeraViewModel
+import com.zera.android.viewmodel.errorDescription
+import com.zera.android.viewmodel.loadErrorDescription
 import com.zera.android.viewmodel.isEmployeeRole
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
@@ -24,6 +26,8 @@ data class ScheduledDisposalsState(
     val disposals: List<OptionItem> = emptyList(),
     val isLoading: Boolean = true,
     val isLoadingMore: Boolean = false,
+    /** A última carga falhou: a lista vazia não mostra "Nenhum descarte". */
+    val loadFailed: Boolean = false,
     val errorMessage: String? = null,
     val searchQuery: String = "",
     val selectedDestinations: List<String> = emptyList(),
@@ -63,6 +67,10 @@ class ScheduledDisposalsViewModel : ZeraViewModel() {
             Route.SchedulingDetails(scheduleId = id),
             animation = ScreenAnimation.SlideHorizontal,
         )
+    }
+
+    fun onErrorDismiss() {
+        _state.value = _state.value.copy(errorMessage = null)
     }
 
     fun onSearchQueryChange(query: String) {
@@ -147,7 +155,8 @@ class ScheduledDisposalsViewModel : ZeraViewModel() {
                 _state.value = _state.value.copy(
                     isLoading = false,
                     isLoadingMore = false,
-                    errorMessage = e.message,
+                    loadFailed = true,
+                    errorMessage = errorDescription(e, loadErrorDescription("os descartes")),
                 )
             }
         }
@@ -161,6 +170,7 @@ class ScheduledDisposalsViewModel : ZeraViewModel() {
         _state.value = _state.value.copy(
             isLoading = false,
             isLoadingMore = false,
+            loadFailed = false,
             errorMessage = null,
             disposals = items.map { disposal ->
                 OptionItem(

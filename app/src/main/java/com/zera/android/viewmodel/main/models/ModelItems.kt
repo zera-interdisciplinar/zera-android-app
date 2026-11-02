@@ -26,6 +26,10 @@ class ModelItemsViewModel(
     private val _state = mutableStateOf(ModelItemsState())
     val state = _state
 
+    fun onErrorDismiss() {
+        _state.value = _state.value.copy(errorMessage = null)
+    }
+
     fun onSearchQueryChange(query: String) {
         _state.value = _state.value.copy(searchQuery = query)
     }

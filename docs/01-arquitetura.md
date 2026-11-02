@@ -112,6 +112,24 @@ O `NavHost` usa `of(targetState)` em `enterTransition`/`exitTransition` e `of(in
 
 O app usa `SharedTransitionLayout` (API experimental do Compose) para animar elementos compartilhados entre telas (hoje, o logo e a `ManagerBottomNavBar` — ver [view/transition/SharedElement.kt](../app/src/main/java/com/zera/android/view/transition/SharedElement.kt)); os escopos necessários (`LocalSharedTransitionScope`, `LocalAnimatedVisibilityScope`) são providos em `ZeraNavHost` e consumidos pelo modifier `Modifier.sharedTransition(key)`. Uma tela só participa de um shared element se o seu `composable<>` estiver envolvido em `CompositionLocalProvider(LocalAnimatedVisibilityScope provides this)`; hoje isso vale para as telas de auth (`Splash`, `Welcome`, `SignIn`, `SignUp`) e para as quatro telas do `ManagerScaffold` (`ManagerHome`, `Employees`, `Indexes`, `Itens`).
 
+## Tratamento de erros
+
+Falha de rede e falha de uma chamada são tratadas de formas diferentes. A regra completa e os cenários estão em [07-especificacoes/telas-de-erro.md](07-especificacoes/telas-de-erro.md).
+
+| Situação | Como o usuário vê |
+|---|---|
+| Sem conexão (`UnknownHostException`, `ConnectException`, `SocketTimeoutException`), na abertura ou durante o uso | Tela cheia `ConnectionError`, uma vez só |
+| Falha no boot (5xx ou configuração inválida) | Tela cheia `FatalError`, que fecha o app |
+| Falha ao carregar ou enviar (400, 409, 422, 5xx) | `ErrorFeedbackPopup` ("Algo deu errado" + descrição simples) |
+| Validação de campo, login, cadastro e recuperação de senha | Inline, embaixo do campo ou do formulário |
+
+- **Detecção de conexão:** `Throwable.isConnectionError()` (`model/remote/client/util.kt`) olha também as causas da exceção. `ConnectionErrorInterceptor` está em todos os clients HTTP (`AdmCoreClient` principal e de refresh, `InventoryClient`, `AiClient`, `ScrapyClient`, `SupabaseStorage`): ao falhar por conexão libera a navegação (`navigationStatus(true)`), faz `push(Route.ConnectionError())` e relança a exceção, para o `catch` de cada tela continuar rodando. `ConnectionErrorGate` garante uma tela só mesmo com várias chamadas falhando juntas; a trava é liberada no `onCleared` da `ConnectionErrorViewModel`.
+- **Splash:** `SplashViewModel` suprime o interceptor (`gate.suppress(true)`) enquanto roda o boot e o restore, e navega ela mesma para `ConnectionError(fromBoot = true)` ou `FatalError`. Falha de conexão ao restaurar a sessão não apaga o login salvo; só 401/403 apagam.
+- **`ConnectionError`:** "Tentar novamente" checa a conexão antes de sair (`NetworkStatus.isOnline`, permissão `ACCESS_NETWORK_STATE`). Online, volta para a Splash (`fromBoot = true`) ou para a tela anterior (`fromBoot = false`); offline, a tela continua. O voltar do sistema faz o mesmo quando `fromBoot = false`.
+- **Nos `ViewModel`s:** o `catch` guarda no `State` uma descrição escrita para o usuário, nunca `e.message`. Os helpers estão em `viewmodel/ErrorDescription.kt`: `errorDescription(error, texto)` devolve `null` para falta de conexão (a tela cheia já aparece, sem popup), `loadErrorDescription("os itens")` monta o texto padrão de carga e `appMessageOrFallback(error, texto)` mantém só as mensagens que os casos de uso escrevem para o usuário (`IllegalStateException`/`IllegalArgumentException`). Cada `ViewModel` expõe `onErrorDismiss()`, que limpa o erro, e a tela compõe `state.errorMessage?.let { ErrorFeedbackPopup(...) }`.
+- **Listas:** quando a carga falha, a lista fica vazia sem o texto "Nenhum ... encontrado" (campo `loadFailed` no `State`), e não há botão de tentar de novo. A paginação (`LoadMoreEffect`) só pede a próxima página quando o usuário chega ao fim, então uma página que falhou não entra em loop.
+- **Fora do que foi feito:** handler de crash (`Thread.setDefaultUncaughtExceptionHandler`) reabrindo em `FatalError`, e o mapa de recicladoras próximas e a bolha de erro do chat, que mantêm o feedback próprio.
+
 ## Concorrência (coroutines)
 
 `ViewModels` usam `viewModelScope.launch` para chamadas suspensas (rede). Não há uso de `Flow`/`StateFlow` para estado reativo — só para o canal de comandos de navegação (`ZeraNavigator.commands`). Não há dispatchers customizados explícitos; as chamadas Retrofit (`suspend fun`) já fazem I/O fora da main thread pelo próprio Retrofit/OkHttp.

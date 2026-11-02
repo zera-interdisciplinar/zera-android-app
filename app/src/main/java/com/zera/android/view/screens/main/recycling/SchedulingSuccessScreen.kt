@@ -17,8 +17,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zera.android.view.components.buttons.ZeraButton
 import com.zera.android.view.components.buttons.ZeraButtonType
 import com.zera.android.view.components.cards.SchedulingSummaryCard
+import com.zera.android.view.components.feedback.ErrorFeedbackPopup
 import com.zera.android.view.components.layouts.SuccessScreenLayout
-import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.components.texts.TitleText
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraColorFamily
@@ -108,12 +108,13 @@ fun SchedulingSuccessScreen(
                         modifier = Modifier.weight(1f),
                     )
                 }
-                state.errorMessage?.let { message ->
-                    CaptionText(text = message, color = ZeraColorFamily.Yellow.palette().base)
-                }
             }
         },
     )
+
+    state.errorMessage?.let { message ->
+        ErrorFeedbackPopup(description = message, onDismissRequest = viewModel::onErrorDismiss)
+    }
 }
 
 @Composable

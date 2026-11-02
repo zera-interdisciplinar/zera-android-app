@@ -26,6 +26,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zera.android.view.components.buttons.ZeraButton
 import com.zera.android.view.components.buttons.ZeraButtonType
+import com.zera.android.view.components.feedback.ErrorFeedbackPopup
 import com.zera.android.view.components.outros.ScanArea
 import com.zera.android.view.components.scaffolds.EmployeeScaffold
 import com.zera.android.view.components.texts.SubtitleText
@@ -96,7 +97,6 @@ fun ScanScreen(
             },
             statusText = when {
                 state.isLookingUp -> "Buscando…"
-                state.lookupError != null -> state.lookupError.orEmpty()
                 state.scannedCode != null -> "Código lido: ${state.scannedCode}"
                 else -> "Leitura automática ativada"
             },
@@ -125,6 +125,10 @@ fun ScanScreen(
         }
 
         Spacer(modifier = Modifier.height(Spacing.large))
+    }
+
+    state.lookupError?.let { message ->
+        ErrorFeedbackPopup(description = message, onDismissRequest = viewModel::onErrorDismiss)
     }
 }
 

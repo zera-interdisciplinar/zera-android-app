@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.zera.android.view.components.feedback.ErrorFeedbackPopup
 import com.zera.android.view.components.graphs.BarGraphItem
 import com.zera.android.view.components.graphs.CircularGraph
 import com.zera.android.view.components.graphs.HorizontalBarGraph
@@ -56,10 +57,6 @@ fun IndexesScreen(
         currentRoute = Route.Indexes,
     ) {
         SubtitleText(text = "Acompanhe desempenho e impacto")
-
-        state.errorMessage?.let { message ->
-            CaptionText(text = message, color = MaterialTheme.colorScheme.error)
-        }
 
         // Os filtros ficam na tela: a troca reativa isLoading e o skeleton volta nos gráficos, e
         // durante o carregamento eles ficam desabilitados para não disparar cargas concorrentes.
@@ -136,9 +133,15 @@ fun IndexesScreen(
             )
             HorizontalBarGraph(
                 items = state.itemsByCategory,
-                emptyContent = { BodyText(text = "Nenhum item ativo") },
+                emptyContent = {
+                    if (!state.loadFailed) BodyText(text = "Nenhum item ativo")
+                },
             )
         }
+    }
+
+    state.errorMessage?.let { message ->
+        ErrorFeedbackPopup(description = message, onDismissRequest = viewModel::onErrorDismiss)
     }
 }
 
