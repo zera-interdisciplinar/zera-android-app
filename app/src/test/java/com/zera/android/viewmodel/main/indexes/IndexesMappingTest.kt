@@ -16,10 +16,9 @@ class IndexesMappingTest {
     }
 
     @Test
-    fun allAndCategoryOmitPeriod() {
+    fun allOmitsPeriod() {
         val today = LocalDate.of(2026, 9, 26)
         assertEquals(null to null, IndexesViewModel.periodFor(IndexesState.FILTER_ALL, today))
-        assertEquals(null to null, IndexesViewModel.periodFor(IndexesState.FILTER_CATEGORY, today))
     }
 
     @Test

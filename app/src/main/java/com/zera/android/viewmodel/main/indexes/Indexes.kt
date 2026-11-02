@@ -19,7 +19,7 @@ import java.util.Locale
 import kotlin.math.abs
 
 data class IndexesState(
-    val periodFilters: List<String> = listOf(FILTER_ALL, FILTER_THIS_MONTH, FILTER_CATEGORY),
+    val periodFilters: List<String> = listOf(FILTER_ALL, FILTER_THIS_MONTH),
     val selectedFilter: String = FILTER_ALL,
     val recyclingRateLabel: String = "",
     val recyclingRateDeltaLabel: String = "",
@@ -36,7 +36,6 @@ data class IndexesState(
     companion object {
         const val FILTER_ALL = "Todos"
         const val FILTER_THIS_MONTH = "Este mês"
-        const val FILTER_CATEGORY = "Categoria"
     }
 }
 

@@ -102,7 +102,6 @@ fun IndexesScreen(
                     }
                     CircularGraph(
                         progress = { state.recyclingRateProgress },
-                        label = "Meta",
                         color = greenPalette.base,
                     )
                 }
