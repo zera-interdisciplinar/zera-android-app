@@ -6,8 +6,10 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -16,15 +18,16 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zera.android.view.components.buttons.ZeraButton
 import com.zera.android.view.components.cards.InviteCard
 import com.zera.android.view.components.containers.ZeraBox
 import com.zera.android.view.components.feedback.ErrorFeedbackPopup
+import com.zera.android.view.components.forms.CreateInviteForm
 import com.zera.android.view.components.lists.EmployeeItem
 import com.zera.android.view.components.lists.EmployeeList
 import com.zera.android.view.components.loading.SkeletonBox
+import com.zera.android.view.components.overlays.BottomSheet
 import com.zera.android.view.components.scaffolds.ManagerScaffold
 import com.zera.android.view.components.texts.BodyText
 import com.zera.android.view.components.texts.HeadlineText
@@ -45,17 +48,13 @@ private val SkeletonSummaryCardHeight = 88.dp
 private val SkeletonEmployeeItemHeight = 72.dp
 private const val SkeletonEmployeeCount = 4
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EmployeesScreen(
     viewModel: EmployeesViewModel = viewModel(),
 ) {
     val state by viewModel.state
     val clipboardManager = LocalClipboardManager.current
-
-    LifecycleResumeEffect(Unit) {
-        viewModel.onResume()
-        onPauseOrDispose { }
-    }
 
     ManagerScaffold(
         title = "Colaboradores",
@@ -118,6 +117,21 @@ fun EmployeesScreen(
                 emptyContent = {
                     if (!state.employeesLoadFailed) BodyText(text = "Nenhum colaborador encontrado")
                 },
+            )
+        }
+    }
+
+    state.inviteDraft?.let { draft ->
+        BottomSheet(
+            onDismissRequest = viewModel::onInviteDismiss,
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        ) {
+            CreateInviteForm(
+                name = draft.name,
+                onNameChange = viewModel::onInviteNameChange,
+                onSubmit = viewModel::onCreateInviteClick,
+                nameError = draft.nameError,
+                isSubmitting = state.isSubmitting,
             )
         }
     }

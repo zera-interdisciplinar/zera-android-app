@@ -5,7 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.zera.android.model.entity.team.PendingInvite
 import com.zera.android.model.entity.team.TeamEmployee
 import com.zera.android.model.entity.user.UserRole
+import com.zera.android.model.remote.client.isConnectionError
 import com.zera.android.model.usecase.team.CountActiveEmployees
+import com.zera.android.model.usecase.team.CreateInvitation
 import com.zera.android.model.usecase.team.ListPendingInvitations
 import com.zera.android.model.usecase.team.ListTeamEmployees
 import com.zera.android.view.components.lists.EmployeeItem
@@ -17,6 +19,7 @@ import com.zera.android.viewmodel.errorDescription
 import com.zera.android.viewmodel.loadErrorDescription
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
@@ -24,6 +27,11 @@ data class PendingInviteCard(
     val code: String,
     val inviteeName: String,
     val expiresInHours: Int,
+)
+
+data class InviteDraft(
+    val name: String = "",
+    val nameError: String? = null,
 )
 
 data class EmployeesState(
@@ -35,6 +43,9 @@ data class EmployeesState(
     val isLoadingInvites: Boolean = true,
     /** A carga da lista falhou: a lista vazia não mostra "Nenhum colaborador encontrado". */
     val employeesLoadFailed: Boolean = false,
+    /** Rascunho do bottom sheet "Criar convite"; `null` = sheet fechado. */
+    val inviteDraft: InviteDraft? = null,
+    val isSubmitting: Boolean = false,
     val errorMessage: String? = null,
 ) {
     /**
@@ -49,8 +60,8 @@ class EmployeesViewModel : ZeraViewModel() {
     private val countActiveEmployees = CountActiveEmployees()
     private val listTeamEmployees = ListTeamEmployees()
     private val listPendingInvitations = ListPendingInvitations()
+    private val createInvitation = CreateInvitation()
 
-    private var refreshInvitesOnResume = false
     private var loadedEmployees: List<TeamEmployee> = emptyList()
     private var loadedInvites: List<PendingInvite> = emptyList()
 
@@ -135,15 +146,43 @@ class EmployeesViewModel : ZeraViewModel() {
     }
 
     fun onInviteClick() {
-        refreshInvitesOnResume = true
-        ZeraNavigator.push(Route.EmployeeRegister, ScreenAnimation.SlideHorizontal)
+        _state.value = _state.value.copy(inviteDraft = InviteDraft())
     }
 
-    /** Chamado quando a tela volta a ficar visível; só recarrega após ir criar um convite. */
-    fun onResume() {
-        if (!refreshInvitesOnResume) return
-        refreshInvitesOnResume = false
-        viewModelScope.launch { loadPendingInvites() }
+    fun onInviteDismiss() {
+        if (_state.value.isSubmitting) return
+        _state.value = _state.value.copy(inviteDraft = null)
+    }
+
+    fun onInviteNameChange(value: String) {
+        val draft = _state.value.inviteDraft ?: return
+        _state.value = _state.value.copy(inviteDraft = draft.copy(name = value, nameError = null))
+    }
+
+    fun onCreateInviteClick() {
+        val current = _state.value
+        val draft = current.inviteDraft ?: return
+        if (current.isSubmitting) return
+        val nameError = inviteNameValidationError(draft.name)
+        if (nameError != null) {
+            _state.value = current.copy(inviteDraft = draft.copy(nameError = nameError))
+            return
+        }
+        _state.value = current.copy(isSubmitting = true, errorMessage = null)
+        viewModelScope.launch {
+            try {
+                createInvitation.execute(draft.name)
+                _state.value = _state.value.copy(isSubmitting = false, inviteDraft = null)
+                loadPendingInvites()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(
+                    isSubmitting = false,
+                    errorMessage = createInviteError(e),
+                )
+            }
+        }
     }
 
     fun onEmployeeClick(employee: EmployeeItem) {
@@ -154,6 +193,23 @@ class EmployeesViewModel : ZeraViewModel() {
 
     companion object {
         internal const val ROLE_OPERATOR = "Operador"
+
+        /** Descrição do popup para a falha ao criar o convite; `null` quando é falta de conexão. */
+        internal fun createInviteError(error: Exception): String? {
+            if (error.isConnectionError()) return null
+            if (error is HttpException) {
+                return when (error.code()) {
+                    400 -> "Nome inválido ou gestor não reconhecido."
+                    404 -> "Gestor não encontrado."
+                    401, 403 -> "Sem permissão para criar convite."
+                    else -> "Não foi possível criar o convite. Tente novamente."
+                }
+            }
+            return "Não foi possível criar o convite. Tente novamente."
+        }
+
+        internal fun inviteNameValidationError(value: String): String? =
+            if (value.isBlank()) "Informe o nome do convite." else null
 
         internal fun hoursUntil(
             expiresAt: String,

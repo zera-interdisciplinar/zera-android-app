@@ -35,7 +35,6 @@ import com.zera.android.view.screens.main.categories.CategoryCreationSuccessScre
 import com.zera.android.view.screens.main.chat.ChatBotScreen
 import com.zera.android.view.screens.main.chat.ChatConversationsScreen
 import com.zera.android.view.screens.main.employees.EmployeeDetailsScreen
-import com.zera.android.view.screens.main.employees.EmployeeRegisterScreen
 import com.zera.android.view.screens.main.employees.EmployeesScreen
 import com.zera.android.view.screens.main.helpCentral.HelpCentralHubScreen
 import com.zera.android.view.screens.main.helpCentral.HelpDocumentScreen
@@ -157,9 +156,6 @@ fun ZeraNavHost() {
                     CompositionLocalProvider(LocalAnimatedVisibilityScope provides this) {
                         EmployeesScreen()
                     }
-                }
-                composable<Route.EmployeeRegister> {
-                    EmployeeRegisterScreen()
                 }
                 composable<Route.EmployeeDetails> { backStackEntry ->
                     val route = backStackEntry.toRoute<Route.EmployeeDetails>()
