@@ -2,12 +2,10 @@ package com.zera.android.view.components.cards
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -17,21 +15,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zera.android.view.components.containers.ZeraBox
+import com.zera.android.view.components.graphs.PieGraph
 import com.zera.android.view.components.texts.BodyText
 import com.zera.android.view.components.texts.HeadlineText
 import com.zera.android.view.components.texts.LabelText
-import com.zera.android.view.components.texts.TitleText
 import com.zera.android.view.theme.Radius
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.view.theme.ZeraTheme
+import com.zera.android.view.theme.palette
 
-/** Diâmetro do círculo de porcentagem. */
+/** Diâmetro do gráfico de porcentagem. */
 private val OccupationCircleSize = 84.dp
+
+/** Opacidade da parte livre do gráfico, sobre o fundo do card. */
+private const val OccupationTrackAlpha = 0.25f
 
 /**
  * Card de destaque com a ocupação do estoque: itens ativos e capacidade total à esquerda
- * e a porcentagem de ocupação num círculo à direita.
+ * e a porcentagem de ocupação num [PieGraph] à direita.
  *
  * @param itemCount quantidade de itens ativos no estoque.
  * @param capacity capacidade total usada no cálculo da porcentagem; `null` quando a unidade
@@ -76,19 +78,14 @@ fun StockOccupationCard(
                     color = LocalContentColor.current,
                 )
             }
-            ZeraBox(
+            PieGraph(
+                progress = occupation,
+                label = "${(occupation * 100).toInt()}%",
+                color = ZeraColorFamily.Yellow.palette().base,
+                trackColor = LocalContentColor.current.copy(alpha = OccupationTrackAlpha),
+                labelColor = MaterialTheme.colorScheme.onPrimary,
                 modifier = Modifier.size(OccupationCircleSize),
-                style = ZeraColorFamily.Yellow,
-                shape = CircleShape,
-                contentPadding = PaddingValues(Spacing.none),
-            ) {
-                TitleText(
-                    text = "${(occupation * 100).toInt()}%",
-                    bold = true,
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier.align(Alignment.Center),
-                )
-            }
+            )
         }
     }
 }
