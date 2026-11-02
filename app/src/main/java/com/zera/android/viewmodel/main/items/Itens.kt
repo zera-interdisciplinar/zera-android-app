@@ -207,11 +207,12 @@ class ItensViewModel(
         )
 
         /**
-         * Status buscados quando nenhum filtro de status está marcado. `DRAFT` nunca aparece;
-         * `REJECTED` e `DISPOSED` só aparecem pelo filtro deles.
+         * Status buscados quando nenhum filtro de status está marcado: todos, menos `DRAFT`
+         * (nunca aparece) e `DISPOSED` (só aparece pelo filtro dele).
          */
         private val DEFAULT_STATUS_API_VALUES = listOf(
             "PENDING_APPROVAL",
+            "REJECTED",
             "IN_STOCK",
             "IN_MAINTENANCE",
             "AWAITING_EVALUATION",
