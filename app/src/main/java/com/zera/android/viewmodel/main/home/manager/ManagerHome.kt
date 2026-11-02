@@ -172,6 +172,10 @@ class ManagerHomeViewModel : ZeraViewModel() {
         ZeraNavigator.push(Route.Employees)
     }
 
+    fun onStockOccupationCardClick() {
+        ZeraNavigator.push(Route.Indexes)
+    }
+
     fun onSeeAllItemsClick() {
         ZeraNavigator.push(Route.Itens())
     }

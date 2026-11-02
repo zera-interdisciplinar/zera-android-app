@@ -1,5 +1,6 @@
 package com.zera.android.view.components.cards
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,6 +13,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zera.android.view.components.containers.ZeraBox
@@ -41,6 +43,7 @@ private const val OccupationTrackAlpha = 0.25f
  * @param occupation ocupação do estoque, de 0f a 1f. Exibida como porcentagem inteira.
  * @param modifier modificador externo opcional. O card já ocupa toda a largura
  *   disponível por padrão ([Modifier.fillMaxWidth]).
+ * @param onClick ação ao tocar no card. Quando `null` (padrão), o card não é clicável.
  */
 @Composable
 fun StockOccupationCard(
@@ -48,11 +51,17 @@ fun StockOccupationCard(
     capacity: Int?,
     occupation: Float,
     modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null,
 ) {
+    val shape = RoundedCornerShape(Radius.xLarge)
+
     ZeraBox(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .let { if (onClick != null) it.clickable(onClick = onClick) else it },
         style = ZeraColorFamily.Blue,
-        shape = RoundedCornerShape(Radius.xLarge),
+        shape = shape,
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),

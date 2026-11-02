@@ -73,6 +73,7 @@ fun ManagerHomeScreen(
                 itemCount = state.stockItemCount,
                 capacity = state.stockCapacity,
                 occupation = state.stockOccupation,
+                onClick = viewModel::onStockOccupationCardClick,
             )
 
             TitleText(
