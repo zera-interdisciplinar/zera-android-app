@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -21,6 +20,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zera.android.view.components.buttons.IconButton
 import com.zera.android.view.components.buttons.ZeraButton
 import com.zera.android.view.components.buttons.ZeraButtonType
+import com.zera.android.view.components.feedback.ErrorFeedbackPopup
 import com.zera.android.view.components.inputs.ZeraChipsGroup
 import com.zera.android.view.components.inputs.ZeraSearchInput
 import com.zera.android.view.components.lists.ProductList
@@ -28,7 +28,6 @@ import com.zera.android.view.components.outros.ItemStatus
 import com.zera.android.view.components.overlays.BottomSheet
 import com.zera.android.view.components.scaffolds.EmployeeScaffold
 import com.zera.android.view.components.scaffolds.ManagerScaffold
-import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.components.texts.TitleText
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
@@ -122,6 +121,10 @@ fun ModelItemsScreen(
             }
         }
     }
+
+    state.errorMessage?.let { message ->
+        ErrorFeedbackPopup(description = message, onDismissRequest = viewModel::onErrorDismiss)
+    }
 }
 
 @Composable
@@ -167,9 +170,6 @@ private fun ColumnScope.ModelItemsContent(
             onSelectedValuesChange = viewModel::onAppliedFilterChipsChange,
             selectMany = true,
         )
-    }
-    state.errorMessage?.let { message ->
-        CaptionText(text = message, color = MaterialTheme.colorScheme.error)
     }
     TitleText(text = state.totalItemsLabel, bold = true)
     ProductList(

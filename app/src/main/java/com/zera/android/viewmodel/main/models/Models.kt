@@ -11,7 +11,9 @@ import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.viewmodel.ZeraViewModel
+import com.zera.android.viewmodel.errorDescription
 import com.zera.android.viewmodel.isEmployeeRole
+import com.zera.android.viewmodel.loadErrorDescription
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -25,6 +27,8 @@ data class ModelsState(
     val models: List<OptionItem> = emptyList(),
     val isLoading: Boolean = true,
     val isLoadingMore: Boolean = false,
+    /** A última carga falhou: a lista vazia não mostra "Nenhum modelo encontrado". */
+    val loadFailed: Boolean = false,
     val errorMessage: String? = null,
     val isModelUsageSheetVisible: Boolean = false,
 )
@@ -70,6 +74,10 @@ class ModelsViewModel : ZeraViewModel() {
             return
         }
         loadModels(reset = false)
+    }
+
+    fun onErrorDismiss() {
+        _state.value = _state.value.copy(errorMessage = null)
     }
 
     fun onAddModelClick() {
@@ -140,6 +148,7 @@ class ModelsViewModel : ZeraViewModel() {
                     models = loadedModels.map(::optionFrom),
                     isLoading = false,
                     isLoadingMore = false,
+                    loadFailed = false,
                     errorMessage = null,
                 )
             } catch (e: CancellationException) {
@@ -148,7 +157,8 @@ class ModelsViewModel : ZeraViewModel() {
                 _state.value = _state.value.copy(
                     isLoading = false,
                     isLoadingMore = false,
-                    errorMessage = e.message,
+                    loadFailed = true,
+                    errorMessage = errorDescription(e, loadErrorDescription("os modelos")),
                 )
             }
         }

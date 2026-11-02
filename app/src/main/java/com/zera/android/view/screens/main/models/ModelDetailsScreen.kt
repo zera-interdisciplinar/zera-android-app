@@ -27,6 +27,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zera.android.view.components.buttons.ZeraButton
 import com.zera.android.view.components.buttons.ZeraButtonType
 import com.zera.android.view.components.cards.ItemSummaryCard
+import com.zera.android.view.components.feedback.ErrorFeedbackPopup
 import com.zera.android.view.components.inputs.ZeraInputPopup
 import com.zera.android.view.components.lists.EditableFieldRow
 import com.zera.android.view.components.loading.SkeletonBox
@@ -114,9 +115,6 @@ fun ModelDetailsScreen(
                 if (state.isLoading) {
                     ModelDetailsSkeleton()
                 } else {
-                    state.errorMessage?.let { message ->
-                        CaptionText(text = message, color = MaterialTheme.colorScheme.error)
-                    }
                     if (state.reviewHint.isNotBlank()) {
                         CaptionText(text = state.reviewHint)
                     }
@@ -173,6 +171,10 @@ fun ModelDetailsScreen(
             },
             validate = ModelDetailsViewModel::reasonValidationError,
         )
+    }
+
+    state.errorMessage?.let { message ->
+        ErrorFeedbackPopup(description = message, onDismissRequest = viewModel::onErrorDismiss)
     }
 }
 

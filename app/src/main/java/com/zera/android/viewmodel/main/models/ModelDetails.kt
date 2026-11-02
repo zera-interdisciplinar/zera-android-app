@@ -2,6 +2,7 @@ package com.zera.android.viewmodel.main.models
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
+import com.zera.android.model.remote.client.isConnectionError
 import com.zera.android.model.dto.inventory.ItemResponseDTO
 import com.zera.android.model.dto.inventory.ModelResponseDTO
 import com.zera.android.model.dto.inventory.PagedItemsDTO
@@ -79,6 +80,10 @@ class ModelDetailsViewModel : ZeraViewModel() {
                 )
             }
         }
+    }
+
+    fun onErrorDismiss() {
+        _state.value = _state.value.copy(errorMessage = null)
     }
 
     fun onBackClick() {
@@ -245,22 +250,24 @@ class ModelDetailsViewModel : ZeraViewModel() {
             else -> names.dropLast(1).joinToString(", ") + " e " + names.last()
         }
 
+        /** Descrição do popup para a falha de uma ação no modelo; `null` quando é falta de conexão. */
         internal fun userFacingError(
             error: Exception,
             conflictMessage: String,
             validationMessage: String,
             fallback: String,
-        ): String {
+        ): String? {
+            if (error.isConnectionError()) return null
             if (error is HttpException) {
                 return when (error.code()) {
                     400 -> validationMessage
                     403 -> "Você não tem permissão para esta ação."
                     404 -> "Modelo ou item não encontrado."
                     409 -> conflictMessage
-                    else -> error.message?.takeIf { it.isNotBlank() } ?: fallback
+                    else -> fallback
                 }
             }
-            return error.message?.takeIf { it.isNotBlank() } ?: fallback
+            return fallback
         }
 
         internal fun stateFrom(

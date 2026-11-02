@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zera.android.view.components.buttons.ZeraButton
+import com.zera.android.view.components.feedback.ErrorFeedbackPopup
 import com.zera.android.view.components.inputs.ZeraSearchInput
 import com.zera.android.view.components.lists.OptionItem
 import com.zera.android.view.components.lists.OptionList
@@ -31,7 +32,6 @@ import com.zera.android.view.components.overlays.BottomSheet
 import com.zera.android.view.components.scaffolds.EmployeeScaffold
 import com.zera.android.view.components.scaffolds.ManagerScaffold
 import com.zera.android.view.components.texts.BodyText
-import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.components.texts.LabelText
 import com.zera.android.view.components.texts.TitleText
 import com.zera.android.view.navigation.Route
@@ -98,6 +98,10 @@ fun ModelsScreen(
             }
         }
     }
+
+    state.errorMessage?.let { message ->
+        ErrorFeedbackPopup(description = message, onDismissRequest = viewModel::onErrorDismiss)
+    }
 }
 
 /**
@@ -128,9 +132,6 @@ private fun ModelsContent(
             icon = ZeraIcon.Plus,
         )
 
-        state.errorMessage?.let { message ->
-            CaptionText(text = message, color = MaterialTheme.colorScheme.error)
-        }
         // Só a região da lista alterna: a busca (que reativa isLoading) e o botão ficam reais.
         if (state.isLoading) {
             SkeletonBox(width = 120.dp, height = 24.dp)
@@ -142,7 +143,9 @@ private fun ModelsContent(
                 onItemClick = onModelClick,
                 contentPadding = PaddingValues(vertical = Spacing.small),
                 modifier = Modifier.weight(1f),
-                emptyContent = { BodyText(text = "Nenhum modelo encontrado") },
+                emptyContent = {
+                    if (!state.loadFailed) BodyText(text = "Nenhum modelo encontrado")
+                },
                 onEndReached = onEndReached,
                 isLoadingMore = state.isLoadingMore,
             )
