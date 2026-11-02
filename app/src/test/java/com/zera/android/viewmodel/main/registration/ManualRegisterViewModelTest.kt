@@ -80,7 +80,10 @@ class ManualRegisterViewModelTest {
         )
 
         assertEquals("789", viewModel.state.value.barcode)
-        assertEquals("timeout", viewModel.state.value.modelsError)
+        assertEquals(
+            "Houve uma instabilidade e não conseguimos carregar os modelos.",
+            viewModel.state.value.modelsError,
+        )
         assertTrue(viewModel.state.value.modelOptions.isEmpty())
         assertFalse(viewModel.state.value.canSubmit)
     }

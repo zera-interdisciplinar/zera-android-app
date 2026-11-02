@@ -7,6 +7,7 @@ import com.zera.android.model.usecase.inventory.GetItemByBarcode
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.viewmodel.ZeraViewModel
+import com.zera.android.viewmodel.errorDescription
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
@@ -93,9 +94,13 @@ class ScanViewModel(
         } catch (error: Exception) {
             _state.value = _state.value.copy(
                 isLookingUp = false,
-                lookupError = error.message ?: "Falha ao buscar item",
+                lookupError = errorDescription(error, "Não conseguimos buscar o item. Tente novamente."),
             )
         }
+    }
+
+    fun onErrorDismiss() {
+        _state.value = _state.value.copy(lookupError = null)
     }
 
     fun onRegisterWithoutLabelClick() {
