@@ -4,12 +4,12 @@
 
 - **Feature:** Telas de erro em tela cheia (conexão e erro fatal), popup de feedback para erros dentro das telas, e quando cada um deve aparecer
 - **Perfil(is) envolvido(s):** Funcionário, Gestor
-- **Status:** em andamento — abordagem confirmada, execução pelo [Checklist de execução](#checklist-de-execução)
+- **Status:** implementado (itens 1 a 17 do [Checklist de execução](#checklist-de-execução)); handler de crash e pull-to-refresh ficam fora de escopo
 - **Última atualização:** 2026-11-01
 
 ## Contexto
 
-Hoje cada `ViewModel` trata erro no próprio `catch` e mostra `errorMessage` na tela como `CaptionText` vermelho (cerca de 25 telas). Não existe tratamento global, e nenhum fluxo leva para uma tela de erro. Vários `ViewModel`s mostram `e.message` direto, o que expõe textos como "HTTP 500 Internal Server Error" ao usuário.
+Situação antes desta spec: cada `ViewModel` trata erro no próprio `catch` e mostra `errorMessage` na tela como `CaptionText` vermelho (cerca de 25 telas). Não existe tratamento global, e nenhum fluxo leva para uma tela de erro. Vários `ViewModel`s mostram `e.message` direto, o que expõe textos como "HTTP 500 Internal Server Error" ao usuário.
 
 Problema concreto: o `SplashViewModel` chama `boot.execute()` (`ScrapyClient.boot()`, chamada de rede) **sem `try/catch`**. Sem conexão na abertura, a exceção escapa do `viewModelScope` e o app fecha (crash).
 
@@ -190,6 +190,7 @@ Fora de escopo desta spec (ver [Fora de escopo](#fora-de-escopo-desta-spec)).
 - Modo offline / fila de envio.
 - Integração com ferramenta de crash report.
 - Pull-to-refresh nas listas.
+- Mapa de recicladoras próximas (`NearbyRecyclingPlaces`) e a bolha de erro do chat: mantêm o feedback próprio (status inline com "Tentar de novo" e mensagem do assistente).
 - Mudar os erros inline de login/cadastro para popup.
 
 ## Checklist de execução
@@ -212,7 +213,7 @@ Uma etapa por vez, com revisão antes da próxima.
 14. [x] Migração — Cadastro (`ManualRegisterScreen`, Scan)
 15. [x] Migração — Chat, Central de alertas e Perfil
 16. [x] Auth: só revisar as mensagens inline (sem `e.message` nem códigos) e ignorar erros de conexão
-17. [ ] Atualizar docs (`01-arquitetura.md`, `03-catalogo-componentes.md`, status desta spec)
+17. [x] Atualizar docs (`01-arquitetura.md`, `03-catalogo-componentes.md`, status desta spec)
 
 ## Referências
 
