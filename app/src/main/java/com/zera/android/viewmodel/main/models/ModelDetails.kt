@@ -38,7 +38,21 @@ data class ModelDetailsState(
     val isLoading: Boolean = true,
     val isSubmitting: Boolean = false,
     val errorMessage: String? = null,
+    /** Rascunho do bottom sheet "Editar modelo"; `null` = sheet fechado. */
+    val editDraft: ModelEditDraft? = null,
 )
+
+data class ModelEditDraft(
+    val name: String = "",
+    val manufacturer: String = "",
+    val nameError: String? = null,
+    val manufacturerError: String? = null,
+)
+
+/** Quais campos do rascunho diferem do modelo atual. */
+internal data class ModelEditChanges(val name: Boolean, val manufacturer: Boolean) {
+    val any: Boolean get() = name || manufacturer
+}
 
 class ModelDetailsViewModel : ZeraViewModel() {
     private val getModel = GetModel()
@@ -90,22 +104,82 @@ class ModelDetailsViewModel : ZeraViewModel() {
         ZeraNavigator.goBack()
     }
 
-    fun onNameConfirm(name: String) {
-        val error = nameValidationError(name)
-        if (error != null) {
-            _state.value = _state.value.copy(errorMessage = error)
-            return
-        }
-        mutateModel { updateModel.rename(_state.value.modelId, name.trim()) }
+    fun onEditClick() {
+        val current = _state.value
+        if (!current.canEdit) return
+        _state.value = current.copy(
+            editDraft = ModelEditDraft(name = current.name, manufacturer = current.manufacturer),
+            errorMessage = null,
+        )
     }
 
-    fun onManufacturerConfirm(manufacturer: String) {
-        val error = manufacturerValidationError(manufacturer)
-        if (error != null) {
-            _state.value = _state.value.copy(errorMessage = error)
+    fun onEditDismiss() {
+        if (_state.value.isSubmitting) return
+        _state.value = _state.value.copy(editDraft = null)
+    }
+
+    fun onEditNameChange(value: String) {
+        updateDraft { it.copy(name = value, nameError = null) }
+    }
+
+    fun onEditManufacturerChange(value: String) {
+        updateDraft { it.copy(manufacturer = value, manufacturerError = null) }
+    }
+
+    /**
+     * Valida o rascunho e grava só o que mudou. Cada campo é um endpoint: se um falhar, o anterior
+     * já fica salvo no state e o sheet continua aberto, e um novo "Salvar" reenvia apenas o que falta.
+     */
+    fun onEditSave() {
+        val current = _state.value
+        val draft = current.editDraft ?: return
+        if (current.isSubmitting) return
+
+        val changes = editChangesFrom(current, draft)
+        val validated = draft.copy(
+            nameError = if (changes.name) nameValidationError(draft.name) else null,
+            manufacturerError = if (changes.manufacturer) manufacturerValidationError(draft.manufacturer) else null,
+        )
+        if (validated.nameError != null || validated.manufacturerError != null) {
+            _state.value = current.copy(editDraft = validated)
             return
         }
-        mutateModel { updateModel.manufacturer(_state.value.modelId, manufacturer.trim()) }
+        if (!changes.any) {
+            _state.value = current.copy(editDraft = null)
+            return
+        }
+
+        _state.value = current.copy(isSubmitting = true, errorMessage = null, editDraft = validated)
+        viewModelScope.launch {
+            try {
+                if (changes.name) {
+                    val updated = updateModel.rename(current.modelId, draft.name.trim())
+                    _state.value = _state.value.copy(name = updated.name.orEmpty())
+                }
+                if (changes.manufacturer) {
+                    val updated = updateModel.manufacturer(current.modelId, draft.manufacturer.trim())
+                    _state.value = _state.value.copy(manufacturer = updated.manufacturer.orEmpty())
+                }
+                _state.value = _state.value.copy(isSubmitting = false, editDraft = null)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(
+                    isSubmitting = false,
+                    errorMessage = userFacingError(
+                        e,
+                        conflictMessage = "O status atual do modelo não permite esta ação.",
+                        validationMessage = "Revise os dados e tente de novo.",
+                        fallback = "Não foi possível atualizar o modelo.",
+                    ),
+                )
+            }
+        }
+    }
+
+    private fun updateDraft(transform: (ModelEditDraft) -> ModelEditDraft) {
+        val draft = _state.value.editDraft ?: return
+        _state.value = _state.value.copy(editDraft = transform(draft))
     }
 
     fun onApproveClick() {
@@ -129,29 +203,6 @@ class ModelDetailsViewModel : ZeraViewModel() {
         pendingItemId = reviewableItemId(items.content)
         _state.value = stateFrom(model, isEmployee, pendingItemId)
             .copy(isLoading = isLoading, isSubmitting = false, errorMessage = null)
-    }
-
-    private fun mutateModel(block: suspend () -> ModelResponseDTO) {
-        val modelId = _state.value.modelId
-        if (modelId.isBlank() || _state.value.isSubmitting) return
-        _state.value = _state.value.copy(isSubmitting = true, errorMessage = null)
-        viewModelScope.launch {
-            try {
-                applyLoadedModel(block(), isLoading = false)
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                _state.value = _state.value.copy(
-                    isSubmitting = false,
-                    errorMessage = userFacingError(
-                        e,
-                        conflictMessage = "O status atual do modelo não permite esta ação.",
-                        validationMessage = "Revise os dados e tente de novo.",
-                        fallback = "Não foi possível atualizar o modelo.",
-                    ),
-                )
-            }
-        }
     }
 
     private suspend fun resolvePendingItemId(modelId: String): String? {
@@ -205,7 +256,12 @@ class ModelDetailsViewModel : ZeraViewModel() {
             @Suppress("UNUSED_PARAMETER") pendingItemId: String? = null,
         ): Boolean = !isEmployee && status == ItemStatus.PendingApproval
 
-        internal fun canEdit(isEmployee: Boolean): Boolean = isEmployee
+        internal fun canEdit(isEmployee: Boolean): Boolean = !isEmployee
+
+        internal fun editChangesFrom(state: ModelDetailsState, draft: ModelEditDraft) = ModelEditChanges(
+            name = draft.name.trim() != state.name.trim(),
+            manufacturer = draft.manufacturer.trim() != state.manufacturer.trim(),
+        )
 
         internal fun reviewHint(
             @Suppress("UNUSED_PARAMETER") isEmployee: Boolean,

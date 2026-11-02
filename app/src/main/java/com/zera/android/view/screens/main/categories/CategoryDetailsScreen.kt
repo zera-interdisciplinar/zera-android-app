@@ -4,12 +4,16 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -20,12 +24,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.zera.android.view.components.buttons.ZeraButton
+import com.zera.android.view.components.buttons.ZeraButtonType
 import com.zera.android.view.components.cards.ItemSummaryCard
 import com.zera.android.view.components.feedback.ErrorFeedbackPopup
+import com.zera.android.view.components.forms.EditCategoryForm
 import com.zera.android.view.components.lists.EditableFieldRow
 import com.zera.android.view.components.loading.SkeletonBox
 import com.zera.android.view.components.navigation.SideBarOverlay
 import com.zera.android.view.components.navigation.UpperNavBar
+import com.zera.android.view.components.overlays.BottomSheet
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.theme.Radius
 import com.zera.android.view.theme.Spacing
@@ -39,6 +47,7 @@ private val SkeletonSummaryCardHeight = 120.dp
 private val SkeletonFieldRowHeight = 56.dp
 private const val SkeletonFieldRowCount = 3
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategoryDetailsScreen(
     categoryId: String,
@@ -47,7 +56,6 @@ fun CategoryDetailsScreen(
     val state by viewModel.state
     var showSideBar by rememberSaveable { mutableStateOf(false) }
     val actionsEnabled = !state.isLoading && !state.isSubmitting && state.categoryId.isNotBlank()
-    val editClick = if (state.canEdit && actionsEnabled) ({}) else null
 
     LaunchedEffect(categoryId) {
         viewModel.loadCategory(categoryId)
@@ -67,6 +75,24 @@ fun CategoryDetailsScreen(
                         .padding(horizontal = Spacing.small),
                 )
             },
+            bottomBar = {
+                if (state.canEdit) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .navigationBarsPadding()
+                            .padding(horizontal = Spacing.medium, vertical = Spacing.small),
+                    ) {
+                        ZeraButton(
+                            text = "Editar",
+                            onClick = viewModel::onEditClick,
+                            type = ZeraButtonType.Secondary,
+                            enabled = actionsEnabled,
+                            fillMaxWidth = true,
+                        )
+                    }
+                }
+            },
         ) { innerPadding ->
             Column(
                 modifier = Modifier
@@ -85,20 +111,8 @@ fun CategoryDetailsScreen(
                         icon = ZeraIcon.Category,
                     )
 
-                    EditableFieldRow(
-                        label = "Nome",
-                        value = state.name,
-                        onEditClick = editClick,
-                        onConfirm = viewModel::onNameConfirm,
-                        validate = CategoryDetailsViewModel::nameValidationError,
-                    )
-                    EditableFieldRow(
-                        label = "Descrição",
-                        value = state.description,
-                        onEditClick = editClick,
-                        onConfirm = viewModel::onDescriptionConfirm,
-                        validate = CategoryDetailsViewModel::descriptionValidationError,
-                    )
+                    EditableFieldRow(label = "Nome", value = state.name)
+                    EditableFieldRow(label = "Descrição", value = state.description)
                     EditableFieldRow(label = "Data de Cadastro", value = state.registeredAt)
                 }
             }
@@ -110,6 +124,26 @@ fun CategoryDetailsScreen(
             items = state.sideBarItems,
             currentRoute = Route.CategoryDetails(categoryId),
         )
+    }
+
+    state.editDraft?.let { draft ->
+        BottomSheet(
+            onDismissRequest = viewModel::onEditDismiss,
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        ) {
+            EditCategoryForm(
+                name = draft.name,
+                onNameChange = viewModel::onEditNameChange,
+                description = draft.description,
+                onDescriptionChange = viewModel::onEditDescriptionChange,
+                onSave = viewModel::onEditSave,
+                onCancel = viewModel::onEditDismiss,
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+                nameError = draft.nameError,
+                descriptionError = draft.descriptionError,
+                isSubmitting = state.isSubmitting,
+            )
+        }
     }
 
     state.errorMessage?.let { message ->

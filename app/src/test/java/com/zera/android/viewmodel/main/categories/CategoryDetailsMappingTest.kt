@@ -43,6 +43,18 @@ class CategoryDetailsMappingTest {
     }
 
     @Test
+    fun editChangesIgnoreUnchangedFieldsAndSurroundingSpaces() {
+        val state = CategoryDetailsViewModel.stateFrom(category, isEmployee = false)
+        val draft = CategoryEditDraft(name = " Informática ", description = "Notebooks e monitores")
+
+        assertFalse(CategoryDetailsViewModel.editChangesFrom(state, draft).any)
+        assertEquals(
+            CategoryEditChanges(name = true, description = false),
+            CategoryDetailsViewModel.editChangesFrom(state, draft.copy(name = "TI")),
+        )
+    }
+
+    @Test
     fun nameAndDescriptionAreRequired() {
         assertEquals("Informe o nome da categoria.", CategoryDetailsViewModel.nameValidationError(" "))
         assertNull(CategoryDetailsViewModel.nameValidationError("Informática"))
