@@ -22,4 +22,12 @@ class AlertDeepLinkTest {
         assertNull(routeForAlertKind("UNKNOWN"))
         assertNull(routeForAlertKind(null))
     }
+
+    @Test
+    fun itemDeepLinkOpensItemDetails() {
+        val itemId = "7c9e6679-7425-40de-944b-e07fc1f90ae7"
+        assertEquals(Route.ItemDetails(itemId), routeForItemDeepLink("zera://item?id=$itemId"))
+        assertNull(routeForItemDeepLink("zera://reset-password"))
+        assertNull(routeForItemDeepLink(null))
+    }
 }
