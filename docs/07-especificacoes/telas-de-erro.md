@@ -205,7 +205,7 @@ Uma etapa por vez, com revisão antes da próxima.
 7. [x] Paginação sem loop em `ProductList`, `OptionList`, `SelectBoxList` e `AlertCentralScreen`
 8. [x] Migração — Categorias (`CategoriesScreen`, `CategoryCreationScreen`)
 9. [x] Migração — Funcionários (`EmployeesScreen`, `EmployeeDetailsScreen`, `EmployeeRegisterScreen`)
-10. [ ] Migração — Home do gestor e Índices (`ManagerHomeScreen`, `IndexesScreen`)
+10. [x] Migração — Home do gestor e Índices (`ManagerHomeScreen`, `IndexesScreen`)
 11. [ ] Migração — Itens (`ItensScreen`, `EmployeeItemsScreen`, `ItemDetailsScreen`)
 12. [ ] Migração — Modelos (`ModelsScreen`, `ModelDetailsScreen`, `ModelItemsScreen`, `ModelCreationScreen`)
 13. [ ] Migração — Reciclagem (`ItensSelectionScreen`, `RecyclingResumeScreen`, `ScheduledDisposalsScreen`, `SchedulingDetailsScreen`, `SchedulingSuccessScreen`, locais próximos)

@@ -16,6 +16,8 @@ import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.view.navigation.routeForAlertKind
 import com.zera.android.view.transition.ScreenAnimation
 import com.zera.android.viewmodel.ZeraViewModel
+import com.zera.android.viewmodel.errorDescription
+import com.zera.android.viewmodel.loadErrorDescription
 import com.zera.android.viewmodel.main.alerts.AlertMapping
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
@@ -39,6 +41,8 @@ data class ManagerHomeState(
     val isLoadingInventory: Boolean = true,
     val isLoadingAlerts: Boolean = true,
     val isLoadingEmployees: Boolean = true,
+    /** A carga do inventário falhou: "Últimos Itens" vazio não mostra "Nenhum produto encontrado". */
+    val inventoryLoadFailed: Boolean = false,
     val errorMessage: String? = null,
 ) {
     /**
@@ -98,12 +102,16 @@ class ManagerHomeViewModel : ZeraViewModel() {
                 latestProducts = home.recentItems.content.map { item ->
                     ProductItem(id = item.id, name = item.name)
                 },
+                inventoryLoadFailed = false,
                 errorMessage = null,
             )
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            _state.value = _state.value.copy(errorMessage = e.message)
+            _state.value = _state.value.copy(
+                inventoryLoadFailed = true,
+                errorMessage = errorDescription(e, loadErrorDescription("os dados do inventário")),
+            )
         } finally {
             _state.value = _state.value.copy(isLoadingInventory = false)
         }
@@ -133,6 +141,10 @@ class ManagerHomeViewModel : ZeraViewModel() {
         } finally {
             _state.value = _state.value.copy(isLoadingEmployees = false)
         }
+    }
+
+    fun onErrorDismiss() {
+        _state.value = _state.value.copy(errorMessage = null)
     }
 
     fun onItemCardClick() {
