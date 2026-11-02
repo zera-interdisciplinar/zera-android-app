@@ -22,6 +22,7 @@ data class EmployeeHomeState(
     val userName: String = "",
     val userRole: String = "",
     val stockItemCount: Int = 0,
+    val stockCapacity: Int? = null,
     val stockOccupation: Float = 0f,
     val maintenanceCount: String = "0",
     val discardCount: String = "0",
@@ -81,6 +82,7 @@ class EmployeeHomeViewModel : ZeraViewModel() {
             val (maintenance, discards) = shortcutCounts(home)
             _state.value = _state.value.copy(
                 stockItemCount = home.activeItems.toInt(),
+                stockCapacity = home.stockCapacity,
                 stockOccupation = occupationFrom(home),
                 maintenanceCount = maintenance,
                 discardCount = discards,

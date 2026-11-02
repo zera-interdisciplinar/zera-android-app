@@ -30,6 +30,7 @@ data class ManagerHomeState(
     val userName: String = "",
     val userRole: String = "",
     val stockItemCount: Int = 0,
+    val stockCapacity: Int? = null,
     val stockOccupation: Float = 0f,
     val totalItems: String = "",
     val itemsChangeLabel: String = "",
@@ -107,6 +108,7 @@ class ManagerHomeViewModel : ZeraViewModel() {
             val home = getManagerHome.execute()
             _state.value = _state.value.copy(
                 stockItemCount = home.activeItems.toInt(),
+                stockCapacity = home.stockCapacity,
                 stockOccupation = occupationFrom(home),
                 totalItems = formatCount(home.activeItems),
                 itemsChangeLabel = formatChangePercent(home.activeItemsChangePercent).orEmpty(),

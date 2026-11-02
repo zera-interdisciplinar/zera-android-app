@@ -30,10 +30,12 @@ import com.zera.android.view.theme.ZeraTheme
 private val OccupationCircleSize = 84.dp
 
 /**
- * Card de destaque com a ocupação do estoque: total de itens cadastrados à esquerda
+ * Card de destaque com a ocupação do estoque: itens ativos e capacidade total à esquerda
  * e a porcentagem de ocupação num círculo à direita.
  *
- * @param itemCount quantidade de itens cadastrados.
+ * @param itemCount quantidade de itens ativos no estoque.
+ * @param capacity capacidade total usada no cálculo da porcentagem; `null` quando a unidade
+ *   não tem capacidade configurada.
  * @param occupation ocupação do estoque, de 0f a 1f. Exibida como porcentagem inteira.
  * @param modifier modificador externo opcional. O card já ocupa toda a largura
  *   disponível por padrão ([Modifier.fillMaxWidth]).
@@ -41,6 +43,7 @@ private val OccupationCircleSize = 84.dp
 @Composable
 fun StockOccupationCard(
     itemCount: Int,
+    capacity: Int?,
     occupation: Float,
     modifier: Modifier = Modifier,
 ) {
@@ -68,7 +71,10 @@ fun StockOccupationCard(
                     bold = true,
                     color = LocalContentColor.current,
                 )
-                BodyText(text = "Itens cadastrados", color = LocalContentColor.current)
+                BodyText(
+                    text = if (capacity != null) "Ocupação total: $capacity" else "Ocupação total não configurada",
+                    color = LocalContentColor.current,
+                )
             }
             ZeraBox(
                 modifier = Modifier.size(OccupationCircleSize),
@@ -93,6 +99,7 @@ private fun StockOccupationCardPreview() {
     ZeraTheme {
         StockOccupationCard(
             itemCount = 300,
+            capacity = 500,
             occupation = 0.6f,
             modifier = Modifier.padding(Spacing.medium),
         )

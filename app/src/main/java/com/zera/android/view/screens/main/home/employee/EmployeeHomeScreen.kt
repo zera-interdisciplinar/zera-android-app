@@ -64,7 +64,11 @@ fun EmployeeHomeScreen(
                 CaptionText(text = state.userRole)
             }
 
-            StockOccupationCard(itemCount = state.stockItemCount, occupation = state.stockOccupation)
+            StockOccupationCard(
+                itemCount = state.stockItemCount,
+                capacity = state.stockCapacity,
+                occupation = state.stockOccupation,
+            )
 
             AdaptiveRow {
                 ZeraButton(
@@ -192,6 +196,7 @@ fun EmployeeHomeScreenPreview() {
             userName = "Carlos Lima",
             userRole = "Operário",
             stockItemCount = 300,
+            stockCapacity = 500,
             stockOccupation = 0.6f,
             maintenanceCount = "3",
             discardCount = "2",
