@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.zera.android.view.components.cards.DismissibleNotification
 import com.zera.android.view.components.cards.Notification
 import com.zera.android.view.components.texts.BodyText
 import com.zera.android.view.theme.Spacing
@@ -53,6 +54,8 @@ data class NotificationItem(
  * @param modifier modificador externo opcional.
  * @param onItemClick ação de "Resolver agora" de cada card, recebendo a
  *   [NotificationItem] clicada. Quando `null` (padrão), a ação não é exibida.
+ * @param onItemDismiss dispensa o card, por deslize ou pelo X, recebendo a [NotificationItem]
+ *   dispensada. Quem chama remove o item de [notifications]. Quando `null` (padrão), o card é fixo.
  * @param contentPadding espaçamento interno entre a borda da lista e os cards.
  * @param emptyContent conteúdo exibido quando [notifications] está vazio. Por padrão,
  *   uma mensagem de texto simples.
@@ -62,6 +65,7 @@ fun NotificationList(
     notifications: List<NotificationItem>,
     modifier: Modifier = Modifier,
     onItemClick: ((NotificationItem) -> Unit)? = null,
+    onItemDismiss: ((NotificationItem) -> Unit)? = null,
     contentPadding: PaddingValues = PaddingValues(Spacing.medium),
     emptyContent: @Composable () -> Unit = { BodyText(text = "Nenhuma notificação") },
 ) {
@@ -82,7 +86,7 @@ fun NotificationList(
         contentPadding = contentPadding,
         verticalArrangement = Arrangement.spacedBy(Spacing.small),
     ) {
-        notificationItems(notifications, onItemClick)
+        notificationItems(notifications, onItemClick, onItemDismiss)
     }
 }
 
@@ -96,25 +100,43 @@ fun NotificationList(
  * @param notifications notificações a exibir, na ordem em que devem aparecer.
  * @param onItemClick ação de cada card, recebendo a [NotificationItem] clicada. Quando `null`
  *   (padrão), a ação não é exibida.
+ * @param onItemDismiss dispensa o card, por deslize ou pelo X, recebendo a [NotificationItem]
+ *   dispensada. Com ele, a saída do card e a subida dos seguintes são animadas. Quando `null`
+ *   (padrão), o card é fixo.
  */
 fun LazyListScope.notificationItems(
     notifications: List<NotificationItem>,
     onItemClick: ((NotificationItem) -> Unit)? = null,
+    onItemDismiss: ((NotificationItem) -> Unit)? = null,
 ) {
     items(notifications, key = { it.id }) { notification ->
-        Notification(
-            label = notification.label,
-            text = notification.text,
-            style = notification.style,
-            redirect = if (onItemClick != null && notification.resolvable) {
-                { onItemClick(notification) }
-            } else {
-                null
-            },
-            redirectLabel = notification.actionLabel,
-            neutral = notification.neutral,
-            modifier = Modifier.fillMaxWidth(),
-        )
+        val redirect: (() -> Unit)? = if (onItemClick != null && notification.resolvable) {
+            { onItemClick(notification) }
+        } else {
+            null
+        }
+        if (onItemDismiss != null) {
+            DismissibleNotification(
+                label = notification.label,
+                onDismiss = { onItemDismiss(notification) },
+                text = notification.text,
+                style = notification.style,
+                redirect = redirect,
+                redirectLabel = notification.actionLabel,
+                neutral = notification.neutral,
+                modifier = Modifier.fillMaxWidth().animateItem(),
+            )
+        } else {
+            Notification(
+                label = notification.label,
+                text = notification.text,
+                style = notification.style,
+                redirect = redirect,
+                redirectLabel = notification.actionLabel,
+                neutral = notification.neutral,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
     }
 }
 
@@ -139,6 +161,30 @@ private fun NotificationListPreview() {
                 ),
             ),
             onItemClick = {},
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun NotificationListDismissiblePreview() {
+    ZeraTheme {
+        NotificationList(
+            notifications = listOf(
+                NotificationItem(
+                    id = "1",
+                    label = "Garantia vencendo: Notebook",
+                    style = ZeraColorFamily.Yellow,
+                    resolvable = true,
+                ),
+                NotificationItem(
+                    id = "2",
+                    label = "Item aprovado pelo gestor",
+                    style = ZeraColorFamily.Green,
+                ),
+            ),
+            onItemClick = {},
+            onItemDismiss = {},
         )
     }
 }
