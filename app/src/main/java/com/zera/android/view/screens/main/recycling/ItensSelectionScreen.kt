@@ -15,11 +15,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zera.android.view.components.buttons.ZeraButton
+import com.zera.android.view.components.feedback.ErrorFeedbackPopup
 import com.zera.android.view.components.inputs.SelectBoxList
 import com.zera.android.view.components.inputs.SelectOption
 import com.zera.android.view.components.inputs.ZeraSearchInput
 import com.zera.android.view.components.loading.OptionListSkeleton
 import com.zera.android.view.components.navigation.UpperNavBar
+import com.zera.android.view.components.texts.BodyText
 import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.components.texts.SubtitleText
 import com.zera.android.view.theme.Spacing
@@ -84,9 +86,6 @@ fun ItensSelectionScreen(
                 onSearch = viewModel::onSearch,
                 placeholder = "Buscar itens cadastrados",
             )
-            state.errorMessage?.let { message ->
-                CaptionText(text = message, color = MaterialTheme.colorScheme.error)
-            }
             // Só a região da lista alterna: o cabeçalho, a busca e o botão ficam reais.
             if (state.isLoading) {
                 OptionListSkeleton(
@@ -102,6 +101,9 @@ fun ItensSelectionScreen(
                     hasSelectAll = true,
                     onEndReached = viewModel::loadNextPage,
                     isLoadingMore = state.isLoadingMore,
+                    emptyContent = {
+                        if (!state.loadFailed) BodyText(text = "Nenhuma opção disponível")
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f),
@@ -114,6 +116,10 @@ fun ItensSelectionScreen(
                 fillMaxWidth = true,
             )
         }
+    }
+
+    state.errorMessage?.let { message ->
+        ErrorFeedbackPopup(description = message, onDismissRequest = viewModel::onErrorDismiss)
     }
 }
 

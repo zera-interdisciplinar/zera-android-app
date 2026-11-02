@@ -208,7 +208,7 @@ Uma etapa por vez, com revisão antes da próxima.
 10. [x] Migração — Home do gestor e Índices (`ManagerHomeScreen`, `IndexesScreen`)
 11. [x] Migração — Itens (`ItensScreen`, `EmployeeItemsScreen`, `ItemDetailsScreen`)
 12. [x] Migração — Modelos (`ModelsScreen`, `ModelDetailsScreen`, `ModelItemsScreen`, `ModelCreationScreen`)
-13. [ ] Migração — Reciclagem (`ItensSelectionScreen`, `RecyclingResumeScreen`, `ScheduledDisposalsScreen`, `SchedulingDetailsScreen`, `SchedulingSuccessScreen`, locais próximos)
+13. [x] Migração — Reciclagem (`ItensSelectionScreen`, `RecyclingResumeScreen`, `ScheduledDisposalsScreen`, `SchedulingDetailsScreen`, `SchedulingSuccessScreen`, locais próximos)
 14. [ ] Migração — Cadastro (`ManualRegisterScreen`, Scan)
 15. [ ] Migração — Chat, Central de alertas e Perfil
 16. [ ] Auth: só revisar as mensagens inline (sem `e.message` nem códigos) e ignorar erros de conexão

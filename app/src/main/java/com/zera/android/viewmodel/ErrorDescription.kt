@@ -15,3 +15,15 @@ internal fun loadErrorDescription(what: String): String =
  */
 internal fun errorDescription(error: Throwable, description: String): String? =
     if (error.isConnectionError()) null else description
+
+/**
+ * Descrição do popup para uma falha de ação cujo caso de uso lança `IllegalStateException` ou
+ * `IllegalArgumentException` com um texto já escrito para o usuário (ex.: "Entre de novo para
+ * gerar o relatório."). Esses textos são mantidos; qualquer outra falha usa [fallback], nunca o
+ * `message` cru (HTTP, rede, parsing). `null` quando é falta de conexão.
+ */
+internal fun appMessageOrFallback(error: Throwable, fallback: String): String? {
+    if (error.isConnectionError()) return null
+    val isAppMessage = error is IllegalStateException || error is IllegalArgumentException
+    return error.message?.takeIf { isAppMessage && it.isNotBlank() } ?: fallback
+}

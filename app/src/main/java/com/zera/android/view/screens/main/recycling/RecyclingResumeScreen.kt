@@ -21,10 +21,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zera.android.view.components.buttons.ZeraButton
 import com.zera.android.view.components.cards.OpeningHoursCard
 import com.zera.android.view.components.containers.ZeraBox
+import com.zera.android.view.components.feedback.ErrorFeedbackPopup
 import com.zera.android.view.components.navigation.UpperNavBar
 import com.zera.android.view.components.outros.Tag
 import com.zera.android.view.components.texts.BodyText
-import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.components.texts.OverlineText
 import com.zera.android.view.components.texts.TitleText
 import com.zera.android.view.navigation.ZeraNavigator
@@ -147,9 +147,6 @@ fun RecyclingResumeScreen(
                     )
                 }
 
-                state.errorMessage?.let { message ->
-                    CaptionText(text = message, color = MaterialTheme.colorScheme.error)
-                }
             }
 
             ZeraButton(
@@ -161,6 +158,10 @@ fun RecyclingResumeScreen(
                 enabled = state.itemIds.isNotEmpty(),
             )
         }
+    }
+
+    state.errorMessage?.let { message ->
+        ErrorFeedbackPopup(description = message, onDismissRequest = viewModel::onErrorDismiss)
     }
 }
 

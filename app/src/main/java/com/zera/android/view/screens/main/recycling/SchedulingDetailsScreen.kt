@@ -33,13 +33,13 @@ import com.zera.android.view.components.buttons.ZeraButton
 import com.zera.android.view.components.buttons.ZeraButtonType
 import com.zera.android.view.components.cards.Notification
 import com.zera.android.view.components.containers.ZeraBox
+import com.zera.android.view.components.feedback.ErrorFeedbackPopup
 import com.zera.android.view.components.lists.OptionItem
 import com.zera.android.view.components.lists.OptionList
 import com.zera.android.view.components.loading.OptionListSkeleton
 import com.zera.android.view.components.loading.SkeletonBox
 import com.zera.android.view.components.navigation.SideBarOverlay
 import com.zera.android.view.components.navigation.UpperNavBar
-import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.components.texts.LabelText
 import com.zera.android.view.components.texts.OverlineText
 import com.zera.android.view.components.texts.TitleText
@@ -185,9 +185,6 @@ fun SchedulingDetailsScreen(
                         )
                     }
 
-                    state.errorMessage?.let { message ->
-                        CaptionText(text = message, color = MaterialTheme.colorScheme.error)
-                    }
                 }
             }
         }
@@ -198,6 +195,10 @@ fun SchedulingDetailsScreen(
             items = state.sideBarItems,
             currentRoute = Route.SchedulingDetails(scheduleId),
         )
+    }
+
+    state.errorMessage?.let { message ->
+        ErrorFeedbackPopup(description = message, onDismissRequest = viewModel::onErrorDismiss)
     }
 }
 

@@ -29,4 +29,12 @@ class ErrorDescriptionTest {
             loadErrorDescription("as categorias"),
         )
     }
+
+    @Test
+    fun appMessagesAreKeptButTechnicalOnesAreNot() {
+        assertEquals("Entre de novo.", appMessageOrFallback(IllegalStateException("Entre de novo."), "Falhou."))
+        assertEquals("Falhou.", appMessageOrFallback(IllegalStateException("  "), "Falhou."))
+        assertEquals("Falhou.", appMessageOrFallback(RuntimeException("HTTP 500 Internal Server Error"), "Falhou."))
+        assertNull(appMessageOrFallback(SocketTimeoutException("timeout"), "Falhou."))
+    }
 }
