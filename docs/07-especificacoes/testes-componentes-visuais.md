@@ -4,7 +4,7 @@
 
 - **Feature:** Testes de comportamento dos componentes de `view/components`, com Compose UI Test e Robolectric, sem emulador
 - **Perfil(is) envolvido(s):** Não se aplica (qualidade interna; quem usa é o time de desenvolvimento)
-- **Status:** em progresso (item 1 de 19)
+- **Status:** em progresso (item 2 de 19)
 - **Última atualização:** 2026-11-02
 
 ## Contexto
@@ -97,7 +97,9 @@ Valores globais em `app/src/test/resources/robolectric.properties`:
 |---|---|
 | Texto, botões e chips | `onNodeWithText` |
 | Ícones com descrição | `onNodeWithContentDescription` |
+| Rótulos dos inputs | Em maiúsculas (`"NOME"`), porque o `OverlineText` converte o texto |
 | Campos de texto | Pelo texto atual, usando valores únicos em cada teste. O rótulo não é associado ao campo |
+| Senha mascarada | Comparando `SemanticsProperties.EditableText` com o valor. A semântica `Password` só indica o tipo do teclado e não muda ao mostrar a senha |
 | Campos desabilitados | Pelo texto atual. Campo desabilitado não expõe a ação de `SetText`, então `hasSetTextAction()` não o encontra |
 | Botão em carregamento | `hasClickAction()`, já que o texto some |
 | Indicador de progresso | `hasProgressBarRangeInfo(ProgressBarRangeInfo.Indeterminate)`. É um nó separado do botão, então o estado desabilitado não aparece nele |
@@ -126,7 +128,7 @@ Encontrados na leitura do código, antes de qualquer teste:
 
 | # | Componente | Problema | Impacto |
 |---|---|---|---|
-| 1 | `ZeraTokenInput` + `SignUpViewModel` | `onFilled` dispara ao digitar o último dígito e de novo na ação "Concluído" do teclado. O `signUp()` não verifica `isLoading` e o campo continua habilitado durante o envio | Pode enviar dois pedidos de cadastro com o mesmo convite |
+| 1 | `ZeraTokenInput` + `SignUpViewModel` | **Confirmado por teste.** `onFilled` dispara ao digitar o último dígito e de novo na ação "Concluído" do teclado. O `signUp()` não verifica `isLoading` e o campo continua habilitado durante o envio | Pode enviar dois pedidos de cadastro com o mesmo convite |
 | 2 | `EditItemForm` + `ZeraRadioButton` | O radio não tem parâmetro `enabled`, então "Possui danos?" continua ativo com `isSubmitting = true` | O usuário altera o formulário durante o envio |
 | 3 | `ProductListItem` e `OptionListItem` | Com `onClickDisabled = true`, a seta e a tag somem, mas a `Surface` continua clicável, com efeito de toque e sem ação | O item parece clicável. A `Tag` de status também some, o que só está documentado no `OptionListItem` |
 | 4 | `ZeraButton` | Com `loading = true`, o texto é removido e o indicador não tem descrição | O leitor de tela não informa qual é o botão |
@@ -152,7 +154,7 @@ Validar nos itens 1 e 2 do checklist, antes de escrever o restante:
 | Compatibilidade do Robolectric com AGP 9 e SDK 36 | **Validada** no item 1: Robolectric 4.17 roda o Compose UI Test |
 | JDK para o SDK 36 | **Validada na JDK 25**, com `--add-exports=java.base/jdk.internal.access=ALL-UNNAMED` na JVM de teste. Ainda não testada na JDK 21 do Android Studio nem na 17 do workflow de release, o que precisará ser revisto quando os testes forem para o CI |
 | `ContentProvider`s de Firebase e ML Kit no manifesto mesclado, inicializados pelo Robolectric | **Sem impacto** no item 1, que já roda com `isIncludeAndroidResources = true` |
-| `Dialog`, menu do `ExposedDropdownMenuBox`, `ModalBottomSheet` e `DatePicker` | Validar `Dialog` e `ModalBottomSheet` no item 2 e os demais nos itens de cada componente |
+| `Dialog`, menu do `ExposedDropdownMenuBox`, `ModalBottomSheet` e `DatePicker` | **Validados** `Dialog`, `ModalBottomSheet` e o menu nos itens 2 e 7. Falta o `DatePicker`, no item 8 |
 | Primeiro uso baixa o `android-all` do Maven | Precisa de rede só na primeira execução |
 
 ## Critérios de aceite
