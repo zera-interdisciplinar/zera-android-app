@@ -11,6 +11,7 @@ import com.zera.android.model.usecase.team.CreateInvitation
 import com.zera.android.model.usecase.team.ListPendingInvitations
 import com.zera.android.model.usecase.team.ListTeamEmployees
 import com.zera.android.view.components.lists.EmployeeItem
+import com.zera.android.view.components.lists.InviteItem
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.view.transition.ScreenAnimation
@@ -23,12 +24,6 @@ import retrofit2.HttpException
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
-data class PendingInviteCard(
-    val code: String,
-    val inviteeName: String,
-    val expiresInHours: Int,
-)
-
 data class InviteDraft(
     val name: String = "",
     val nameError: String? = null,
@@ -36,7 +31,8 @@ data class InviteDraft(
 
 data class EmployeesState(
     val activeEmployeesCount: Int = 0,
-    val pendingInvites: List<PendingInviteCard> = emptyList(),
+    /** Só os primeiros convites; o resto fica em "Todos os convites". */
+    val pendingInvites: List<InviteItem> = emptyList(),
     val employees: List<EmployeeItem> = emptyList(),
     val isLoadingCount: Boolean = true,
     val isLoadingEmployees: Boolean = true,
@@ -136,7 +132,7 @@ class EmployeesViewModel : ZeraViewModel() {
 
     private fun publishRoster() {
         _state.value = _state.value.copy(
-            pendingInvites = loadedInvites.map { toInviteCard(it) },
+            pendingInvites = loadedInvites.take(INVITES_PREVIEW_LIMIT).map { toInviteCard(it) },
             employees = composeEmployees(loadedEmployees, loadedInvites),
         )
     }
@@ -185,6 +181,10 @@ class EmployeesViewModel : ZeraViewModel() {
         }
     }
 
+    fun onSeeAllInvitesClick() {
+        ZeraNavigator.push(Route.PendingInvites, ScreenAnimation.SlideHorizontal)
+    }
+
     fun onEmployeeClick(employee: EmployeeItem) {
         // Convite pendente ainda não tem usuário, então não há detalhe para abrir.
         if (employee.isPending) return
@@ -193,6 +193,9 @@ class EmployeesViewModel : ZeraViewModel() {
 
     companion object {
         internal const val ROLE_OPERATOR = "Operador"
+
+        /** A tela mostra só os primeiros convites; o resto fica em "Todos os convites". */
+        internal const val INVITES_PREVIEW_LIMIT = 3
 
         /** Descrição do popup para a falha ao criar o convite; `null` quando é falta de conexão. */
         internal fun createInviteError(error: Exception): String? {
@@ -226,7 +229,7 @@ class EmployeesViewModel : ZeraViewModel() {
         internal fun toInviteCard(
             invite: PendingInvite,
             now: LocalDateTime = LocalDateTime.now(),
-        ): PendingInviteCard = PendingInviteCard(
+        ): InviteItem = InviteItem(
             code = invite.code,
             inviteeName = invite.inviteeName,
             expiresInHours = hoursUntil(invite.expiresAt, now),

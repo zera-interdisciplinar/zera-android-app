@@ -27,6 +27,9 @@ sealed interface Route{
     data object Employees : Route
 
     @Serializable
+    data object PendingInvites : Route
+
+    @Serializable
     data class EmployeeDetails(val employeeId: String) : Route
 
     @Serializable

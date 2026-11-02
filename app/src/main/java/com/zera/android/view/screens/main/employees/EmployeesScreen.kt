@@ -25,6 +25,7 @@ import com.zera.android.view.components.feedback.ErrorFeedbackPopup
 import com.zera.android.view.components.forms.CreateInviteForm
 import com.zera.android.view.components.lists.EmployeeItem
 import com.zera.android.view.components.lists.EmployeeList
+import com.zera.android.view.components.lists.InviteItem
 import com.zera.android.view.components.loading.SkeletonBox
 import com.zera.android.view.components.overlays.BottomSheet
 import com.zera.android.view.components.scaffolds.ManagerScaffold
@@ -40,7 +41,6 @@ import com.zera.android.view.theme.ZeraTheme
 import com.zera.android.view.theme.icons.ZeraIcon
 import com.zera.android.viewmodel.main.employees.EmployeesState
 import com.zera.android.viewmodel.main.employees.EmployeesViewModel
-import com.zera.android.viewmodel.main.employees.PendingInviteCard
 
 // Alturas aproximadas dos blocos reais; o esqueleto só indica a disposição.
 private val SkeletonSummaryCardHeight = 88.dp
@@ -91,11 +91,23 @@ fun EmployeesScreen(
 
             // Seção opcional, sem skeleton: entra quando os convites chegam.
             if (state.pendingInvites.isNotEmpty()) {
-                TitleText(
-                    text = "Convites pendentes",
-                    bold = true,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    TitleText(
+                        text = "Convites pendentes",
+                        bold = true,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.weight(1f),
+                    )
+                    LabelText(
+                        text = "Ver Todos",
+                        bold = true,
+                        color = MaterialTheme.colorScheme.primary,
+                        onClick = viewModel::onSeeAllInvitesClick,
+                    )
+                }
                 state.pendingInvites.forEach { invite ->
                     InviteCard(
                         code = invite.code,
@@ -161,7 +173,7 @@ fun EmployeesScreenPreview() {
         state.value = EmployeesState(
             activeEmployeesCount = 8,
             pendingInvites = listOf(
-                PendingInviteCard(code = "ZRA-4821", inviteeName = "Ana Paula", expiresInHours = 20),
+                InviteItem(code = "ZRA-4821", inviteeName = "Ana Paula", expiresInHours = 20),
             ),
             employees = listOf(
                 EmployeeItem(id = "invite-ZRA-4821", name = "Ana Paula", role = "Operador", isPending = true),
