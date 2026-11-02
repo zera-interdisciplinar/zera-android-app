@@ -68,7 +68,7 @@ data class SideBarItem(
  */
 private val FixedSideBarItems = listOf(
     SideBarItem(label = "Central de Ajuda", icon = ZeraIcon.InfoCircle, route = Route.HelpCentralHub),
-    SideBarItem(label = "Fale com o Zé", icon = ZeraIcon.Chatbot, route = Route.ChatConversations),
+    SideBarItem(label = "Fale com o Zack", icon = ZeraIcon.Chatbot, route = Route.ChatConversations),
     SideBarItem(label = "Configurações", icon = ZeraIcon.Gear, route = Route.Configurations),
 )
 
@@ -76,7 +76,7 @@ private val FixedSideBarItems = listOf(
  * Sidebar de navegação, usada pelos fluxos do gestor e do operário.
  *
  * Mostra a logo, a lista [items] (rolável) e, no rodapé, os atalhos fixos de Central de Ajuda,
- * Fale com o Zé e Configurações — esses três sempre aparecem, não importa o fluxo.
+ * Fale com o Zack e Configurações — esses três sempre aparecem, não importa o fluxo.
  *
  * Funciona como as barras inferiores: recebe a [currentRoute] da tela em que está e destaca
  * (e desabilita) o botão que levaria para ela.

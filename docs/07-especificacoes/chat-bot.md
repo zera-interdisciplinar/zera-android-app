@@ -1,4 +1,4 @@
-# Spec — Chat com o assistente (Zé Bot)
+# Spec — Chat com o assistente (Zack Bot)
 
 ## Metadados
 
@@ -9,7 +9,7 @@
 
 ## Contexto
 
-O FAB dos scaffolds (`ManagerScaffold` / `EmployeeScaffold`) e o item "Fale com o Zé" abrem o **inbox** `Route.ChatConversations` (`SlideVertical`). Dali, uma linha abre `Route.ChatBot(threadId)` e o FAB `+` gera um UUID v4 e abre um fio novo (sem POST até a primeira mensagem).
+O FAB dos scaffolds (`ManagerScaffold` / `EmployeeScaffold`) e o item "Fale com o Zack" abrem o **inbox** `Route.ChatConversations` (`SlideVertical`). Dali, uma linha abre `Route.ChatBot(threadId)` e o FAB `+` gera um UUID v4 e abre um fio novo (sem POST até a primeira mensagem).
 
 Telas compartilhadas: `ChatConversationsScreen` / `ChatConversationsViewModel` e `ChatBotScreen` / `ChatBotViewModel`.
 
