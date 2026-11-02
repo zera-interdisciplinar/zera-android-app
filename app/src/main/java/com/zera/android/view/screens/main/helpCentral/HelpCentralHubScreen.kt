@@ -48,6 +48,7 @@ fun HelpCentralHubScreen(
         goBack = true,
         fabIcon = null,
         scrollable = false,
+        showBottomNavBar = false,
     ) {
         ZeraBox(
             modifier = Modifier.fillMaxWidth(),
