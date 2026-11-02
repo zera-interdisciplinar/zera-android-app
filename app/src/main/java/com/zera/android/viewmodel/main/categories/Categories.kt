@@ -8,6 +8,8 @@ import com.zera.android.view.components.lists.OptionItem
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.viewmodel.ZeraViewModel
+import com.zera.android.viewmodel.errorDescription
+import com.zera.android.viewmodel.loadErrorDescription
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -19,6 +21,8 @@ data class CategoriesState(
     val totalCategoriesLabel: String = "",
     val categories: List<OptionItem> = emptyList(),
     val isLoading: Boolean = true,
+    /** A última carga falhou: a lista vazia não mostra "Nenhuma categoria encontrada". */
+    val loadFailed: Boolean = false,
     val errorMessage: String? = null,
 )
 
@@ -45,6 +49,10 @@ class CategoriesViewModel : ZeraViewModel() {
         ZeraNavigator.push(Route.CategoryCreation)
     }
 
+    fun onErrorDismiss() {
+        _state.value = _state.value.copy(errorMessage = null)
+    }
+
     /** [silent] é a recarga automática (retorno à tela): não reativa `isLoading`, que só sobe na primeira carga. */
     private fun loadCategories(silent: Boolean = false) {
         loadJob?.cancel()
@@ -53,14 +61,15 @@ class CategoriesViewModel : ZeraViewModel() {
             try {
                 loadedCategories = getCategories.execute()
                 hasLoaded = true
-                _state.value = _state.value.copy(isLoading = false, errorMessage = null)
+                _state.value = _state.value.copy(isLoading = false, loadFailed = false, errorMessage = null)
                 publishList()
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
                     isLoading = false,
-                    errorMessage = e.message,
+                    loadFailed = true,
+                    errorMessage = errorDescription(e, loadErrorDescription("as categorias")),
                 )
             }
         }

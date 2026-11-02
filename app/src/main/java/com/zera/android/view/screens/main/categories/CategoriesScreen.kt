@@ -1,7 +1,6 @@
 package com.zera.android.view.screens.main.categories
 
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -10,6 +9,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zera.android.view.components.buttons.ZeraButton
+import com.zera.android.view.components.feedback.ErrorFeedbackPopup
 import com.zera.android.view.components.inputs.ZeraSearchInput
 import com.zera.android.view.components.lists.OptionItem
 import com.zera.android.view.components.lists.OptionList
@@ -17,7 +17,6 @@ import com.zera.android.view.components.loading.OptionListSkeleton
 import com.zera.android.view.components.loading.SkeletonBox
 import com.zera.android.view.components.scaffolds.ManagerScaffold
 import com.zera.android.view.components.texts.BodyText
-import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.components.texts.TitleText
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.theme.Spacing
@@ -41,6 +40,7 @@ fun CategoriesScreen(
         state = state,
         onSearchQueryChange = viewModel::onSearchQueryChange,
         onAddCategoryClick = viewModel::onAddCategoryClick,
+        onErrorDismiss = viewModel::onErrorDismiss,
     )
 }
 
@@ -53,6 +53,7 @@ private fun CategoriesContent(
     state: CategoriesState,
     onSearchQueryChange: (String) -> Unit,
     onAddCategoryClick: () -> Unit,
+    onErrorDismiss: () -> Unit,
 ) {
     ManagerScaffold(
         title = "Categorias",
@@ -74,9 +75,6 @@ private fun CategoriesContent(
             icon = ZeraIcon.Plus,
         )
 
-        state.errorMessage?.let { message ->
-            CaptionText(text = message, color = MaterialTheme.colorScheme.error)
-        }
         // Só a região da lista alterna: a busca e o botão ficam reais.
         if (state.isLoading) {
             SkeletonBox(width = 120.dp, height = 24.dp)
@@ -88,9 +86,15 @@ private fun CategoriesContent(
                 onItemClick = null,
                 contentPadding = PaddingValues(vertical = Spacing.small),
                 modifier = Modifier.weight(1f),
-                emptyContent = { BodyText(text = "Nenhuma categoria encontrada") },
+                emptyContent = {
+                    if (!state.loadFailed) BodyText(text = "Nenhuma categoria encontrada")
+                },
             )
         }
+    }
+
+    state.errorMessage?.let { message ->
+        ErrorFeedbackPopup(description = message, onDismissRequest = onErrorDismiss)
     }
 }
 
@@ -109,6 +113,7 @@ fun CategoriesScreenPreview() {
             ),
             onSearchQueryChange = {},
             onAddCategoryClick = {},
+            onErrorDismiss = {},
         )
     }
 }
@@ -122,6 +127,7 @@ fun CategoriesScreenLoadingPreview() {
             state = CategoriesState(),
             onSearchQueryChange = {},
             onAddCategoryClick = {},
+            onErrorDismiss = {},
         )
     }
 }

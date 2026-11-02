@@ -6,12 +6,14 @@ import com.zera.android.model.usecase.inventory.CreateCategory
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.viewmodel.ZeraViewModel
+import com.zera.android.viewmodel.errorDescription
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
 data class CategoryCreationState(
     val name: String = "",
     val description: String = "",
+    val nameError: String? = null,
     val isSaving: Boolean = false,
     val errorMessage: String? = null,
 )
@@ -23,11 +25,11 @@ class CategoryCreationViewModel : ZeraViewModel() {
     val state = _state
 
     fun onNameChange(value: String) {
-        _state.value = _state.value.copy(name = value, errorMessage = null)
+        _state.value = _state.value.copy(name = value, nameError = null)
     }
 
     fun onDescriptionChange(value: String) {
-        _state.value = _state.value.copy(description = value, errorMessage = null)
+        _state.value = _state.value.copy(description = value)
     }
 
     fun onCreateClick() {
@@ -35,10 +37,10 @@ class CategoryCreationViewModel : ZeraViewModel() {
         val form = _state.value
         val error = validationError(form.name)
         if (error != null) {
-            _state.value = form.copy(errorMessage = error)
+            _state.value = form.copy(nameError = error)
             return
         }
-        _state.value = form.copy(isSaving = true, errorMessage = null)
+        _state.value = form.copy(isSaving = true, nameError = null, errorMessage = null)
         viewModelScope.launch {
             try {
                 val created = createCategory.execute(
@@ -57,10 +59,14 @@ class CategoryCreationViewModel : ZeraViewModel() {
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
                     isSaving = false,
-                    errorMessage = e.message ?: "Não foi possível cadastrar a categoria.",
+                    errorMessage = errorDescription(e, "Não conseguimos cadastrar a categoria. Tente novamente."),
                 )
             }
         }
+    }
+
+    fun onErrorDismiss() {
+        _state.value = _state.value.copy(errorMessage = null)
     }
 
     fun onCancelClick() {
