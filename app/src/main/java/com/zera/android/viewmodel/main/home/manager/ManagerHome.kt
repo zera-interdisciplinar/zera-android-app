@@ -3,10 +3,11 @@ package com.zera.android.viewmodel.main.home.manager
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.zera.android.model.dto.inventory.DashboardHomeResponseDTO
-import com.zera.android.model.dto.notification.AlertResponseDTO
 import com.zera.android.model.entity.user.UserRole
 import com.zera.android.model.usecase.auth.GetSelfUser
 import com.zera.android.model.usecase.inventory.GetManagerHome
+import com.zera.android.model.usecase.notification.DismissAlert
+import com.zera.android.model.usecase.notification.DismissedAlerts
 import com.zera.android.model.usecase.notification.GetAlerts
 import com.zera.android.model.usecase.team.CountActiveEmployees
 import com.zera.android.view.components.lists.NotificationItem
@@ -58,11 +59,22 @@ class ManagerHomeViewModel : ZeraViewModel() {
     private val getManagerHome = GetManagerHome()
     private val getAlerts = GetAlerts()
     private val countActiveEmployees = CountActiveEmployees()
+    private val dismissAlert = DismissAlert()
 
     private val _state = mutableStateOf(ManagerHomeState())
     val state = _state
 
+    /** A página inteira: ao dispensar um alerta, o próximo sobe para o lugar dele na home. */
+    private var loadedAlerts = emptyList<NotificationItem>()
+
     init {
+        viewModelScope.launch {
+            DismissedAlerts.ids.collect { dismissedIds ->
+                _state.value = _state.value.copy(
+                    notifications = homeAlertsFrom(loadedAlerts, dismissedIds),
+                )
+            }
+        }
         loadDashboard()
     }
 
@@ -120,7 +132,10 @@ class ManagerHomeViewModel : ZeraViewModel() {
     private suspend fun loadAlerts() {
         try {
             val alerts = getAlerts.execute(status = "OPEN")
-            _state.value = _state.value.copy(notifications = homeAlertsFrom(alerts))
+            loadedAlerts = AlertMapping.notificationsFrom(alerts)
+            _state.value = _state.value.copy(
+                notifications = homeAlertsFrom(loadedAlerts, DismissedAlerts.ids.value),
+            )
         } catch (e: CancellationException) {
             throw e
         } catch (_: Exception) {
@@ -159,9 +174,38 @@ class ManagerHomeViewModel : ZeraViewModel() {
         ZeraNavigator.push(Route.Itens())
     }
 
+    /** Atualiza os alertas ao voltar para a tela, sem skeleton. A carga inicial já está no `init`. */
+    fun onScreenResume() {
+        if (_state.value.isLoadingAlerts) return
+        viewModelScope.launch { loadAlerts() }
+    }
+
+    fun onAlertDismiss(notification: NotificationItem) {
+        viewModelScope.launch {
+            try {
+                dismissAlert.execute(notification.id)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(
+                    errorMessage = errorDescription(e, AlertMapping.DismissErrorDescription),
+                )
+            }
+        }
+    }
+
     fun onAlertClick(notification: NotificationItem) {
         val route = routeForAlertKind(notification.kind) ?: return
         ZeraNavigator.push(route)
+        viewModelScope.launch {
+            try {
+                dismissAlert.execute(notification.id)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                // O usuário já seguiu para a ação: o alerta só volta para a lista.
+            }
+        }
     }
 
     fun onSeeAllAlertsClick() {
@@ -174,8 +218,11 @@ class ManagerHomeViewModel : ZeraViewModel() {
         /** A home mostra só os primeiros alertas; o resto fica na central de alertas. */
         internal const val HOME_ALERTS_LIMIT = 3
 
-        internal fun homeAlertsFrom(alerts: List<AlertResponseDTO>): List<NotificationItem> =
-            AlertMapping.notificationsFrom(alerts).take(HOME_ALERTS_LIMIT)
+        internal fun homeAlertsFrom(
+            alerts: List<NotificationItem>,
+            dismissedIds: Set<String>,
+        ): List<NotificationItem> =
+            AlertMapping.visibleAlerts(alerts, dismissedIds).take(HOME_ALERTS_LIMIT)
 
         internal fun occupationFrom(home: DashboardHomeResponseDTO): Float {
             val percent = home.occupancyPercent ?: return 0f

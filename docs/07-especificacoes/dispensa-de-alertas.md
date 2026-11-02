@@ -166,7 +166,7 @@ Uma etapa por vez, com revisão antes da próxima.
 1. [x] `closeAlert` + `DismissedAlerts` + `DismissAlert` + testes
 2. [x] Dispensa pelo push em `PendingAlertDeepLink` (`alertId` provisório) + testes
 3. [x] `AlertCentralViewModel`: filtro `OPEN`, `DismissedAlerts`, paginação, `onAlertDismiss` e `onAlertClick` + testes
-4. [ ] `ManagerHomeViewModel`: `DismissedAlerts`, limite da home, recarga, `onAlertDismiss` e `onAlertClick` + testes
+4. [x] `ManagerHomeViewModel`: `DismissedAlerts`, limite da home, recarga, `onAlertDismiss` e `onAlertClick` + testes
 5. [ ] `Notification` com X + `DismissibleNotification`
 6. [ ] `NotificationList` e `notificationItems` com `onItemDismiss` e animação
 7. [ ] Ligar `AlertCentralScreen` e `ManagerHomeScreen`
