@@ -102,6 +102,7 @@ fun AlertCentralScreen(
             notificationItems(
                 notifications = state.notifications,
                 onItemClick = viewModel::onAlertClick,
+                onItemDismiss = viewModel::onAlertDismiss,
             )
 
             if (state.notifications.isEmpty() && !state.isLoading && !state.isLoadingMore && !state.loadFailed) {

@@ -169,5 +169,5 @@ Uma etapa por vez, com revisão antes da próxima.
 4. [x] `ManagerHomeViewModel`: `DismissedAlerts`, limite da home, recarga, `onAlertDismiss` e `onAlertClick` + testes
 5. [x] `Notification` com X + `DismissibleNotification`
 6. [x] `NotificationList` e `notificationItems` com `onItemDismiss` e animação
-7. [ ] Ligar `AlertCentralScreen` e `ManagerHomeScreen`
+7. [x] Ligar `AlertCentralScreen` e `ManagerHomeScreen`
 8. [ ] Atualizar docs (`contrato-adm-core-alertas/contrato.md`, `06-contratos-api.md`, `03-catalogo-componentes.md`, `09-stack-e-dependencias.md`, status desta spec) e conferir o nome `alertId` na documentação do back-end
