@@ -36,5 +36,7 @@ Plugin `com.google.gms.google-services` 4.5.0, `google-services.json` em `app/`,
 ## Testes
 
 - **JUnit 4** (`junit:junit:4.13.2`) para testes locais (`app/src/test`).
-- **AndroidX Test** (`androidx-junit` 1.3.0, `androidx-espresso-core` 3.7.0) e **Compose UI Test** (`ui-test-junit4`, `ui-test-manifest`) para testes instrumentados (`app/src/androidTest`).
+- **Robolectric** 4.17 e **Compose UI Test** (`ui-test-junit4`, `ui-test-manifest`) para os testes locais de componentes visuais, sem emulador ([spec](07-especificacoes/testes-componentes-visuais.md)). A configuração fica em `app/src/test/resources/robolectric.properties`. O `app/build.gradle.kts` passa `--add-exports=java.base/jdk.internal.access=ALL-UNNAMED` à JVM de teste, exigido pelo SDK 36 do Robolectric.
+- **AndroidX Test** (`androidx-junit` 1.3.0, `androidx-espresso-core` 3.7.0) e **Compose UI Test** para testes instrumentados (`app/src/androidTest`).
+- Para rodar os testes locais: `gradlew testDebugUnitTest`. O workflow `.github/workflows/unit-tests.yml` roda o mesmo comando, na JDK 21, em todo pull request e em push na `main`.
 - Além dos testes-padrão do Android Studio (`ExampleUnitTest`, `ExampleInstrumentedTest`), há `ScrapyClientUrlTest` cobrindo a montagem da base URL da Scrapy (prefixo Kong vs URL direta com `/v1`).

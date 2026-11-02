@@ -24,11 +24,13 @@ data class SignUpState(
     val errorMessage: String? = null
 )
 
-class SignUpViewModel : ZeraViewModel() {
+class SignUpViewModel(
+    private val redeemInvitation: suspend (token: String, name: String, email: String, password: String) -> Unit =
+        { token, name, email, password -> InvitationUseCase().execute(token, name, email, password) },
+) : ZeraViewModel() {
     private val _state = mutableStateOf(SignUpState())
     val state = _state
 
-    private val invitationUseCase = InvitationUseCase()
     private val signInUseCase = SingIn()
 
     fun onNameChange(newName: String) {
@@ -48,6 +50,8 @@ class SignUpViewModel : ZeraViewModel() {
     }
 
     fun signUp() {
+        // O campo de código também dispara o cadastro: ao completar e no "Concluído" do teclado.
+        if (_state.value.isLoading) return
         _state.value = _state.value.copy(isLoading = true, errorMessage = null)
 
         val current = _state.value
@@ -75,7 +79,7 @@ class SignUpViewModel : ZeraViewModel() {
 
         viewModelScope.launch {
             try {
-                invitationUseCase.execute(current.token, current.name, current.email, current.password)
+                redeemInvitation(current.token, current.name, current.email, current.password)
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
                     isLoading = false,

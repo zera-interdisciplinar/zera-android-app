@@ -26,9 +26,19 @@ class ItensMappingTest {
     }
 
     @Test
-    fun omitsStatusTagWhenBackendHasNoChip() {
+    fun showsDraftTag() {
         val product = ItensViewModel.productFrom(
             ItemResponseDTO(id = "id-1", name = "Rascunho", status = "DRAFT"),
+        )
+
+        assertEquals(ItemStatus.Draft.label, product.statusText)
+        assertEquals(ItemStatus.Draft.colorFamily, product.statusStyle)
+    }
+
+    @Test
+    fun omitsStatusTagWhenBackendHasNoChip() {
+        val product = ItensViewModel.productFrom(
+            ItemResponseDTO(id = "id-1", name = "Removido", status = "REMOVED"),
         )
 
         assertNull(product.statusText)

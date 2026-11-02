@@ -100,7 +100,6 @@ internal fun shouldSendAccessToken(encodedPath: String): Boolean {
     val path = encodedPath.trimEnd('/')
     return !path.endsWith("/auth/login") &&
         !path.endsWith("/auth/refresh") &&
-        !path.endsWith("/auth/logout") &&
         !path.endsWith("/invitations/redeem") &&
         !path.endsWith("/auth/password-reset/request") &&
         !path.endsWith("/auth/password-reset/confirm")

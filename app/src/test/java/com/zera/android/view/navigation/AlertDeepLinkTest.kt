@@ -3,7 +3,11 @@ package com.zera.android.view.navigation
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
+// Robolectric fornece o android.net.Uri usado por routeForItemDeepLink.
+@RunWith(RobolectricTestRunner::class)
 class AlertDeepLinkTest {
     @Test
     fun mapsKnownKindsToExistingScreens() {
