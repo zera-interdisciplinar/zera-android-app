@@ -13,24 +13,22 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.zera.android.view.components.lists.LoadMoreEffect
 import com.zera.android.view.components.texts.BodyText
 import com.zera.android.view.components.texts.LabelText
 import com.zera.android.view.theme.Radius
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.view.theme.ZeraTheme
-import kotlinx.coroutines.flow.distinctUntilChanged
 
 /** Lado da caixa de seleção da linha "Selecionar todos". */
 private val SelectAllCheckboxSize = 16.dp
@@ -113,19 +111,7 @@ fun SelectBoxList(
     val allSelected = options.all { it.value in selected }
 
     val listState = rememberLazyListState()
-    LaunchedEffect(listState, options.size, isLoadingMore) {
-        if (isLoadingMore) return@LaunchedEffect
-        snapshotFlow {
-            val info = listState.layoutInfo
-            val lastVisible = info.visibleItemsInfo.lastOrNull()?.index ?: return@snapshotFlow false
-            val total = info.totalItemsCount
-            total > 0 && lastVisible >= total - 4
-        }
-            .distinctUntilChanged()
-            .collect { nearEnd ->
-                if (nearEnd) onEndReached()
-            }
-    }
+    LoadMoreEffect(listState = listState, itemCount = options.size, onEndReached = onEndReached)
 
     Column(modifier = modifier) {
         if (hasSelectAll) {

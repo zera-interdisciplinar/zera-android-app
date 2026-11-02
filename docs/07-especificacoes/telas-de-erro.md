@@ -202,7 +202,7 @@ Uma etapa por vez, com revisão antes da próxima.
 4. [x] Splash: `try/catch` no boot e separação de conexão vs. 401/403 no restore
 5. [x] `ConnectionErrorInterceptor` + `ConnectionErrorGate` nos clientes HTTP + testes
 6. [x] Componente `ErrorFeedbackPopup`
-7. [ ] Paginação sem loop em `ProductList`, `OptionList`, `SelectBoxList` e `AlertCentralScreen`
+7. [x] Paginação sem loop em `ProductList`, `OptionList`, `SelectBoxList` e `AlertCentralScreen`
 8. [ ] Migração — Categorias (`CategoriesScreen`, `CategoryCreationScreen`)
 9. [ ] Migração — Funcionários (`EmployeesScreen`, `EmployeeDetailsScreen`, `EmployeeRegisterScreen`)
 10. [ ] Migração — Home do gestor e Índices (`ManagerHomeScreen`, `IndexesScreen`)

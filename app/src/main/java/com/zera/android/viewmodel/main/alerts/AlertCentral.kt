@@ -60,12 +60,11 @@ class AlertCentralViewModel(
             } catch (e: CancellationException) {
                 throw e
             } catch (_: Exception) {
-                // TODO: trocar por snackbar com "Tentar novamente". Por ora a paginação para aqui,
-                //  senão a tela pediria a mesma página de novo assim que o carregamento terminasse.
+                // Mantém hasMore: o LoadMoreEffect não pede a página de novo sozinho, só quando o
+                // usuário sobe e desce outra vez até o fim.
                 _state.value = _state.value.copy(
                     isLoading = false,
                     isLoadingMore = false,
-                    hasMore = false,
                     snackbarMessage = "Não foi possível carregar os alertas.",
                 )
             }

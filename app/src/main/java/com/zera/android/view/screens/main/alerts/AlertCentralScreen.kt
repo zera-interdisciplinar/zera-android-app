@@ -17,13 +17,13 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.zera.android.view.components.lists.LoadMoreEffect
 import com.zera.android.view.components.lists.NotificationItem
 import com.zera.android.view.components.lists.notificationItems
 import com.zera.android.view.components.loading.NotificationListSkeleton
@@ -64,17 +64,12 @@ fun AlertCentralScreen(
     }
 
     val listState = rememberLazyListState()
-    val nearEnd by remember {
-        derivedStateOf {
-            val info = listState.layoutInfo
-            val lastVisible = info.visibleItemsInfo.lastOrNull()?.index ?: return@derivedStateOf false
-            lastVisible >= info.totalItemsCount - 1 - LoadMoreThreshold
-        }
-    }
-    // Também roda de novo quando uma página termina de carregar e a lista ainda não encheu a tela.
-    LaunchedEffect(nearEnd, state.isLoading, state.isLoadingMore, state.hasMore) {
-        if (nearEnd && state.hasMore && !state.isLoading && !state.isLoadingMore) viewModel.onLoadMore()
-    }
+    LoadMoreEffect(
+        listState = listState,
+        itemCount = state.notifications.size,
+        onEndReached = viewModel::onLoadMore,
+        threshold = LoadMoreThreshold,
+    )
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
