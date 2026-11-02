@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -145,7 +147,12 @@ fun EmployeeItemsScreen(
                 text = "Escolha quais filtros deseja aplicar em itens",
                 bold = true,
             )
-            Column(verticalArrangement = Arrangement.spacedBy(Spacing.large)) {
+            Column(
+                modifier = Modifier
+                    .weight(1f, fill = false)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(Spacing.large),
+            ) {
                 ZeraChipsGroup(
                     label = "Status",
                     options = ItemStatus.entries.map { it.label },
