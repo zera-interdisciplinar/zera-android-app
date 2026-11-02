@@ -7,6 +7,8 @@ import com.zera.android.view.components.lists.NotificationItem
 import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.view.navigation.routeForAlertKind
 import com.zera.android.viewmodel.ZeraViewModel
+import com.zera.android.viewmodel.errorDescription
+import com.zera.android.viewmodel.loadErrorDescription
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
@@ -15,7 +17,9 @@ data class AlertCentralState(
     val isLoading: Boolean = true,
     val isLoadingMore: Boolean = false,
     val hasMore: Boolean = true,
-    val snackbarMessage: String? = null,
+    /** A última carga falhou: a lista vazia não mostra "Nenhuma notificação". */
+    val loadFailed: Boolean = false,
+    val errorMessage: String? = null,
 )
 
 class AlertCentralViewModel(
@@ -56,16 +60,18 @@ class AlertCentralViewModel(
                     isLoading = false,
                     isLoadingMore = false,
                     hasMore = hasMoreAfter(alerts.size),
+                    loadFailed = false,
                 )
             } catch (e: CancellationException) {
                 throw e
-            } catch (_: Exception) {
+            } catch (e: Exception) {
                 // Mantém hasMore: o LoadMoreEffect não pede a página de novo sozinho, só quando o
                 // usuário sobe e desce outra vez até o fim.
                 _state.value = _state.value.copy(
                     isLoading = false,
                     isLoadingMore = false,
-                    snackbarMessage = "Não foi possível carregar os alertas.",
+                    loadFailed = true,
+                    errorMessage = errorDescription(e, loadErrorDescription("os alertas")),
                 )
             }
         }
@@ -76,8 +82,8 @@ class AlertCentralViewModel(
         ZeraNavigator.push(route)
     }
 
-    fun onSnackbarShown() {
-        _state.value = _state.value.copy(snackbarMessage = null)
+    fun onErrorDismiss() {
+        _state.value = _state.value.copy(errorMessage = null)
     }
 
     companion object {

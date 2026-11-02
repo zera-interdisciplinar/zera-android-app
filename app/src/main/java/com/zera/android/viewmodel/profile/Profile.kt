@@ -15,6 +15,9 @@ import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.view.transition.ScreenAnimation
 import com.zera.android.viewmodel.ZeraViewModel
+import com.zera.android.viewmodel.appMessageOrFallback
+import com.zera.android.viewmodel.errorDescription
+import com.zera.android.viewmodel.loadErrorDescription
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -40,7 +43,6 @@ data class ProfileState(
     val isLoggingOut: Boolean = false,
     val errorMessage: String? = null,
     val snackbarMessage: String? = null,
-    val snackbarIsError: Boolean = true,
     /** Rascunho do bottom sheet "Editar perfil"; `null` = sheet fechado. */
     val editDraft: ProfileEditDraft? = null,
 )
@@ -50,8 +52,6 @@ data class ProfileEditDraft(
     val email: String = "",
     val nameError: String? = null,
     val emailError: String? = null,
-    /** Erro do último "Salvar", mostrado dentro do sheet (o snackbar da tela fica atrás dele). */
-    val submitError: String? = null,
 )
 
 /** Quais campos do rascunho diferem do perfil atual e o usuário pode alterar. */
@@ -94,7 +94,7 @@ class ProfileViewModel(
                 } catch (e: Exception) {
                     _state.value = stateFrom(profile, apiRole).copy(
                         isLoading = false,
-                        errorMessage = e.message ?: "Não foi possível carregar o telefone.",
+                        errorMessage = errorDescription(e, loadErrorDescription("o telefone")),
                     )
                     return@launch
                 }
@@ -104,7 +104,7 @@ class ProfileViewModel(
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
                     isLoading = false,
-                    errorMessage = e.message ?: "Não foi possível carregar o perfil.",
+                    errorMessage = errorDescription(e, loadErrorDescription("o perfil")),
                 )
             }
         }
@@ -135,23 +135,19 @@ class ProfileViewModel(
         }
     }
 
-    fun onSnackbarShown() {
-        _state.value = _state.value.copy(snackbarMessage = null)
+    fun onErrorDismiss() {
+        _state.value = _state.value.copy(errorMessage = null)
     }
 
-    private fun showSnackbar(message: String, isError: Boolean, isSaving: Boolean? = null) {
-        _state.value = _state.value.copy(
-            isSaving = isSaving ?: _state.value.isSaving,
-            snackbarMessage = message,
-            snackbarIsError = isError,
-        )
+    fun onSnackbarShown() {
+        _state.value = _state.value.copy(snackbarMessage = null)
     }
 
     fun onPhotoPicked(bytes: ByteArray, mimeType: String) {
         if (_state.value.isSaving) return
         val error = photoValidationError(bytes, mimeType)
         if (error != null) {
-            showSnackbar(error, isError = true)
+            _state.value = _state.value.copy(errorMessage = error)
             return
         }
         viewModelScope.launch {
@@ -168,7 +164,6 @@ class ProfileViewModel(
                     isSaving = false,
                     isUploadingPhoto = false,
                     snackbarMessage = "Foto atualizada.",
-                    snackbarIsError = false,
                 )
             } catch (e: CancellationException) {
                 throw e
@@ -176,8 +171,7 @@ class ProfileViewModel(
                 _state.value = _state.value.copy(
                     isSaving = false,
                     isUploadingPhoto = false,
-                    snackbarMessage = photoWriteError(e),
-                    snackbarIsError = true,
+                    errorMessage = errorDescription(e, photoWriteError(e)),
                 )
             }
         }
@@ -199,17 +193,17 @@ class ProfileViewModel(
     }
 
     fun onEditNameChange(value: String) {
-        updateDraft { it.copy(fullName = value, nameError = null, submitError = null) }
+        updateDraft { it.copy(fullName = value, nameError = null) }
     }
 
     fun onEditEmailChange(value: String) {
-        updateDraft { it.copy(email = value, emailError = null, submitError = null) }
+        updateDraft { it.copy(email = value, emailError = null) }
     }
 
     /**
      * Valida o rascunho e grava só o que mudou (o nome só para gestor). Cada campo é um
      * endpoint: se um falhar, os anteriores já ficam salvos no state e o sheet continua aberto
-     * com o erro, e um novo "Salvar" reenvia apenas o que falta.
+     * com o popup de erro por cima, e um novo "Salvar" reenvia apenas o que falta.
      */
     fun onEditSave() {
         val current = _state.value
@@ -220,7 +214,6 @@ class ProfileViewModel(
         val validated = draft.copy(
             nameError = if (changes.name) nameValidationError(draft.fullName) else null,
             emailError = if (changes.email) emailValidationError(draft.email) else null,
-            submitError = null,
         )
         if (validated.nameError != null || validated.emailError != null) {
             _state.value = current.copy(editDraft = validated)
@@ -255,16 +248,12 @@ class ProfileViewModel(
                     isSaving = false,
                     editDraft = null,
                     snackbarMessage = "Perfil atualizado.",
-                    snackbarIsError = false,
                 )
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 val message = if (writingEmail) emailWriteError(e) else profileWriteError(e)
-                _state.value = _state.value.copy(
-                    isSaving = false,
-                    editDraft = _state.value.editDraft?.copy(submitError = message),
-                )
+                _state.value = _state.value.copy(isSaving = false, errorMessage = message)
             }
         }
     }
@@ -349,7 +338,7 @@ class ProfileViewModel(
                 "invalidmimetype" in raw || "mime type" in raw ->
                     "Este tipo de arquivo não é permitido. Use JPEG, PNG ou WebP."
                 "row-level security" in raw || "accessdenied" in raw ->
-                    "Sem permissão para enviar a foto. Confira a política do Storage."
+                    "Sem permissão para enviar a foto."
                 "bucket" in raw -> "Não foi possível enviar a foto. Tente novamente."
                 "jwt" in raw || "apikey" in raw || "unauthorized" in raw ->
                     "Não foi possível enviar a foto. Tente novamente."
@@ -366,7 +355,8 @@ class ProfileViewModel(
             return "$url${separator}t=${System.currentTimeMillis()}"
         }
 
-        internal fun profileWriteError(error: Exception): String {
+        /** Descrição do popup para a falha ao salvar o perfil; `null` quando é falta de conexão. */
+        internal fun profileWriteError(error: Exception): String? {
             if (error is HttpException) {
                 return when (error.code()) {
                     400 -> "Não foi possível salvar. Verifique os dados."
@@ -376,11 +366,10 @@ class ProfileViewModel(
                     else -> "Não foi possível salvar. Tente novamente."
                 }
             }
-            return error.message?.takeIf { it.isNotBlank() }
-                ?: "Não foi possível salvar. Tente novamente."
+            return appMessageOrFallback(error, "Não foi possível salvar. Tente novamente.")
         }
 
-        internal fun emailWriteError(error: Exception): String {
+        internal fun emailWriteError(error: Exception): String? {
             if (error is HttpException && error.code() == 400) {
                 return "E-mail já em uso ou inválido."
             }

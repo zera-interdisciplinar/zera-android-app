@@ -12,17 +12,13 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Snackbar
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.zera.android.view.components.feedback.ErrorFeedbackPopup
 import com.zera.android.view.components.lists.LoadMoreEffect
 import com.zera.android.view.components.lists.NotificationItem
 import com.zera.android.view.components.lists.notificationItems
@@ -32,7 +28,6 @@ import com.zera.android.view.components.texts.BodyText
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.view.theme.ZeraTheme
-import com.zera.android.view.theme.palette
 import com.zera.android.viewmodel.main.alerts.AlertCentralState
 import com.zera.android.viewmodel.main.alerts.AlertCentralViewModel
 
@@ -54,15 +49,6 @@ fun AlertCentralScreen(
     viewModel: AlertCentralViewModel = viewModel(),
 ) {
     val state by viewModel.state
-    val snackbarHostState = remember { SnackbarHostState() }
-    val errorPalette = ZeraColorFamily.Red.palette()
-
-    LaunchedEffect(state.snackbarMessage) {
-        val message = state.snackbarMessage ?: return@LaunchedEffect
-        snackbarHostState.showSnackbar(message)
-        viewModel.onSnackbarShown()
-    }
-
     val listState = rememberLazyListState()
     LoadMoreEffect(
         listState = listState,
@@ -82,15 +68,6 @@ fun AlertCentralScreen(
                     .statusBarsPadding()
                     .padding(horizontal = Spacing.small),
             )
-        },
-        snackbarHost = {
-            SnackbarHost(hostState = snackbarHostState) { data ->
-                Snackbar(
-                    snackbarData = data,
-                    containerColor = errorPalette.base,
-                    contentColor = errorPalette.onBase,
-                )
-            }
         },
     ) { innerPadding ->
         LazyColumn(
@@ -127,7 +104,7 @@ fun AlertCentralScreen(
                 onItemClick = viewModel::onAlertClick,
             )
 
-            if (state.notifications.isEmpty() && !state.isLoading && !state.isLoadingMore) {
+            if (state.notifications.isEmpty() && !state.isLoading && !state.isLoadingMore && !state.loadFailed) {
                 item(key = "empty") {
                     Box(
                         modifier = Modifier.fillMaxWidth().padding(Spacing.medium),
@@ -150,6 +127,10 @@ fun AlertCentralScreen(
                 }
             }
         }
+    }
+
+    state.errorMessage?.let { message ->
+        ErrorFeedbackPopup(description = message, onDismissRequest = viewModel::onErrorDismiss)
     }
 }
 

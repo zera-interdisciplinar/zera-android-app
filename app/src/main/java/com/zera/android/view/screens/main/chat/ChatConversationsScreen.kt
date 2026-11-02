@@ -28,9 +28,9 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zera.android.view.components.buttons.IconButton
 import com.zera.android.view.components.chat.ConversationRow
+import com.zera.android.view.components.feedback.ErrorFeedbackPopup
 import com.zera.android.view.components.loading.SkeletonBox
 import com.zera.android.view.components.navigation.UpperNavBar
-import com.zera.android.view.components.texts.BodyText
 import com.zera.android.view.theme.Radius
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
@@ -63,6 +63,10 @@ fun ChatConversationsScreen(
         onNewConversationClick = viewModel::onNewConversationClick,
         onBackClick = viewModel::onBackClick,
     )
+
+    state.errorMessage?.let { message ->
+        ErrorFeedbackPopup(description = message, onDismissRequest = viewModel::onErrorDismiss)
+    }
 }
 
 /**
@@ -112,12 +116,6 @@ private fun ChatConversationsContent(
             when {
                 state.isLoading -> {
                     ChatConversationsSkeleton()
-                }
-                state.errorMessage != null && state.items.isEmpty() -> {
-                    BodyText(
-                        text = state.errorMessage.orEmpty(),
-                        modifier = Modifier.padding(Spacing.medium),
-                    )
                 }
                 else -> {
                     LazyColumn(modifier = Modifier.fillMaxSize()) {

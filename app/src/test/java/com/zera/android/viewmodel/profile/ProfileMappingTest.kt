@@ -80,7 +80,7 @@ class ProfileMappingTest {
             ProfileViewModel.photoWriteError(Exception("Não foi possível enviar a foto (400): InvalidMimeType")),
         )
         assertEquals(
-            "Sem permissão para enviar a foto. Confira a política do Storage.",
+            "Sem permissão para enviar a foto.",
             ProfileViewModel.photoWriteError(
                 Exception("Não foi possível enviar a foto (400): new row violates row-level security policy"),
             ),
@@ -88,8 +88,12 @@ class ProfileMappingTest {
     }
 
     @Test
-    fun emailWriteErrorFallsBackToGenericMessage() {
-        assertEquals("falhou", ProfileViewModel.emailWriteError(Exception("falhou")))
+    fun emailWriteErrorHidesTheRawMessage() {
+        assertEquals(
+            "Não foi possível salvar. Tente novamente.",
+            ProfileViewModel.emailWriteError(Exception("falhou")),
+        )
+        assertNull(ProfileViewModel.emailWriteError(java.net.UnknownHostException("adm")))
     }
 
     @Test

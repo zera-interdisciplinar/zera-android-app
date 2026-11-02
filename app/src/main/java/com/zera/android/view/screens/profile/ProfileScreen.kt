@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zera.android.view.components.buttons.ZeraButton
 import com.zera.android.view.components.buttons.ZeraButtonType
+import com.zera.android.view.components.feedback.ErrorFeedbackPopup
 import com.zera.android.view.components.forms.EditProfileForm
 import com.zera.android.view.components.lists.EditableFieldRow
 import com.zera.android.view.components.loading.SkeletonBox
@@ -62,7 +63,6 @@ fun ProfileScreen(
     val state by viewModel.state
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
-    val errorPalette = ZeraColorFamily.Red.palette()
     val successPalette = ZeraColorFamily.Green.palette()
 
     LaunchedEffect(state.snackbarMessage) {
@@ -97,11 +97,10 @@ fun ProfileScreen(
         },
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState) { data ->
-                val palette = if (state.snackbarIsError) errorPalette else successPalette
                 Snackbar(
                     snackbarData = data,
-                    containerColor = palette.base,
-                    contentColor = palette.onBase,
+                    containerColor = successPalette.base,
+                    contentColor = successPalette.onBase,
                 )
             }
         },
@@ -125,9 +124,6 @@ fun ProfileScreen(
                 if (state.isLoading) {
                     ProfileSkeleton()
                 } else {
-                    state.errorMessage?.let { message ->
-                        CaptionText(text = message, color = MaterialTheme.colorScheme.error)
-                    }
 
                     Avatar(
                         initials = state.initials,
@@ -205,7 +201,6 @@ fun ProfileScreen(
                 emailEnabled = state.canEditEmail,
                 nameError = draft.nameError,
                 emailError = draft.emailError,
-                errorMessage = draft.submitError,
                 isSubmitting = state.isSaving,
             )
         }
@@ -219,6 +214,10 @@ fun ProfileScreen(
             onConfirm = viewModel::onLogoutConfirm,
             onDismissRequest = viewModel::onLogoutDismiss,
         )
+    }
+
+    state.errorMessage?.let { message ->
+        ErrorFeedbackPopup(description = message, onDismissRequest = viewModel::onErrorDismiss)
     }
 }
 
