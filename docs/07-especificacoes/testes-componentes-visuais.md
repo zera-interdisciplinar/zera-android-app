@@ -4,7 +4,7 @@
 
 - **Feature:** Testes de comportamento dos componentes de `view/components`, com Compose UI Test e Robolectric, sem emulador
 - **Perfil(is) envolvido(s):** Não se aplica (qualidade interna; quem usa é o time de desenvolvimento)
-- **Status:** em progresso (item 7 de 19)
+- **Status:** em progresso (item 8 de 19)
 - **Última atualização:** 2026-11-02
 
 ## Contexto
@@ -190,7 +190,7 @@ Um item por vez, um commit por item (`test: ...`), parando para revisão.
 - [x] **5. `ZeraSearchInput`.** Digitar chama `onValueChange`; placeholder só com valor vazio; "Limpar busca" só com texto e envia `""`; ação do teclado chama `onSearch`.
 - [x] **6. `ZeraTokenInput`.** Filtra para dígitos e respeita `size`; `value` externo com não dígitos é normalizado; `onFilled` só ao completar; "Concluído" incompleto não chama `onFilled`; completo chama; desabilitado; erro.
 - [x] **7. `ZeraDropdownInput` e `ZeraSelectInput`.** Dropdown: abre, lista as opções, escolher chama `onValueChange` e fecha; desabilitado não abre; erro. Select: valor ou placeholder; toque chama `onClick`; desabilitado não chama; erro.
-- [ ] **8. `ZeraDateInput`.** Toque abre o seletor; "Confirmar" devolve a mesma data em `dd/MM/yyyy`, inclusive em `America/Sao_Paulo`; "Cancelar" fecha sem chamar `onValueChange`; "Confirmar" sem data fecha sem chamar; valor inválido abre sem quebrar; desabilitado não abre. Não testar a seleção de dias no calendário, que é do Material.
+- [x] **8. `ZeraDateInput`.** Toque abre o seletor; "Confirmar" devolve a mesma data em `dd/MM/yyyy`, inclusive em `America/Sao_Paulo`; "Cancelar" fecha sem chamar `onValueChange`; "Confirmar" sem data fecha sem chamar; valor inválido abre sem quebrar; desabilitado não abre. Não testar a seleção de dias no calendário, que é do Material.
 - [ ] **9. `ZeraChipsGroup`, `ZeraRadioButton` e `ZeraSliderInput`.** Chips: seleção única chama `onSelectedChange`; múltipla adiciona e remove; desabilitado não responde; layout em linha e empilhado. Radio: estado selecionado, toque e rótulo. Slider: mostra rótulo e limites; `SetProgress` devolve inteiro; desabilitado.
 - [ ] **10. `SelectBoxItem` e `SelectBoxList`.** Item: estado marcado e desmarcado; toque; descrição opcional. Lista: toque adiciona e remove; "Selecionar todos" marca, desmarca e preserva seleções de fora; marcada automaticamente com tudo selecionado; lista vazia sem a linha; `isLoadingMore` mostra progresso.
 
