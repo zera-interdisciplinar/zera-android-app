@@ -28,6 +28,7 @@ import com.zera.android.view.theme.ZeraTheme
  * @param style família de cor do card. Ver [ZeraColorFamily].
  * @param resolvable quando `true`, a lista pode exibir "Resolver agora" se houver [NotificationList.onItemClick].
  * @param kind tipo do alerta da API, quando a notificação veio de `AlertResponseDTO`.
+ * @param eventId origem do alerta da API: id do item ou da unidade, conforme o [kind].
  * @param actionLabel texto da ação exibida quando [resolvable] (ex.: "Reenviar convite").
  * @param neutral quando `true`, o card usa o visual neutro de notificação antiga, ignorando [style].
  */
@@ -38,6 +39,7 @@ data class NotificationItem(
     val style: ZeraColorFamily = ZeraColorFamily.Yellow,
     val resolvable: Boolean = false,
     val kind: String? = null,
+    val eventId: String? = null,
     val actionLabel: String = "Resolver agora",
     val neutral: Boolean = false,
 )

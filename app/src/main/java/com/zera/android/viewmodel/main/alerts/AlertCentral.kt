@@ -7,7 +7,7 @@ import com.zera.android.model.usecase.notification.DismissedAlerts
 import com.zera.android.model.usecase.notification.GetAlerts
 import com.zera.android.view.components.lists.NotificationItem
 import com.zera.android.view.navigation.ZeraNavigator
-import com.zera.android.view.navigation.routeForAlertKind
+import com.zera.android.view.navigation.routeForAlert
 import com.zera.android.viewmodel.ZeraViewModel
 import com.zera.android.viewmodel.errorDescription
 import com.zera.android.viewmodel.loadErrorDescription
@@ -113,7 +113,7 @@ class AlertCentralViewModel(
     }
 
     fun onAlertClick(notification: NotificationItem) {
-        val route = routeForAlertKind(notification.kind) ?: return
+        val route = routeForAlert(notification.kind, notification.eventId) ?: return
         ZeraNavigator.push(route)
         viewModelScope.launch {
             try {

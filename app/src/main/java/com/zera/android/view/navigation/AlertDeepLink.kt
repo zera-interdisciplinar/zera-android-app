@@ -71,6 +71,27 @@ fun routeForItemDeepLink(link: String?): Route? {
     return Route.ItemDetails(itemId)
 }
 
+/** Tipos cujo `eventId` é o id do item. Em `STOCK_QUANTITY_LIMIT`, ele é o id da unidade. */
+private val ItemAlertKinds = setOf(
+    AlertKind.WARRANTY_EXPIRATION,
+    AlertKind.LIFESPAN_EXPIRATION,
+    AlertKind.USAGE_INTENSITY_LIMIT,
+    AlertKind.TIME_IN_STOCK_LIMIT,
+    AlertKind.STALE_ITEM,
+    AlertKind.PREDICTED_FAILURE,
+    AlertKind.ITEM_PENDING_APPROVAL,
+)
+
+/** Rota de um alerta da lista: o detalhe do item quando o `eventId` aponta para um; senão, a do tipo. */
+fun routeForAlert(kind: String?, eventId: String?): Route? {
+    val itemId = eventId?.takeIf { it.isNotBlank() }
+    return if (itemId != null && AlertKind.from(kind.orEmpty()) in ItemAlertKinds) {
+        Route.ItemDetails(itemId)
+    } else {
+        routeForAlertKind(kind)
+    }
+}
+
 fun routeForAlertKind(kind: String?): Route? = when (AlertKind.from(kind.orEmpty())) {
     AlertKind.STOCK_QUANTITY_LIMIT,
     AlertKind.TIME_IN_STOCK_LIMIT,

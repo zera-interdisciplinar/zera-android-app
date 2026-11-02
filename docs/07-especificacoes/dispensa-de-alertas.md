@@ -44,6 +44,15 @@ Como usuário que recebe alertas, quero que um alerta saia da lista quando eu in
 - **When** o usuário toca na ação
 - **Then** o alerta sai da lista, é fechado na API e o app navega para a tela da ação
 
+A tela da ação vem de `routeForAlert(kind, eventId)`:
+
+| Tipo | Destino |
+|---|---|
+| `WARRANTY_EXPIRATION`, `LIFESPAN_EXPIRATION`, `USAGE_INTENSITY_LIMIT`, `TIME_IN_STOCK_LIMIT`, `STALE_ITEM`, `PREDICTED_FAILURE`, `ITEM_PENDING_APPROVAL` | Detalhe do item (`eventId` é o `itemId`). Sem `eventId`, a listagem de itens |
+| `STOCK_QUANTITY_LIMIT` | Listagem de itens (`eventId` é o `unitId`) |
+| `RECYCLABLE_TO_LANDFILL` | Tela de reciclagem |
+| Demais | Sem ação |
+
 ### Cenário: Tocar no push
 
 - **Given** um push que traz `alertId` no `data`
@@ -147,7 +156,6 @@ Como usuário que recebe alertas, quero que um alerta saia da lista quando eu in
 
 ## Fora de escopo desta spec
 
-- "Resolver agora" abrir o item específico. A resposta documentada do `GET` não traz `deepLink`; será tratado depois.
 - Enviar `alertId` no push: mudança do back-end.
 - Dois pushes de mesmo título se substituem na bandeja, porque o id da notificação vem de `title.hashCode()`. Só o último `alertId` chega ao app; os anteriores seguem na lista até serem dispensados.
 - Desfazer a dispensa.
