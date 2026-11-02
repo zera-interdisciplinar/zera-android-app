@@ -180,7 +180,8 @@ Um item por vez, um commit por item (`test: ...`), parando para revisão.
 
 ### Preparação
 
-- [x] **1. Stack e `ZeraButton`.** Adicionar `testImplementation` de Compose BOM e `ui-test-junit4`, `isIncludeAndroidResources = true`, `qualifiers` no `robolectric.properties` e o helper `setZeraContent`. Robolectric e `robolectric.properties` já foram adicionados na correção da linha de base. `ZeraButtonTest`: mostra o texto; toque chama `onClick`; desabilitado não chama; `loading` esconde o texto, mostra o progresso e bloqueia o toque.- [ ] **2. `PopupDialog` e `BottomSheet`.** Valida as janelas no Robolectric. `PopupDialog`: mostra o conteúdo; o X chama `onDismissRequest`; `hasDismissButton = false` esconde o X. `BottomSheet`: mostra o conteúdo.
+- [x] **1. Stack e `ZeraButton`.** Adicionar `testImplementation` de Compose BOM e `ui-test-junit4`, `isIncludeAndroidResources = true`, `qualifiers` no `robolectric.properties` e o helper `setZeraContent`. Robolectric e `robolectric.properties` já foram adicionados na correção da linha de base. `ZeraButtonTest`: mostra o texto; toque chama `onClick`; desabilitado não chama; `loading` esconde o texto, mostra o progresso e bloqueia o toque.
+- [x] **2. `PopupDialog` e `BottomSheet`.** Valida as janelas no Robolectric. `PopupDialog`: mostra o conteúdo; o X chama `onDismissRequest`; `hasDismissButton = false` esconde o X. `BottomSheet`: mostra o conteúdo.
 
 ### Componentes base
 
