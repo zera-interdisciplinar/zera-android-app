@@ -4,7 +4,7 @@ import com.zera.android.view.navigation.Route
 import com.zera.android.view.theme.icons.ZeraIcon
 
 /**
- * Atalhos da [SideBar] do gestor. Os atalhos fixos (Central de Ajuda, Fale com o Zé e
+ * Atalhos da [SideBar] do gestor. Os atalhos fixos (Central de Ajuda, Fale com o Zack e
  * Configurações) não entram aqui: a própria [SideBar] já os desenha.
  */
 val ManagerSideBarItems = listOf(

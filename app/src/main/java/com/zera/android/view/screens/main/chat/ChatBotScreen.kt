@@ -51,7 +51,7 @@ fun ChatBotScreen(
         containerColor = MaterialTheme.zeraColors.brandContainer,
         topBar = {
             UpperNavBar(
-                title = "Zé Bot",
+                title = "Zack Bot",
                 goBack = true,
                 showActions = false,
                 backgroundVariant = true,

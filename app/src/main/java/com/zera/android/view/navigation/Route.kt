@@ -27,7 +27,7 @@ sealed interface Route{
     data object Employees : Route
 
     @Serializable
-    data object EmployeeRegister : Route
+    data object PendingInvites : Route
 
     @Serializable
     data class EmployeeDetails(val employeeId: String) : Route
@@ -104,6 +104,9 @@ sealed interface Route{
 
     @Serializable
     data object Categories : Route
+
+    @Serializable
+    data class CategoryDetails(val categoryId: String) : Route
 
     @Serializable
     data object CategoryCreation : Route

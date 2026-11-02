@@ -17,3 +17,13 @@ data class CreateCategoryRequestDTO(
     val name: String,
     val description: String? = null,
 )
+
+@Serializable
+data class UpdateCategoryNameRequestDTO(
+    val name: String,
+)
+
+@Serializable
+data class UpdateCategoryDescriptionRequestDTO(
+    val description: String,
+)

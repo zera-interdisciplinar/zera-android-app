@@ -32,11 +32,12 @@ import com.zera.android.view.screens.main.alerts.AlertCentralScreen
 import com.zera.android.view.screens.main.categories.CategoriesScreen
 import com.zera.android.view.screens.main.categories.CategoryCreationScreen
 import com.zera.android.view.screens.main.categories.CategoryCreationSuccessScreen
+import com.zera.android.view.screens.main.categories.CategoryDetailsScreen
 import com.zera.android.view.screens.main.chat.ChatBotScreen
 import com.zera.android.view.screens.main.chat.ChatConversationsScreen
 import com.zera.android.view.screens.main.employees.EmployeeDetailsScreen
-import com.zera.android.view.screens.main.employees.EmployeeRegisterScreen
 import com.zera.android.view.screens.main.employees.EmployeesScreen
+import com.zera.android.view.screens.main.employees.PendingInvitesScreen
 import com.zera.android.view.screens.main.helpCentral.HelpCentralHubScreen
 import com.zera.android.view.screens.main.helpCentral.HelpDocumentScreen
 import com.zera.android.view.screens.main.home.employee.EmployeeHomeScreen
@@ -66,6 +67,7 @@ import com.zera.android.view.screens.preferences.ConfigurationsScreen
 import com.zera.android.view.screens.profile.ProfileScreen
 import com.zera.android.view.transition.LocalAnimatedVisibilityScope
 import com.zera.android.view.transition.LocalSharedTransitionScope
+import com.zera.android.view.transition.ReduceAnimationsManager
 import com.zera.android.view.transition.ScreenAnimationRegistry
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -119,10 +121,11 @@ fun ZeraNavHost() {
             NavHost(
                 navController = navController,
                 startDestination = Route.Splash,
-                enterTransition = { animations.of(targetState).enter() },
-                exitTransition = { animations.of(targetState).exit() },
-                popEnterTransition = { animations.of(initialState).popEnter() },
-                popExitTransition = { animations.of(initialState).popExit() },
+                // O registro roda sempre, para a tela guardar a animação caso a preferência seja desligada depois.
+                enterTransition = { animations.of(targetState).orNone(ReduceAnimationsManager.enabled).enter() },
+                exitTransition = { animations.of(targetState).orNone(ReduceAnimationsManager.enabled).exit() },
+                popEnterTransition = { animations.of(initialState).orNone(ReduceAnimationsManager.enabled).popEnter() },
+                popExitTransition = { animations.of(initialState).orNone(ReduceAnimationsManager.enabled).popExit() },
             ) {
                 composable<Route.Splash> {
                     CompositionLocalProvider(LocalAnimatedVisibilityScope provides this) {
@@ -158,8 +161,8 @@ fun ZeraNavHost() {
                         EmployeesScreen()
                     }
                 }
-                composable<Route.EmployeeRegister> {
-                    EmployeeRegisterScreen()
+                composable<Route.PendingInvites> {
+                    PendingInvitesScreen()
                 }
                 composable<Route.EmployeeDetails> { backStackEntry ->
                     val route = backStackEntry.toRoute<Route.EmployeeDetails>()
@@ -250,6 +253,10 @@ fun ZeraNavHost() {
                 }
                 composable<Route.Categories> {
                     CategoriesScreen()
+                }
+                composable<Route.CategoryDetails> { backStackEntry ->
+                    val route = backStackEntry.toRoute<Route.CategoryDetails>()
+                    CategoryDetailsScreen(categoryId = route.categoryId)
                 }
                 composable<Route.CategoryCreation> {
                     CategoryCreationScreen()

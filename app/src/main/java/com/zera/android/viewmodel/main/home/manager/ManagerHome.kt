@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.zera.android.model.dto.inventory.DashboardHomeResponseDTO
 import com.zera.android.model.entity.user.UserRole
 import com.zera.android.model.usecase.auth.GetSelfUser
+import com.zera.android.model.usecase.inventory.DeletedItems
 import com.zera.android.model.usecase.inventory.GetManagerHome
 import com.zera.android.model.usecase.notification.DismissAlert
 import com.zera.android.model.usecase.notification.DismissedAlerts
@@ -21,6 +22,7 @@ import com.zera.android.viewmodel.errorDescription
 import com.zera.android.viewmodel.loadErrorDescription
 import com.zera.android.viewmodel.main.alerts.AlertMapping
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.Locale
@@ -30,6 +32,7 @@ data class ManagerHomeState(
     val userName: String = "",
     val userRole: String = "",
     val stockItemCount: Int = 0,
+    val stockCapacity: Int? = null,
     val stockOccupation: Float = 0f,
     val totalItems: String = "",
     val itemsChangeLabel: String = "",
@@ -75,6 +78,10 @@ class ManagerHomeViewModel : ZeraViewModel() {
                 )
             }
         }
+        // Totais, ocupação e últimos itens mudam quando um item é excluído no detalhe.
+        viewModelScope.launch {
+            DeletedItems.ids.drop(1).collect { loadInventoryHome() }
+        }
         loadDashboard()
     }
 
@@ -107,6 +114,7 @@ class ManagerHomeViewModel : ZeraViewModel() {
             val home = getManagerHome.execute()
             _state.value = _state.value.copy(
                 stockItemCount = home.activeItems.toInt(),
+                stockCapacity = home.stockCapacity,
                 stockOccupation = occupationFrom(home),
                 totalItems = formatCount(home.activeItems),
                 itemsChangeLabel = formatChangePercent(home.activeItemsChangePercent).orEmpty(),
@@ -168,6 +176,10 @@ class ManagerHomeViewModel : ZeraViewModel() {
 
     fun onEmployeesCardClick() {
         ZeraNavigator.push(Route.Employees)
+    }
+
+    fun onStockOccupationCardClick() {
+        ZeraNavigator.push(Route.Indexes)
     }
 
     fun onSeeAllItemsClick() {

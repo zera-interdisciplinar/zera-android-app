@@ -58,7 +58,7 @@ fun ManagerBottomNavBar(
             selected = currentRoute == Route.Indexes,
         )
         IconButton(
-            icon = ZeraIcon.Plus,
+            icon = ZeraIcon.AddEmployee,
             onClick = { viewModel.onEmployeesClick(currentRoute) },
             contentDescription = "Colaboradores",
             enabled = currentRoute != Route.Employees,

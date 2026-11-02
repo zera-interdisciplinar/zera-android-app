@@ -11,8 +11,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -28,12 +30,15 @@ import com.zera.android.view.components.buttons.ZeraButton
 import com.zera.android.view.components.buttons.ZeraButtonType
 import com.zera.android.view.components.cards.ItemSummaryCard
 import com.zera.android.view.components.feedback.ErrorFeedbackPopup
+import com.zera.android.view.components.forms.EditModelForm
 import com.zera.android.view.components.inputs.ZeraInputPopup
 import com.zera.android.view.components.lists.EditableFieldRow
 import com.zera.android.view.components.loading.SkeletonBox
 import com.zera.android.view.components.navigation.SideBarOverlay
 import com.zera.android.view.components.navigation.UpperNavBar
 import com.zera.android.view.components.outros.ItemStatus
+import com.zera.android.view.components.overlays.BottomSheet
+import com.zera.android.view.components.overlays.ConfirmationPopup
 import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.theme.Radius
@@ -48,6 +53,7 @@ private val SkeletonSummaryCardHeight = 120.dp
 private val SkeletonFieldRowHeight = 56.dp
 private const val SkeletonFieldRowCount = 4
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ModelDetailsScreen(
     modelId: String,
@@ -57,7 +63,6 @@ fun ModelDetailsScreen(
     var showSideBar by rememberSaveable { mutableStateOf(false) }
     var showRejectPopup by remember { mutableStateOf(false) }
     val actionsEnabled = !state.isLoading && !state.isSubmitting && state.modelId.isNotBlank()
-    val editClick = if (state.canEdit && actionsEnabled) ({}) else null
 
     LaunchedEffect(modelId) {
         viewModel.loadModel(modelId)
@@ -78,28 +83,44 @@ fun ModelDetailsScreen(
                 )
             },
             bottomBar = {
-                if (state.canReview) {
-                    Row(
+                if (state.canReview || state.canEdit) {
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .navigationBarsPadding()
                             .padding(horizontal = Spacing.medium, vertical = Spacing.small),
-                        horizontalArrangement = Arrangement.spacedBy(Spacing.medium),
+                        verticalArrangement = Arrangement.spacedBy(Spacing.small),
                     ) {
-                        ZeraButton(
-                            text = "Recusar",
-                            onClick = { showRejectPopup = true },
-                            type = ZeraButtonType.Secondary,
-                            style = ZeraColorFamily.Red,
-                            enabled = actionsEnabled,
-                            modifier = Modifier.weight(1f),
-                        )
-                        ZeraButton(
-                            text = if (state.isSubmitting) "Enviando..." else "Aprovar",
-                            onClick = viewModel::onApproveClick,
-                            enabled = actionsEnabled,
-                            modifier = Modifier.weight(1f),
-                        )
+                        if (state.canReview) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(Spacing.medium),
+                            ) {
+                                ZeraButton(
+                                    text = "Recusar",
+                                    onClick = { showRejectPopup = true },
+                                    type = ZeraButtonType.Secondary,
+                                    style = ZeraColorFamily.Red,
+                                    enabled = actionsEnabled,
+                                    modifier = Modifier.weight(1f),
+                                )
+                                ZeraButton(
+                                    text = if (state.isSubmitting) "Enviando..." else "Aprovar",
+                                    onClick = viewModel::onApproveClick,
+                                    enabled = actionsEnabled,
+                                    modifier = Modifier.weight(1f),
+                                )
+                            }
+                        }
+                        if (state.canEdit) {
+                            ZeraButton(
+                                text = "Editar",
+                                onClick = viewModel::onEditClick,
+                                type = ZeraButtonType.Secondary,
+                                enabled = actionsEnabled,
+                                fillMaxWidth = true,
+                            )
+                        }
                     }
                 }
             },
@@ -126,20 +147,8 @@ fun ModelDetailsScreen(
                         condition = state.category,
                     )
 
-                    EditableFieldRow(
-                        label = "Nome",
-                        value = state.name,
-                        onEditClick = editClick,
-                        onConfirm = viewModel::onNameConfirm,
-                        validate = ModelDetailsViewModel::nameValidationError,
-                    )
-                    EditableFieldRow(
-                        label = "Marca",
-                        value = state.manufacturer,
-                        onEditClick = editClick,
-                        onConfirm = viewModel::onManufacturerConfirm,
-                        validate = ModelDetailsViewModel::manufacturerValidationError,
-                    )
+                    EditableFieldRow(label = "Nome", value = state.name)
+                    EditableFieldRow(label = "Marca", value = state.manufacturer)
                     EditableFieldRow(label = "Categoria", value = state.category)
                     EditableFieldRow(label = "Material", value = state.material)
                     if (state.notes.isNotBlank()) {
@@ -147,6 +156,17 @@ fun ModelDetailsScreen(
                     }
                     if (state.rejectionReason.isNotBlank()) {
                         EditableFieldRow(label = "Motivo da recusa", value = state.rejectionReason)
+                    }
+
+                    if (state.canDelete) {
+                        ZeraButton(
+                            text = "Excluir modelo",
+                            onClick = viewModel::onDeleteClick,
+                            type = ZeraButtonType.Secondary,
+                            style = ZeraColorFamily.Red,
+                            enabled = actionsEnabled,
+                            fillMaxWidth = true,
+                        )
                     }
                 }
             }
@@ -160,6 +180,26 @@ fun ModelDetailsScreen(
         )
     }
 
+    state.editDraft?.let { draft ->
+        BottomSheet(
+            onDismissRequest = viewModel::onEditDismiss,
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        ) {
+            EditModelForm(
+                name = draft.name,
+                onNameChange = viewModel::onEditNameChange,
+                manufacturer = draft.manufacturer,
+                onManufacturerChange = viewModel::onEditManufacturerChange,
+                onSave = viewModel::onEditSave,
+                onCancel = viewModel::onEditDismiss,
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+                nameError = draft.nameError,
+                manufacturerError = draft.manufacturerError,
+                isSubmitting = state.isSubmitting,
+            )
+        }
+    }
+
     if (showRejectPopup && state.canReview) {
         ZeraInputPopup(
             label = "Motivo da recusa",
@@ -170,6 +210,16 @@ fun ModelDetailsScreen(
                 showRejectPopup = false
             },
             validate = ModelDetailsViewModel::reasonValidationError,
+        )
+    }
+
+    if (state.showDeleteConfirmation) {
+        ConfirmationPopup(
+            title = "Excluir esse modelo?",
+            message = "O modelo será excluído definitivamente.",
+            confirmButtonText = "Excluir",
+            onConfirm = viewModel::onDeleteConfirm,
+            onDismissRequest = viewModel::onDeleteDismiss,
         )
     }
 

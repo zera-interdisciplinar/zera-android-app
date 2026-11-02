@@ -6,6 +6,7 @@ import kotlinx.serialization.Serializable
 data class DashboardHomeResponseDTO(
     val activeItems: Long,
     val activeItemsChangePercent: Double? = null,
+    val stockCapacity: Int? = null,
     val occupancyPercent: Double? = null,
     val pendingApproval: Long = 0,
     val inMaintenance: Long = 0,

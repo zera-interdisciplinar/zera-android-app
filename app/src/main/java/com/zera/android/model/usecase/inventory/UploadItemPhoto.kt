@@ -1,18 +1,21 @@
 package com.zera.android.model.usecase.inventory
 
-import com.zera.android.model.config.AppConfig
-import com.zera.android.model.remote.client.SupabaseStorage
+import com.zera.android.model.dto.inventory.ItemResponseDTO
+import com.zera.android.model.remote.client.InventoryClient
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.toRequestBody
 
 class UploadItemPhoto {
-    suspend fun execute(itemId: String, bytes: ByteArray, mimeType: String): String {
-        val environments = AppConfig.environments
-        val bucket = environments.supabaseItemsBucket
-        if (!SupabaseStorage.isConfigured(environments, bucket)) {
-            error("Upload de foto não configurado")
-        }
-        val mime = SupabaseStorage.canonicalMime(mimeType)
-        val objectPath = SupabaseStorage.itemObjectPath(itemId, mime)
-        SupabaseStorage.upload(bytes, mime, objectPath, environments, bucket)
-        return SupabaseStorage.publicUrl(environments, objectPath, bucket)
+    suspend fun execute(itemId: String, bytes: ByteArray, mimeType: String): ItemResponseDTO =
+        InventoryClient.inventoryService.uploadItemPhoto(itemId, photoPart(bytes, mimeType))
+
+    companion object {
+        internal fun photoPart(bytes: ByteArray, mimeType: String): MultipartBody.Part =
+            MultipartBody.Part.createFormData(
+                name = "photo",
+                filename = "photo.${mimeType.substringAfter('/')}",
+                body = bytes.toRequestBody(mimeType.toMediaType()),
+            )
     }
 }

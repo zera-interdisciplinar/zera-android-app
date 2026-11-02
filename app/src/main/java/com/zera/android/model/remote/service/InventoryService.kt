@@ -15,6 +15,8 @@ import com.zera.android.model.dto.inventory.ModelResponseDTO
 import com.zera.android.model.dto.inventory.PagedItemsDTO
 import com.zera.android.model.dto.inventory.PagedModelsDTO
 import com.zera.android.model.dto.inventory.RejectItemRequestDTO
+import com.zera.android.model.dto.inventory.UpdateCategoryDescriptionRequestDTO
+import com.zera.android.model.dto.inventory.UpdateCategoryNameRequestDTO
 import com.zera.android.model.dto.inventory.UpdateItemRequestDTO
 import com.zera.android.model.dto.inventory.UpdateModelManufacturerRequestDTO
 import com.zera.android.model.dto.inventory.UpdateModelMaterialsRequestDTO
@@ -22,10 +24,14 @@ import com.zera.android.model.dto.inventory.UpdateModelNameRequestDTO
 import com.zera.android.model.dto.inventory.DisposalRecordDTO
 import com.zera.android.model.dto.inventory.PagedDisposalsDTO
 import com.zera.android.model.dto.inventory.WorkCenterResponseDTO
+import okhttp3.MultipartBody
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.Multipart
 import retrofit2.http.PATCH
 import retrofit2.http.POST
+import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -73,6 +79,13 @@ interface InventoryService {
         @Body body: CreateItemRequestDTO,
     ): ItemResponseDTO
 
+    @Multipart
+    @POST("api/v1/items/{id}/photo")
+    suspend fun uploadItemPhoto(
+        @Path("id") id: String,
+        @Part photo: MultipartBody.Part,
+    ): ItemResponseDTO
+
     @POST("api/v1/items/{id}/submit")
     suspend fun submitItem(
         @Path("id") id: String,
@@ -84,6 +97,28 @@ interface InventoryService {
     @POST("api/v1/categories")
     suspend fun createCategory(
         @Body body: CreateCategoryRequestDTO,
+    ): CategoryResponseDTO
+
+    @GET("api/v1/categories/{id}")
+    suspend fun getCategory(
+        @Path("id") id: String,
+    ): CategoryResponseDTO
+
+    @DELETE("api/v1/categories/{id}")
+    suspend fun deleteCategory(
+        @Path("id") id: String,
+    )
+
+    @PATCH("api/v1/categories/{id}/name")
+    suspend fun updateCategoryName(
+        @Path("id") id: String,
+        @Body body: UpdateCategoryNameRequestDTO,
+    ): CategoryResponseDTO
+
+    @PATCH("api/v1/categories/{id}/description")
+    suspend fun updateCategoryDescription(
+        @Path("id") id: String,
+        @Body body: UpdateCategoryDescriptionRequestDTO,
     ): CategoryResponseDTO
 
     @GET("api/v1/models")
@@ -109,6 +144,11 @@ interface InventoryService {
         @Query("page") page: Int = 0,
         @Query("size") size: Int = 20,
     ): PagedItemsDTO
+
+    @DELETE("api/v1/models/{id}")
+    suspend fun deleteModel(
+        @Path("id") id: String,
+    )
 
     @PATCH("api/v1/models/{id}/name")
     suspend fun updateModelName(
@@ -141,6 +181,11 @@ interface InventoryService {
         @Path("id") id: String,
         @Body body: RejectItemRequestDTO,
     ): ItemResponseDTO
+
+    @DELETE("api/v1/items/{id}")
+    suspend fun deleteItem(
+        @Path("id") id: String,
+    )
 
     @POST("api/v1/items/{id}/maintenance/start")
     suspend fun startItemMaintenance(

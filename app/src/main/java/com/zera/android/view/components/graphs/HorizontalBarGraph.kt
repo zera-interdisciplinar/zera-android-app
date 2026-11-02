@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
@@ -113,6 +114,7 @@ private fun HorizontalBarGraphRow(
     barHeight: Dp,
 ) {
     val palette = style.palette()
+    val fill by rememberGraphFill(item.percentage.coerceIn(0f, 1f))
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -141,10 +143,9 @@ private fun HorizontalBarGraphRow(
                         shape = RoundedCornerShape(percent = 50),
                     ),
             ) {
-                // TODO: animar o preenchimento (ex.: animateFloatAsState) quando a barra entrar em tela.
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth(item.percentage.coerceIn(0f, 1f))
+                        .fillMaxWidth(fill)
                         .height(barHeight)
                         .background(
                             color = palette.base,

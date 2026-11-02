@@ -16,15 +16,33 @@ class ModelDetailsMappingTest {
     fun managerCanReviewPendingModel() {
         val state = ModelDetailsViewModel.stateFrom(pendingModel(), isEmployee = false)
         assertTrue(state.canReview)
-        assertFalse(state.canEdit)
+        assertTrue(state.canEdit)
         assertEquals(ItemStatus.PendingApproval, state.status)
     }
 
     @Test
-    fun employeeCanEditAndCannotReview() {
+    fun employeeCannotEditNorReview() {
         val state = ModelDetailsViewModel.stateFrom(pendingModel(), isEmployee = true)
         assertFalse(state.canReview)
-        assertTrue(state.canEdit)
+        assertFalse(state.canEdit)
+    }
+
+    @Test
+    fun onlyManagerCanDelete() {
+        assertTrue(ModelDetailsViewModel.stateFrom(pendingModel(), isEmployee = false).canDelete)
+        assertFalse(ModelDetailsViewModel.stateFrom(pendingModel(), isEmployee = true).canDelete)
+    }
+
+    @Test
+    fun editChangesIgnoreUnchangedFieldsAndSurroundingSpaces() {
+        val state = ModelDetailsState(name = "Latitude", manufacturer = "Dell")
+        val draft = ModelEditDraft(name = " Latitude ", manufacturer = "Dell")
+
+        assertFalse(ModelDetailsViewModel.editChangesFrom(state, draft).any)
+        assertEquals(
+            ModelEditChanges(name = false, manufacturer = true),
+            ModelDetailsViewModel.editChangesFrom(state, draft.copy(manufacturer = "Lenovo")),
+        )
     }
 
     @Test

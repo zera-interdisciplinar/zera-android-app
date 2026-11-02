@@ -194,13 +194,17 @@ fun ProfileScreen(
                 onNameChange = viewModel::onEditNameChange,
                 email = draft.email,
                 onEmailChange = viewModel::onEditEmailChange,
+                phone = draft.phone,
+                onPhoneChange = viewModel::onEditPhoneChange,
                 onSave = viewModel::onEditSave,
                 onCancel = viewModel::onEditDismiss,
                 modifier = Modifier.verticalScroll(rememberScrollState()),
                 nameEnabled = state.canEditName,
                 emailEnabled = state.canEditEmail,
+                phoneEnabled = state.canEditPhone,
                 nameError = draft.nameError,
                 emailError = draft.emailError,
+                phoneError = draft.phoneError,
                 isSubmitting = state.isSaving,
             )
         }

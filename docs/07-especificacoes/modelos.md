@@ -4,8 +4,8 @@
 
 - **Feature:** Consulta, orientação e cadastro de modelos (`ModelsScreen`)
 - **Perfil(is) envolvido(s):** Gestor e Operário
-- **Status:** interface em progresso; persistência pendente
-- **Última atualização:** 2026-10-03
+- **Status:** implementado (cadastro por `POST /models`)
+- **Última atualização:** 2026-11-02
 
 ## Contexto
 
@@ -50,8 +50,26 @@ Como Gestor, quero preencher os dados de um modelo e ver uma confirmação do fl
 ### Cenário: Preencher os dados
 
 - **Given** o Gestor está no formulário
-- **When** informa nome, material, marca e observação
-- **Then** os valores ficam no estado de `ModelCreationViewModel`; material é selecionado em `ZeraDropdownInput`
+- **When** informa nome, categoria, materiais, marca e observação
+- **Then** os valores ficam no estado de `ModelCreationViewModel`
+
+### Cenário: Selecionar materiais
+
+- **Given** o catálogo de materiais carregou (`GET /materials`)
+- **When** toca no campo "Materiais", marca um ou mais chips no bottom sheet e toca em "Confirmar"
+- **Then** o campo mostra os nomes na ordem do catálogo, e o cadastro envia os códigos em `materials`
+
+### Cenário: Descartar a seleção
+
+- **Given** o bottom sheet de materiais está aberto com mudanças
+- **When** fecha sem tocar em "Confirmar"
+- **Then** a seleção anterior continua valendo
+
+### Cenário: Nenhum material selecionado
+
+- **Given** nenhum material foi confirmado
+- **When** toca em "Concluir Cadastro"
+- **Then** o campo mostra "Selecione ao menos um material." e nada é enviado
 
 ### Cenário: Exibir confirmação visual
 
@@ -71,8 +89,10 @@ Como Gestor, quero preencher os dados de um modelo e ver uma confirmação do fl
 - [x] BottomSheet de orientação controlado pelo estado de ModelsViewModel
 - [x] Campos controlados pelo `ModelCreationViewModel`
 - [x] Confirmação mostra nome, material, marca e observação quando preenchidos
-- [ ] Validar campos e persistir o modelo pela API
-- [ ] Carregar opções de material de uma fonte oficial
+- [x] Validar campos e persistir o modelo pela API
+- [x] Carregar opções de material de uma fonte oficial
+- [x] Selecionar um ou mais materiais em bottom sheet
+- [ ] Validar com um cadastro real o envio de mais de um material
 - [x] Implementar regra durável para mostrar a orientação somente no primeiro acesso
 
 ## Edge cases considerados

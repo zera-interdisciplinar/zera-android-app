@@ -2,12 +2,12 @@ package com.zera.android.view.components.lists
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -24,22 +24,22 @@ import com.zera.android.view.theme.ZeraTheme
  * @param role cargo do colaborador (ex.: "Operador").
  * @param isPending quando `true`, o [EmployeeListItem] destaca o item como convite
  *   pendente ("Pendente") em vez de colaborador ativo ("Ativo").
+ * @param inviteCode código do convite, quando o item é um convite pendente.
  */
 data class EmployeeItem(
     val id: String,
     val name: String,
     val role: String,
     val isPending: Boolean = false,
+    val inviteCode: String? = null,
 )
 
 /**
- * Lista rolável de colaboradores: recebe os dados em [employees] e renderiza um
+ * Lista de colaboradores: recebe os dados em [employees] e renderiza um
  * [EmployeeListItem] para cada um.
  *
- * A lista ocupa apenas a altura do seu conteúdo. Quando for colocada dentro de um
- * container com rolagem vertical, limite a altura pelo [modifier]
- * (ex.: `Modifier.heightIn(max = 400.dp)`) ou, dentro de uma tela não rolável, use
- * `Modifier.weight(1f)`.
+ * Não rola sozinha nem é lazy: ocupa a altura de todos os itens, para acompanhar a rolagem
+ * da tela. O tamanho da equipe é limitado pela busca (`ListTeamEmployees`).
  *
  * @param employees colaboradores a exibir, na ordem em que devem aparecer.
  * @param onItemClick ação executada ao tocar em um item, recebendo o [EmployeeItem] clicado.
@@ -68,18 +68,21 @@ fun EmployeeList(
         return
     }
 
-    LazyColumn(
-        modifier = modifier.fillMaxWidth(),
-        contentPadding = contentPadding,
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(contentPadding),
         verticalArrangement = Arrangement.spacedBy(Spacing.small),
     ) {
-        items(employees, key = { it.id }) { employee ->
-            EmployeeListItem(
-                name = employee.name,
-                role = employee.role,
-                isPending = employee.isPending,
-                onClick = { onItemClick(employee) },
-            )
+        employees.forEach { employee ->
+            key(employee.id) {
+                EmployeeListItem(
+                    name = employee.name,
+                    role = employee.role,
+                    isPending = employee.isPending,
+                    onClick = { onItemClick(employee) },
+                )
+            }
         }
     }
 }

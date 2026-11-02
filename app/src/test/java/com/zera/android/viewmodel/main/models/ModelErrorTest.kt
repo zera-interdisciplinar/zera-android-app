@@ -1,5 +1,6 @@
 package com.zera.android.viewmodel.main.models
 
+import com.zera.android.model.dto.inventory.MaterialCatalogDTO
 import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -18,7 +19,7 @@ class ModelErrorTest {
             name = " ",
             manufacturer = "",
             categoryId = null,
-            materialCode = "PLASTIC",
+            materialCodes = listOf("PLASTIC", "BATTERY"),
             notes = "",
         )
 
@@ -32,14 +33,41 @@ class ModelErrorTest {
 
     @Test
     fun validFormHasNoFieldErrors() {
-        val errors = ModelCreationViewModel.fieldErrors("Notebook", "Dell", "c1", "PLASTIC", "ok")
+        val errors = ModelCreationViewModel.fieldErrors("Notebook", "Dell", "c1", listOf("PLASTIC"), "ok")
 
         assertFalse(errors.hasAny)
     }
 
     @Test
+    fun formWithoutMaterialsIsInvalid() {
+        val errors = ModelCreationViewModel.fieldErrors("Notebook", "Dell", "c1", emptyList(), "ok")
+
+        assertEquals("Selecione ao menos um material.", errors.material)
+    }
+
+    @Test
+    fun materialCodesFollowCatalogOrderAndIgnoreUnknownNames() {
+        val catalog = listOf(
+            MaterialCatalogDTO(code = "PLASTIC", name = "Plástico"),
+            MaterialCatalogDTO(code = "METAL", name = "Metal"),
+            MaterialCatalogDTO(code = "BATTERY", name = "Bateria"),
+        )
+
+        assertEquals(
+            listOf("PLASTIC", "BATTERY"),
+            ModelCreationViewModel.materialCodes(listOf("Bateria", "Plástico", "Inexistente"), catalog),
+        )
+    }
+
+    @Test
+    fun materialsLabelJoinsTheSelectedNames() {
+        assertEquals("Plástico, Bateria", ModelCreationState(materials = listOf("Plástico", "Bateria")).materialsLabel)
+        assertEquals("", ModelCreationState().materialsLabel)
+    }
+
+    @Test
     fun tooLongNotesAreInvalid() {
-        val errors = ModelCreationViewModel.fieldErrors("Notebook", "Dell", "c1", "PLASTIC", "a".repeat(501))
+        val errors = ModelCreationViewModel.fieldErrors("Notebook", "Dell", "c1", listOf("PLASTIC"), "a".repeat(501))
 
         assertTrue(errors.hasAny)
         assertEquals("A observação pode ter no máximo 500 caracteres.", errors.notes)

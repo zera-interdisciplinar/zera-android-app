@@ -83,6 +83,7 @@ class DashboardHomeResponseDTOTest {
 
         assertEquals(128L, home.activeItems)
         assertEquals(4.35, home.activeItemsChangePercent)
+        assertEquals(200, home.stockCapacity)
         assertEquals(64.0, home.occupancyPercent)
         assertEquals(3L, home.pendingApproval)
         assertEquals(1, home.recentItems.content.size)
@@ -116,6 +117,7 @@ class DashboardHomeResponseDTOTest {
         val home = json.decodeFromString<DashboardHomeResponseDTO>(payload)
 
         assertNull(home.activeItemsChangePercent)
+        assertNull(home.stockCapacity)
         assertNull(home.occupancyPercent)
         assertEquals(0, home.recentItems.content.size)
     }

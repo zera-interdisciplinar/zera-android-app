@@ -38,9 +38,6 @@ object SupabaseStorage {
     fun objectPath(userId: String, mimeType: String): String =
         "$userId/profile.${extensionFor(canonicalMime(mimeType))}"
 
-    fun itemObjectPath(itemId: String, mimeType: String): String =
-        "$itemId/photo.${extensionFor(canonicalMime(mimeType))}"
-
     fun publicUrl(
         environments: Environments,
         objectPath: String,

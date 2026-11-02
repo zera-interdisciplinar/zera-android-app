@@ -43,14 +43,14 @@ class ModelsMappingTest {
     fun rejectsIncompleteCreateForm() {
         assertEquals(
             "Informe o nome do modelo.",
-            ModelCreationViewModel.validationError(" ", "Dell", "c1", "PLASTIC", ""),
+            ModelCreationViewModel.validationError(" ", "Dell", "c1", listOf("PLASTIC"), ""),
         )
         assertEquals(
             "Selecione a categoria.",
-            ModelCreationViewModel.validationError("Notebook", "Dell", null, "PLASTIC", ""),
+            ModelCreationViewModel.validationError("Notebook", "Dell", null, listOf("PLASTIC"), ""),
         )
         assertNull(
-            ModelCreationViewModel.validationError("Notebook", "Dell", "c1", "PLASTIC", "ok"),
+            ModelCreationViewModel.validationError("Notebook", "Dell", "c1", listOf("PLASTIC"), "ok"),
         )
     }
 

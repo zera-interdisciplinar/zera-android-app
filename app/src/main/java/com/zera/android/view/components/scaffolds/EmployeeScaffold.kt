@@ -84,6 +84,7 @@ private val BottomFadeHeight = 25.dp
  *   título/ícones da [UpperNavBar]) para o azul de destaque
  *   ([com.zera.android.view.theme.ZeraColors.brandContainer]/`onBrandContainer`).
  * @param edgeFade quando `true` (padrão), mostra o gradiente de fade no topo/fim do conteúdo.
+ * @param showBottomNavBar quando `false`, esconde o [EmployeeBottomNavBar] (ex.: Central de Ajuda).
  * @param content conteúdo da tela, desenhado dentro da [Column] do Scaffold.
  */
 @Composable
@@ -99,6 +100,7 @@ fun EmployeeScaffold(
     contentPadding: Dp = Spacing.medium,
     backgroundVariant: Boolean = false,
     edgeFade: Boolean = true,
+    showBottomNavBar: Boolean = true,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val backgroundColor = if (backgroundVariant) {
@@ -128,14 +130,16 @@ fun EmployeeScaffold(
                 )
             },
             bottomBar = {
-                EmployeeBottomNavBar(
-                    currentRoute = currentRoute,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .navigationBarsPadding()
-                        .padding(horizontal = Spacing.medium, vertical = Spacing.small)
-                        .sharedTransition(SharedElementKeys.EmployeeBottomNavBar),
-                )
+                if (showBottomNavBar) {
+                    EmployeeBottomNavBar(
+                        currentRoute = currentRoute,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .navigationBarsPadding()
+                            .padding(horizontal = Spacing.medium, vertical = Spacing.small)
+                            .sharedTransition(SharedElementKeys.EmployeeBottomNavBar),
+                    )
+                }
             },
             floatingActionButton = {
                 if (fabIcon != null) {

@@ -180,7 +180,7 @@ Fora de escopo desta spec (ver [Fora de escopo](#fora-de-escopo-desta-spec)).
 - `ZeraNavigator.navigationStatus(false)` ativo durante um carregamento: o push para a tela de erro seria ignorado. O interceptor libera a navegação antes de navegar.
 - Deep links pendentes (`consumePendingAlertDeepLink`, `consumePendingPasswordResetDeepLink`) quando o boot falha: só são consumidos em `navigateAfterBoot`, então continuam pendentes ao tentar de novo pela Splash.
 - Timeout (`SocketTimeoutException`) pode significar servidor lento, não falta de internet; aceito tratar como conexão.
-- Upload de foto (Supabase) não passa pelo Retrofit, mas usa `OkHttpClient`; recebe o mesmo interceptor.
+- Upload do avatar (Supabase) não passa pelo Retrofit, mas usa `OkHttpClient`; recebe o mesmo interceptor.
 - Várias falhas na mesma tela (ex.: duas cargas em paralelo sem ser por conexão): o popup mostra só uma mensagem por vez (o estado guarda uma só).
 
 ## Fora de escopo desta spec

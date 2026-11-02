@@ -21,11 +21,15 @@ import com.zera.android.R
  * ```
  */
 enum class ZeraIcon(@DrawableRes val resId: Int) {
+    AddEmployee(R.drawable.add_employee),
     Bell(R.drawable.bell),
     Box(R.drawable.box),
     Category(R.drawable.category),
     Chatbot(R.drawable.chatbot),
     ChatbotBase(R.drawable.chatbot_base),
+    ChatbotDoubt(R.drawable.chatbot_doubt),
+    ChatbotHappy(R.drawable.chatbot_happy),
+    ChatbotWink(R.drawable.chatbot_wink),
     Check(R.drawable.check),
     Close(R.drawable.close),
     Crate(R.drawable.crate),

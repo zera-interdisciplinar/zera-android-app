@@ -15,6 +15,9 @@ enum class ScreenAnimation {
     SlideVertical,
     None;
 
+    /** A própria animação, ou [None] com "Reduzir animações" ligado. */
+    fun orNone(reduceAnimations: Boolean): ScreenAnimation = if (reduceAnimations) None else this
+
     /** Tela nova entrando ao ser empilhada. */
     fun enter(): EnterTransition = when (this) {
         Fade -> fadeIn()

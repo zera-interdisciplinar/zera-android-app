@@ -4,6 +4,7 @@ import com.zera.android.model.entity.team.PendingInvite
 import com.zera.android.model.entity.team.TeamEmployee
 import com.zera.android.model.entity.user.UserRole
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.time.LocalDateTime
@@ -28,9 +29,11 @@ class EmployeesMappingTest {
         assertEquals(2, items.size)
         assertTrue(items[0].isPending)
         assertEquals("invite-120443", items[0].id)
+        assertEquals("120443", items[0].inviteCode)
         assertEquals("Carol", items[0].name)
         assertEquals("Operador", items[0].role)
         assertEquals("u1", items[1].id)
+        assertNull(items[1].inviteCode)
         assertEquals("João", items[1].name)
         assertEquals("Operador", items[1].role)
     }

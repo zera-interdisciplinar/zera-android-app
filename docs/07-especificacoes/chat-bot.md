@@ -1,15 +1,15 @@
-# Spec — Chat com o assistente (Zé Bot)
+# Spec — Chat com o assistente (Zack Bot)
 
 ## Metadados
 
 - **Feature:** Inbox de conversas (`Route.ChatConversations`) e tela de chat (`Route.ChatBot(threadId)`)
 - **Perfil(is) envolvido(s):** Gestor e Operário
 - **Status:** integrado ao AI Core (lista, hidratação, envio, `redirect_to`)
-- **Última atualização:** 2026-10-13
+- **Última atualização:** 2026-11-02
 
 ## Contexto
 
-O FAB dos scaffolds (`ManagerScaffold` / `EmployeeScaffold`) e o item "Fale com o Zé" abrem o **inbox** `Route.ChatConversations` (`SlideVertical`). Dali, uma linha abre `Route.ChatBot(threadId)` e o FAB `+` gera um UUID v4 e abre um fio novo (sem POST até a primeira mensagem).
+O FAB dos scaffolds (`ManagerScaffold` / `EmployeeScaffold`) e o item "Fale com o Zack" abrem o **inbox** `Route.ChatConversations` (`SlideVertical`). Dali, uma linha abre `Route.ChatBot(threadId)` e o FAB `+` gera um UUID v4 e abre um fio novo (sem POST até a primeira mensagem).
 
 Telas compartilhadas: `ChatConversationsScreen` / `ChatConversationsViewModel` e `ChatBotScreen` / `ChatBotViewModel`.
 
@@ -22,6 +22,8 @@ Como Gestor ou Operário, quero ver minhas conversas, continuar um fio ou começ
 ## Inbox
 
 `GET /api/v1/multi-agent/conversations?page=1&page_size=20`. Envelope `items` + `page` + `page_size` + `total`. `preview` = 40 chars da primeira mensagem. Recarrega em `ON_RESUME`. Horário na linha só se `created_at`/`updated_at` vier no JSON.
+
+Cada linha mostra uma das quatro imagens do agente (`ChatbotBase`, `ChatbotWink`, `ChatbotHappy`, `ChatbotDoubt`). A imagem é derivada do `threadId` (`ChatConversationsViewModel.avatarFor`), não sorteada: a lista recarrega a cada retorno à tela, e cada conversa precisa manter a mesma imagem.
 
 Eventos: `load`, `onConversationClick`, `onNewConversationClick`, `onBackClick`.
 

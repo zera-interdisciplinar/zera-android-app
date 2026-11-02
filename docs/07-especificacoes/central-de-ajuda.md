@@ -5,7 +5,7 @@
 - **Feature:** Central de Ajuda (`HelpCentralHubScreen`) e detalhe de documento (`HelpDocumentScreen`)
 - **Perfil(is) envolvido(s):** Operário (funcionário)
 - **Status:** implementado
-- **Última atualização:** 2026-11-01
+- **Última atualização:** 2026-11-02
 
 ## Contexto
 
@@ -93,6 +93,7 @@ Como Operário, quero buscar e ler os documentos de ajuda, para resolver dúvida
   - `onDocumentClick` → `ZeraNavigator.push(Route.HelpDocument(documentKey = option.id))`.
   - `onSearch` deixa de existir; a busca já filtra ao digitar.
 - `HelpCentralHubScreen`: tira o ramo de skeleton/erro. O placeholder da busca passa a ser "Pesquisar por título ou assunto..." (o do layout, "ID, Nome ou Material", não descreve o que é buscado aqui).
+- O hub não tem barra inferior: `EmployeeScaffold(showBottomNavBar = false)`. O detalhe do documento ainda a mostra.
 
 ### Detalhe do documento (novo)
 

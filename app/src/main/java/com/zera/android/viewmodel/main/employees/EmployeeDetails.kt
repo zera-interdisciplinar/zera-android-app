@@ -75,11 +75,6 @@ class EmployeeDetailsViewModel(
         ZeraNavigator.goBack()
     }
 
-    fun onDeleteClick() {
-        // TODO: confirmar e excluir o perfil do operário. O adm-core ainda não expõe rota de
-        //  exclusão/desativação de usuário.
-    }
-
     companion object {
         internal fun initialsFrom(name: String): String = ProfileViewModel.initialsFrom(name)
 
