@@ -84,6 +84,7 @@ fun SignUpScreen(
                 value = state.token,
                 onValueChange = { viewModel.onTokenChange(it) },
                 label = "Código de convite",
+                enabled = !state.isLoading,
                 isError = state.errorMessage != null && state.token.length != 6,
                 onFilled = { viewModel.signUp() },
             )

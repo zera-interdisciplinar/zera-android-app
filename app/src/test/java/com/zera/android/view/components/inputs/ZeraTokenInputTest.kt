@@ -1,9 +1,5 @@
 package com.zera.android.view.components.inputs
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasSetTextAction
@@ -14,7 +10,6 @@ import androidx.compose.ui.test.performImeAction
 import androidx.compose.ui.test.performTextInput
 import com.zera.android.view.components.setZeraContent
 import org.junit.Assert.assertEquals
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -115,21 +110,6 @@ class ZeraTokenInputTest {
             ZeraTokenInput(value = "123456", onValueChange = {}, onFilled = { filled += it })
         }
 
-        composeRule.onNode(field).performImeAction()
-
-        assertEquals(listOf("123456"), filled)
-    }
-
-    @Ignore("Problema conhecido 1 da spec testes-componentes-visuais: onFilled dispara duas vezes")
-    @Test
-    fun doneAfterCompletingTheCodeDoesNotCallOnFilledAgain() {
-        val filled = mutableListOf<String>()
-        composeRule.setZeraContent {
-            var code by remember { mutableStateOf("") }
-            ZeraTokenInput(value = code, onValueChange = { code = it }, onFilled = { filled += it })
-        }
-
-        composeRule.onNode(field).performTextInput("123456")
         composeRule.onNode(field).performImeAction()
 
         assertEquals(listOf("123456"), filled)

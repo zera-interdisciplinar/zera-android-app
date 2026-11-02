@@ -128,7 +128,7 @@ Encontrados na leitura do código, antes de qualquer teste:
 
 | # | Componente | Problema | Impacto |
 |---|---|---|---|
-| 1 | `ZeraTokenInput` + `SignUpViewModel` | **Confirmado por teste.** `onFilled` dispara ao digitar o último dígito e de novo na ação "Concluído" do teclado. O `signUp()` não verifica `isLoading` e o campo continua habilitado durante o envio | Pode enviar dois pedidos de cadastro com o mesmo convite |
+| 1 | `SignUpViewModel` | **Corrigido.** `onFilled` dispara ao digitar o último dígito e de novo na ação "Concluído" do teclado, e o `signUp()` não verificava `isLoading`. Agora ele ignora chamadas durante o envio e o campo fica desabilitado. O `onFilled` repetido foi mantido no componente, porque permite tentar de novo depois de um erro | Podia enviar dois pedidos de cadastro com o mesmo convite |
 | 2 | `EditItemForm` + `ZeraRadioButton` | O radio não tem parâmetro `enabled`, então "Possui danos?" continua ativo com `isSubmitting = true` | O usuário altera o formulário durante o envio |
 | 3 | `ProductListItem` e `OptionListItem` | Com `onClickDisabled = true`, a seta e a tag somem, mas a `Surface` continua clicável, com efeito de toque e sem ação | O item parece clicável. A `Tag` de status também some, o que só está documentado no `OptionListItem` |
 | 4 | `ZeraButton` | Com `loading = true`, o texto é removido e o indicador não tem descrição | O leitor de tela não informa qual é o botão |
@@ -154,14 +154,14 @@ Validar nos itens 1 e 2 do checklist, antes de escrever o restante:
 | Compatibilidade do Robolectric com AGP 9 e SDK 36 | **Validada** no item 1: Robolectric 4.17 roda o Compose UI Test |
 | JDK para o SDK 36 | **Validada na JDK 25**, com `--add-exports=java.base/jdk.internal.access=ALL-UNNAMED` na JVM de teste. Ainda não testada na JDK 21 do Android Studio nem na 17 do workflow de release, o que precisará ser revisto quando os testes forem para o CI |
 | `ContentProvider`s de Firebase e ML Kit no manifesto mesclado, inicializados pelo Robolectric | **Sem impacto** no item 1, que já roda com `isIncludeAndroidResources = true` |
-| `Dialog`, menu do `ExposedDropdownMenuBox`, `ModalBottomSheet` e `DatePicker` | **Validados** `Dialog`, `ModalBottomSheet` e o menu nos itens 2 e 7. Falta o `DatePicker`, no item 8 |
+| `Dialog`, menu do `ExposedDropdownMenuBox`, `ModalBottomSheet` e `DatePicker` | **Validados** `Dialog`, `ModalBottomSheet`, o menu e o `DatePicker`. Campo de texto dentro de `Dialog` não funciona: ver [Limitações encontradas](#limitações-encontradas) |
 | Primeiro uso baixa o `android-all` do Maven | Precisa de rede só na primeira execução |
 
 ## Critérios de aceite
 
 - [ ] `gradlew testDebugUnitTest` roda sem emulador e sem nenhuma falha, com os testes novos e os existentes.
 - [ ] Nenhum teste usa `Thread.sleep` nem depende de rede, exceto o download inicial do Robolectric.
-- [ ] Nenhuma alteração em código de produção vem junto com os testes.
+- [ ] Nenhuma alteração em código de produção vem junto com os testes. Correções decididas com o time ficam em commits `fix:` próprios.
 - [ ] Todo componente do escopo cobre os casos listados no checklist, ou tem a ausência justificada em [Limitações encontradas](#limitações-encontradas).
 - [x] No item 1, o `ZeraButtonTest` é visto falhando ao quebrar o componente temporariamente, sem commitar essa quebra.
 - [ ] `docs/09-stack-e-dependencias.md` descreve a nova stack e o comando para rodar os testes.
@@ -188,7 +188,7 @@ Um item por vez, um commit por item (`test: ...`), parando para revisão.
 - [x] **3. `IconButton`, `Tag` e `ItemStatus`.** `IconButton`: localizável pela descrição; toque e estado desabilitado. `Tag`: mostra o texto. `ItemStatusTag`: mostra o rótulo de cada status. `fromBackend`: normaliza caixa e espaços, aceita os apelidos `PENDING` e `APPROVED` e devolve `null` para valor desconhecido.
 - [x] **4. `ZeraTextInput`.** Digitar chama `onValueChange`; rótulo omitido quando vazio; placeholder só com valor vazio; erro só com `isError` e mensagem; desabilitado; senha mascarada por padrão, com "Mostrar" e "Ocultar" alternando; campo comum sem alternância.
 - [x] **5. `ZeraSearchInput`.** Digitar chama `onValueChange`; placeholder só com valor vazio; "Limpar busca" só com texto e envia `""`; ação do teclado chama `onSearch`.
-- [x] **6. `ZeraTokenInput`.** Filtra para dígitos e respeita `size`; `value` externo com não dígitos é normalizado; `onFilled` só ao completar; "Concluído" incompleto não chama `onFilled`; desabilitado; erro. Problema conhecido 1 como teste com `@Ignore`.
+- [x] **6. `ZeraTokenInput`.** Filtra para dígitos e respeita `size`; `value` externo com não dígitos é normalizado; `onFilled` só ao completar; "Concluído" incompleto não chama `onFilled`; completo chama; desabilitado; erro.
 - [x] **7. `ZeraDropdownInput` e `ZeraSelectInput`.** Dropdown: abre, lista as opções, escolher chama `onValueChange` e fecha; desabilitado não abre; erro. Select: valor ou placeholder; toque chama `onClick`; desabilitado não chama; erro.
 - [ ] **8. `ZeraDateInput`.** Toque abre o seletor; "Confirmar" devolve a mesma data em `dd/MM/yyyy`, inclusive em `America/Sao_Paulo`; "Cancelar" fecha sem chamar `onValueChange`; "Confirmar" sem data fecha sem chamar; valor inválido abre sem quebrar; desabilitado não abre. Não testar a seleção de dias no calendário, que é do Material.
 - [ ] **9. `ZeraChipsGroup`, `ZeraRadioButton` e `ZeraSliderInput`.** Chips: seleção única chama `onSelectedChange`; múltipla adiciona e remove; desabilitado não responde; layout em linha e empilhado. Radio: estado selecionado, toque e rótulo. Slider: mostra rótulo e limites; `SetProgress` devolve inteiro; desabilitado.
@@ -197,7 +197,7 @@ Um item por vez, um commit por item (`test: ...`), parando para revisão.
 ### Componentes com lógica
 
 - [ ] **11. `AdaptiveRow`.** Filhos que cabem ficam na mesma linha e com a mesma largura; filho largo demais empilha todos; ordem preservada.
-- [ ] **12. Popups.** `FeedbackPopup`: título e subtítulo opcional. `ErrorFeedbackPopup`: título fixo e descrição. `ConfirmationPopup`: textos, confirmar e cancelar. `DenyReasonPopup`: motivo válido chega em `onConfirm`; inválido mostra o erro e não confirma; digitar limpa o erro; cancelar.
+- [ ] **12. Popups.** `FeedbackPopup`: título e subtítulo opcional. `ErrorFeedbackPopup`: título fixo e descrição. `ConfirmationPopup`: textos, confirmar e cancelar. `DenyReasonPopup` ficou fora: ver [Limitações encontradas](#limitações-encontradas).
 - [ ] **13. Formulários simples.** `CreateInviteForm`, `EditCategoryForm`, `EditModelForm` e `SelectMaterialsForm`: mostram os valores; edição chama o callback certo; erros por campo; salvar e cancelar; estado enviando; confirmar seleção de materiais.
 - [ ] **14. `EditProfileForm` e `EditItemForm`.** Perfil: `*Enabled` bloqueia só o campo indicado; erros por campo; `errorMessage`; estado enviando. Item: tipo de dano só com `hasDamage`; `onHasDamageChange` recebe o valor atual; erros; estado enviando. Problema conhecido 2 como teste com `@Ignore`.
 - [ ] **15. `ProductList` e `OptionList`.** Itens e toque com o item certo; lista vazia com o conteúdo padrão e customizado; `isLoadingMore`; `statusText` troca a seta pela tag; `ProductListItem` mostra `ID` com 7 caracteres; `OptionListItem` sem ícone e sem descrição em branco. Problema conhecido 3 como teste com `@Ignore`.
@@ -212,6 +212,10 @@ Um item por vez, um commit por item (`test: ...`), parando para revisão.
 ## Limitações encontradas
 
 Preencher durante a execução, com o componente, a interação que ficou fora e o motivo.
+
+| Componente | O que ficou fora | Motivo |
+|---|---|---|
+| `DenyReasonPopup` | Todos os testes: textos, validação, limpeza do erro, confirmar e cancelar | Um campo de texto dentro de `Dialog` nunca fica ocioso no Robolectric (`AppNotIdleException`), e o teste acaba estourando a memória. Reproduz com `Dialog { BasicTextField(...) }`, sem código do app, e também com `@GraphicsMode(NATIVE)`. Para testar, seria preciso separar o conteúdo do popup em um composable próprio ou usar `androidTest` |
 
 ## Fora de escopo desta spec
 
