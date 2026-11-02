@@ -4,7 +4,7 @@
 
 - **Feature:** Testes de comportamento dos componentes de `view/components`, com Compose UI Test e Robolectric, sem emulador
 - **Perfil(is) envolvido(s):** Não se aplica (qualidade interna; quem usa é o time de desenvolvimento)
-- **Status:** em progresso (item 2 de 19)
+- **Status:** em progresso (item 3 de 19)
 - **Última atualização:** 2026-11-02
 
 ## Contexto
@@ -184,7 +184,7 @@ Um item por vez, um commit por item (`test: ...`), parando para revisão.
 
 ### Componentes base
 
-- [ ] **3. `IconButton`, `Tag` e `ItemStatus`.** `IconButton`: localizável pela descrição; toque e estado desabilitado. `Tag`: mostra o texto. `ItemStatusTag`: mostra o rótulo de cada status. `fromBackend`: normaliza caixa e espaços, aceita os apelidos `PENDING` e `APPROVED` e devolve `null` para valor desconhecido.
+- [x] **3. `IconButton`, `Tag` e `ItemStatus`.** `IconButton`: localizável pela descrição; toque e estado desabilitado. `Tag`: mostra o texto. `ItemStatusTag`: mostra o rótulo de cada status. `fromBackend`: normaliza caixa e espaços, aceita os apelidos `PENDING` e `APPROVED` e devolve `null` para valor desconhecido.
 - [ ] **4. `ZeraTextInput`.** Digitar chama `onValueChange`; rótulo omitido quando vazio; placeholder só com valor vazio; erro só com `isError` e mensagem; desabilitado; senha mascarada por padrão, com "Mostrar" e "Ocultar" alternando; campo comum sem alternância.
 - [ ] **5. `ZeraSearchInput`.** Digitar chama `onValueChange`; placeholder só com valor vazio; "Limpar busca" só com texto e envia `""`; ação do teclado chama `onSearch`.
 - [ ] **6. `ZeraTokenInput`.** Filtra para dígitos e respeita `size`; `value` externo com não dígitos é normalizado; `onFilled` só ao completar; "Concluído" incompleto não chama `onFilled`; desabilitado; erro. Problema conhecido 1 como teste com `@Ignore`.
