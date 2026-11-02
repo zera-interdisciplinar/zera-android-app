@@ -30,10 +30,12 @@ class ProfileMappingTest {
         assertEquals("https://cdn.example.com/avatars/joao.png", state.photoUrl)
         assertEquals("joao@empresa.com", state.email)
         assertEquals("11987654321", state.phone)
+        assertEquals("tel-1", state.telephoneId)
         assertEquals("", state.company)
         assertEquals("Operador", state.position)
         assertFalse(state.canEditName)
         assertTrue(state.canEditEmail)
+        assertFalse(state.canEditPhone)
     }
 
     @Test
@@ -53,6 +55,7 @@ class ProfileMappingTest {
         assertNull(state.photoUrl)
         assertTrue(state.canEditName)
         assertTrue(state.canEditEmail)
+        assertTrue(state.canEditPhone)
     }
 
     @Test
@@ -107,9 +110,26 @@ class ProfileMappingTest {
 
         assertFalse(ProfileViewModel.editChangesFrom(state, draft).any)
         assertEquals(
-            ProfileEditChanges(name = false, email = true),
+            ProfileEditChanges(name = false, email = true, phone = false),
             ProfileViewModel.editChangesFrom(state, draft.copy(email = "ana.lima@zera.com")),
         )
+    }
+
+    @Test
+    fun phoneChangeComparesOnlyDigits() {
+        val state = ProfileState(phone = "11987654321", canEditPhone = true)
+        val draft = ProfileEditDraft(phone = "(11) 98765-4321")
+
+        assertFalse(ProfileViewModel.editChangesFrom(state, draft).phone)
+        assertTrue(ProfileViewModel.editChangesFrom(state, draft.copy(phone = "11912345678")).phone)
+    }
+
+    @Test
+    fun phoneValidationAcceptsTenOrElevenDigits() {
+        assertNull(ProfileViewModel.phoneValidationError("(11) 3456-7890"))
+        assertNull(ProfileViewModel.phoneValidationError("(11) 98765-4321"))
+        assertEquals("Telefone inválido", ProfileViewModel.phoneValidationError("119876"))
+        assertEquals("Telefone inválido", ProfileViewModel.phoneValidationError(""))
     }
 
     @Test
@@ -119,10 +139,10 @@ class ProfileMappingTest {
             email = "caio@zera.com",
             canEditName = false,
         )
-        val draft = ProfileEditDraft(fullName = "Outro Nome", email = "novo@zera.com")
+        val draft = ProfileEditDraft(fullName = "Outro Nome", email = "novo@zera.com", phone = "11987654321")
 
         assertEquals(
-            ProfileEditChanges(name = false, email = true),
+            ProfileEditChanges(name = false, email = true, phone = false),
             ProfileViewModel.editChangesFrom(state, draft),
         )
     }

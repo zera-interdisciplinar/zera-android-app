@@ -29,13 +29,17 @@ fun EditProfileForm(
     onNameChange: (String) -> Unit,
     email: String,
     onEmailChange: (String) -> Unit,
+    phone: String,
+    onPhoneChange: (String) -> Unit,
     onSave: () -> Unit,
     onCancel: () -> Unit,
     modifier: Modifier = Modifier,
     nameEnabled: Boolean = true,
     emailEnabled: Boolean = true,
+    phoneEnabled: Boolean = true,
     nameError: String? = null,
     emailError: String? = null,
+    phoneError: String? = null,
     errorMessage: String? = null,
     isSubmitting: Boolean = false,
 ) {
@@ -58,10 +62,20 @@ fun EditProfileForm(
             onValueChange = onEmailChange,
             label = "E-mail",
             type = ZeraInputType.Email,
-            imeAction = ImeAction.Done,
+            imeAction = ImeAction.Next,
             enabled = emailEnabled && !isSubmitting,
             isError = emailError != null,
             errorMessage = emailError,
+        )
+        ZeraTextInput(
+            value = phone,
+            onValueChange = onPhoneChange,
+            label = "Telefone",
+            type = ZeraInputType.Phone,
+            imeAction = ImeAction.Done,
+            enabled = phoneEnabled && !isSubmitting,
+            isError = phoneError != null,
+            errorMessage = phoneError,
         )
         errorMessage?.let { CaptionText(text = it, color = MaterialTheme.colorScheme.error) }
         AdaptiveRow(modifier = Modifier.fillMaxWidth()) {
@@ -89,6 +103,8 @@ private fun EditProfileFormPreview() {
             onNameChange = {},
             email = "nome.sobrenome@empresa.com",
             onEmailChange = {},
+            phone = "11987654321",
+            onPhoneChange = {},
             onSave = {},
             onCancel = {},
         )

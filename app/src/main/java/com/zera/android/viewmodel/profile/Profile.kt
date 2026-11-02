@@ -6,6 +6,7 @@ import com.zera.android.model.entity.user.ProfileUser
 import com.zera.android.model.entity.user.UserRole
 import com.zera.android.model.usecase.auth.SignOut
 import com.zera.android.model.usecase.telephone.GetTelephone
+import com.zera.android.model.usecase.telephone.SaveTelephone
 import com.zera.android.model.usecase.user.GetProfile
 import com.zera.android.model.usecase.user.RenameUser
 import com.zera.android.model.usecase.user.UpdateUserEmail
@@ -33,9 +34,11 @@ data class ProfileState(
     val photoUrl: String? = null,
     val email: String = "",
     val phone: String = "",
+    val telephoneId: String? = null,
     val position: String = "",
     val canEditName: Boolean = false,
     val canEditEmail: Boolean = true,
+    val canEditPhone: Boolean = false,
     val isLoading: Boolean = false,
     val isSaving: Boolean = false,
     val isUploadingPhoto: Boolean = false,
@@ -50,13 +53,15 @@ data class ProfileState(
 data class ProfileEditDraft(
     val fullName: String = "",
     val email: String = "",
+    val phone: String = "",
     val nameError: String? = null,
     val emailError: String? = null,
+    val phoneError: String? = null,
 )
 
 /** Quais campos do rascunho diferem do perfil atual e o usuário pode alterar. */
-internal data class ProfileEditChanges(val name: Boolean, val email: Boolean) {
-    val any: Boolean get() = name || email
+internal data class ProfileEditChanges(val name: Boolean, val email: Boolean, val phone: Boolean) {
+    val any: Boolean get() = name || email || phone
 }
 
 class ProfileViewModel(
@@ -64,6 +69,7 @@ class ProfileViewModel(
     private val getTelephone: GetTelephone = GetTelephone(),
     private val renameUser: RenameUser = RenameUser(),
     private val updateUserEmail: UpdateUserEmail = UpdateUserEmail(),
+    private val saveTelephone: SaveTelephone = SaveTelephone(),
     private val uploadAvatar: UploadAvatar = UploadAvatar(),
     private val updateUserImage: UpdateUserImage = UpdateUserImage(),
 ) : ZeraViewModel() {
@@ -183,6 +189,7 @@ class ProfileViewModel(
             editDraft = ProfileEditDraft(
                 fullName = current.fullName,
                 email = current.email,
+                phone = current.phone,
             ),
         )
     }
@@ -200,8 +207,12 @@ class ProfileViewModel(
         updateDraft { it.copy(email = value, emailError = null) }
     }
 
+    fun onEditPhoneChange(value: String) {
+        updateDraft { it.copy(phone = value, phoneError = null) }
+    }
+
     /**
-     * Valida o rascunho e grava só o que mudou (o nome só para gestor). Cada campo é um
+     * Valida o rascunho e grava só o que mudou (nome e telefone só para gestor). Cada campo é um
      * endpoint: se um falhar, os anteriores já ficam salvos no state e o sheet continua aberto
      * com o popup de erro por cima, e um novo "Salvar" reenvia apenas o que falta.
      */
@@ -214,8 +225,9 @@ class ProfileViewModel(
         val validated = draft.copy(
             nameError = if (changes.name) nameValidationError(draft.fullName) else null,
             emailError = if (changes.email) emailValidationError(draft.email) else null,
+            phoneError = if (changes.phone) phoneValidationError(draft.phone) else null,
         )
-        if (validated.nameError != null || validated.emailError != null) {
+        if (validated.nameError != null || validated.emailError != null || validated.phoneError != null) {
             _state.value = current.copy(editDraft = validated)
             return
         }
@@ -243,6 +255,13 @@ class ProfileViewModel(
                     updateUserEmail.execute(email)
                     writingEmail = false
                     _state.value = _state.value.copy(email = email)
+                }
+                if (changes.phone) {
+                    val telephone = saveTelephone.execute(current.telephoneId, phoneDigits(draft.phone))
+                    _state.value = _state.value.copy(
+                        phone = telephone.number,
+                        telephoneId = telephone.telephoneId,
+                    )
                 }
                 _state.value = _state.value.copy(
                     isSaving = false,
@@ -283,20 +302,27 @@ class ProfileViewModel(
                 photoUrl = profile.imageUrl,
                 email = profile.email,
                 phone = profile.phone,
+                telephoneId = profile.telephoneId,
                 position = roleLabel,
                 canEditName = canEditName(role),
                 canEditEmail = canEditEmail(),
+                canEditPhone = canEditPhone(role),
             )
         }
 
         internal fun editChangesFrom(state: ProfileState, draft: ProfileEditDraft) = ProfileEditChanges(
             name = state.canEditName && draft.fullName.trim() != state.fullName.trim(),
             email = state.canEditEmail && draft.email.trim() != state.email.trim(),
+            phone = state.canEditPhone && phoneDigits(draft.phone) != phoneDigits(state.phone),
         )
 
         internal fun canEditName(role: String): Boolean = role == UserRole.MANAGER
 
         internal fun canEditEmail(): Boolean = true
+
+        internal fun canEditPhone(role: String): Boolean = role == UserRole.MANAGER
+
+        internal fun phoneDigits(phone: String): String = phone.filter { it.isDigit() }
 
         internal fun roleLabel(role: String): String = when (role) {
             UserRole.MANAGER -> "Gestor"
@@ -320,6 +346,9 @@ class ProfileViewModel(
 
         internal fun emailValidationError(email: String): String? =
             if (email.contains("@")) null else "E-mail inválido"
+
+        internal fun phoneValidationError(phone: String): String? =
+            if (phoneDigits(phone).length in 10..11) null else "Telefone inválido"
 
         internal fun photoValidationError(bytes: ByteArray, mimeType: String): String? {
             if (mimeType.lowercase() !in AllowedPhotoMimes) {
