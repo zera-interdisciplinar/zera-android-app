@@ -9,8 +9,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -22,14 +24,18 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zera.android.view.components.buttons.ZeraButton
 import com.zera.android.view.components.buttons.ZeraButtonType
 import com.zera.android.view.components.feedback.ErrorFeedbackPopup
+import com.zera.android.view.components.forms.SelectMaterialsForm
 import com.zera.android.view.components.inputs.ZeraDropdownInput
+import com.zera.android.view.components.inputs.ZeraSelectInput
 import com.zera.android.view.components.inputs.ZeraTextInput
 import com.zera.android.view.components.navigation.UpperNavBar
+import com.zera.android.view.components.overlays.BottomSheet
 import com.zera.android.view.components.texts.BodyText
 import com.zera.android.view.theme.Spacing
 import com.zera.android.view.theme.ZeraTheme
 import com.zera.android.viewmodel.main.models.ModelCreationViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ModelCreationScreen(
     viewModel: ModelCreationViewModel = viewModel(),
@@ -104,12 +110,12 @@ fun ModelCreationScreen(
                 isError = state.categoryError != null,
                 errorMessage = state.categoryError,
             )
-            ZeraDropdownInput(
-                value = state.material,
-                values = state.materialOptions,
-                onValueChange = viewModel::onMaterialChange,
-                label = "Material",
-                placeholder = "Selecione um material",
+            ZeraSelectInput(
+                value = state.materialsLabel,
+                onClick = viewModel::onMaterialFieldClick,
+                label = "Materiais",
+                placeholder = "Selecione os materiais",
+                enabled = state.materialOptions.isNotEmpty(),
                 isError = state.materialError != null,
                 errorMessage = state.materialError,
             )
@@ -130,6 +136,20 @@ fun ModelCreationScreen(
                 imeAction = ImeAction.Done,
                 isError = state.notesError != null,
                 errorMessage = state.notesError,
+            )
+        }
+    }
+
+    if (state.isMaterialSheetVisible) {
+        BottomSheet(
+            onDismissRequest = viewModel::onMaterialSheetDismiss,
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        ) {
+            SelectMaterialsForm(
+                options = state.materialOptions,
+                selected = state.draftMaterials,
+                onSelectedChange = viewModel::onDraftMaterialsChange,
+                onConfirm = viewModel::onMaterialsConfirm,
             )
         }
     }

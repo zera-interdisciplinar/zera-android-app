@@ -19,8 +19,10 @@ data class ModelCreationState(
     val modelName: String = "",
     val category: String = "",
     val categoryOptions: List<String> = emptyList(),
-    val material: String = "",
+    val materials: List<String> = emptyList(),
     val materialOptions: List<String> = emptyList(),
+    val draftMaterials: List<String> = emptyList(),
+    val isMaterialSheetVisible: Boolean = false,
     val brand: String = "",
     val notes: String = "",
     val nameError: String? = null,
@@ -31,7 +33,10 @@ data class ModelCreationState(
     val isLoading: Boolean = true,
     val isSaving: Boolean = false,
     val errorMessage: String? = null,
-)
+) {
+    val materialsLabel: String
+        get() = materials.joinToString(", ")
+}
 
 class ModelCreationViewModel : ZeraViewModel() {
     private val getCategories = GetCategories()
@@ -56,8 +61,28 @@ class ModelCreationViewModel : ZeraViewModel() {
         _state.value = _state.value.copy(category = value, categoryError = null)
     }
 
-    fun onMaterialChange(value: String) {
-        _state.value = _state.value.copy(material = value, materialError = null)
+    fun onMaterialFieldClick() {
+        _state.value = _state.value.copy(
+            draftMaterials = _state.value.materials,
+            isMaterialSheetVisible = true,
+        )
+    }
+
+    fun onDraftMaterialsChange(values: List<String>) {
+        _state.value = _state.value.copy(draftMaterials = values)
+    }
+
+    fun onMaterialsConfirm() {
+        val form = _state.value
+        _state.value = form.copy(
+            materials = form.materialOptions.filter { it in form.draftMaterials },
+            isMaterialSheetVisible = false,
+            materialError = null,
+        )
+    }
+
+    fun onMaterialSheetDismiss() {
+        _state.value = _state.value.copy(isMaterialSheetVisible = false)
     }
 
     fun onBrandChange(value: String) {
@@ -72,12 +97,12 @@ class ModelCreationViewModel : ZeraViewModel() {
         if (_state.value.isSaving) return
         val form = _state.value
         val categoryId = categories.find { it.name == form.category }?.id
-        val materialCode = materials.find { it.name == form.material }?.code
+        val materialCodes = materialCodes(form.materials, materials)
         val errors = fieldErrors(
             name = form.modelName,
             manufacturer = form.brand,
             categoryId = categoryId,
-            materialCode = materialCode,
+            materialCodes = materialCodes,
             notes = form.notes,
         )
         if (errors.hasAny) {
@@ -105,14 +130,14 @@ class ModelCreationViewModel : ZeraViewModel() {
                     name = form.modelName.trim(),
                     manufacturer = form.brand.trim(),
                     categoryId = categoryId.orEmpty(),
-                    materialCodes = listOf(materialCode.orEmpty()),
+                    materialCodes = materialCodes,
                     notes = form.notes.trim().takeIf { it.isNotEmpty() },
                 )
                 val materialLabel = created.materials
                     .map { it.name.ifBlank { it.code.orEmpty() } }
                     .filter { it.isNotBlank() }
                     .joinToString(", ")
-                    .ifBlank { form.material }
+                    .ifBlank { form.materialsLabel }
                 ZeraNavigator.pushAndPop(
                     Route.ModelCreationSuccess(
                         modelName = created.name?.takeIf { it.isNotBlank() } ?: form.modelName.trim(),
@@ -164,25 +189,31 @@ class ModelCreationViewModel : ZeraViewModel() {
     }
 
     companion object {
+        /** Códigos dos materiais selecionados, na ordem do catálogo. */
+        internal fun materialCodes(
+            selected: List<String>,
+            catalog: List<MaterialCatalogDTO>,
+        ): List<String> = catalog.filter { it.name in selected }.map { it.code }
+
         internal fun validationError(
             name: String,
             manufacturer: String,
             categoryId: String?,
-            materialCode: String?,
+            materialCodes: List<String>,
             notes: String,
-        ): String? = fieldErrors(name, manufacturer, categoryId, materialCode, notes).first
+        ): String? = fieldErrors(name, manufacturer, categoryId, materialCodes, notes).first
 
         internal fun fieldErrors(
             name: String,
             manufacturer: String,
             categoryId: String?,
-            materialCode: String?,
+            materialCodes: List<String>,
             notes: String,
         ) = ModelFieldErrors(
             name = "Informe o nome do modelo.".takeIf { name.isBlank() },
             manufacturer = "Informe a marca.".takeIf { manufacturer.isBlank() },
             category = "Selecione a categoria.".takeIf { categoryId.isNullOrBlank() },
-            material = "Selecione o material.".takeIf { materialCode.isNullOrBlank() },
+            material = "Selecione ao menos um material.".takeIf { materialCodes.isEmpty() },
             notes = "A observação pode ter no máximo 500 caracteres.".takeIf { notes.trim().length > 500 },
         )
     }
