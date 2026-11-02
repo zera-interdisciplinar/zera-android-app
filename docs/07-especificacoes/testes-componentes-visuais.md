@@ -4,7 +4,7 @@
 
 - **Feature:** Testes de comportamento dos componentes de `view/components`, com Compose UI Test e Robolectric, sem emulador
 - **Perfil(is) envolvido(s):** Não se aplica (qualidade interna; quem usa é o time de desenvolvimento)
-- **Status:** em progresso (item 17 de 19)
+- **Status:** em progresso (item 18 de 19)
 - **Última atualização:** 2026-11-02
 
 ## Contexto
@@ -203,7 +203,7 @@ Um item por vez, um commit por item (`test: ...`), parando para revisão.
 - [x] **15. `ProductList` e `OptionList`.** Itens e toque com o item certo; lista vazia com o conteúdo padrão e customizado; `isLoadingMore`; `statusText` troca a seta pela tag; `ProductListItem` mostra `ID` com 7 caracteres; `OptionListItem` sem ícone e sem descrição em branco. Problema conhecido 3 como teste com `@Ignore`.
 - [x] **16. `EmployeeList`, `InviteList`, `Notification` e `NotificationList`.** Colaboradores: "Pendente" e "Ativo"; toque; vazia. Convites: dados e "Copiar código"; vazia. Notificação: ação só com `redirect`; X só com `onDismiss`. Lista: "Resolver agora" só com `resolvable` e `onItemClick`; vazia.
 - [x] **17. `LoadMoreEffect`.** Longe do fim não chama; chegar perto chama uma vez; `itemCount` novo com o usuário no fim chama de novo; sem mudança de `itemCount` não repete; subir e descer chama de novo; lista curta chama sozinha; respeita o `threshold`.
-- [ ] **18. `DismissibleNotification`.** X chama `onDismiss`; deslizar para os dois lados chama `onDismiss`; item que continua na tela volta ao lugar depois do `SwipeResetDelay`, com `mainClock`.
+- [x] **18. `DismissibleNotification`.** X chama `onDismiss`; deslizar para os dois lados chama `onDismiss`; item que continua na tela volta ao lugar depois do `SwipeResetDelay`, com `mainClock`.
 
 ### Fechamento
 
