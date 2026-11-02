@@ -45,7 +45,7 @@
             android:value="zera_alerts" />
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
-            android:resource="@drawable/bell" />
+            android:resource="@drawable/zera_icon" />
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

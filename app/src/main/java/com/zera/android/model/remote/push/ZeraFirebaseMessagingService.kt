@@ -76,7 +76,7 @@ class ZeraFirebaseMessagingService : FirebaseMessagingService() {
         manager.notify(
             title.hashCode(),
             NotificationCompat.Builder(this, ChannelId)
-                .setSmallIcon(R.drawable.bell)
+                .setSmallIcon(R.drawable.zera_icon)
                 .setContentTitle(title)
                 .setContentText(body)
                 .setAutoCancel(true)
