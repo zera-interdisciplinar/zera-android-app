@@ -21,6 +21,7 @@ import com.zera.android.R
  * ```
  */
 enum class ZeraIcon(@DrawableRes val resId: Int) {
+    AddEmployee(R.drawable.add_employee),
     Bell(R.drawable.bell),
     Box(R.drawable.box),
     Category(R.drawable.category),
