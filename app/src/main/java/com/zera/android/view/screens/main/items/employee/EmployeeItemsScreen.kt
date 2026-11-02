@@ -155,7 +155,7 @@ fun EmployeeItemsScreen(
             ) {
                 ZeraChipsGroup(
                     label = "Status",
-                    options = ItemStatus.entries.map { it.label },
+                    options = ItemStatus.entries.filter { it != ItemStatus.Draft }.map { it.label },
                     selectedValues = draftStatuses,
                     onSelectedValuesChange = { draftStatuses = it },
                     selectMany = true,
