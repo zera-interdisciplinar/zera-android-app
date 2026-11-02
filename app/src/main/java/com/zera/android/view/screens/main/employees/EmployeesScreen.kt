@@ -10,6 +10,7 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,6 +55,12 @@ fun EmployeesScreen(
 ) {
     val state by viewModel.state
     val clipboardManager = LocalClipboardManager.current
+
+    LaunchedEffect(state.codeToCopy) {
+        val code = state.codeToCopy ?: return@LaunchedEffect
+        clipboardManager.setText(AnnotatedString(code))
+        viewModel.onCodeCopied()
+    }
 
     ManagerScaffold(
         title = "Colaboradores",

@@ -42,6 +42,8 @@ data class EmployeesState(
     /** Rascunho do bottom sheet "Criar convite"; `null` = sheet fechado. */
     val inviteDraft: InviteDraft? = null,
     val isSubmitting: Boolean = false,
+    /** Código a copiar para a área de transferência; a tela copia e avisa em `onCodeCopied`. */
+    val codeToCopy: String? = null,
     val errorMessage: String? = null,
 ) {
     /**
@@ -186,9 +188,16 @@ class EmployeesViewModel : ZeraViewModel() {
     }
 
     fun onEmployeeClick(employee: EmployeeItem) {
-        // Convite pendente ainda não tem usuário, então não há detalhe para abrir.
-        if (employee.isPending) return
+        // Convite pendente ainda não tem usuário, então não há detalhe para abrir: o toque copia o código.
+        if (employee.isPending) {
+            _state.value = _state.value.copy(codeToCopy = employee.inviteCode)
+            return
+        }
         ZeraNavigator.push(Route.EmployeeDetails(employeeId = employee.id), ScreenAnimation.SlideHorizontal)
+    }
+
+    fun onCodeCopied() {
+        _state.value = _state.value.copy(codeToCopy = null)
     }
 
     companion object {
@@ -251,6 +260,7 @@ class EmployeesViewModel : ZeraViewModel() {
                     name = invite.inviteeName,
                     role = ROLE_OPERATOR,
                     isPending = true,
+                    inviteCode = invite.code,
                 )
             }
             val activeItems = employees.map { employee ->

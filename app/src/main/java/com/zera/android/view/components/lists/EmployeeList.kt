@@ -24,12 +24,14 @@ import com.zera.android.view.theme.ZeraTheme
  * @param role cargo do colaborador (ex.: "Operador").
  * @param isPending quando `true`, o [EmployeeListItem] destaca o item como convite
  *   pendente ("Pendente") em vez de colaborador ativo ("Ativo").
+ * @param inviteCode código do convite, quando o item é um convite pendente.
  */
 data class EmployeeItem(
     val id: String,
     val name: String,
     val role: String,
     val isPending: Boolean = false,
+    val inviteCode: String? = null,
 )
 
 /**
