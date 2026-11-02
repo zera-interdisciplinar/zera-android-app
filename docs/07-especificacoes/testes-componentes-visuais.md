@@ -26,7 +26,7 @@ O que já existe:
 
 - **Testes rodam com Robolectric**, em `src/test`, sem emulador.
 - **Sem testes de screenshot** nesta spec.
-- **Sem CI** nesta spec: os testes rodam localmente.
+- **CI fora do checklist:** o workflow `.github/workflows/unit-tests.yml` foi adicionado depois, na JDK 21.
 
 ## User story
 
@@ -152,7 +152,7 @@ Validar nos itens 1 e 2 do checklist, antes de escrever o restante:
 | Risco | Como tratar |
 |---|---|
 | Compatibilidade do Robolectric com AGP 9 e SDK 36 | **Validada** no item 1: Robolectric 4.17 roda o Compose UI Test |
-| JDK para o SDK 36 | **Validada na JDK 25**, com `--add-exports=java.base/jdk.internal.access=ALL-UNNAMED` na JVM de teste. Ainda não testada na JDK 21 do Android Studio nem na 17 do workflow de release, o que precisará ser revisto quando os testes forem para o CI |
+| JDK para o SDK 36 | **Validada nas JDKs 25 e 21**, com `--add-exports=java.base/jdk.internal.access=ALL-UNNAMED` na JVM de teste. O workflow de testes usa a 21. A 17, usada no workflow de release, não foi testada |
 | `ContentProvider`s de Firebase e ML Kit no manifesto mesclado, inicializados pelo Robolectric | **Sem impacto** no item 1, que já roda com `isIncludeAndroidResources = true` |
 | `Dialog`, menu do `ExposedDropdownMenuBox`, `ModalBottomSheet` e `DatePicker` | **Validados** `Dialog`, `ModalBottomSheet`, o menu e o `DatePicker`. Campo de texto dentro de `Dialog` não funciona: ver [Limitações encontradas](#limitações-encontradas) |
 | Primeiro uso baixa o `android-all` do Maven | Precisa de rede só na primeira execução |
@@ -219,7 +219,7 @@ Preencher durante a execução, com o componente, a interação que ficou fora e
 
 ## Fora de escopo desta spec
 
-- CI e testes de screenshot.
+- Testes de screenshot.
 - Correção dos [Problemas conhecidos](#problemas-conhecidos), salvo decisão específica.
 - Telas (`view/screens`) e `ViewModel`s.
 - Barras de navegação e scaffolds, incluindo o `ManagerBottomNavBar`, que usa `ViewModel`.
