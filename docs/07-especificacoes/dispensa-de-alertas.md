@@ -4,8 +4,8 @@
 
 - **Feature:** dispensar alertas na Central de Alertas (`AlertCentralScreen`), na home do Gestor (`ManagerHomeScreen`) e pelo toque no push
 - **Perfil(is) envolvido(s):** Gestor e Funcionário (quem recebe alertas da API)
-- **Status:** em progresso
-- **Última atualização:** 2026-11-01
+- **Status:** implementado; a dispensa pelo push depende de o back-end enviar `alertId`
+- **Última atualização:** 2026-11-02
 
 ## Contexto
 
@@ -92,7 +92,7 @@ Como usuário que recebe alertas, quero que um alerta saia da lista quando eu in
 - `PendingAlertDeepLink` guarda também o `alertId` (`stash`/`takeAlertId`).
 - `consumePendingAlertDeepLink()` dispara o `DismissAlert` em um escopo próprio, antes de resolver a rota. Assim o push sem rota também dispensa.
 - Só consome o `alertId` com `AdmCoreClient.isReady()` e token salvo. Caso contrário ele fica pendente, e a Splash, o login ou o cadastro o consomem depois.
-- **Dependência do back-end:** hoje o push ainda não envia o `alertId`. O app assume o nome `alertId` em `message.data`, a confirmar na documentação. Sem o campo, nada é fechado pelo push e o resto do fluxo não muda.
+- **Dependência do back-end:** hoje o push ainda não envia o `alertId`. O Confluence (páginas 4 e 5) confirma esse nome no `GET` e no `PATCH`, mas no push só cita `data.deepLink`. O app assume `alertId` em `message.data`. Sem o campo, nada é fechado pelo push e o resto do fluxo não muda.
 
 ### ViewModels
 
@@ -123,17 +123,17 @@ Como usuário que recebe alertas, quero que um alerta saia da lista quando eu in
 
 ## Critérios de aceite
 
-- [ ] `DismissAlert` fecha o alerta na API, volta o id em falha e trata `404` como sucesso
-- [ ] Central de Alertas lista só alertas `OPEN`
-- [ ] Deslizar ou tocar no X remove o card com animação e fecha o alerta
-- [ ] "Resolver agora" navega e fecha o alerta
-- [ ] Falha ao deslizar ou no X devolve o card à posição e mostra o erro
-- [ ] Toque no push com `alertId` fecha o alerta, com ou sem rota, e espera o login se preciso
-- [ ] Dispensar não pula itens na paginação
-- [ ] Dispensar na Central reflete na home do Gestor
-- [ ] Central de Trabalho e home do Funcionário continuam sem deslize e sem X
-- [ ] Testes unitários do use case, do deep link e das regras dos ViewModels
-- [ ] Docs atualizadas
+- [x] `DismissAlert` fecha o alerta na API, volta o id em falha e trata `404` como sucesso
+- [x] Central de Alertas lista só alertas `OPEN`
+- [x] Deslizar ou tocar no X remove o card com animação e fecha o alerta
+- [x] "Resolver agora" navega e fecha o alerta
+- [x] Falha ao deslizar ou no X devolve o card à posição e mostra o erro
+- [ ] Toque no push com `alertId` fecha o alerta, com ou sem rota, e espera o login se preciso (código pronto; falta o back-end enviar o campo para validar com um push real)
+- [x] Dispensar não pula itens na paginação
+- [x] Dispensar na Central reflete na home do Gestor
+- [x] Central de Trabalho e home do Funcionário continuam sem deslize e sem X
+- [x] Testes unitários do use case, do deep link e das regras dos ViewModels
+- [x] Docs atualizadas
 
 ## Edge cases considerados
 
@@ -170,4 +170,4 @@ Uma etapa por vez, com revisão antes da próxima.
 5. [x] `Notification` com X + `DismissibleNotification`
 6. [x] `NotificationList` e `notificationItems` com `onItemDismiss` e animação
 7. [x] Ligar `AlertCentralScreen` e `ManagerHomeScreen`
-8. [ ] Atualizar docs (`contrato-adm-core-alertas/contrato.md`, `06-contratos-api.md`, `03-catalogo-componentes.md`, `09-stack-e-dependencias.md`, status desta spec) e conferir o nome `alertId` na documentação do back-end
+8. [x] Atualizar docs (`contrato-adm-core-alertas/contrato.md`, `06-contratos-api.md`, `03-catalogo-componentes.md`, `09-stack-e-dependencias.md`, status desta spec) e conferir o nome `alertId` na documentação do back-end

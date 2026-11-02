@@ -27,7 +27,7 @@ Fonte canônica do back-end (outubro 2026):
 | [contrato-dashboard/](contrato-dashboard/) | `GET /dashboard/home`, `/work-center`, `/indicators`. |
 | [contrato-pdi/](contrato-pdi/) | Itens, categorias, barcode, PATCH/approve/reject. |
 | [contrato-adm-core-membros/](contrato-adm-core-membros/) | Users, convites, perfil. **Não existe `POST /users`.** |
-| [contrato-adm-core-alertas/](contrato-adm-core-alertas/) | `GET/POST /notifications/alerts`. |
+| [contrato-adm-core-alertas/](contrato-adm-core-alertas/) | `GET/POST /notifications/alerts` e `PATCH /notifications/alerts/{alertId}`. |
 | [contrato-places-api/](contrato-places-api/) | Locais, recicladoras, `POST /disposals`, cancelamento, PDF. |
 | [contrato-ai-core-api/](contrato-ai-core-api/) | Chat e `POST /reports`. |
 | [07-especificacoes/](07-especificacoes/) | Specs Given/When/Then. |
