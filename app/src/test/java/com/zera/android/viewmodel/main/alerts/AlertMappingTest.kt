@@ -33,6 +33,21 @@ class AlertMappingTest {
     }
 
     @Test
+    fun visibleAlertsDropDismissedAndKeepOrder() {
+        val loaded = AlertMapping.notificationsFrom(
+            listOf(
+                alert(alertId = "a", description = "A", severity = "HIGH"),
+                alert(alertId = "b", description = "B", severity = "HIGH"),
+                alert(alertId = "c", description = "C", severity = "HIGH"),
+            ),
+        )
+
+        val visible = AlertMapping.visibleAlerts(loaded, setOf("b", "not-loaded"))
+
+        assertEquals(listOf("a", "c"), visible.map { it.id })
+    }
+
+    @Test
     fun kindMapsToColorFamily() {
         assertEquals(ZeraColorFamily.Green, AlertMapping.colorFamilyForAlert("ITEM_APPROVED", "HIGH"))
         assertEquals(ZeraColorFamily.Yellow, AlertMapping.colorFamilyForAlert("ITEM_PENDING_APPROVAL", "LOW"))

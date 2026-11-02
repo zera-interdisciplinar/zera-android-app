@@ -8,6 +8,15 @@ import com.zera.android.view.theme.ZeraColorFamily
 
 /** Converte os alertas da API nos cards de notificação, para a home do gestor e a Central de Alertas. */
 object AlertMapping {
+    internal const val DismissErrorDescription =
+        "Houve uma instabilidade e não conseguimos dispensar o alerta."
+
+    /** Os alertas carregados que ainda não foram dispensados, na mesma ordem. */
+    internal fun visibleAlerts(
+        loaded: List<NotificationItem>,
+        dismissedIds: Set<String>,
+    ): List<NotificationItem> = loaded.filterNot { it.id in dismissedIds }
+
     fun notificationsFrom(alerts: List<AlertResponseDTO>): List<NotificationItem> =
         alerts.map { alert ->
             NotificationItem(
