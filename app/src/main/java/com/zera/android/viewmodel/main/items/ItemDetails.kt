@@ -55,7 +55,7 @@ data class ItemDetailsState(
     val photoUrl: String? = null,
     /** `true` enquanto o popup com a foto ampliada está aberto. */
     val showPhotoViewer: Boolean = false,
-    /** `true` enquanto a foto recém-tirada está sendo enviada ao Storage. */
+    /** `true` enquanto a foto recém-tirada está sendo enviada à API. */
     val isUploadingPhoto: Boolean = false,
     val canReview: Boolean = false,
     val canSendToMaintenance: Boolean = false,
@@ -125,10 +125,12 @@ class ItemDetailsViewModel : ZeraViewModel() {
         _state.value = _state.value.copy(errorMessage = "Permita o uso da câmera para tirar a foto.")
     }
 
-    /** Recebe a foto já tirada e reduzida (`null` se não deu para processá-la) e a envia ao Storage. */
-    fun onPhotoTaken(bytes: ByteArray?) {
+    /**
+     * Recebe a foto já tirada e reduzida (`null` se não deu para processá-la) e a envia à API.
+     * O [itemId] vem da rota: se o processo morreu com a câmera aberta, o state ainda não carregou.
+     */
+    fun onPhotoTaken(itemId: String, bytes: ByteArray?) {
         val current = _state.value
-        val itemId = current.itemId
         if (itemId.isBlank() || current.isUploadingPhoto) return
         if (bytes == null || bytes.isEmpty()) {
             _state.value = current.copy(errorMessage = "Não foi possível processar a foto.")
@@ -137,13 +139,14 @@ class ItemDetailsViewModel : ZeraViewModel() {
         _state.value = current.copy(isUploadingPhoto = true, errorMessage = null)
         viewModelScope.launch {
             try {
-                val photoUrl = uploadItemPhoto.execute(itemId, bytes, PhotoCapture.MimeType)
-                // O contrato atual não persiste photoUrl em PATCH; a URL é exibida nesta sessão.
+                val item = uploadItemPhoto.execute(itemId, bytes, PhotoCapture.MimeType)
+                val photoUrl = item.photoUrl?.takeIf { it.isNotBlank() }
                 _state.value = _state.value.copy(
-                    photoUrl = ProfileViewModel.cacheBust(photoUrl),
+                    photoUrl = photoUrl?.let(::uploadedPhotoUrl),
                     isUploadingPhoto = false,
                     showPhotoViewer = false,
-                    errorMessage = null,
+                    // A API devolve photoUrl nulo quando não tem foto servível, mesmo com o envio aceito.
+                    errorMessage = if (photoUrl == null) "A foto foi enviada, mas não pôde ser exibida agora." else null,
                 )
             } catch (e: CancellationException) {
                 _state.value = _state.value.copy(isUploadingPhoto = false)
@@ -151,7 +154,7 @@ class ItemDetailsViewModel : ZeraViewModel() {
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
                     isUploadingPhoto = false,
-                    errorMessage = errorDescription(e, ProfileViewModel.photoWriteError(e)),
+                    errorMessage = errorDescription(e, itemPhotoWriteError(e)),
                 )
             }
         }
@@ -357,6 +360,20 @@ class ItemDetailsViewModel : ZeraViewModel() {
     }
 
     companion object {
+        internal fun itemPhotoWriteError(error: Exception): String =
+            when ((error as? HttpException)?.code()) {
+                413 -> "A foto deve ter no máximo 5 MB."
+                503 -> "O envio de fotos está indisponível no momento."
+                else -> "Não foi possível enviar a foto. Tente novamente."
+            }
+
+        /**
+         * URL a exibir logo após o envio. Sem query, ela pode repetir a da foto anterior e o Coil
+         * mostraria a imagem em cache. Com query, pode ser assinada: mexer nela invalidaria a assinatura.
+         */
+        internal fun uploadedPhotoUrl(url: String): String =
+            if (url.contains("?")) url else ProfileViewModel.cacheBust(url)
+
         private val ptBr = Locale.forLanguageTag("pt-BR")
         internal const val NAME_MAX_LENGTH = 120
         internal const val NOTES_MAX_LENGTH = 500
@@ -550,7 +567,6 @@ class ItemDetailsViewModel : ZeraViewModel() {
             notes = item.notes.orEmpty(),
             registeredBy = registeredByFrom(item),
             registeredAt = formatRegisteredAt(item.createdAt),
-            // TODO: alinhar com o back-end o envio do photoUrl do item (hoje o ItemResponse pode vir sem foto).
             photoUrl = item.photoUrl?.takeIf { it.isNotBlank() },
             canReview = canReview(statusFrom(item.status), isEmployee),
             canSendToMaintenance = canSendToMaintenance(statusFrom(item.status), isEmployee),

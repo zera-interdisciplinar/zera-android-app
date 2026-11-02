@@ -97,7 +97,7 @@ fun ItemDetailsScreen(
             val bytes = withContext(Dispatchers.IO) {
                 PhotoCapture.readCompressed(file).also { file.delete() }
             }
-            viewModel.onPhotoTaken(bytes)
+            viewModel.onPhotoTaken(itemId, bytes)
         }
     }
 

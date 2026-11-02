@@ -22,10 +22,13 @@ import com.zera.android.model.dto.inventory.UpdateModelNameRequestDTO
 import com.zera.android.model.dto.inventory.DisposalRecordDTO
 import com.zera.android.model.dto.inventory.PagedDisposalsDTO
 import com.zera.android.model.dto.inventory.WorkCenterResponseDTO
+import okhttp3.MultipartBody
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.Multipart
 import retrofit2.http.PATCH
 import retrofit2.http.POST
+import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -71,6 +74,13 @@ interface InventoryService {
     @POST("api/v1/items")
     suspend fun createItem(
         @Body body: CreateItemRequestDTO,
+    ): ItemResponseDTO
+
+    @Multipart
+    @POST("api/v1/items/{id}/photo")
+    suspend fun uploadItemPhoto(
+        @Path("id") id: String,
+        @Part photo: MultipartBody.Part,
     ): ItemResponseDTO
 
     @POST("api/v1/items/{id}/submit")
