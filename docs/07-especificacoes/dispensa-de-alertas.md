@@ -167,7 +167,7 @@ Uma etapa por vez, com revisão antes da próxima.
 2. [x] Dispensa pelo push em `PendingAlertDeepLink` (`alertId` provisório) + testes
 3. [x] `AlertCentralViewModel`: filtro `OPEN`, `DismissedAlerts`, paginação, `onAlertDismiss` e `onAlertClick` + testes
 4. [x] `ManagerHomeViewModel`: `DismissedAlerts`, limite da home, recarga, `onAlertDismiss` e `onAlertClick` + testes
-5. [ ] `Notification` com X + `DismissibleNotification`
+5. [x] `Notification` com X + `DismissibleNotification`
 6. [ ] `NotificationList` e `notificationItems` com `onItemDismiss` e animação
 7. [ ] Ligar `AlertCentralScreen` e `ManagerHomeScreen`
 8. [ ] Atualizar docs (`contrato-adm-core-alertas/contrato.md`, `06-contratos-api.md`, `03-catalogo-componentes.md`, `09-stack-e-dependencias.md`, status desta spec) e conferir o nome `alertId` na documentação do back-end

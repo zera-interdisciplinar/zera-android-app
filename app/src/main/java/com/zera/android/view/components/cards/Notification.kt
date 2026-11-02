@@ -14,6 +14,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.zera.android.view.components.buttons.IconButton
+import com.zera.android.view.components.buttons.ZeraButtonType
 import com.zera.android.view.components.texts.BodyText
 import com.zera.android.view.components.texts.LabelText
 import com.zera.android.view.theme.Radius
@@ -22,6 +24,8 @@ import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.view.theme.ZeraTheme
 import com.zera.android.view.theme.icons.ZeraIcon
 import com.zera.android.view.theme.palette
+
+private val DismissButtonSize = 32.dp
 
 /**
  * Card de notificação: um rótulo em destaque, um texto de apoio e, opcionalmente,
@@ -39,6 +43,7 @@ import com.zera.android.view.theme.palette
  * @param redirectLabel texto da ação de [redirect].
  * @param neutral quando `true`, ignora o [style] e usa o fundo de superfície, sem borda
  *   colorida, com a ação na cor primária — visual das notificações antigas, já sem urgência.
+ * @param onDismiss ação do X no canto do card. Quando `null` (padrão), o X não é exibido.
  */
 @Composable
 fun Notification(
@@ -49,6 +54,7 @@ fun Notification(
     redirect: (() -> Unit)? = null,
     redirectLabel: String = "Resolver agora",
     neutral: Boolean = false,
+    onDismiss: (() -> Unit)? = null,
 ) {
     val palette = style.palette()
     val containerColor = if (neutral) MaterialTheme.colorScheme.surface else palette.container
@@ -65,7 +71,26 @@ fun Notification(
             modifier = Modifier.padding(Spacing.medium),
             verticalArrangement = Arrangement.spacedBy(Spacing.small),
         ) {
-            BodyText(text = label, bold = true, color = labelColor)
+            if (onDismiss != null) {
+                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.small)) {
+                    BodyText(
+                        text = label,
+                        bold = true,
+                        color = labelColor,
+                        modifier = Modifier.weight(1f),
+                    )
+                    IconButton(
+                        icon = ZeraIcon.Close,
+                        onClick = onDismiss,
+                        contentDescription = "Dispensar alerta",
+                        style = style,
+                        type = ZeraButtonType.Tertiary,
+                        size = DismissButtonSize,
+                    )
+                }
+            } else {
+                BodyText(text = label, bold = true, color = labelColor)
+            }
             if(text!=null){
                 BodyText(text = text, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
@@ -117,6 +142,11 @@ private fun NotificationPreview() {
                 redirect = {},
                 redirectLabel = "Reenviar convite",
                 neutral = true,
+            )
+            Notification(
+                label = "Item aprovado pelo gestor",
+                style = ZeraColorFamily.Green,
+                onDismiss = {},
             )
         }
     }
