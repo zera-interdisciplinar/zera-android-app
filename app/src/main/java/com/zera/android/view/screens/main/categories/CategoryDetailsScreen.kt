@@ -34,9 +34,11 @@ import com.zera.android.view.components.loading.SkeletonBox
 import com.zera.android.view.components.navigation.SideBarOverlay
 import com.zera.android.view.components.navigation.UpperNavBar
 import com.zera.android.view.components.overlays.BottomSheet
+import com.zera.android.view.components.overlays.ConfirmationPopup
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.theme.Radius
 import com.zera.android.view.theme.Spacing
+import com.zera.android.view.theme.ZeraColorFamily
 import com.zera.android.view.theme.ZeraTheme
 import com.zera.android.view.theme.icons.ZeraIcon
 import com.zera.android.viewmodel.main.categories.CategoryDetailsState
@@ -114,6 +116,17 @@ fun CategoryDetailsScreen(
                     EditableFieldRow(label = "Nome", value = state.name)
                     EditableFieldRow(label = "Descrição", value = state.description)
                     EditableFieldRow(label = "Data de Cadastro", value = state.registeredAt)
+
+                    if (state.canDelete) {
+                        ZeraButton(
+                            text = "Excluir categoria",
+                            onClick = viewModel::onDeleteClick,
+                            type = ZeraButtonType.Secondary,
+                            style = ZeraColorFamily.Red,
+                            enabled = actionsEnabled,
+                            fillMaxWidth = true,
+                        )
+                    }
                 }
             }
         }
@@ -144,6 +157,16 @@ fun CategoryDetailsScreen(
                 isSubmitting = state.isSubmitting,
             )
         }
+    }
+
+    if (state.showDeleteConfirmation) {
+        ConfirmationPopup(
+            title = "Excluir essa categoria?",
+            message = "A categoria será excluída definitivamente.",
+            confirmButtonText = "Excluir",
+            onConfirm = viewModel::onDeleteConfirm,
+            onDismissRequest = viewModel::onDeleteDismiss,
+        )
     }
 
     state.errorMessage?.let { message ->

@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.zera.android.model.dto.inventory.CategoryResponseDTO
 import com.zera.android.model.remote.client.isConnectionError
 import com.zera.android.model.usecase.auth.GetSelfUser
+import com.zera.android.model.usecase.inventory.DeleteCategory
 import com.zera.android.model.usecase.inventory.GetCategory
 import com.zera.android.model.usecase.inventory.UpdateCategory
 import com.zera.android.view.components.navigation.SideBarItem
@@ -25,6 +26,9 @@ data class CategoryDetailsState(
     val description: String = "",
     val registeredAt: String = "",
     val canEdit: Boolean = false,
+    val canDelete: Boolean = false,
+    /** `true` enquanto o popup "Excluir essa categoria?" está aberto. */
+    val showDeleteConfirmation: Boolean = false,
     val sideBarItems: List<SideBarItem> = emptyList(),
     val isLoading: Boolean = true,
     val isSubmitting: Boolean = false,
@@ -49,6 +53,7 @@ class CategoryDetailsViewModel : ZeraViewModel() {
     private val getCategory = GetCategory()
     private val getSelfUser = GetSelfUser()
     private val updateCategory = UpdateCategory()
+    private val deleteCategory = DeleteCategory()
 
     private val _state = mutableStateOf(CategoryDetailsState())
     val state = _state
@@ -154,6 +159,39 @@ class CategoryDetailsViewModel : ZeraViewModel() {
         }
     }
 
+    fun onDeleteClick() {
+        if (!_state.value.canDelete) return
+        _state.value = _state.value.copy(showDeleteConfirmation = true)
+    }
+
+    fun onDeleteDismiss() {
+        _state.value = _state.value.copy(showDeleteConfirmation = false)
+    }
+
+    /** A lista de categorias recarrega ao voltar a ficar visível. */
+    fun onDeleteConfirm() {
+        val categoryId = _state.value.categoryId
+        if (categoryId.isBlank() || _state.value.isSubmitting || !_state.value.canDelete) return
+        _state.value = _state.value.copy(
+            showDeleteConfirmation = false,
+            isSubmitting = true,
+            errorMessage = null,
+        )
+        viewModelScope.launch {
+            try {
+                deleteCategory.execute(categoryId)
+                ZeraNavigator.goBack()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(
+                    isSubmitting = false,
+                    errorMessage = deleteError(e),
+                )
+            }
+        }
+    }
+
     private fun updateDraft(transform: (CategoryEditDraft) -> CategoryEditDraft) {
         val draft = _state.value.editDraft ?: return
         _state.value = _state.value.copy(editDraft = transform(draft))
@@ -162,6 +200,22 @@ class CategoryDetailsViewModel : ZeraViewModel() {
     companion object {
         // Escrita em categoria é só do gestor (ms-inventory).
         internal fun canEdit(isEmployee: Boolean): Boolean = !isEmployee
+
+        internal fun canDelete(isEmployee: Boolean): Boolean = !isEmployee
+
+        /** Descrição do popup para a falha ao excluir; `null` quando é falta de conexão. */
+        internal fun deleteError(error: Exception): String? {
+            if (error.isConnectionError()) return null
+            if (error is HttpException) {
+                return when (error.code()) {
+                    403 -> "Você não tem permissão para esta ação."
+                    404 -> "Categoria não encontrada."
+                    409 -> "Esta categoria tem modelos vinculados e não pode ser excluída."
+                    else -> "Não foi possível excluir a categoria."
+                }
+            }
+            return "Não foi possível excluir a categoria."
+        }
 
         internal fun editChangesFrom(state: CategoryDetailsState, draft: CategoryEditDraft) = CategoryEditChanges(
             name = draft.name.trim() != state.name.trim(),
@@ -195,6 +249,7 @@ class CategoryDetailsViewModel : ZeraViewModel() {
                 description = category.description.orEmpty(),
                 registeredAt = ItemDetailsViewModel.formatRegisteredAt(category.createdAt),
                 canEdit = canEdit(isEmployee),
+                canDelete = canDelete(isEmployee),
                 sideBarItems = sideBarItemsFor(isEmployee),
             )
     }

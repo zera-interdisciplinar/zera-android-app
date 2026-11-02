@@ -38,6 +38,7 @@ import com.zera.android.view.components.navigation.SideBarOverlay
 import com.zera.android.view.components.navigation.UpperNavBar
 import com.zera.android.view.components.outros.ItemStatus
 import com.zera.android.view.components.overlays.BottomSheet
+import com.zera.android.view.components.overlays.ConfirmationPopup
 import com.zera.android.view.components.texts.CaptionText
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.theme.Radius
@@ -156,6 +157,17 @@ fun ModelDetailsScreen(
                     if (state.rejectionReason.isNotBlank()) {
                         EditableFieldRow(label = "Motivo da recusa", value = state.rejectionReason)
                     }
+
+                    if (state.canDelete) {
+                        ZeraButton(
+                            text = "Excluir modelo",
+                            onClick = viewModel::onDeleteClick,
+                            type = ZeraButtonType.Secondary,
+                            style = ZeraColorFamily.Red,
+                            enabled = actionsEnabled,
+                            fillMaxWidth = true,
+                        )
+                    }
                 }
             }
         }
@@ -198,6 +210,16 @@ fun ModelDetailsScreen(
                 showRejectPopup = false
             },
             validate = ModelDetailsViewModel::reasonValidationError,
+        )
+    }
+
+    if (state.showDeleteConfirmation) {
+        ConfirmationPopup(
+            title = "Excluir esse modelo?",
+            message = "O modelo será excluído definitivamente.",
+            confirmButtonText = "Excluir",
+            onConfirm = viewModel::onDeleteConfirm,
+            onDismissRequest = viewModel::onDeleteDismiss,
         )
     }
 

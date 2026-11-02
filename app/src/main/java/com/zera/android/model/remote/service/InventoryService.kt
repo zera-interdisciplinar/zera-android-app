@@ -104,6 +104,11 @@ interface InventoryService {
         @Path("id") id: String,
     ): CategoryResponseDTO
 
+    @DELETE("api/v1/categories/{id}")
+    suspend fun deleteCategory(
+        @Path("id") id: String,
+    )
+
     @PATCH("api/v1/categories/{id}/name")
     suspend fun updateCategoryName(
         @Path("id") id: String,
@@ -139,6 +144,11 @@ interface InventoryService {
         @Query("page") page: Int = 0,
         @Query("size") size: Int = 20,
     ): PagedItemsDTO
+
+    @DELETE("api/v1/models/{id}")
+    suspend fun deleteModel(
+        @Path("id") id: String,
+    )
 
     @PATCH("api/v1/models/{id}/name")
     suspend fun updateModelName(

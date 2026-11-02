@@ -8,6 +8,7 @@ import com.zera.android.model.dto.inventory.ModelResponseDTO
 import com.zera.android.model.dto.inventory.PagedItemsDTO
 import com.zera.android.model.usecase.auth.GetSelfUser
 import com.zera.android.model.usecase.inventory.ApproveItem
+import com.zera.android.model.usecase.inventory.DeleteModel
 import com.zera.android.model.usecase.inventory.GetModel
 import com.zera.android.model.usecase.inventory.GetModelItems
 import com.zera.android.model.usecase.inventory.RejectItem
@@ -33,6 +34,9 @@ data class ModelDetailsState(
     val status: ItemStatus? = null,
     val canReview: Boolean = false,
     val canEdit: Boolean = false,
+    val canDelete: Boolean = false,
+    /** `true` enquanto o popup "Excluir esse modelo?" está aberto. */
+    val showDeleteConfirmation: Boolean = false,
     val reviewHint: String = "",
     val sideBarItems: List<SideBarItem> = emptyList(),
     val isLoading: Boolean = true,
@@ -59,6 +63,7 @@ class ModelDetailsViewModel : ZeraViewModel() {
     private val getModelItems = GetModelItems()
     private val getSelfUser = GetSelfUser()
     private val updateModel = UpdateModel()
+    private val deleteModel = DeleteModel()
     private val approveItem = ApproveItem()
     private val rejectItem = RejectItem()
 
@@ -177,6 +182,44 @@ class ModelDetailsViewModel : ZeraViewModel() {
         }
     }
 
+    fun onDeleteClick() {
+        if (!_state.value.canDelete) return
+        _state.value = _state.value.copy(showDeleteConfirmation = true)
+    }
+
+    fun onDeleteDismiss() {
+        _state.value = _state.value.copy(showDeleteConfirmation = false)
+    }
+
+    /** A lista de modelos recarrega ao voltar a ficar visível. */
+    fun onDeleteConfirm() {
+        val modelId = _state.value.modelId
+        if (modelId.isBlank() || _state.value.isSubmitting || !_state.value.canDelete) return
+        _state.value = _state.value.copy(
+            showDeleteConfirmation = false,
+            isSubmitting = true,
+            errorMessage = null,
+        )
+        viewModelScope.launch {
+            try {
+                deleteModel.execute(modelId)
+                ZeraNavigator.goBack()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(
+                    isSubmitting = false,
+                    errorMessage = userFacingError(
+                        e,
+                        conflictMessage = "Este modelo tem itens vinculados e não pode ser excluído.",
+                        validationMessage = "Não foi possível excluir o modelo.",
+                        fallback = "Não foi possível excluir o modelo.",
+                    ),
+                )
+            }
+        }
+    }
+
     private fun updateDraft(transform: (ModelEditDraft) -> ModelEditDraft) {
         val draft = _state.value.editDraft ?: return
         _state.value = _state.value.copy(editDraft = transform(draft))
@@ -257,6 +300,8 @@ class ModelDetailsViewModel : ZeraViewModel() {
         ): Boolean = !isEmployee && status == ItemStatus.PendingApproval
 
         internal fun canEdit(isEmployee: Boolean): Boolean = !isEmployee
+
+        internal fun canDelete(isEmployee: Boolean): Boolean = !isEmployee
 
         internal fun editChangesFrom(state: ModelDetailsState, draft: ModelEditDraft) = ModelEditChanges(
             name = draft.name.trim() != state.name.trim(),
@@ -345,6 +390,7 @@ class ModelDetailsViewModel : ZeraViewModel() {
                 status = status,
                 canReview = canReview(isEmployee, status, pendingItemId),
                 canEdit = canEdit(isEmployee),
+                canDelete = canDelete(isEmployee),
                 reviewHint = reviewHint(isEmployee, status, pendingItemId),
                 sideBarItems = sideBarItemsFor(isEmployee),
             )

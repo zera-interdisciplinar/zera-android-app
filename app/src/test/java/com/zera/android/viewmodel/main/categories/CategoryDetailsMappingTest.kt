@@ -43,6 +43,23 @@ class CategoryDetailsMappingTest {
     }
 
     @Test
+    fun onlyManagerCanDelete() {
+        assertTrue(CategoryDetailsViewModel.stateFrom(category, isEmployee = false).canDelete)
+        assertFalse(CategoryDetailsViewModel.stateFrom(category, isEmployee = true).canDelete)
+    }
+
+    @Test
+    fun deleteConflictExplainsTheLinkedModels() {
+        val error = HttpException(Response.error<Unit>(409, "".toResponseBody()))
+
+        assertEquals(
+            "Esta categoria tem modelos vinculados e não pode ser excluída.",
+            CategoryDetailsViewModel.deleteError(error),
+        )
+        assertNull(CategoryDetailsViewModel.deleteError(UnknownHostException("inventory")))
+    }
+
+    @Test
     fun editChangesIgnoreUnchangedFieldsAndSurroundingSpaces() {
         val state = CategoryDetailsViewModel.stateFrom(category, isEmployee = false)
         val draft = CategoryEditDraft(name = " Informática ", description = "Notebooks e monitores")

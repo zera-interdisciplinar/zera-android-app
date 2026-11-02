@@ -28,6 +28,12 @@ class ModelDetailsMappingTest {
     }
 
     @Test
+    fun onlyManagerCanDelete() {
+        assertTrue(ModelDetailsViewModel.stateFrom(pendingModel(), isEmployee = false).canDelete)
+        assertFalse(ModelDetailsViewModel.stateFrom(pendingModel(), isEmployee = true).canDelete)
+    }
+
+    @Test
     fun editChangesIgnoreUnchangedFieldsAndSurroundingSpaces() {
         val state = ModelDetailsState(name = "Latitude", manufacturer = "Dell")
         val draft = ModelEditDraft(name = " Latitude ", manufacturer = "Dell")
