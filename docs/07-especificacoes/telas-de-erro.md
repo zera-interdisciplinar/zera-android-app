@@ -211,7 +211,7 @@ Uma etapa por vez, com revisão antes da próxima.
 13. [x] Migração — Reciclagem (`ItensSelectionScreen`, `RecyclingResumeScreen`, `ScheduledDisposalsScreen`, `SchedulingDetailsScreen`, `SchedulingSuccessScreen`, locais próximos)
 14. [x] Migração — Cadastro (`ManualRegisterScreen`, Scan)
 15. [x] Migração — Chat, Central de alertas e Perfil
-16. [ ] Auth: só revisar as mensagens inline (sem `e.message` nem códigos) e ignorar erros de conexão
+16. [x] Auth: só revisar as mensagens inline (sem `e.message` nem códigos) e ignorar erros de conexão
 17. [ ] Atualizar docs (`01-arquitetura.md`, `03-catalogo-componentes.md`, status desta spec)
 
 ## Referências

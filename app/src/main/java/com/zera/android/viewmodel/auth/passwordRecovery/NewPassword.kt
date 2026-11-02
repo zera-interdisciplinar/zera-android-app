@@ -3,6 +3,7 @@ package com.zera.android.viewmodel.auth.passwordRecovery
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.zera.android.model.local.SqliteManager
+import com.zera.android.model.remote.client.isConnectionError
 import com.zera.android.model.usecase.auth.ConfirmPasswordReset
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
@@ -87,7 +88,9 @@ class NewPasswordViewModel : ZeraViewModel() {
         super.onCleared()
     }
 
-    private fun userFacingError(error: Exception): String {
+    /** Mensagem inline; `null` quando é falta de conexão (a tela cheia já aparece). */
+    private fun userFacingError(error: Exception): String? {
+        if (error.isConnectionError()) return null
         // 400 não distingue token desconhecido, usado ou expirado.
         if (error is HttpException && error.code() == 400) return INVALID_LINK_MESSAGE
         return "Não foi possível redefinir a senha. Tente novamente."

@@ -3,13 +3,16 @@ package com.zera.android.viewmodel.auth
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.zera.android.model.dto.user.SelfUserResponseDTO
+import com.zera.android.model.remote.client.isConnectionError
 import com.zera.android.model.usecase.auth.SingIn
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.view.navigation.consumePendingAlertDeepLink
 import com.zera.android.viewmodel.ZeraViewModel
 import com.zera.android.viewmodel.homeRouteForRole
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
 
 data class SingInState(
     val email: String = "",
@@ -42,7 +45,7 @@ class SingInViewModel : ZeraViewModel() {
         if (state.value.email.isBlank() || state.value.password.isBlank()) {
             _state.value = _state.value.copy(
                 isLoading = false,
-                errorMessage = "Email and password cannot be empty"
+                errorMessage = "Informe e-mail e senha."
             )
             return
         }
@@ -62,9 +65,25 @@ class SingInViewModel : ZeraViewModel() {
                 }
                 ZeraNavigator.pushAndPopAll(destination)
                 consumePendingAlertDeepLink()
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
-                _state.value = _state.value.copy(isLoading = false, errorMessage = e.message)
+                _state.value = _state.value.copy(isLoading = false, errorMessage = signInError(e))
             }
+        }
+    }
+
+    companion object {
+        /** Mensagem inline do login; `null` quando é falta de conexão (a tela cheia já aparece). */
+        internal fun signInError(error: Exception): String? {
+            if (error.isConnectionError()) return null
+            if (error is HttpException) {
+                return when (error.code()) {
+                    400, 401, 403, 404 -> "E-mail ou senha incorretos."
+                    else -> "Não foi possível entrar. Tente novamente."
+                }
+            }
+            return "Não foi possível entrar. Tente novamente."
         }
     }
 }

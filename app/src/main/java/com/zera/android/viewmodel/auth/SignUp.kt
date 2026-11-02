@@ -2,12 +2,14 @@ package com.zera.android.viewmodel.auth
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
+import com.zera.android.model.remote.client.isConnectionError
 import com.zera.android.model.usecase.auth.InvitationUseCase
 import com.zera.android.model.usecase.auth.SingIn
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.view.navigation.consumePendingAlertDeepLink
 import com.zera.android.viewmodel.ZeraViewModel
+import com.zera.android.viewmodel.appMessageOrFallback
 import com.zera.android.viewmodel.homeRouteForRole
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
@@ -109,7 +111,9 @@ class SignUpViewModel : ZeraViewModel() {
         return EMAIL_REGEX.matches(email.trim())
     }
 
-    private fun userFacingError(error: Exception, fallback: String): String {
+    /** Mensagem inline do cadastro; `null` quando é falta de conexão (a tela cheia já aparece). */
+    private fun userFacingError(error: Exception, fallback: String): String? {
+        if (error.isConnectionError()) return null
         if (error is HttpException) {
             return when (error.code()) {
                 400, 409, 422 -> "Código inválido ou já utilizado. Confira o convite e tente de novo."
@@ -117,7 +121,7 @@ class SignUpViewModel : ZeraViewModel() {
                 else -> fallback
             }
         }
-        return error.message?.takeIf { it.isNotBlank() } ?: fallback
+        return appMessageOrFallback(error, fallback)
     }
 
     companion object {
