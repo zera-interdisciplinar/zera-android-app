@@ -6,6 +6,7 @@ import com.zera.android.model.dto.ai.ConversationSummaryDTO
 import com.zera.android.model.usecase.ai.ListChatConversations
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
+import com.zera.android.view.theme.icons.ZeraIcon
 import com.zera.android.view.transition.ScreenAnimation
 import com.zera.android.viewmodel.ZeraViewModel
 import com.zera.android.viewmodel.errorDescription
@@ -22,6 +23,7 @@ data class ConversationRowItem(
     val threadId: String,
     val preview: String,
     val timeLabel: String? = null,
+    val avatar: ZeraIcon = ZeraIcon.ChatbotBase,
 )
 
 data class ChatConversationsState(
@@ -78,6 +80,12 @@ class ChatConversationsViewModel(
 
     companion object {
         private val clockFormat = DateTimeFormatter.ofPattern("HH:mm")
+        private val conversationAvatars = listOf(
+            ZeraIcon.ChatbotBase,
+            ZeraIcon.ChatbotWink,
+            ZeraIcon.ChatbotHappy,
+            ZeraIcon.ChatbotDoubt,
+        )
 
         fun rowFrom(dto: ConversationSummaryDTO): ConversationRowItem? {
             val threadId = dto.resolvedThreadId().trim()
@@ -86,8 +94,13 @@ class ChatConversationsViewModel(
                 threadId = threadId,
                 preview = dto.preview.trim(),
                 timeLabel = clockLabel(dto.lastMessageAt ?: dto.updatedAt ?: dto.createdAt),
+                avatar = avatarFor(threadId),
             )
         }
+
+        /** Derivado do `threadId`, para a conversa manter o mesmo avatar quando a lista recarrega. */
+        fun avatarFor(threadId: String): ZeraIcon =
+            conversationAvatars[threadId.hashCode().mod(conversationAvatars.size)]
 
         fun clockLabel(raw: String?): String? {
             if (raw.isNullOrBlank()) return null

@@ -123,6 +123,7 @@ private fun ChatConversationsContent(
                             ConversationRow(
                                 preview = item.preview,
                                 timeLabel = item.timeLabel,
+                                avatar = item.avatar,
                                 onClick = { onConversationClick(item.threadId) },
                             )
                         }
@@ -167,9 +168,9 @@ private fun ChatConversationsScreenPreview() {
         ChatConversationsContent(
             state = ChatConversationsState(
                 items = listOf(
-                    ConversationRowItem(threadId = "1", preview = "Como cadastrar um produto?", timeLabel = "14:32"),
-                    ConversationRowItem(threadId = "2", preview = "Falar com o suporte", timeLabel = "09:10"),
-                    ConversationRowItem(threadId = "3", preview = "", timeLabel = null),
+                    ConversationRowItem(threadId = "1", preview = "Como cadastrar um produto?", timeLabel = "14:32", avatar = ZeraIcon.ChatbotWink),
+                    ConversationRowItem(threadId = "2", preview = "Falar com o suporte", timeLabel = "09:10", avatar = ZeraIcon.ChatbotHappy),
+                    ConversationRowItem(threadId = "3", preview = "", timeLabel = null, avatar = ZeraIcon.ChatbotDoubt),
                 ),
                 isLoading = false,
             ),
