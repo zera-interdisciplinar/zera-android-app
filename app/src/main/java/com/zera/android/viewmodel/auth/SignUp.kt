@@ -8,6 +8,7 @@ import com.zera.android.model.usecase.auth.SingIn
 import com.zera.android.view.navigation.Route
 import com.zera.android.view.navigation.ZeraNavigator
 import com.zera.android.view.navigation.consumePendingAlertDeepLink
+import com.zera.android.view.navigation.consumePendingItemDeepLink
 import com.zera.android.viewmodel.ZeraViewModel
 import com.zera.android.viewmodel.appMessageOrFallback
 import com.zera.android.viewmodel.homeRouteForRole
@@ -97,6 +98,7 @@ class SignUpViewModel : ZeraViewModel() {
                 }
                 ZeraNavigator.pushAndPopAll(destination)
                 consumePendingAlertDeepLink()
+                consumePendingItemDeepLink()
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
                     isLoading = false,

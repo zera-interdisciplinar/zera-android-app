@@ -16,9 +16,11 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.core.app.ActivityCompat
 import com.zera.android.model.local.SqliteManager
 import com.zera.android.view.navigation.PendingAlertDeepLink
+import com.zera.android.view.navigation.PendingItemDeepLink
 import com.zera.android.view.navigation.PendingPasswordResetDeepLink
 import com.zera.android.view.navigation.ZeraNavHost
 import com.zera.android.view.navigation.consumePendingAlertDeepLink
+import com.zera.android.view.navigation.consumePendingItemDeepLink
 import com.zera.android.view.navigation.consumePendingPasswordResetDeepLink
 import com.zera.android.view.theme.ThemeManager
 import com.zera.android.view.theme.ZeraTheme
@@ -31,6 +33,7 @@ class MainActivity : ComponentActivity() {
         ThemeManager.load()
         PendingAlertDeepLink.stash(intent)
         PendingPasswordResetDeepLink.stash(intent)
+        PendingItemDeepLink.stash(intent)
         requestNotificationPermission()
         applyEdgeToEdge(darkTheme = ThemeManager.current == AppThemeOption.Dark)
         setContent {
@@ -74,8 +77,10 @@ class MainActivity : ComponentActivity() {
         setIntent(intent)
         PendingAlertDeepLink.stash(intent)
         PendingPasswordResetDeepLink.stash(intent)
+        PendingItemDeepLink.stash(intent)
         consumePendingPasswordResetDeepLink()
         consumePendingAlertDeepLink()
+        consumePendingItemDeepLink()
     }
 
     private fun requestNotificationPermission() {
