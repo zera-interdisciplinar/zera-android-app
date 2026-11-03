@@ -20,12 +20,14 @@ class EditModelFormTest {
 
     private val nameChanges = mutableListOf<String>()
     private val manufacturerChanges = mutableListOf<String>()
+    private val weightChanges = mutableListOf<String>()
     private var saves = 0
     private var cancels = 0
 
     private fun showForm(
         nameError: String? = null,
         manufacturerError: String? = null,
+        weightError: String? = null,
         isSubmitting: Boolean = false,
     ) {
         composeRule.setZeraContent {
@@ -34,10 +36,13 @@ class EditModelFormTest {
                 onNameChange = { nameChanges += it },
                 manufacturer = "Dell",
                 onManufacturerChange = { manufacturerChanges += it },
+                weight = "2,5",
+                onWeightChange = { weightChanges += it },
                 onSave = { saves++ },
                 onCancel = { cancels++ },
                 nameError = nameError,
                 manufacturerError = manufacturerError,
+                weightError = weightError,
                 isSubmitting = isSubmitting,
             )
         }
@@ -58,6 +63,17 @@ class EditModelFormTest {
         composeRule.onNodeWithText("Latitude 5420").performTextReplacement("XPS 13")
 
         assertEquals(listOf("XPS 13"), nameChanges)
+        assertEquals(emptyList<String>(), manufacturerChanges)
+    }
+
+    @Test
+    fun editingTheWeightCallsOnlyItsCallback() {
+        showForm()
+
+        composeRule.onNodeWithText("2,5").performTextReplacement("3")
+
+        assertEquals(listOf("3"), weightChanges)
+        assertEquals(emptyList<String>(), nameChanges)
         assertEquals(emptyList<String>(), manufacturerChanges)
     }
 
