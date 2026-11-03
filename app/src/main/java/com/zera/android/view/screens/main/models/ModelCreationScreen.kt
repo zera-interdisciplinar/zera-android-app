@@ -27,6 +27,7 @@ import com.zera.android.view.components.feedback.ErrorFeedbackPopup
 import com.zera.android.view.components.forms.SelectMaterialsForm
 import com.zera.android.view.components.inputs.ZeraDropdownInput
 import com.zera.android.view.components.inputs.ZeraSelectInput
+import com.zera.android.view.components.inputs.ZeraInputType
 import com.zera.android.view.components.inputs.ZeraTextInput
 import com.zera.android.view.components.navigation.UpperNavBar
 import com.zera.android.view.components.overlays.BottomSheet
@@ -127,6 +128,16 @@ fun ModelCreationScreen(
                 imeAction = ImeAction.Next,
                 isError = state.brandError != null,
                 errorMessage = state.brandError,
+            )
+            ZeraTextInput(
+                value = state.weight,
+                onValueChange = viewModel::onWeightChange,
+                label = "Peso estimado (kg)",
+                placeholder = "Opcional. Ex: 2,5",
+                type = ZeraInputType.Decimal,
+                imeAction = ImeAction.Next,
+                isError = state.weightError != null,
+                errorMessage = state.weightError,
             )
             ZeraTextInput(
                 value = state.notes,

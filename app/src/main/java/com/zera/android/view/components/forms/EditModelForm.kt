@@ -9,6 +9,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import com.zera.android.view.components.buttons.ZeraButton
 import com.zera.android.view.components.buttons.ZeraButtonType
+import com.zera.android.view.components.inputs.ZeraInputType
 import com.zera.android.view.components.inputs.ZeraTextInput
 import com.zera.android.view.components.layouts.AdaptiveRow
 import com.zera.android.view.components.texts.TitleText
@@ -22,11 +23,14 @@ fun EditModelForm(
     onNameChange: (String) -> Unit,
     manufacturer: String,
     onManufacturerChange: (String) -> Unit,
+    weight: String,
+    onWeightChange: (String) -> Unit,
     onSave: () -> Unit,
     onCancel: () -> Unit,
     modifier: Modifier = Modifier,
     nameError: String? = null,
     manufacturerError: String? = null,
+    weightError: String? = null,
     isSubmitting: Boolean = false,
 ) {
     Column(
@@ -47,10 +51,21 @@ fun EditModelForm(
             value = manufacturer,
             onValueChange = onManufacturerChange,
             label = "Marca",
-            imeAction = ImeAction.Done,
+            imeAction = ImeAction.Next,
             enabled = !isSubmitting,
             isError = manufacturerError != null,
             errorMessage = manufacturerError,
+        )
+        ZeraTextInput(
+            value = weight,
+            onValueChange = onWeightChange,
+            label = "Peso estimado (kg)",
+            placeholder = "Ex: 2,5",
+            type = ZeraInputType.Decimal,
+            imeAction = ImeAction.Done,
+            enabled = !isSubmitting,
+            isError = weightError != null,
+            errorMessage = weightError,
         )
         AdaptiveRow(modifier = Modifier.fillMaxWidth()) {
             ZeraButton(
@@ -77,6 +92,8 @@ private fun EditModelFormPreview() {
             onNameChange = {},
             manufacturer = "Dell",
             onManufacturerChange = {},
+            weight = "2,5",
+            onWeightChange = {},
             onSave = {},
             onCancel = {},
         )

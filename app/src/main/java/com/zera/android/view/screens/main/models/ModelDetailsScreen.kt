@@ -190,11 +190,14 @@ fun ModelDetailsScreen(
                 onNameChange = viewModel::onEditNameChange,
                 manufacturer = draft.manufacturer,
                 onManufacturerChange = viewModel::onEditManufacturerChange,
+                weight = draft.weight,
+                onWeightChange = viewModel::onEditWeightChange,
                 onSave = viewModel::onEditSave,
                 onCancel = viewModel::onEditDismiss,
                 modifier = Modifier.verticalScroll(rememberScrollState()),
                 nameError = draft.nameError,
                 manufacturerError = draft.manufacturerError,
+                weightError = draft.weightError,
                 isSubmitting = state.isSubmitting,
             )
         }

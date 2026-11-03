@@ -27,6 +27,8 @@ data class ModelDetailsState(
     val modelId: String = "",
     val name: String = "",
     val manufacturer: String = "",
+    /** Peso estimado em kg, já formatado ("2,5"); vazio quando o modelo não tem peso. */
+    val weight: String = "",
     val category: String = "",
     val material: String = "",
     val notes: String = "",
@@ -51,11 +53,17 @@ data class ModelEditDraft(
     val manufacturer: String = "",
     val nameError: String? = null,
     val manufacturerError: String? = null,
+    val weight: String = "",
+    val weightError: String? = null,
 )
 
 /** Quais campos do rascunho diferem do modelo atual. */
-internal data class ModelEditChanges(val name: Boolean, val manufacturer: Boolean) {
-    val any: Boolean get() = name || manufacturer
+internal data class ModelEditChanges(
+    val name: Boolean,
+    val manufacturer: Boolean,
+    val weight: Boolean = false,
+) {
+    val any: Boolean get() = name || manufacturer || weight
 }
 
 class ModelDetailsViewModel : ZeraViewModel() {
@@ -113,7 +121,11 @@ class ModelDetailsViewModel : ZeraViewModel() {
         val current = _state.value
         if (!current.canEdit) return
         _state.value = current.copy(
-            editDraft = ModelEditDraft(name = current.name, manufacturer = current.manufacturer),
+            editDraft = ModelEditDraft(
+                name = current.name,
+                manufacturer = current.manufacturer,
+                weight = current.weight,
+            ),
             errorMessage = null,
         )
     }
@@ -131,6 +143,10 @@ class ModelDetailsViewModel : ZeraViewModel() {
         updateDraft { it.copy(manufacturer = value, manufacturerError = null) }
     }
 
+    fun onEditWeightChange(value: String) {
+        updateDraft { it.copy(weight = value, weightError = null) }
+    }
+
     /**
      * Valida o rascunho e grava só o que mudou. Cada campo é um endpoint: se um falhar, o anterior
      * já fica salvo no state e o sheet continua aberto, e um novo "Salvar" reenvia apenas o que falta.
@@ -144,8 +160,9 @@ class ModelDetailsViewModel : ZeraViewModel() {
         val validated = draft.copy(
             nameError = if (changes.name) nameValidationError(draft.name) else null,
             manufacturerError = if (changes.manufacturer) manufacturerValidationError(draft.manufacturer) else null,
+            weightError = if (changes.weight) weightValidationError(draft.weight) else null,
         )
-        if (validated.nameError != null || validated.manufacturerError != null) {
+        if (validated.nameError != null || validated.manufacturerError != null || validated.weightError != null) {
             _state.value = current.copy(editDraft = validated)
             return
         }
@@ -164,6 +181,10 @@ class ModelDetailsViewModel : ZeraViewModel() {
                 if (changes.manufacturer) {
                     val updated = updateModel.manufacturer(current.modelId, draft.manufacturer.trim())
                     _state.value = _state.value.copy(manufacturer = updated.manufacturer.orEmpty())
+                }
+                if (changes.weight) {
+                    val updated = updateModel.estimatedWeightKg(current.modelId, parseWeightKg(draft.weight)!!)
+                    _state.value = _state.value.copy(weight = formatWeightKg(updated.estimatedWeightKg))
                 }
                 _state.value = _state.value.copy(isSubmitting = false, editDraft = null)
             } catch (e: CancellationException) {
@@ -306,7 +327,24 @@ class ModelDetailsViewModel : ZeraViewModel() {
         internal fun editChangesFrom(state: ModelDetailsState, draft: ModelEditDraft) = ModelEditChanges(
             name = draft.name.trim() != state.name.trim(),
             manufacturer = draft.manufacturer.trim() != state.manufacturer.trim(),
+            weight = draft.weight.trim() != state.weight.trim(),
         )
+
+        /** Aceita vírgula ou ponto como separador decimal; `null` quando não é um número. */
+        internal fun parseWeightKg(value: String): Double? =
+            value.trim().replace(',', '.').toDoubleOrNull()
+
+        /** "2,5" para 2.5 e "3" para 3.0; vazio quando o modelo não tem peso. */
+        internal fun formatWeightKg(value: Double?): String = when {
+            value == null -> ""
+            value % 1.0 == 0.0 -> value.toLong().toString()
+            else -> value.toString().replace('.', ',')
+        }
+
+        internal fun weightValidationError(value: String): String? {
+            val kg = parseWeightKg(value)
+            return if (kg == null || kg <= 0.0 || !kg.isFinite()) "Informe um peso maior que zero, em kg." else null
+        }
 
         internal fun reviewHint(
             @Suppress("UNUSED_PARAMETER") isEmployee: Boolean,
@@ -381,6 +419,7 @@ class ModelDetailsViewModel : ZeraViewModel() {
                 modelId = model.id.orEmpty(),
                 name = model.name.orEmpty(),
                 manufacturer = model.manufacturer.orEmpty(),
+                weight = formatWeightKg(model.estimatedWeightKg),
                 category = model.category?.name.orEmpty(),
                 material = materialsLabel(
                     model.materials.map { it.name.ifBlank { it.code.orEmpty() } }.filter { it.isNotBlank() },

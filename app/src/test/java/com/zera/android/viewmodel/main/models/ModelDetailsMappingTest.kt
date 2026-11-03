@@ -46,6 +46,33 @@ class ModelDetailsMappingTest {
     }
 
     @Test
+    fun weightIsFormattedAndParsedWithCommaOrDot() {
+        assertEquals("2,5", ModelDetailsViewModel.formatWeightKg(2.5))
+        assertEquals("3", ModelDetailsViewModel.formatWeightKg(3.0))
+        assertEquals("", ModelDetailsViewModel.formatWeightKg(null))
+        assertEquals(2.5, ModelDetailsViewModel.parseWeightKg("2,5"))
+        assertEquals(2.5, ModelDetailsViewModel.parseWeightKg(" 2.5 "))
+        assertEquals(null, ModelDetailsViewModel.parseWeightKg("abc"))
+    }
+
+    @Test
+    fun weightMustBePositive() {
+        assertEquals(null, ModelDetailsViewModel.weightValidationError("2,5"))
+        assertTrue(ModelDetailsViewModel.weightValidationError("0") != null)
+        assertTrue(ModelDetailsViewModel.weightValidationError("-1") != null)
+        assertTrue(ModelDetailsViewModel.weightValidationError("") != null)
+    }
+
+    @Test
+    fun editChangesDetectWeight() {
+        val state = ModelDetailsState(name = "Latitude", manufacturer = "Dell", weight = "2,5")
+        val draft = ModelEditDraft(name = "Latitude", manufacturer = "Dell", weight = "2,5")
+
+        assertFalse(ModelDetailsViewModel.editChangesFrom(state, draft).any)
+        assertTrue(ModelDetailsViewModel.editChangesFrom(state, draft.copy(weight = "3")).weight)
+    }
+
+    @Test
     fun approvedModelHasNoReview() {
         val state = ModelDetailsViewModel.stateFrom(
             pendingModel().copy(approvalStatus = "APPROVED"),

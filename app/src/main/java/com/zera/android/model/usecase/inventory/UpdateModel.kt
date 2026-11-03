@@ -1,6 +1,7 @@
 package com.zera.android.model.usecase.inventory
 
 import com.zera.android.model.dto.inventory.ModelResponseDTO
+import com.zera.android.model.dto.inventory.UpdateModelEstimatedWeightKgRequestDTO
 import com.zera.android.model.dto.inventory.UpdateModelManufacturerRequestDTO
 import com.zera.android.model.dto.inventory.UpdateModelMaterialsRequestDTO
 import com.zera.android.model.dto.inventory.UpdateModelNameRequestDTO
@@ -17,6 +18,12 @@ class UpdateModel {
         InventoryClient.inventoryService.updateModelManufacturer(
             modelId,
             UpdateModelManufacturerRequestDTO(manufacturer = manufacturer),
+        )
+
+    suspend fun estimatedWeightKg(modelId: String, estimatedWeightKg: Double): ModelResponseDTO =
+        InventoryClient.inventoryService.updateModelEstimatedWeightKg(
+            modelId,
+            UpdateModelEstimatedWeightKgRequestDTO(estimatedWeightKg = estimatedWeightKg),
         )
 
     suspend fun materials(modelId: String, materialCodes: List<String>): ModelResponseDTO =
