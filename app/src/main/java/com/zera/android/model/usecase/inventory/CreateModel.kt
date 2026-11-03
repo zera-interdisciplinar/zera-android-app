@@ -11,6 +11,7 @@ class CreateModel {
         categoryId: String,
         materialCodes: List<String>,
         notes: String?,
+        estimatedWeightKg: Double? = null,
     ): ModelResponseDTO {
         return InventoryClient.inventoryService.createModel(
             CreateModelRequestDTO(
@@ -19,6 +20,7 @@ class CreateModel {
                 categoryId = categoryId,
                 materials = materialCodes,
                 notes = notes,
+                estimatedWeightKg = estimatedWeightKg,
             ),
         )
     }

@@ -22,6 +22,11 @@ data class UpdateModelManufacturerRequestDTO(
 )
 
 @Serializable
+data class UpdateModelEstimatedWeightKgRequestDTO(
+    val estimatedWeightKg: Double,
+)
+
+@Serializable
 data class UpdateModelMaterialsRequestDTO(
     val materials: List<String>,
 )
@@ -33,6 +38,7 @@ data class CreateModelRequestDTO(
     val categoryId: String,
     val materials: List<String>,
     val notes: String? = null,
+    val estimatedWeightKg: Double? = null,
 )
 
 @Serializable

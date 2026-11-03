@@ -25,6 +25,8 @@ data class ModelCreationState(
     val isMaterialSheetVisible: Boolean = false,
     val brand: String = "",
     val notes: String = "",
+    val weight: String = "",
+    val weightError: String? = null,
     val nameError: String? = null,
     val categoryError: String? = null,
     val materialError: String? = null,
@@ -89,6 +91,10 @@ class ModelCreationViewModel : ZeraViewModel() {
         _state.value = _state.value.copy(brand = value, brandError = null)
     }
 
+    fun onWeightChange(value: String) {
+        _state.value = _state.value.copy(weight = value, weightError = null)
+    }
+
     fun onNotesChange(value: String) {
         _state.value = _state.value.copy(notes = value, notesError = null)
     }
@@ -104,6 +110,7 @@ class ModelCreationViewModel : ZeraViewModel() {
             categoryId = categoryId,
             materialCodes = materialCodes,
             notes = form.notes,
+            weight = form.weight,
         )
         if (errors.hasAny) {
             _state.value = form.copy(
@@ -112,6 +119,7 @@ class ModelCreationViewModel : ZeraViewModel() {
                 materialError = errors.material,
                 brandError = errors.manufacturer,
                 notesError = errors.notes,
+                weightError = errors.weight,
             )
             return
         }
@@ -121,6 +129,7 @@ class ModelCreationViewModel : ZeraViewModel() {
             materialError = null,
             brandError = null,
             notesError = null,
+            weightError = null,
             isSaving = true,
             errorMessage = null,
         )
@@ -132,6 +141,7 @@ class ModelCreationViewModel : ZeraViewModel() {
                     categoryId = categoryId.orEmpty(),
                     materialCodes = materialCodes,
                     notes = form.notes.trim().takeIf { it.isNotEmpty() },
+                    estimatedWeightKg = ModelDetailsViewModel.parseWeightKg(form.weight),
                 )
                 val materialLabel = created.materials
                     .map { it.name.ifBlank { it.code.orEmpty() } }
@@ -201,7 +211,8 @@ class ModelCreationViewModel : ZeraViewModel() {
             categoryId: String?,
             materialCodes: List<String>,
             notes: String,
-        ): String? = fieldErrors(name, manufacturer, categoryId, materialCodes, notes).first
+            weight: String = "",
+        ): String? = fieldErrors(name, manufacturer, categoryId, materialCodes, notes, weight).first
 
         internal fun fieldErrors(
             name: String,
@@ -209,12 +220,14 @@ class ModelCreationViewModel : ZeraViewModel() {
             categoryId: String?,
             materialCodes: List<String>,
             notes: String,
+            weight: String = "",
         ) = ModelFieldErrors(
             name = "Informe o nome do modelo.".takeIf { name.isBlank() },
             manufacturer = "Informe a marca.".takeIf { manufacturer.isBlank() },
             category = "Selecione a categoria.".takeIf { categoryId.isNullOrBlank() },
             material = "Selecione ao menos um material.".takeIf { materialCodes.isEmpty() },
             notes = "A observação pode ter no máximo 500 caracteres.".takeIf { notes.trim().length > 500 },
+            weight = ModelDetailsViewModel.weightValidationError(weight).takeIf { weight.isNotBlank() },
         )
     }
 }
@@ -226,11 +239,12 @@ internal data class ModelFieldErrors(
     val category: String? = null,
     val material: String? = null,
     val notes: String? = null,
+    val weight: String? = null,
 ) {
     val hasAny: Boolean
         get() = first != null
 
     /** O primeiro erro, na ordem do formulário. */
     val first: String?
-        get() = name ?: manufacturer ?: category ?: material ?: notes
+        get() = name ?: manufacturer ?: category ?: material ?: notes ?: weight
 }

@@ -41,6 +41,7 @@ data class ModelResponseDTO(
     val name: String? = null,
     val manufacturer: String? = null,
     val materials: List<MaterialResponseDTO> = emptyList(),
+    val estimatedWeightKg: Double? = null,
     val category: CategoryResponseDTO? = null,
     val notes: String? = null,
     val approvalStatus: String? = null,
